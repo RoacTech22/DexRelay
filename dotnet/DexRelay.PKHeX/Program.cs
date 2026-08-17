@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using PKHeX.Core;
 
-Console.WriteLine("DEXRELAY PKHEX BRIDGE");
-
 while (true)
 {
     string? input = Console.ReadLine();

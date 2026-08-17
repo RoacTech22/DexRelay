@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DexRelay.PKHeX")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb931a27196516dd220b46501e9b79670b568bd3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9e8c19f2f9bb43ca187ac2e5779e4d8874471a41")]
 [assembly: System.Reflection.AssemblyProductAttribute("DexRelay.PKHeX")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DexRelay.PKHeX")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
