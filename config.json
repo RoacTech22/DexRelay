@@ -1,6 +1,6 @@
 {
     "azahar": {
-        "process_name": "sango-2"
+        "process_name": "azahar.exe"
     },
     "server": {
         "host": "localhost",
