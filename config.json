@@ -1,0 +1,12 @@
+{
+    "azahar": {
+        "process_name": "sango-2"
+    },
+    "server": {
+        "host": "localhost",
+        "port": 8080
+    },
+    "realtime": {
+        "refresh_ms": 200
+    }
+}
