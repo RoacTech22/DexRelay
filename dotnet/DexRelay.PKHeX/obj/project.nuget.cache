@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "fl5RLKZ0zbo=",
+  "success": true,
+  "projectFilePath": "D:\\Documents\\DexRelay\\dotnet\\DexRelay.PKHeX\\DexRelay.PKHeX.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ronald Castro\\.nuget\\packages\\pkhex.core\\26.7.7\\pkhex.core.26.7.7.nupkg.sha512"
+  ],
+  "logs": []
+}
