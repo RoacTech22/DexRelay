@@ -1,17 +1,19 @@
 from app.readers.citra import Citra
-
-
-PARTY_ORDER_ADDRESS = 0x08CF71F0
-PARTY_ORDER_SIZE = 24
+from app.memory.memory_reader import MemoryReader
+from app.memory.pointers import (
+    PARTY_ORDER_ADDRESS,
+    ORDER_ENTRY_SIZE,
+)
 
 
 def main():
     print("================================")
-    print("       DEXRELAY CITRA PROBE")
+    print("       DEXRELAY MEMORY PROBE")
     print("================================")
     print()
 
     citra = Citra()
+    memory = MemoryReader(citra)
 
     print("Consultando procesos de Azahar...")
 
@@ -20,10 +22,6 @@ def main():
     if not processes:
         print("No se encontraron procesos.")
         return
-
-    print()
-    print("Procesos encontrados:")
-    print()
 
     target_process_id = None
 
@@ -53,17 +51,20 @@ def main():
 
     current_process = citra.get_process()
 
-    print(f"Proceso activo según Azahar: {current_process}")
+    print(
+        f"Proceso activo según Azahar: "
+        f"{current_process}"
+    )
 
     print()
     print(
-        f"Leyendo {PARTY_ORDER_SIZE} bytes "
-        f"desde 0x{PARTY_ORDER_ADDRESS:08X}..."
+        f"Leyendo tabla de party desde "
+        f"0x{PARTY_ORDER_ADDRESS:08X}..."
     )
 
-    data = citra.read_memory(
+    data = memory.read(
         PARTY_ORDER_ADDRESS,
-        PARTY_ORDER_SIZE
+        ORDER_ENTRY_SIZE * 6
     )
 
     if not data:
