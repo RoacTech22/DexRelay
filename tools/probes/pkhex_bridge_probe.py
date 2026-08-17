@@ -3,43 +3,50 @@ from app.services.pkhex.bridge import PKHeXBridge
 
 def main():
     print("================================")
-    print("     DEXRELAY PKHEX BRIDGE")
+    print("   DEXRELAY PKHEX BRIDGE TEST")
     print("================================")
     print()
 
     bridge = PKHeXBridge()
 
-    print("Iniciando bridge...")
+    print("Primera petición...")
 
-    bridge.start()
+    result = bridge.species(269)
 
-    print("Bridge iniciado.")
+    print(result)
+
     print()
+    print("Deteniendo bridge manualmente...")
 
-    species_ids = [
-        269,
-        659,
-        258,
-        15,
-        661,
-    ]
+    bridge.stop()
 
-    for species_id in species_ids:
+    print(
+        f"Bridge activo: "
+        f"{bridge.is_running()}"
+    )
 
-        response = bridge.species(
-            species_id
-        )
+    print()
+    print(
+        "Segunda petición después "
+        "del cierre..."
+    )
 
-        print(
-            f"{species_id} -> "
-            f"{response}"
-        )
+    result = bridge.species(659)
+
+    print(result)
+
+    print()
+    print(
+        f"Bridge activo: "
+        f"{bridge.is_running()}"
+    )
 
     bridge.stop()
 
     print()
-    print("Bridge detenido correctamente.")
+    print("Prueba finalizada.")
 
 
 if __name__ == "__main__":
     main()
+    

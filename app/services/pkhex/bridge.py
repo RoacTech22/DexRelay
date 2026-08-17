@@ -25,7 +25,10 @@ class PKHeXBridge:
         """
 
         if self.process is not None:
-            return
+            if self.process.poll() is None:
+                return
+
+            self.process = None
 
         self.process = subprocess.Popen(
             [
@@ -42,38 +45,96 @@ class PKHeXBridge:
             bufsize=1,
         )
 
-    def request(self, payload):
+    def is_running(self):
         """
-        Envía una petición JSON al bridge y
-        devuelve la respuesta como diccionario.
+        Comprueba si el proceso del bridge
+        continúa ejecutándose.
         """
 
         if self.process is None:
+            return False
+
+        return self.process.poll() is None
+
+    def request(self, payload):
+        """
+        Envía una petición JSON y devuelve
+        la respuesta como diccionario.
+        """
+
+        if not self.is_running():
             self.start()
+
+        if self.process is None:
+            raise RuntimeError(
+                "No se pudo iniciar el bridge PKHeX."
+            )
+
+        if self.process.stdin is None:
+            raise RuntimeError(
+                "La entrada del bridge no está disponible."
+            )
+
+        if self.process.stdout is None:
+            raise RuntimeError(
+                "La salida del bridge no está disponible."
+            )
 
         message = (
             json.dumps(payload)
             + "\n"
         )
 
-        self.process.stdin.write(
-            message
-        )
+        try:
+            self.process.stdin.write(
+                message
+            )
 
-        self.process.stdin.flush()
+            self.process.stdin.flush()
+
+        except (BrokenPipeError, OSError) as error:
+
+            self.stop()
+
+            raise RuntimeError(
+                "No se pudo enviar la petición "
+                "al bridge PKHeX."
+            ) from error
 
         response = (
             self.process.stdout.readline()
         )
 
         if not response:
-            raise RuntimeError(
-                "El bridge PKHeX no devolvió respuesta."
+            exit_code = (
+                self.process.poll()
             )
 
-        return json.loads(
-            response
-        )
+            self.stop()
+
+            raise RuntimeError(
+                "El bridge PKHeX dejó de responder. "
+                f"Código de salida: {exit_code}"
+            )
+
+        try:
+            result = json.loads(
+                response
+            )
+
+        except json.JSONDecodeError as error:
+
+            raise RuntimeError(
+                "El bridge PKHeX devolvió "
+                "una respuesta JSON inválida."
+            ) from error
+
+        if "error" in result:
+            raise RuntimeError(
+                result["error"]
+            )
+
+        return result
 
     def species(self, species_id):
         """
@@ -95,13 +156,32 @@ class PKHeXBridge:
         if self.process is None:
             return
 
-        if self.process.stdin:
-            self.process.stdin.close()
-
-        self.process.terminate()
-
-        self.process.wait(
-            timeout=5
-        )
+        process = self.process
 
         self.process = None
+
+        try:
+
+            if process.stdin is not None:
+                process.stdin.close()
+
+        except (BrokenPipeError, OSError):
+            pass
+
+        try:
+
+            if process.poll() is None:
+                process.terminate()
+
+                process.wait(
+                    timeout=5
+                )
+
+        except subprocess.TimeoutExpired:
+
+            process.kill()
+
+            process.wait()
+
+        except OSError:
+            pass
