@@ -1,5 +1,3 @@
-import struct
-
 from app.readers.citra import Citra
 from app.memory.memory_reader import MemoryReader
 from app.memory.pointers import (
@@ -11,6 +9,7 @@ from app.memory.pointers import (
     STAT_DATA_SIZE,
 )
 from app.memory.structures import Pokemon6
+from app.services.species_resolver import SpeciesResolver
 
 
 class AzaharReader:
@@ -19,20 +18,33 @@ class AzaharReader:
     los datos actuales de la party desde Azahar.
     """
 
-    def __init__(self, citra=None):
+    def __init__(
+        self,
+        citra=None,
+        species_resolver=None
+    ):
         self.citra = citra or Citra()
-        self.memory = MemoryReader(self.citra)
+
+        self.memory = MemoryReader(
+            self.citra
+        )
+
+        self.species_resolver = (
+            species_resolver
+            or SpeciesResolver()
+        )
 
     def find_game_process(self):
         """
         Busca el proceso del juego dentro de Azahar.
-
-        El proceso utilizado por el reader es sango-2.
         """
 
-        processes = self.citra.process_list()
+        processes = (
+            self.citra.process_list()
+        )
 
         for process_id, data in processes.items():
+
             title_id, process_name = data
 
             if process_name == "sango-2":
@@ -42,10 +54,13 @@ class AzaharReader:
 
     def connect(self):
         """
-        Busca sango-2 y lo selecciona como proceso activo.
+        Busca sango-2 y lo selecciona
+        como proceso activo.
         """
 
-        process_id = self.find_game_process()
+        process_id = (
+            self.find_game_process()
+        )
 
         if process_id is None:
             return False
@@ -62,7 +77,9 @@ class AzaharReader:
         """
 
         try:
-            process_id = self.citra.get_process()
+            process_id = (
+                self.citra.get_process()
+            )
 
             return process_id is not None
 
@@ -71,8 +88,8 @@ class AzaharReader:
 
     def read_party_order(self):
         """
-        Lee la tabla que determina el orden actual
-        de los seis Pokémon de la party.
+        Lee la tabla que determina el orden
+        actual de los seis Pokémon.
         """
 
         data = self.memory.read(
@@ -89,11 +106,14 @@ class AzaharReader:
         pointers = []
 
         for slot in range(6):
-            pointer = struct.unpack_from(
-                "<I",
-                data,
-                slot * ORDER_ENTRY_SIZE
-            )[0]
+
+            pointer = int.from_bytes(
+                data[
+                    slot * ORDER_ENTRY_SIZE:
+                    (slot + 1) * ORDER_ENTRY_SIZE
+                ],
+                byteorder="little"
+            )
 
             pointers.append(
                 pointer
@@ -103,8 +123,8 @@ class AzaharReader:
 
     def read_pokemon(self, pointer):
         """
-        Lee y descifra un Pokémon a partir del puntero
-        obtenido de la tabla de party.
+        Lee y descifra un Pokémon a partir
+        del puntero de la tabla de party.
         """
 
         if pointer == 0:
@@ -163,11 +183,12 @@ class AzaharReader:
         pokemon
     ):
         """
-        Convierte Pokemon6 en el formato de datos
-        utilizado por DexRelay.
+        Convierte Pokemon6 en el formato
+        de datos utilizado por DexRelay.
         """
 
         if pokemon is None:
+
             return {
                 "slot": slot,
                 "empty": True,
@@ -183,11 +204,17 @@ class AzaharReader:
             pokemon.species_id()
         )
 
+        species = (
+            self.species_resolver.resolve(
+                species_id
+            )
+        )
+
         return {
             "slot": slot,
             "empty": species_id == 0,
             "nickname": pokemon.nickname(),
-            "species": "",
+            "species": species,
             "speciesId": species_id,
             "level": pokemon.level(),
             "hp": pokemon.hp(),
@@ -197,11 +224,11 @@ class AzaharReader:
     def read_party(self):
         """
         Lee los seis slots actuales de la party.
-
-        Devuelve una lista de seis diccionarios.
         """
 
-        pointers = self.read_party_order()
+        pointers = (
+            self.read_party_order()
+        )
 
         if len(pointers) != 6:
             return []
@@ -211,15 +238,20 @@ class AzaharReader:
         for slot_index, pointer in enumerate(
             pointers
         ):
+
             slot = slot_index + 1
 
-            pokemon = self.read_pokemon(
-                pointer
+            pokemon = (
+                self.read_pokemon(
+                    pointer
+                )
             )
 
-            data = self.build_pokemon_data(
-                slot,
-                pokemon
+            data = (
+                self.build_pokemon_data(
+                    slot,
+                    pokemon
+                )
             )
 
             party.append(
