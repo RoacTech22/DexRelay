@@ -26,3 +26,7 @@ dist/
 # OS
 Thumbs.db
 .DS_Store
+
+# .NET build artifacts
+bin/
+obj/
