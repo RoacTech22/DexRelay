@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BadgesService
+from app.services.badges_storage import BadgesStorage
 
 
 class Runtime:
@@ -17,6 +18,10 @@ class Runtime:
         self.badges_service = BadgesService(
             self.reader.memory
         )
+
+        self.badges_storage = BadgesStorage()
+
+        self._last_badges = None
 
     def update(self):
         """Actualiza el estado realtime de DexRelay."""
@@ -34,7 +39,10 @@ class Runtime:
             self.state.team = party
             self.state.reader_active = True
 
-        self.state.badges = (
-            self.badges_service.read_badges()
-        )
-        
+        badges = self.badges_service.read_badges()
+
+        self.state.badges = badges
+
+        if badges != self._last_badges:
+            self.badges_storage.save(badges)
+            self._last_badges = badges.copy()
