@@ -4,6 +4,7 @@ from app.core.config import Config
 from app.core.runtime import Runtime
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
+from app.server.http_server import HTTPServer
 
 
 class Application:
@@ -22,13 +23,41 @@ class Application:
             default=200,
         )
 
-        self.refresh_seconds = max(0.001, float(refresh_ms) / 1000.0)
+        self.refresh_seconds = max(
+            0.001,
+            float(refresh_ms) / 1000.0,
+        )
+
+        server_host = self.config.get(
+            "server",
+            "host",
+            default="127.0.0.1",
+        )
+
+        server_port = self.config.get(
+            "server",
+            "port",
+            default=8080,
+        )
+
+        self.http_server = HTTPServer(
+            state=self.state,
+            host=server_host,
+            port=int(server_port),
+        )
+
         self.running = False
 
     def start(self):
         print("Iniciando DexRelay...")
         print("Configuración cargada correctamente.")
-        print(f"Refresh realtime: {self.refresh_seconds * 1000:.0f} ms")
+        print(
+            f"Refresh realtime: "
+            f"{self.refresh_seconds * 1000:.0f} ms"
+        )
+
+        self.http_server.start()
+
         self.running = True
 
     def update(self):
@@ -36,6 +65,7 @@ class Application:
 
     def run(self):
         """Ejecuta el ciclo realtime de DexRelay hasta que se detenga."""
+
         if not self.running:
             self.start()
 
@@ -52,10 +82,10 @@ class Application:
             if sleep_time > 0:
                 time.sleep(sleep_time)
             else:
-                # Si una actualización tarda demasiado, no acumulamos retraso.
                 next_update = time.monotonic()
 
     def stop(self):
         if self.running:
             self.running = False
+            self.http_server.stop()
             print("Deteniendo DexRelay.")
