@@ -1,22 +1,39 @@
+from app.services.pkhex.bridge import PKHeXBridge
+
+
 class SpeciesResolver:
     """
-    Resuelve el nombre de una especie a partir
-    de los datos de especies disponibles.
+    Resuelve el nombre de una especie.
+
+    Puede utilizar datos estáticos para pruebas y
+    PKHeX como fuente dinámica para el runtime.
     """
 
-    def __init__(self, species_data=None):
+    def __init__(
+        self,
+        species_data=None,
+        bridge=None,
+    ):
         self.species_data = (
             species_data
             if isinstance(species_data, list)
             else []
         )
 
+        self.bridge = (
+            bridge
+            if bridge is not None
+            else PKHeXBridge()
+        )
+
+        self.cache = {}
+
     def resolve(self, species_id):
         """
-        Busca una especie por speciesId.
+        Resuelve una especie por su ID.
 
-        Devuelve el nombre de la especie.
-        Si no existe, devuelve una cadena vacía.
+        Primero consulta los datos estáticos,
+        después la caché y finalmente PKHeX.
         """
 
         for info in self.species_data:
@@ -27,10 +44,29 @@ class SpeciesResolver:
             if info.get("speciesId", 0) == species_id:
                 return info.get(
                     "species",
-                    ""
+                    "",
                 )
 
-        return ""
+        if species_id in self.cache:
+            return self.cache[species_id]
+
+        try:
+            result = self.bridge.species(
+                species_id
+            )
+
+            name = result.get(
+                "name",
+                "",
+            )
+
+            if name:
+                self.cache[species_id] = name
+
+            return name
+
+        except Exception:
+            return ""
 
     def set_species_data(self, species_data):
         """

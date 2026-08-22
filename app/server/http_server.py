@@ -91,6 +91,13 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/team":
+                    self._send_json(
+                        state.team,
+                        200,
+                    )
+                    return
+
                 if self.path == "/api/badges":
                     self._send_json(
                         state.badges,
