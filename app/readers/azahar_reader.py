@@ -56,24 +56,33 @@ class AzaharReader:
         """
         Busca sango-2 y lo selecciona
         como proceso activo.
+
+        Si Azahar no está disponible o la comunicación
+        falla durante la búsqueda, se considera
+        desconectado y se reintentará en la siguiente
+        actualización.
         """
 
-        process_id = (
-            self.find_game_process()
-        )
+        try:
+            process_id = (
+                self.find_game_process()
+            )
 
-        if process_id is None:
+            if process_id is None:
+                return False
+
+            self.citra.set_process(
+                process_id
+            )
+
+            return True
+
+        except Exception:
             return False
-
-        self.citra.set_process(
-            process_id
-        )
-
-        return True
 
     def is_connected(self):
         """
-        Comprueba si existe un proceso activo.
+        Comprueba si existe un proceso de juego válido seleccionado.
         """
 
         try:
@@ -81,7 +90,10 @@ class AzaharReader:
                 self.citra.get_process()
             )
 
-            return process_id is not None
+            return (
+                process_id is not None
+                and process_id != 0xFFFFFFFF
+            )
 
         except Exception:
             return False

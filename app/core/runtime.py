@@ -27,17 +27,23 @@ class Runtime:
         """Actualiza el estado realtime de DexRelay."""
 
         if not self.reader.is_connected():
-            self.state.azahar_connected = False
-            self.state.reader_active = False
-            return
+            connected = self.reader.connect()
+
+            if not connected:
+                self.state.azahar_connected = False
+                self.state.reader_active = False
+                return
 
         self.state.azahar_connected = True
 
         party = self.reader.read_party()
 
-        if party:
-            self.state.team = party
-            self.state.reader_active = True
+        if not party:
+            self.state.reader_active = False
+            return
+
+        self.state.team = party
+        self.state.reader_active = True
 
         badges = self.badges_service.read_badges()
 

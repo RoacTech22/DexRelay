@@ -1,8 +1,8 @@
 {
-  "value": 1,
-  "count": 1,
+  "value": 0,
+  "count": 0,
   "badges": [
-    true,
+    false,
     false,
     false,
     false,

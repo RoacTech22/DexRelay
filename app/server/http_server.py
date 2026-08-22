@@ -77,6 +77,20 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/status":
+                    self._send_json(
+                        {
+                            "azahar_connected": (
+                                state.azahar_connected
+                            ),
+                            "reader_active": (
+                                state.reader_active
+                            ),
+                        },
+                        200,
+                    )
+                    return
+
                 if self.path == "/api/badges":
                     self._send_json(
                         state.badges,
@@ -89,7 +103,11 @@ class HTTPServer:
                     404,
                 )
 
-            def _send_json(self, data, status_code: int):
+            def _send_json(
+                self,
+                data,
+                status_code: int,
+            ):
                 body = json.dumps(
                     data,
                     ensure_ascii=False,
@@ -109,7 +127,11 @@ class HTTPServer:
 
                 self.wfile.write(body)
 
-            def _send_text(self, text: str, status_code: int):
+            def _send_text(
+                self,
+                text: str,
+                status_code: int,
+            ):
                 body = text.encode("utf-8")
 
                 self.send_response(status_code)
