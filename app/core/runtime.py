@@ -4,6 +4,7 @@ from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BadgesService
 from app.services.badges_storage import BadgesStorage
+from app.services.combat_service import CombatService
 
 
 class Runtime:
@@ -16,6 +17,10 @@ class Runtime:
         self.state = state
 
         self.badges_service = BadgesService(
+            self.reader.memory
+        )
+
+        self.combat_service = CombatService(
             self.reader.memory
         )
 
@@ -52,3 +57,8 @@ class Runtime:
         if badges != self._last_badges:
             self.badges_storage.save(badges)
             self._last_badges = badges.copy()
+
+        combat_hp = self.combat_service.read()
+
+        if combat_hp is not None:
+            self.state.combat_hp = combat_hp

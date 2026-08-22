@@ -103,6 +103,14 @@ class HTTPServer:
                         state.badges,
                         200,
                     )
+
+                if self.path == "/api/combat":
+                    self._send_json(
+                        {
+                            "hp": state.combat_hp,
+                        },
+                        200,
+                    )
                     return
 
                 self._send_text(
