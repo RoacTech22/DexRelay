@@ -1,0 +1,387 @@
+html,
+body {
+
+    width: max-content;
+    min-width: max-content;
+    height: 195px;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+
+    overflow: hidden;
+}
+
+#team {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+
+    width: max-content;
+    height: 195px;
+
+    padding: 5px 15px 10px;
+
+    background: transparent;
+}
+
+.slot {
+    position: relative;
+
+    width: 145px;
+    height: 180px;
+
+    flex: 0 0 145px;
+
+    pointer-events: none;
+}
+
+/* =========================================
+   SPRITE
+========================================= */
+
+.sprite-wrapper {
+    position: absolute;
+
+    left: 50%;
+    top: 70px;
+
+    width: 140px;
+    height: 140px;
+
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sprite {
+    width: 140px;
+    height: 140px;
+
+    object-fit: contain;
+
+    image-rendering: auto;
+
+    transform-origin: center center;
+
+    filter:
+        drop-shadow(0 0 3px rgba(0, 0, 0, 0.9)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+
+    transition:
+        transform 0.25s ease,
+        filter 0.25s ease;
+}
+
+.sprite-small {
+    transform: scale(0.82);
+}
+
+.sprite-normal {
+    transform: scale(1);
+}
+
+.sprite-large {
+    transform: scale(1.12);
+}
+
+.sprite-huge {
+    transform: scale(1.22);
+}
+
+/* =========================================
+   NOMBRE
+========================================= */
+
+.nickname {
+    position: absolute;
+
+    left: 50%;
+    bottom: 27px;
+
+    transform: translateX(-50%);
+
+    color: #074b73;
+
+    font-family: "Teko", sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+
+    line-height: 0.9;
+
+    text-align: center;
+    white-space: nowrap;
+
+    letter-spacing: 3px;
+
+    -webkit-text-stroke: 5px #ffffff;
+
+    paint-order: stroke fill;
+
+    text-shadow:
+        0 2px 0 #5daff2,
+        0 3px 3px rgba(0, 40, 70, 0.65);
+
+    z-index: 10;
+}
+
+/* =========================================
+   NIVEL
+========================================= */
+
+.level {
+    position: absolute;
+
+    left: 50%;
+    bottom: 0px;
+
+    transform: translateX(-50%);
+
+    color: #000000;
+
+    font-family: "Teko", sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+
+    line-height: 0.9;
+
+    white-space: nowrap;
+
+    -webkit-text-stroke: 2px #ffffff;
+
+    paint-order: stroke fill;
+
+    text-shadow:
+        0 2px 2px rgba(0, 0, 0, 0.45);
+
+    z-index: 11;
+}
+
+/* =========================================
+   BARRA DE VIDA
+========================================= */
+
+.hp-container {
+    position: absolute;
+
+    left: 50%;
+    bottom: 8px;
+
+    transform: translateX(-50%);
+
+    width: 105px;
+    height: 7px;
+
+    background: rgba(0, 20, 40, 0.75);
+
+    border: 1.5px solid #ffffff;
+
+    border-radius: 5px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 3px rgba(0, 25, 50, 0.6);
+
+    z-index: 10;
+}
+
+.hp-bar {
+    height: 100%;
+
+    border-radius: 3px;
+
+    transition:
+        width 0.4s ease,
+        background 0.3s ease;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+/* =========================================
+   HP CRÍTICO
+========================================= */
+
+.hp-critical {
+    animation: criticalPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes criticalPulse {
+
+    0%,
+    100% {
+        filter:
+            drop-shadow(0 0 3px rgba(0, 0, 0, 0.9)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+    }
+
+    50% {
+        filter:
+            drop-shadow(0 0 7px rgba(255, 60, 60, 0.75)) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.8));
+    }
+}
+
+/* =========================================
+   SHINY
+========================================= */
+
+.shiny {
+    filter:
+        drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 8px #00bfff);
+}
+
+/* =========================================
+   POKÉMON MUERTO
+========================================= */
+
+.nuzlocke-dead {
+    filter:
+        grayscale(100%) brightness(0.72) contrast(1.15) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+
+    opacity: 0.78;
+}
+
+/* =========================================
+   SLOT VACÍO
+========================================= */
+
+.empty {
+    opacity: 0;
+}
+
+/* =========================================
+   ENTRADA
+========================================= */
+
+.sprite-wrapper-enter {
+    animation:
+        pokemonEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pokemonEnter {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%) translateY(12px) scale(0.85);
+    }
+
+    70% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) translateY(-2px) scale(1.03);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) translateY(0) scale(1);
+    }
+}
+
+/* =========================================
+   EVOLUCIÓN
+========================================= */
+
+.sprite-wrapper-evolution {
+    animation:
+        pokemonEvolution 0.8s ease-out both;
+}
+
+@keyframes pokemonEvolution {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%) scale(0.8);
+    }
+
+    20% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) scale(1.08);
+
+        filter:
+            brightness(2.5) drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 20px #5de4f2);
+    }
+
+    45% {
+        transform:
+            translate(-50%, -50%) scale(1.03);
+
+        filter:
+            brightness(1.8) drop-shadow(0 0 15px #5de4f2);
+    }
+
+    70% {
+        transform:
+            translate(-50%, -50%) scale(1);
+
+        filter:
+            brightness(1.2) drop-shadow(0 0 7px #5de4f2);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) scale(1);
+
+        filter: brightness(1);
+    }
+}
+
+/* =========================================
+   SUBIDA DE NIVEL
+========================================= */
+
+.level-levelup {
+    animation:
+        levelUpFlash 0.75s ease-out both;
+}
+
+@keyframes levelUpFlash {
+
+    0% {
+        opacity: 0.5;
+
+        transform:
+            translateX(-50%) scale(0.9);
+    }
+
+    35% {
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1.18);
+
+        text-shadow:
+            0 0 5px #ffffff,
+            0 0 10px #5de4f2,
+            0 0 16px #087cc1;
+    }
+
+    65% {
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform:
+            translateX(-50%) scale(1);
+
+        text-shadow:
+            0 2px 2px rgba(0, 35, 55, 0.5);
+    }
+}

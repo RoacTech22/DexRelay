@@ -12,6 +12,22 @@ from app.memory.structures import Pokemon6
 from app.services.species_resolver import SpeciesResolver
 
 
+class ReadFailure:
+    """
+    Sentinela para distinguir un slot genuinamente
+    vacío (pointer == 0) de una lectura de memoria
+    que falló de forma transitoria (paquete UDP
+    perdido, lectura incompleta, etc).
+
+    Son casos distintos y no deben tratarse igual:
+    un slot vacío es información válida, una lectura
+    fallida no lo es.
+    """
+
+
+READ_FAILED = ReadFailure()
+
+
 class AzaharReader:
     """
     Reader responsable exclusivamente de obtener
@@ -33,6 +49,12 @@ class AzaharReader:
             species_resolver
             or SpeciesResolver()
         )
+
+        # Último dato válido conocido por slot (1 a 6).
+        # Se usa como fallback cuando una lectura de
+        # memoria falla de forma transitoria, en vez
+        # de reportar el slot como vacío.
+        self._last_known_party = [None] * 6
 
     def find_game_process(self):
         """
@@ -137,6 +159,15 @@ class AzaharReader:
         """
         Lee y descifra un Pokémon a partir
         del puntero de la tabla de party.
+
+        Devuelve:
+        - None si el slot está genuinamente vacío
+          (pointer == 0).
+        - READ_FAILED si el slot debería tener un
+          Pokémon pero la lectura de memoria falló
+          de forma transitoria (paquete UDP perdido,
+          lectura incompleta, descifrado inválido).
+        - Un Pokemon6 si la lectura fue exitosa.
         """
 
         if pointer == 0:
@@ -153,10 +184,10 @@ class AzaharReader:
         )
 
         if not party_data:
-            return None
+            return READ_FAILED
 
         if len(party_data) != SLOT_DATA_SIZE:
-            return None
+            return READ_FAILED
 
         stats_address = (
             address
@@ -170,10 +201,10 @@ class AzaharReader:
         )
 
         if not stats_data:
-            return None
+            return READ_FAILED
 
         if len(stats_data) != STAT_DATA_SIZE:
-            return None
+            return READ_FAILED
 
         encrypted_data = (
             party_data
@@ -185,7 +216,12 @@ class AzaharReader:
         )
 
         if not pokemon.raw_data:
-            return None
+            # La estructura no pasó la validación de
+            # Pokemon6 (por ejemplo, una lectura a medio
+            # escribir por el juego). Esto es una falla
+            # de lectura, no un slot vacío: el pointer
+            # ya nos dijo que debería haber un Pokémon.
+            return READ_FAILED
 
         return pokemon
 
@@ -236,6 +272,12 @@ class AzaharReader:
     def read_party(self):
         """
         Lee los seis slots actuales de la party.
+
+        Si un slot falla la lectura de forma transitoria,
+        se reutiliza el último dato válido conocido para
+        ese slot en vez de reportarlo como vacío. Esto
+        evita que un Pokémon "desaparezca" del overlay
+        por una sola lectura UDP perdida.
         """
 
         pointers = (
@@ -259,12 +301,38 @@ class AzaharReader:
                 )
             )
 
-            data = (
-                self.build_pokemon_data(
-                    slot,
-                    pokemon
+            if pokemon is READ_FAILED:
+
+                cached = (
+                    self._last_known_party[
+                        slot_index
+                    ]
                 )
-            )
+
+                if cached is not None:
+                    data = cached
+                else:
+                    # No hay dato previo para este slot
+                    # (por ejemplo, falló ya en la primera
+                    # lectura). No queda otra que reportarlo
+                    # vacío por esta vez.
+                    data = self.build_pokemon_data(
+                        slot,
+                        None
+                    )
+
+            else:
+
+                data = (
+                    self.build_pokemon_data(
+                        slot,
+                        pokemon
+                    )
+                )
+
+                self._last_known_party[
+                    slot_index
+                ] = data
 
             party.append(
                 data

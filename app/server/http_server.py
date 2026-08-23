@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
 
 from app.core.state import ApplicationState
@@ -20,6 +21,13 @@ class HTTPServer:
         self.host = host
         self.port = port
 
+        self.overlay_directory = (
+            Path(__file__)
+            .resolve()
+            .parents[2]
+            / "overlays"
+        )
+
         self._server: ThreadingHTTPServer | None = None
         self._thread: Thread | None = None
 
@@ -33,6 +41,13 @@ class HTTPServer:
             (self.host, self.port),
             self._create_handler(),
         )
+
+        # El backlog por defecto de socketserver es muy bajo (5).
+        # Con varias imágenes + el polling de /api/team pidiendo
+        # conexión casi al mismo tiempo, conviene dejar más margen
+        # para que el sistema operativo no rechace/demore conexiones
+        # entrantes mientras el servidor procesa las anteriores.
+        server.request_queue_size = 32
 
         self._server = server
 
@@ -67,13 +82,49 @@ class HTTPServer:
         """Crea el handler HTTP."""
 
         state = self.state
+        overlay_directory = self.overlay_directory
 
         class Handler(BaseHTTPRequestHandler):
+
+            # HTTP/1.1 habilita keep-alive: el navegador puede
+            # reutilizar la misma conexión TCP para varias
+            # peticiones seguidas, en vez de abrir una conexión
+            # nueva por cada imagen/JSON. Sin esto, con HTTP/1.0
+            # (el valor por defecto de BaseHTTPRequestHandler),
+            # el límite de ~6 conexiones simultáneas por origen
+            # que impone el navegador se agota rápido cuando hay
+            # 6 sprites + el polling de /api/team compitiendo por
+            # conexión al mismo tiempo, y las últimas peticiones
+            # se quedan esperando un slot libre indefinidamente.
+            protocol_version = "HTTP/1.1"
+
             def do_GET(self):
                 if self.path == "/":
                     self._send_text(
                         "DexRelay HTTP Server",
                         200,
+                    )
+                    return
+
+                if self.path.rstrip("/") == "/overlay/team":
+                    self._send_file(
+                        "team/index.html",
+                        "text/html; charset=utf-8",
+                    )
+                    return
+
+                if self.path.startswith(
+                    "/overlay/team/"
+                ):
+                    relative_path = self.path[
+                        len("/overlay/team/"):
+                    ]
+
+                    self._send_file(
+                        f"team/{relative_path}",
+                        self._content_type(
+                            relative_path
+                        ),
                     )
                     return
 
@@ -103,6 +154,7 @@ class HTTPServer:
                         state.badges,
                         200,
                     )
+                    return
 
                 if self.path == "/api/combat":
                     self._send_json(
@@ -116,6 +168,68 @@ class HTTPServer:
                 self._send_text(
                     "Not Found",
                     404,
+                )
+
+            def _send_file(
+                self,
+                relative_path: str,
+                content_type: str,
+            ):
+                file_path = (
+                    overlay_directory
+                    / relative_path
+                )
+
+                if not file_path.is_file():
+                    self._send_text(
+                        "Not Found",
+                        404,
+                    )
+                    return
+
+                body = file_path.read_bytes()
+
+                self.send_response(200)
+                self.send_header(
+                    "Content-Type",
+                    content_type,
+                )
+                self.send_header(
+                    "Content-Length",
+                    str(len(body)),
+                )
+                self.end_headers()
+
+                self.wfile.write(body)
+
+            def _content_type(
+                self,
+                path: str,
+            ) -> str:
+                suffix = Path(
+                    path
+                ).suffix.lower()
+
+                content_types = {
+                    ".html": (
+                        "text/html; charset=utf-8"
+                    ),
+                    ".css": (
+                        "text/css; charset=utf-8"
+                    ),
+                    ".js": (
+                        "application/javascript; "
+                        "charset=utf-8"
+                    ),
+                    ".png": "image/png",
+                    ".jpg": "image/jpeg",
+                    ".jpeg": "image/jpeg",
+                    ".webp": "image/webp",
+                }
+
+                return content_types.get(
+                    suffix,
+                    "application/octet-stream",
                 )
 
             def _send_json(
@@ -162,7 +276,11 @@ class HTTPServer:
 
                 self.wfile.write(body)
 
-            def log_message(self, format, *args):
+            def log_message(
+                self,
+                format,
+                *args,
+            ):
                 return
 
         return Handler
