@@ -8,6 +8,15 @@ from app.memory.memory_reader import MemoryReader
 COMBAT_POINTER_ADDRESS = 0x083F8658
 COMBAT_HP_OFFSET = 0x404
 
+# Confirmado con tools/probes/combat/observar_puntero_combate.py:
+# al salir de combate, el puntero NO vuelve a 0x00000000. Se queda
+# en este valor fijo (COMBAT_POINTER_ADDRESS - 4), que es memoria
+# "basura" reutilizada por el juego, no una estructura de batalla
+# real. Si se trata como puntero valido, CombatService devuelve un
+# HP congelado (el ultimo leido antes de salir de combate) para
+# siempre, en vez de reportar que ya no hay combate.
+COMBAT_INACTIVE_POINTER = COMBAT_POINTER_ADDRESS - 4
+
 LECTURA_DESCARTADA = object()
 
 
@@ -33,7 +42,7 @@ class CombatService:
             pointer_before,
         )[0]
 
-        if base_address == 0:
+        if base_address in (0, COMBAT_INACTIVE_POINTER):
             return None
 
         hp_data = self.memory_reader.read(
