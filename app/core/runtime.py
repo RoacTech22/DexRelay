@@ -4,7 +4,10 @@ from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BadgesService
 from app.services.badges_storage import BadgesStorage
-from app.services.combat_service import CombatService
+from app.services.combat_service import (
+    LECTURA_DESCARTADA,
+    CombatService,
+)
 
 
 class Runtime:
@@ -60,5 +63,17 @@ class Runtime:
 
         combat_hp = self.combat_service.read()
 
-        if combat_hp is not None:
+        if combat_hp is LECTURA_DESCARTADA:
+            # Lectura inconsistente (el puntero cambió a mitad de
+            # lectura): se descarta y se conserva el último estado
+            # de combate válido, en vez de corromper el JSON.
+            pass
+
+        elif combat_hp is None:
+            # base_address == 0: no hay combate activo.
+            self.state.combat_active = False
+            self.state.combat_hp = None
+
+        else:
+            self.state.combat_active = True
             self.state.combat_hp = combat_hp

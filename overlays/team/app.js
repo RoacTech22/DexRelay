@@ -1,4 +1,5 @@
 const API_URL = "/api/team";
+const COMBAT_API_URL = "/api/combat";
 
 const teamElement =
     document.getElementById("team");
@@ -13,6 +14,20 @@ let previousTeam = [
 ];
 
 let loadInProgress = false;
+
+/* =========================================
+   SLOT QUE SE CONSIDERA "EN COMBATE"
+
+   Por ahora se asume siempre el slot 1
+   (el líder del equipo). El backend todavía
+   no identifica qué Pokémon fue el enviado
+   a combate (queda pendiente como bloque
+   aparte: "detección del Pokémon enviado a
+   combate"). Cuando eso exista, este índice
+   dejará de ser fijo.
+========================================= */
+
+const COMBAT_SLOT_INDEX = 0;
 
 
 /* =========================================
@@ -35,7 +50,12 @@ for (let index = 0; index < 6; index++) {
 
 
 /* =========================================
-   CARGAR TEAM
+   CARGAR TEAM + COMBATE
+
+   Las dos peticiones van en el mismo ciclo
+   de 200ms para que la barra del slot en
+   combate se actualice con el mismo ritmo
+   que el resto del overlay.
 ========================================= */
 
 async function loadTeam() {
@@ -48,24 +68,39 @@ async function loadTeam() {
 
     try {
 
-        const response =
-            await fetch(
-                API_URL,
-                {
-                    cache: "no-store"
-                }
-            );
+        const [teamResponse, combatResponse] =
+            await Promise.all([
+                fetch(
+                    API_URL,
+                    { cache: "no-store" }
+                ),
+                fetch(
+                    COMBAT_API_URL,
+                    { cache: "no-store" }
+                )
+            ]);
 
-        if (!response.ok) {
+        if (!teamResponse.ok) {
             throw new Error(
-                `HTTP ${response.status}`
+                `HTTP ${teamResponse.status}`
             );
         }
 
         const team =
-            await response.json();
+            await teamResponse.json();
 
-        renderTeam(team);
+        let combat = {
+            active: false,
+            hp: null
+        };
+
+        if (combatResponse.ok) {
+
+            combat =
+                await combatResponse.json();
+        }
+
+        renderTeam(team, combat);
 
     } catch (error) {
 
@@ -132,7 +167,7 @@ function normalizeTeam(team) {
    RENDERIZAR TEAM
 ========================================= */
 
-function renderTeam(team) {
+function renderTeam(team, combat) {
 
     const currentTeam =
         normalizeTeam(team);
@@ -146,7 +181,10 @@ function renderTeam(team) {
         renderSlot(
             index,
             currentTeam[index],
-            previousTeam[index]
+            previousTeam[index],
+            index === COMBAT_SLOT_INDEX
+                ? combat
+                : null
         );
     }
 
@@ -186,7 +224,8 @@ function renderTeam(team) {
 function renderSlot(
     index,
     pokemon,
-    previous
+    previous,
+    combat
 ) {
 
     const slot =
@@ -221,13 +260,43 @@ function renderSlot(
 
     /* ================================
        DATOS
-    ================================= */
 
-    const hp =
-        Number(pokemon.hp) || 0;
+       Fuera de combate, el HP viene de
+       /api/team como siempre. Si este
+       slot es el que está en combate
+       (combat.active === true), se usa
+       el HP realtime de /api/combat en
+       su lugar para que la barra baje
+       en pasos reales (31 → 24 → 18 → 3)
+       en vez de saltar directo al valor
+       final que reporta la party al
+       terminar el combate.
+
+       Importante: esto NO modifica
+       pokemon.hp ni el HP "permanente"
+       de la party, solo lo que se
+       calcula aquí para pintar la barra.
+    ================================= */
 
     const maxHp =
         Number(pokemon.maxHp) || 0;
+
+    const inCombat =
+        Boolean(combat) &&
+        combat.active === true &&
+        combat.hp !== null &&
+        combat.hp !== undefined;
+
+    const hp =
+        inCombat
+            ? Math.max(
+                0,
+                Math.min(
+                    maxHp || Number(combat.hp),
+                    Number(combat.hp)
+                )
+            )
+            : Number(pokemon.hp) || 0;
 
 
     const hpPercent =

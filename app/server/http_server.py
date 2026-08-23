@@ -159,6 +159,7 @@ class HTTPServer:
                 if self.path == "/api/combat":
                     self._send_json(
                         {
+                            "active": state.combat_active,
                             "hp": state.combat_hp,
                         },
                         200,

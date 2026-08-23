@@ -4,4 +4,5 @@ class ApplicationState:
         self.reader_active = False
         self.team = []
         self.badges = []
+        self.combat_active = False
         self.combat_hp = None
