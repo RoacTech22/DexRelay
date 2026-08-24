@@ -432,27 +432,21 @@ El overlay asume que el Pokémon en combate es siempre el del **slot 1**. Se inv
 
 **Decisión:** se mantiene slot 1 fijo. Es una limitación conocida y documentada, no bloquea el resto del proyecto. Para retomarlo en el futuro, lo más prometedor sería un debugger real conectado al código ARM emulado (no solo al proceso host de Windows ni al protocolo UDP de Azahar) — ambos enfoques usados hasta ahora llegaron a su límite práctico sin esa visibilidad.
 
+**Override desactivado temporalmente en el overlay (24/08/2026).** Reportado: la limitación de arriba estaba afectando visualizaciones que ya funcionaban bien (barra de un Pokémon sano mostrando 0 por aplicarle el HP de otro Pokémon en combate). Se comentó (no se borró) en `overlays/team/app.js`: el fetch de `COMBAT_API_URL`, `COMBAT_SLOT_INDEX`, y el bloque de cálculo de `hp`/`inCombat` en `renderSlot()`. La barra vuelve a usar siempre `/api/team` (igual que fuera de combate). El backend (`combat_service.py`, `/api/combat`) sigue intacto y funcionando — no afecta nada visualmente por sí solo, y facilita reactivar todo esto de un solo commit cuando se resuelva la detección real del slot.
+
 ---
 
 ## 9. Muertes / debilitamiento
 
-Hay **dos sistemas distintos** relacionados con "muerte" en el proyecto, y no deben confundirse:
+Hay **dos sistemas distintos** relacionados con "muerte" en el proyecto. Ya no son independientes — desde el 24/08/2026 el overlay consume el resultado del segundo, pero conceptualmente siguen siendo dos cosas distintas:
 
-### 9.1. Detección histórica (`nuzlocke.json`) — del prototipo original, no reimplementada aún en la arquitectura actual
+### 9.1. Nuzlocke Tracker (`data/nuzlocke.json`) — 🟢 implementado (Bloque A, sección 14)
 
-Comportamiento que estaba validado en el proyecto anterior (PokeOverlay):
+Registro **permanente**: `Pokémon se debilita → pasa al graveyard → aunque se cure después, no vuelve al roster`. Portado desde la lógica validada del prototipo (PokeOverlay) a `app/services/nuzlocke_service.py`. Expuesto en `/api/nuzlocke`.
 
-```text
-Pokémon se debilita → nuzlocke.json se actualiza → Pokémon se cura → la muerte permanece
-```
+### 9.2. Animación/estado visual de "debilitado" en el Team Overlay — 🟢 implementado, con muerte persistente (24/08/2026)
 
-Esto es responsabilidad del futuro Nuzlocke Tracker (FASE 5, ver sección 14) — un registro **permanente**, independiente del HP actual. **Todavía no existe en la arquitectura actual de DexRelay** (no hay `nuzlocke_service.py` ni `nuzlocke.json` en el proyecto reconstruido); es una función pendiente, no completada, aunque estuvo validada en el prototipo anterior.
-
-### 9.2. Animación visual de "debilitado" en el Team Overlay — implementada 23/08/2026
-
-Puramente basada en `pokemon.hp <= 0` de `/api/team` en el momento actual — es **transitoria**: si el Pokémon se cura, el estado visual desaparece. No usa ni depende de ningún historial. Ver sección 12 para el detalle de la animación y los bugs corregidos.
-
-**Cuando se implemente el Nuzlocke Tracker real, estos dos sistemas deberán coexistir sin pisarse**: el overlay seguirá mostrando el estado visual actual (HP-based), y el Tracker llevará el registro histórico permanente por separado.
+`overlays/team/app.js` calcula `isDead = pokemon.hp <= 0 || nickname en graveyard de /api/nuzlocke`. El chequeo de HP dispara la animación en el instante exacto (el backend tarda hasta un ciclo de 200ms en registrar la muerte); el chequeo del cementerio mantiene la apariencia de muerto para siempre, sin importar el HP después — corrigiendo la regresión respecto al comportamiento original de PokeOverlay, donde la muerte visual sí era persistente. Todo el slot (nickname, nivel, barra de HP), no solo el sprite, se atenúa en gris cuando `isDead` es `true` (clase `dead` en el `<div class="slot">`). Ver sección 12 y sección 14 para el detalle completo.
 
 ---
 
@@ -468,11 +462,11 @@ Rutas activas:
 - `/api/status` → `{azahar_connected, reader_active}`
 - `/api/team` → party actual
 - `/api/badges` → `{value, count, badges}`
-- `/api/combat` → `{active, hp}`
+- `/api/combat` → `{active, hp}` (implementado; ver sección 8 sobre el override del overlay desactivado)
+- `/api/nuzlocke` → `{roster, graveyard}`
 - `/overlay/team`, `/overlay/team/*` → sirve `overlays/team/`
 - `/overlay/badges`, `/overlay/badges/*` → sirve `overlays/badges/`
-
-Rutas previstas, aún no implementadas: `/api/nuzlocke`, `/overlay/nuzlocke`.
+- `/overlay/nuzlocke`, `/overlay/nuzlocke/*` → sirve `overlays/nuzlocke/`
 
 **Bug del overlay — RESUELTO.** Los slots 5 y 6 se alternaban por agotamiento del pool de conexiones del navegador. Solución vigente (no revertir):
 - HTTP/1.1 + keep-alive (`protocol_version = "HTTP/1.1"`)
@@ -481,6 +475,10 @@ Rutas previstas, aún no implementadas: `/api/nuzlocke`, `/overlay/nuzlocke`.
 - No reconstruir sprites/DOM innecesariamente cada 200ms
 - Reintentos de carga de sprites (`loadSpriteWithRetry`)
 - Polling cada 200ms sin query string variable
+
+**Bug de CSS/JS sin cargar — RESUELTO (24/08/2026).** Al entrar a `/overlay/{nombre}` **sin barra final**, el navegador resolvía los `<link>`/`<script>` relativos (`style.css`, `app.js`) contra el directorio padre (`/overlay/`) en vez de `/overlay/{nombre}/`, dando 404 silencioso en ambos. Fix: las 3 rutas de overlay (antes casi duplicadas) se unificaron en `_serve_overlay(overlay_name)`, que redirige (301) a la versión con `/` al final cuando falta, sirve `index.html` con la barra, y sirve archivos estáticos con el prefijo completo. Verificado end-to-end contra el servidor real para los 3 overlays.
+
+**Desconexiones de cliente silenciadas (24/08/2026).** `ConnectionAbortedError`/`ConnectionResetError`/`BrokenPipeError` son tráfico normal de keep-alive cuando el navegador (u OBS) cierra/recarga una conexión a medio camino — no bugs. `handle_error()` es un método del **servidor** (`socketserver.BaseServer`), no del request handler; `_QuietThreadingHTTPServer` (subclase de `ThreadingHTTPServer`) lo sobreescribe para filtrar solo esos 3 errores esperados, dejando pasar cualquier otro al reporte normal.
 
 La GUI futura (FASE 4) deberá poder iniciar/detener este servidor y mostrar/copiar las URLs para OBS.
 
@@ -539,58 +537,69 @@ Se compararon contra la lógica de referencia del proyecto anterior (`PokeOverla
 
 Ver sección 7.
 
+**Nuzlocke Overlay** (`overlays/nuzlocke/`, cementerio + estadísticas): ver sección 14, Bloque B.
+
 ---
 
-## 14. Nuzlocke Tracker (futuro)
+## 14. Nuzlocke Tracker
 
-**Estado: 🔴 pendiente. No confundir con la detección visual de muerte del overlay (sección 9).**
+**Estado: 🟡 en progreso — Bloques A y B completos, Bloque C pendiente.** No confundir la muerte persistente de esta sección con la detección visual del overlay (sección 9) — están integradas entre sí (ver más abajo) pero conceptualmente siguen siendo dos cosas distintas.
 
-Debe registrar:
-- Pokémon capturados
-- encuentros por ruta/zona
-- vivos / muertos (histórico permanente)
-- nickname, especie, speciesId, nivel, lugar de captura
-- evoluciones, eventos, estadísticas, progreso
+Alcance completo definido (24/08/2026), en 3 bloques:
 
-```text
-NUZLOCKE TRACKER
-├── Partida
-├── Encuentros
-├── Pokémon vivos
-├── Pokémon muertos
-├── Evoluciones
-├── Medallas
-├── Eventos
-└── Estadísticas
-```
+- **Bloque A — Núcleo** (🟢 completo): captura automática, evolución sin duplicar registro, muerte persistente, `/api/nuzlocke`.
+- **Bloque B — Overlay** (🟢 completo): cementerio visual + estadísticas.
+- **Bloque C — Encuentros por ruta** (🔴 pendiente): requiere decisión de diseño (registro manual vs. investigar dirección de "zona actual" en memoria) — ver más abajo.
 
-JSON es suficiente para la comunicación inicial con overlays. Cuando el Tracker crezca, SQLite es la opción recomendada para el historial (`Azahar → Reader → Services → SQLite → Tracker`), manteniendo JSON para la comunicación rápida con overlays.
+### Bloque A — Núcleo (`app/services/nuzlocke_service.py` + `nuzlocke_storage.py`)
 
-### Lógica reutilizable ya validada en el prototipo (PokeOverlay) — no portada todavía
+Portado directamente desde la lógica ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`: `pokemon_identity`, `is_already_dead`, `register_death`, `update_death_detector`), adaptado a la arquitectura de servicios actual.
 
-En `PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py` (proyecto anterior, no en el repo actual de DexRelay) existe detección de muerte persistente ya probada en juego real, con estas funciones:
+**Identidad:** solo `nickname` (a diferencia de las animaciones del Team Overlay, que usan `nickname` + `speciesId` porque comparan el mismo slot entre dos ciclos consecutivos). Acá la identidad tiene que ser estable a través de **toda la partida**, incluyendo evoluciones — una evolución actualiza el registro existente, no crea uno nuevo. Limitación conocida (heredada del prototipo): un Pokémon sin nickname personalizado pierde continuidad de identidad al evolucionar, porque el nombre por defecto suele ser el de la especie.
 
-```text
-pokemon_identity(pokemon)       — identidad basada en nickname + speciesId
-is_already_dead(...)            — evita registrar la misma muerte dos veces
-register_death(...)             — agrega el Pokémon a la lista de muertos
-update_death_detector(...)      — detecta HP <= 0 y dispara el registro
-load_nuzlocke() / save...       — persistencia en data/nuzlocke.json
-```
-
-Formato de persistencia usado:
-
+**Formato de persistencia** (`data/nuzlocke.json`):
 ```json
 {
-  "dead": [
-    { "nickname": "Conter", "speciesId": 659, "species": "Bunnelby", "level": 6 }
+  "roster": [
+    { "nickname": "...", "speciesId": ..., "species": "...", "level": ..., "caughtAt": "ISO 8601" }
+  ],
+  "graveyard": [
+    { "nickname": "...", "speciesId": ..., "species": "...", "level": ..., "diedAt": "ISO 8601" }
   ]
 }
 ```
 
-Es la misma lógica de identidad (`nickname` + `speciesId`) que ya se reutilizó para las animaciones del Team Overlay (sección 12). Cuando se implemente esta fase, portar esta lógica a `app/services/nuzlocke_service.py` en vez de diseñarla desde cero — ya está validada, solo falta adaptarla a la arquitectura de servicios actual (y separarla claramente del estado visual "debilitado" del overlay, ver sección 9).
+**Regla clave:** una vez que un `nickname` aparece en `graveyard`, nunca vuelve a `roster` aunque el HP actual sea > 0 (curación) — la muerte es historial permanente, coherente con el principio de la sección 3.
 
-**Nota de contexto:** el `decrypt_data()` de ese mismo script antiguo tampoco validaba el checksum PK6 (mismo bug corregido en la sección 5) — confirma que no fue una regresión de la reconstrucción de DexRelay, es un bug de nacimiento del proyecto original que nunca se había notado hasta las pruebas de animaciones de esta semana.
+El disco es la fuente de verdad (no hay memoria del juego de la que re-derivar el cementerio): `NuzlockeService` carga una sola vez y cachea en memoria, escribiendo a disco solo cuando algo cambia.
+
+Integrado en `Runtime.update()` (justo después de leer la party) y expuesto en `/api/nuzlocke`.
+
+Verificado con un test end-to-end sobre las clases reales: captura → sube de nivel (mismo registro) → evoluciona (mismo registro, sin duplicar) → muere (pasa a `graveyard`) → HP vuelve a subir (confirmado que NO revive) → persistencia real en disco.
+
+### Bloque B — Overlay del cementerio (`overlays/nuzlocke/`)
+
+Sirve en `/overlay/nuzlocke`. Barra de estadísticas (Capturados = `roster.length + graveyard.length`, Vivos = `roster.length`, Caídos = `graveyard.length`, Medallas X/8 vía `/api/badges`) + grilla del cementerio (sprite atenuado + nickname + nivel al morir + una cruz `†` decorativa). Reutiliza los sprites del Team Overlay vía ruta relativa (`../team/sprites/{speciesId}.png`) en vez de duplicar assets. Mismo patrón anti-bug de los otros overlays: como las muertes son permanentes, el cementerio solo crece — se trackean los nicknames ya renderizados y solo se agregan elementos nuevos.
+
+### Muerte visual persistente en el Team Overlay (integración entre secciones 9 y 14, 24/08/2026)
+
+Antes, `.nuzlocke-dead` en el Team Overlay dependía solo de `pokemon.hp <= 0` en el ciclo actual — si el Pokémon se curaba en el juego, la apariencia de muerto desaparecía. Esto era una regresión respecto al comportamiento del proyecto anterior (PokeOverlay), donde la muerte visual sí era persistente.
+
+Fix: `overlays/team/app.js` ahora también consulta `/api/nuzlocke` y arma un `Set` de nicknames en `graveyard`. `isDead` es `true` si `hp <= 0` (dispara la animación en el instante exacto) **o** si el nickname ya está en el cementerio (mantiene la apariencia para siempre, sin importar el HP después). Se agregó además la clase `dead` al `<div class="slot">` completo (no solo al `<img>`), con CSS nuevo que atenúa nickname, nivel y barra de HP — antes solo se atenuaba el sprite.
+
+### Bloque C — Encuentros por ruta (pendiente, requiere decisión de diseño)
+
+La regla Nuzlocke de "un encuentro por ruta" necesita saber **dónde** está el jugador y **qué** apareció — hoy no se lee ubicación ni encuentros salvajes de memoria. Dos caminos no excluyentes:
+- **Registro manual**: formulario/endpoint donde el usuario anota ruta + resultado. Funciona sin investigación de memoria.
+- **Investigar dirección de "zona/mapa actual"** en memoria: plausible que exista y sea más fácil de encontrar que el slot de combate (la posición del jugador suele vivir en una zona de memoria predecible), pero no garantizado. Línea de investigación opcional, no bloqueante.
+
+### Mejoras/ideas propuestas para más adelante (no bloqueantes)
+
+- Reglas configurables del run (dupes clause, species clause, etc.) en un futuro campo `run.ruleset`.
+- Validación anti-basura en capturas/muertes (mismo principio del fix de checksum PK6 — no registrar a partir de una sola lectura sin confirmar).
+- Exportar resumen del run al terminar (JSON o texto).
+- Notificaciones tipo "toast" en el overlay ante eventos importantes, aprovechando el futuro bus de eventos (sección 16).
+- Leer la caja (PC) completa, no solo el equipo activo, para que el roster incluya todo lo capturado — requiere investigar la dirección del box.
 
 ---
 
@@ -689,6 +698,20 @@ Tags previstos: `v0.1.0`, `v0.2.0`, ... `v1.0.0`.
 ### Historial de commits (de más reciente a más antiguo)
 
 ```text
+49227cb Aplicar el gris de 'muerto' a todo el slot (nickname, nivel, barra de HP)
+991324b Muerte visual persistente en el overlay + desactivar HP de combate temporalmente
+9e1fdcc Corregir CSS/JS que no cargaban por falta de redirect a barra final
+d0db13f Nuzlocke Tracker (Bloque B): overlay del cementerio + estadisticas
+8d69dee Nuzlocke Tracker (Bloque A): captura automatica y muerte persistente
+cf6746b Sincronizar ajustes visuales manuales del usuario (team/badges) y sprites de medallas
+12ab6e1 Silenciar tracebacks de desconexiones esperadas del cliente (keep-alive)
+3634a5d Marcar decision de concurrencia como resuelta en el Documento Maestro
+579525a Mover el loop realtime a su propio hilo (decision de concurrencia: threads)
+8747683 Marcar fix de process_name como resuelto en el Documento Maestro
+3f0a0ff Leer process_name desde config.json en vez de hardcodearlo
+5f9f7f7 Documentar logica reutilizable de muerte persistente del prototipo (Nuzlocke)
+aca7dc8 Reconstruir Documento Maestro consolidado a partir de las 7 versiones historicas
+05238cd Actualizar Documento Maestro (bugs de animaciones + checksum PK6)
 7ebac26 Corregir lecturas corruptas de party (checksum PK6) y animacion de entrada al reordenar
 01ed424 Corregir animaciones de evolucion y agregar animacion de muerte faltante
 774a325 Actualizar Documento Maestro (HP de combate + Badges Overlay)
@@ -789,11 +812,13 @@ git diff --check
 - [ ] URLs copiables, estado de servicios, logs, configuración
 
 ### FASE 5 — NUZLOCKE TRACKER
-**🔴 PENDIENTE**
+**🟡 EN PROGRESO — Bloques A y B completos**
 
-- [ ] Base de datos (JSON inicial, SQLite cuando crezca)
-- [ ] Partidas, encuentros, capturas, muertes (persistentes), evoluciones, medallas, estadísticas
-- [ ] Gestión manual, overlay del Tracker
+- [x] Base de datos (JSON — `data/nuzlocke.json`)
+- [x] Capturas automáticas, muertes persistentes, evoluciones (sección 14, Bloque A)
+- [x] Overlay del Tracker (cementerio + estadísticas, sección 14, Bloque B)
+- [ ] Encuentros por ruta/zona (sección 14, Bloque C — pendiente, requiere decisión de diseño)
+- [ ] Partidas (multi-run), gestión manual desde GUI
 
 ### FASE 6 — APLICACIÓN
 **🔴 PENDIENTE**
@@ -850,21 +875,23 @@ COMUNICACIÓN CON AZAHAR      🟢 FUNCIONAL
 PARTY REALTIME                🟢 FUNCIONAL (con checksum PK6)
 SPECIES ID / RESOLVER         🟢 FUNCIONAL (PKHeX integrado)
 PKHEX BRIDGE                  🟢 VALIDADO (falta self-contained para release)
-MUERTES — VISUAL (OVERLAY)    🟢 FUNCIONAL
-MUERTES — TRACKER PERSISTENTE 🔴 PENDIENTE (lógica ya validada en el prototipo, no portada — ver sección 14)
+MUERTES — VISUAL (OVERLAY)    🟢 FUNCIONAL (persistente, integrada con el Tracker)
+MUERTES — TRACKER PERSISTENTE 🟢 FUNCIONAL (Bloque A del Nuzlocke Tracker, sección 14)
 MEDALLAS — MEMORIA            🟢 VALIDADO
 MEDALLAS — SERVICIO/API       🟢 FUNCIONAL
 BADGES OVERLAY                🟢 FUNCIONAL
-HP DE COMBATE — BACKEND       🟢 FUNCIONAL
-HP DE COMBATE — OVERLAY       🟢 FUNCIONAL (limitado a slot 1 fijo)
+NUZLOCKE TRACKER — NÚCLEO     🟢 FUNCIONAL (captura/evolución/muerte automáticas)
+NUZLOCKE OVERLAY               🟢 FUNCIONAL (cementerio + estadísticas)
+NUZLOCKE — ENCUENTROS/RUTA     🔴 PENDIENTE (Bloque C, requiere decisión de diseño)
+HP DE COMBATE — BACKEND       🟢 FUNCIONAL (sigue corriendo, no afecta overlay)
+HP DE COMBATE — OVERLAY       🟡 DESACTIVADO TEMPORALMENTE (comentado en app.js, no borrado)
 DETECCIÓN DE SLOT EN COMBATE  🔴 PAUSADA, SIN RESULTADO
 TEAM OVERLAY — ANIMACIONES    🟢 FUNCIONAL (evolución/muerte/entrada corregidas)
-HTTP SERVER                   🟢 FUNCIONAL
-RUNTIME LOOP                  🟢 FUNCIONAL
+HTTP SERVER                   🟢 FUNCIONAL (bug de rutas sin barra final corregido)
+RUNTIME LOOP                  🟢 FUNCIONAL (en su propio hilo)
 CONFIG — process_name         🟢 RESUELTO (lee config.json)
 CONCURRENCIA (asyncio/threads) 🟢 RESUELTO (threads; loop realtime en su propio hilo)
 SISTEMA DE EVENTOS             🟡 NOMBRES DEFINIDOS, BUS NO IMPLEMENTADO
-NUZLOCKE TRACKER               🔴 PENDIENTE
 GUI                            🔴 PENDIENTE
 EMPAQUETADO                    🔴 PENDIENTE
 ```
@@ -892,6 +919,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-21:** `v4`/`v5` — HTTP server, PKHeX bridge integrado como fuente automática, badges persistente, roadmap corregido.
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
-- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo; silenciados los tracebacks de desconexiones esperadas del cliente (keep-alive); sincronizados los ajustes visuales manuales del usuario en `overlays/team/style.css` y `overlays/badges/style.css` + sprites reales de medallas.
+- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo; silenciados los tracebacks de desconexiones esperadas del cliente (keep-alive); sincronizados los ajustes visuales manuales del usuario en `overlays/team/style.css` y `overlays/badges/style.css` + sprites reales de medallas; **Nuzlocke Tracker Bloques A y B completos** (captura/evolución/muerte automáticas + overlay de cementerio y estadísticas, portado desde el prototipo); corregido bug de CSS/JS sin cargar por falta de redirect a barra final en las 3 rutas de overlay; muerte visual del Team Overlay ahora es persistente (integrada con el cementerio del Tracker) y se extiende a todo el slot (nickname, nivel, barra de HP), no solo al sprite; HP de combate en tiempo real desactivado temporalmente en el overlay (comentado, no borrado) por estar afectando visualizaciones ya funcionales mientras la detección real del slot sigue pendiente.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**
