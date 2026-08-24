@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DexRelay Nuzlocke</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300..700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="stats">
+        <div class="stat">
+            <span class="stat-value" id="stat-caught">0</span>
+            <span class="stat-label">Capturados</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-alive">0</span>
+            <span class="stat-label">Vivos</span>
+        </div>
+        <div class="stat stat-dead">
+            <span class="stat-value" id="stat-dead">0</span>
+            <span class="stat-label">Caídos</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-badges">0/8</span>
+            <span class="stat-label">Medallas</span>
+        </div>
+    </div>
+
+    <div id="graveyard"></div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

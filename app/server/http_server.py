@@ -187,6 +187,28 @@ class HTTPServer:
                     )
                     return
 
+                if self.path.rstrip("/") == "/overlay/nuzlocke":
+                    self._send_file(
+                        "nuzlocke/index.html",
+                        "text/html; charset=utf-8",
+                    )
+                    return
+
+                if self.path.startswith(
+                    "/overlay/nuzlocke/"
+                ):
+                    relative_path = self.path[
+                        len("/overlay/nuzlocke/"):
+                    ]
+
+                    self._send_file(
+                        f"nuzlocke/{relative_path}",
+                        self._content_type(
+                            relative_path
+                        ),
+                    )
+                    return
+
                 if self.path == "/api/status":
                     self._send_json(
                         {

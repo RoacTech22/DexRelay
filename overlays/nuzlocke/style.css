@@ -1,0 +1,178 @@
+html,
+body {
+
+    width: max-content;
+    min-width: max-content;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+
+    overflow: hidden;
+
+    font-family: "Teko", sans-serif;
+}
+
+/* =========================================
+   BARRA DE ESTADÍSTICAS
+========================================= */
+
+#stats {
+    display: flex;
+    gap: 28px;
+
+    width: max-content;
+
+    padding: 10px 18px;
+
+    background: transparent;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 64px;
+}
+
+.stat-value {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+
+    color: #ffffff;
+
+    text-shadow:
+        0 2px 3px rgba(0, 0, 0, 0.85),
+        0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.stat-label {
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+    color: rgba(255, 255, 255, 0.75);
+
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.stat-dead .stat-value {
+    color: #e74c3c;
+}
+
+/* =========================================
+   CEMENTERIO
+
+   Grilla que crece hacia abajo/derecha segun
+   el tamano del contenedor en OBS. Cada
+   entrada se agrega UNA sola vez cuando
+   aparece un Pokemon nuevo en graveyard -- las
+   muertes son permanentes, asi que nunca hace
+   falta quitar ni reordenar nada, solo agregar.
+========================================= */
+
+#graveyard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    width: max-content;
+    max-width: 640px;
+
+    padding: 4px 18px 14px;
+
+    background: transparent;
+}
+
+.grave {
+    position: relative;
+
+    width: 64px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    pointer-events: none;
+}
+
+.grave-sprite {
+    width: 56px;
+    height: 56px;
+
+    object-fit: contain;
+
+    filter:
+        grayscale(100%)
+        brightness(0.72)
+        contrast(1.15)
+        drop-shadow(0 2px 3px rgba(0, 0, 0, 0.9));
+
+    opacity: 0.85;
+}
+
+.grave-nickname {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+
+    color: #cfcfcf;
+
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+
+    max-width: 64px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grave-level {
+    font-size: 12px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* Cruz pequeña sobre el sprite, para que se
+   note de un vistazo que es una lapida y no
+   solo un sprite atenuado cualquiera. */
+.grave::before {
+    content: "†";
+
+    position: absolute;
+    top: -4px;
+    right: 2px;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #e74c3c;
+
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+/* =========================================
+   ANIMACIÓN: nueva lápida
+========================================= */
+
+.grave-enter {
+    animation: graveEnter 0.5s ease-out both;
+}
+
+@keyframes graveEnter {
+
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.85);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
