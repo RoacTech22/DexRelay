@@ -225,6 +225,13 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/nuzlocke":
+                    self._send_json(
+                        state.nuzlocke,
+                        200,
+                    )
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,

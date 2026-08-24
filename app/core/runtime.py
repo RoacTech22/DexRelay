@@ -8,6 +8,8 @@ from app.services.combat_service import (
     LECTURA_DESCARTADA,
     CombatService,
 )
+from app.services.nuzlocke_service import NuzlockeService
+from app.services.nuzlocke_storage import NuzlockeStorage
 
 
 class Runtime:
@@ -28,6 +30,10 @@ class Runtime:
         )
 
         self.badges_storage = BadgesStorage()
+
+        self.nuzlocke_service = NuzlockeService(
+            NuzlockeStorage()
+        )
 
         self._last_badges = None
 
@@ -52,6 +58,10 @@ class Runtime:
 
         self.state.team = party
         self.state.reader_active = True
+
+        self.state.nuzlocke = self.nuzlocke_service.update(
+            party
+        )
 
         badges = self.badges_service.read_badges()
 

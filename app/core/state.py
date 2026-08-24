@@ -6,3 +6,7 @@ class ApplicationState:
         self.badges = []
         self.combat_active = False
         self.combat_hp = None
+        self.nuzlocke = {
+            "roster": [],
+            "graveyard": [],
+        }
