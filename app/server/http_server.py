@@ -143,70 +143,13 @@ class HTTPServer:
                     )
                     return
 
-                if self.path.rstrip("/") == "/overlay/team":
-                    self._send_file(
-                        "team/index.html",
-                        "text/html; charset=utf-8",
-                    )
+                if self._serve_overlay("team"):
                     return
 
-                if self.path.startswith(
-                    "/overlay/team/"
-                ):
-                    relative_path = self.path[
-                        len("/overlay/team/"):
-                    ]
-
-                    self._send_file(
-                        f"team/{relative_path}",
-                        self._content_type(
-                            relative_path
-                        ),
-                    )
+                if self._serve_overlay("badges"):
                     return
 
-                if self.path.rstrip("/") == "/overlay/badges":
-                    self._send_file(
-                        "badges/index.html",
-                        "text/html; charset=utf-8",
-                    )
-                    return
-
-                if self.path.startswith(
-                    "/overlay/badges/"
-                ):
-                    relative_path = self.path[
-                        len("/overlay/badges/"):
-                    ]
-
-                    self._send_file(
-                        f"badges/{relative_path}",
-                        self._content_type(
-                            relative_path
-                        ),
-                    )
-                    return
-
-                if self.path.rstrip("/") == "/overlay/nuzlocke":
-                    self._send_file(
-                        "nuzlocke/index.html",
-                        "text/html; charset=utf-8",
-                    )
-                    return
-
-                if self.path.startswith(
-                    "/overlay/nuzlocke/"
-                ):
-                    relative_path = self.path[
-                        len("/overlay/nuzlocke/"):
-                    ]
-
-                    self._send_file(
-                        f"nuzlocke/{relative_path}",
-                        self._content_type(
-                            relative_path
-                        ),
-                    )
+                if self._serve_overlay("nuzlocke"):
                     return
 
                 if self.path == "/api/status":
@@ -258,6 +201,71 @@ class HTTPServer:
                     "Not Found",
                     404,
                 )
+
+            def _serve_overlay(
+                self,
+                overlay_name: str,
+            ) -> bool:
+                """
+                Sirve el index.html de un overlay
+                (team/badges/nuzlocke) y los archivos estáticos
+                dentro de su carpeta. Devuelve True si la petición
+                era para este overlay (ya se respondió, con éxito
+                o 404), False si no tiene nada que ver con él.
+
+                Redirige a la versión con "/" al final cuando
+                falta: sin esa barra, el navegador resuelve los
+                <link>/<script> relativos (style.css, app.js)
+                contra el directorio PADRE (/overlay/) en vez de
+                /overlay/{overlay_name}/, y el CSS/JS no cargan.
+                """
+
+                base_path = f"/overlay/{overlay_name}"
+
+                if self.path == base_path:
+                    self._send_redirect(
+                        f"{base_path}/"
+                    )
+                    return True
+
+                if self.path == f"{base_path}/":
+                    self._send_file(
+                        f"{overlay_name}/index.html",
+                        "text/html; charset=utf-8",
+                    )
+                    return True
+
+                prefix = f"{base_path}/"
+
+                if self.path.startswith(prefix):
+                    relative_path = self.path[
+                        len(prefix):
+                    ]
+
+                    self._send_file(
+                        f"{overlay_name}/{relative_path}",
+                        self._content_type(
+                            relative_path
+                        ),
+                    )
+                    return True
+
+                return False
+
+            def _send_redirect(
+                self,
+                location: str,
+            ):
+                self.send_response(301)
+                self.send_header(
+                    "Location",
+                    location,
+                )
+                self.send_header(
+                    "Content-Length",
+                    "0",
+                )
+                self.end_headers()
 
             def _send_file(
                 self,
