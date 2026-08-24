@@ -1,5 +1,6 @@
 const API_URL = "/api/team";
 const COMBAT_API_URL = "/api/combat";
+const NUZLOCKE_API_URL = "/api/nuzlocke";
 
 const teamElement =
     document.getElementById("team");
@@ -16,18 +17,29 @@ let previousTeam = [
 let loadInProgress = false;
 
 /* =========================================
-   SLOT QUE SE CONSIDERA "EN COMBATE"
+   HP DE COMBATE EN TIEMPO REAL -- DESACTIVADO
+   TEMPORALMENTE (24/08/2026)
 
-   Por ahora se asume siempre el slot 1
-   (el líder del equipo). El backend todavía
-   no identifica qué Pokémon fue el enviado
-   a combate (queda pendiente como bloque
-   aparte: "detección del Pokémon enviado a
-   combate"). Cuando eso exista, este índice
-   dejará de ser fijo.
+   Se comenta (no se borra) porque, sin la
+   detección real de qué Pokémon está en
+   combate, el overlay asumía siempre el slot 1
+   -- y eso estaba afectando visualizaciones que
+   ya funcionaban bien: si el Pokémon que en
+   verdad estaba peleando no era el del slot 1,
+   la barra de un Pokémon sano se mostraba en 0
+   (o cualquier valor incorrecto) por aplicarle
+   el HP de otro.
+
+   Para reactivar esto cuando se resuelva la
+   detección real del slot en combate: descomentar
+   esta constante, el fetch de COMBAT_API_URL en
+   loadTeam(), el parámetro `combat` en
+   renderTeam()/renderSlot(), y el bloque de
+   cálculo de `hp`/`inCombat` en renderSlot()
+   (todos marcados con el mismo comentario).
+
+   const COMBAT_SLOT_INDEX = 0;
 ========================================= */
-
-const COMBAT_SLOT_INDEX = 0;
 
 
 /* =========================================
@@ -50,12 +62,11 @@ for (let index = 0; index < 6; index++) {
 
 
 /* =========================================
-   CARGAR TEAM + COMBATE
+   CARGAR TEAM + NUZLOCKE
 
-   Las dos peticiones van en el mismo ciclo
-   de 200ms para que la barra del slot en
-   combate se actualice con el mismo ritmo
-   que el resto del overlay.
+   El fetch de COMBAT_API_URL queda comentado
+   junto con el resto del HP de combate en
+   tiempo real (ver nota arriba).
 ========================================= */
 
 async function loadTeam() {
@@ -68,14 +79,20 @@ async function loadTeam() {
 
     try {
 
-        const [teamResponse, combatResponse] =
+        const [teamResponse, nuzlockeResponse] =
             await Promise.all([
                 fetch(
                     API_URL,
                     { cache: "no-store" }
                 ),
+                // COMBAT_API_URL -- ver nota de
+                // desactivación temporal arriba.
+                // fetch(
+                //     COMBAT_API_URL,
+                //     { cache: "no-store" }
+                // ),
                 fetch(
-                    COMBAT_API_URL,
+                    NUZLOCKE_API_URL,
                     { cache: "no-store" }
                 )
             ]);
@@ -89,18 +106,27 @@ async function loadTeam() {
         const team =
             await teamResponse.json();
 
-        let combat = {
-            active: false,
-            hp: null
+        let nuzlocke = {
+            graveyard: []
         };
 
-        if (combatResponse.ok) {
+        if (nuzlockeResponse.ok) {
 
-            combat =
-                await combatResponse.json();
+            nuzlocke =
+                await nuzlockeResponse.json();
         }
 
-        renderTeam(team, combat);
+        const deadNicknames = new Set(
+            (
+                Array.isArray(nuzlocke.graveyard)
+                    ? nuzlocke.graveyard
+                    : []
+            ).map(
+                grave => grave.nickname
+            )
+        );
+
+        renderTeam(team, deadNicknames);
 
     } catch (error) {
 
@@ -167,7 +193,7 @@ function normalizeTeam(team) {
    RENDERIZAR TEAM
 ========================================= */
 
-function renderTeam(team, combat) {
+function renderTeam(team, deadNicknames) {
 
     const currentTeam =
         normalizeTeam(team);
@@ -182,18 +208,39 @@ function renderTeam(team, combat) {
             index,
             currentTeam[index],
             previousTeam[index],
-            index === COMBAT_SLOT_INDEX
-                ? combat
-                : null
+            deadNicknames
+            // COMBAT_SLOT_INDEX / combat -- ver
+            // nota de desactivación temporal del
+            // HP de combate al inicio del archivo.
+            // ,
+            // index === COMBAT_SLOT_INDEX
+            //     ? combat
+            //     : null
         );
     }
 
     previousTeam =
         currentTeam.map(
-            pokemon =>
-                pokemon
-                    ? { ...pokemon }
-                    : null
+            pokemon => {
+
+                if (!pokemon) {
+                    return null;
+                }
+
+                const dead =
+                    Number(pokemon.hp) <= 0 ||
+                    (
+                        Boolean(deadNicknames) &&
+                        deadNicknames.has(
+                            pokemon.nickname
+                        )
+                    );
+
+                return {
+                    ...pokemon,
+                    _dead: dead
+                };
+            }
         );
 }
 
@@ -225,7 +272,10 @@ function renderSlot(
     index,
     pokemon,
     previous,
-    combat
+    deadNicknames
+    // combat -- ver nota de desactivación
+    // temporal del HP de combate al inicio
+    // del archivo.
 ) {
 
     const slot =
@@ -261,42 +311,36 @@ function renderSlot(
     /* ================================
        DATOS
 
-       Fuera de combate, el HP viene de
-       /api/team como siempre. Si este
-       slot es el que está en combate
-       (combat.active === true), se usa
-       el HP realtime de /api/combat en
-       su lugar para que la barra baje
-       en pasos reales (31 → 24 → 18 → 3)
-       en vez de saltar directo al valor
-       final que reporta la party al
-       terminar el combate.
+       HP DE COMBATE EN TIEMPO REAL --
+       DESACTIVADO TEMPORALMENTE (24/08/2026).
+       Ver nota completa al inicio del archivo.
+       Mientras tanto, el HP siempre viene de
+       /api/team (el HP "permanente" de la
+       party), igual que fuera de combate.
 
-       Importante: esto NO modifica
-       pokemon.hp ni el HP "permanente"
-       de la party, solo lo que se
-       calcula aquí para pintar la barra.
+       const inCombat =
+           Boolean(combat) &&
+           combat.active === true &&
+           combat.hp !== null &&
+           combat.hp !== undefined;
+
+       const hp =
+           inCombat
+               ? Math.max(
+                   0,
+                   Math.min(
+                       maxHp || Number(combat.hp),
+                       Number(combat.hp)
+                   )
+               )
+               : Number(pokemon.hp) || 0;
     ================================= */
 
     const maxHp =
         Number(pokemon.maxHp) || 0;
 
-    const inCombat =
-        Boolean(combat) &&
-        combat.active === true &&
-        combat.hp !== null &&
-        combat.hp !== undefined;
-
     const hp =
-        inCombat
-            ? Math.max(
-                0,
-                Math.min(
-                    maxHp || Number(combat.hp),
-                    Number(combat.hp)
-                )
-            )
-            : Number(pokemon.hp) || 0;
+        Number(pokemon.hp) || 0;
 
 
     const hpPercent =
@@ -389,12 +433,32 @@ function renderSlot(
         pokemon.nickname;
 
 
+    /* Muerte visual persistente (24/08/2026): un
+       Pokémon se sigue viendo debilitado aunque
+       lo cures después, si su nickname ya quedó
+       registrado en el cementerio del Nuzlocke
+       Tracker (/api/nuzlocke -> graveyard). Antes
+       esto dependía solo del HP actual y la
+       apariencia de "muerto" desaparecía al curar
+       -- igual comportamiento que ya tenía el
+       proyecto anterior (PokeOverlay) y que se
+       había perdido en esta reescritura. El chequeo
+       de HP <= 0 se mantiene además del cementerio
+       para que la animación de muerte dispare en
+       el instante exacto (el backend tarda hasta
+       un ciclo de 200ms en registrar la muerte en
+       el cementerio). */
+
     const isDead =
-        Number(pokemon.hp) <= 0;
+        Number(pokemon.hp) <= 0 ||
+        (
+            Boolean(deadNicknames) &&
+            deadNicknames.has(pokemon.nickname)
+        );
 
     const wasDead =
         previous &&
-        Number(previous.hp) <= 0;
+        previous._dead === true;
 
     /* Debilitarse NO cambia nickname ni
        speciesId, así que `samePokemon` sigue
