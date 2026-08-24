@@ -192,7 +192,7 @@ sango-2
 
 `app/memory/memory_reader.py` (`MemoryReader`) es una capa fina sobre `Citra` que expone `.read(address, size)`, usada por todos los lectores especializados (party, badges, combate).
 
-**Pendiente conocido:** el nombre de proceso `"sango-2"` está **hardcodeado** en `AzaharReader.find_game_process()`, a pesar de que `config.json` ya tiene la clave `azahar.process_name` lista para esto. Se volverá un bug real en cuanto el loop realtime continuo dependa de poder cambiar esto sin tocar código. Pendiente de mover a config — ver sección 21 (roadmap).
+**Resuelto (24/08/2026):** el nombre de proceso ya no está hardcodeado. `AzaharReader` acepta `process_name` en el constructor (default `"sango-2"` para no romper probes/tests existentes que lo instancian sin argumentos), `find_game_process()` compara contra `self.process_name`, y `Application` (`app/core/app.py`) lee `config.get("azahar", "process_name")` y se lo pasa al construir el reader.
 
 ---
 
@@ -658,7 +658,7 @@ Pero no hay todavía un bus/dispatcher que los emita o los consuma — es solo u
 }
 ```
 
-`app/core/config.py` (`Config`) ya sabe leer esto (`.get(*keys, default=...)`). **Pendiente:** `azahar_reader.py` todavía no usa `config.get("azahar", "process_name")` — sigue con `"sango-2"` hardcodeado en el código (ver sección 4). Evitar rutas absolutas y configuraciones duplicadas en múltiples módulos.
+`app/core/config.py` (`Config`) ya sabe leer esto (`.get(*keys, default=...)`). **Resuelto (24/08/2026):** `Application` ya lee `config.get("azahar", "process_name")` y lo pasa a `AzaharReader` (ver sección 4). Evitar rutas absolutas y configuraciones duplicadas en múltiples módulos.
 
 ---
 
@@ -745,7 +745,7 @@ git diff --check
 - [x] HP de combate realtime integrado en overlay
 - [ ] Detección del slot real en combate (pausada sin resultado — sección 8)
 - [ ] Detección persistente de muertes tipo Nuzlocke (la del prototipo, no la visual — sección 9.1, todavía no reimplementada en la arquitectura actual)
-- [ ] Mover `process_name` a `config.json` (sección 4/17)
+- [x] Mover `process_name` a `config.json` (sección 4/17)
 - [ ] Decidir modelo de concurrencia antes de FASE 4 (sección 18)
 
 ### FASE 2 — MEDALLAS
@@ -845,7 +845,7 @@ DETECCIÓN DE SLOT EN COMBATE  🔴 PAUSADA, SIN RESULTADO
 TEAM OVERLAY — ANIMACIONES    🟢 FUNCIONAL (evolución/muerte/entrada corregidas)
 HTTP SERVER                   🟢 FUNCIONAL
 RUNTIME LOOP                  🟢 FUNCIONAL
-CONFIG — process_name         🔴 PENDIENTE (hardcodeado, no lee config.json)
+CONFIG — process_name         🟢 RESUELTO (lee config.json)
 CONCURRENCIA (asyncio/threads) 🔴 PENDIENTE DE DECISIÓN
 SISTEMA DE EVENTOS             🟡 NOMBRES DEFINIDOS, BUS NO IMPLEMENTADO
 NUZLOCKE TRACKER               🔴 PENDIENTE
@@ -876,6 +876,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-21:** `v4`/`v5` — HTTP server, PKHeX bridge integrado como fuente automática, badges persistente, roadmap corregido.
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
-- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5.
+- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**
