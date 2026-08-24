@@ -711,7 +711,12 @@ fdcf875 Integrar base realtime y validación de medallas
 
 *(Nota: algunas versiones antiguas de este documento mencionan además `1be5256 Crear lector de party de Azahar`, `d6b78c3 Integrar resolución de especies`, `fb931a2 Validar integración de PKHeX moderno` como commits intermedios de esa etapa; no aparecen en el log más reciente revisado, posiblemente por squash/rebase en algún punto. No es motivo de alarma, pero si en algún momento el historial de git no coincide con esta lista, confiar en `git log` real, no en este documento.)*
 
-Nota: el usuario hizo ajustes visuales manuales adicionales sobre `overlays/badges/style.css` después del commit `a07a408` (afinando el brillo/resplandor) — no siempre reflejados de inmediato aquí; verificar con `git status`/`git diff` antes de asumir que el estado local coincide exactamente con este documento.
+**Ajustes visuales manuales sincronizados (24/08/2026):** el usuario ajustó a mano, sobre el proyecto local, tres valores de estilo que ya quedaron incorporados aquí:
+- `overlays/team/style.css`: separación entre slots `gap: 32px → 54px`.
+- `overlays/badges/style.css`: separación entre medallas `gap: 14px → 30px`; `.badge.pending` sin borde (`border: none`, antes `3px solid`); `opacity: 0.55 → 0.8`.
+- `overlays/badges/sprites/` ya tiene las 8 imágenes reales del usuario (antes solo se documentaba dónde debían ir).
+
+Siempre que el usuario suba una copia del proyecto, comparar contra este repo antes de asumir que coinciden — este documento se actualiza cuando se detectan diferencias reales, pero puede haber una ventana corta sin sincronizar.
 
 ---
 
@@ -887,6 +892,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-21:** `v4`/`v5` — HTTP server, PKHeX bridge integrado como fuente automática, badges persistente, roadmap corregido.
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
-- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo.
+- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo; silenciados los tracebacks de desconexiones esperadas del cliente (keep-alive); sincronizados los ajustes visuales manuales del usuario en `overlays/team/style.css` y `overlays/badges/style.css` + sprites reales de medallas.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**

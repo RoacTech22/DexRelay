@@ -16,7 +16,7 @@ body {
 #team {
     display: flex;
     align-items: flex-start;
-    gap: 32px;
+    gap: 54px;
 
     width: max-content;
     height: 195px;
