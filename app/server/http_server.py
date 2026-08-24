@@ -1,11 +1,48 @@
 from __future__ import annotations
 
 import json
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 
 from app.core.state import ApplicationState
+
+
+# Errores esperados cuando el navegador (o el Browser Source de
+# OBS) cierra o recarga una conexión keep-alive a medio camino.
+# No son un bug del servidor -- son tráfico normal de HTTP/1.1
+# keep-alive. Sin filtrarlos, socketserver imprime un traceback
+# completo por cada desconexión de este tipo, aunque el overlay
+# siga funcionando bien.
+_EXPECTED_DISCONNECT_ERRORS = (
+    ConnectionAbortedError,
+    ConnectionResetError,
+    BrokenPipeError,
+)
+
+
+class _QuietThreadingHTTPServer(ThreadingHTTPServer):
+    """
+    ThreadingHTTPServer que no imprime traceback para
+    desconexiones de cliente esperadas (ver
+    _EXPECTED_DISCONNECT_ERRORS). handle_error() es un método del
+    SERVIDOR (no del request handler) -- ThreadingMixIn.process_request_thread
+    lo llama sobre self (el servidor) cuando finish_request()
+    lanza una excepción. Cualquier otro error se reporta
+    normalmente.
+    """
+
+    def handle_error(self, request, client_address):
+        exception_type = sys.exc_info()[0]
+
+        if exception_type in _EXPECTED_DISCONNECT_ERRORS:
+            return
+
+        super().handle_error(
+            request,
+            client_address,
+        )
 
 
 class HTTPServer:
@@ -37,7 +74,7 @@ class HTTPServer:
         if self._server is not None:
             return
 
-        server = ThreadingHTTPServer(
+        server = _QuietThreadingHTTPServer(
             (self.host, self.port),
             self._create_handler(),
         )
