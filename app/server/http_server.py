@@ -128,6 +128,28 @@ class HTTPServer:
                     )
                     return
 
+                if self.path.rstrip("/") == "/overlay/badges":
+                    self._send_file(
+                        "badges/index.html",
+                        "text/html; charset=utf-8",
+                    )
+                    return
+
+                if self.path.startswith(
+                    "/overlay/badges/"
+                ):
+                    relative_path = self.path[
+                        len("/overlay/badges/"):
+                    ]
+
+                    self._send_file(
+                        f"badges/{relative_path}",
+                        self._content_type(
+                            relative_path
+                        ),
+                    )
+                    return
+
                 if self.path == "/api/status":
                     self._send_json(
                         {

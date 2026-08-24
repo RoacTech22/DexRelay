@@ -1,0 +1,111 @@
+html,
+body {
+
+    width: max-content;
+    min-width: max-content;
+    height: 80px;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+
+    overflow: hidden;
+}
+
+#badges {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    width: max-content;
+    height: 80px;
+
+    padding: 10px 15px;
+
+    background: transparent;
+}
+
+/* =========================================
+   BADGE
+
+   El color/relleno de cada medalla ahora viene
+   de una imagen real en sprites/{numero}.png
+   (asignada desde app.js via background-image),
+   no de un color CSS fijo. El circulo sigue
+   sirviendo como marco: recorta la imagen en
+   redondo y aplica los mismos efectos de
+   pendiente/obtenida que antes.
+========================================= */
+
+.badge {
+    position: relative;
+
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    border-radius: 50%;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    pointer-events: none;
+
+    transition:
+        border-color 0.3s ease,
+        filter 0.3s ease,
+        opacity 0.3s ease;
+}
+
+/* No obtenida: se ve la imagen pero clara y
+   desaturada (blanquecina), no oscura. */
+.badge.pending {
+    border: 3px solid rgba(255, 255, 255, 0.35);
+
+    opacity: 0.55;
+
+    filter:
+        grayscale(1)
+        brightness(1.8)
+        contrast(0.85);
+}
+
+/* Obtenida: sin aro ni fondo, solo la imagen
+   con un resplandor tipo "iluminada" alrededor
+   (glow blanco pegado a la forma + glow calido
+   mas difuso hacia afuera). */
+.badge.obtained {
+    border: none;
+
+    opacity: 1;
+
+    filter:
+        drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
+        drop-shadow(0 0 8px rgba(255, 245, 200, 0.85))
+        drop-shadow(0 0 16px rgba(255, 225, 140, 0.55));
+}
+
+/* =========================================
+   ANIMACION: medalla recien obtenida
+========================================= */
+
+.badge.just-obtained {
+    animation: badge-pop 0.6s ease;
+}
+
+@keyframes badge-pop {
+    0% {
+        transform: scale(0.4);
+    }
+
+    55% {
+        transform: scale(1.35);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
