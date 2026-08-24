@@ -243,6 +243,43 @@ body {
     opacity: 0.78;
 }
 
+/* El slot entero se marca con la clase "dead"
+   (ver app.js) cuando el Pokémon está debilitado
+   -- ya sea en este instante (HP <= 0) o de forma
+   permanente por estar en el cementerio del
+   Nuzlocke Tracker. Antes solo se atenuaba el
+   sprite; ahora nickname, nivel y barra de HP
+   también quedan en gris, para que se note de un
+   vistazo en todo el slot, no solo en la imagen. */
+
+.slot.dead .nickname {
+    color: #6e6e6e;
+
+    -webkit-text-stroke-color: #b8b8b8;
+
+    text-shadow:
+        0 2px 0 #8a8a8a,
+        0 3px 3px rgba(0, 0, 0, 0.5);
+}
+
+.slot.dead .level {
+    color: #3a3a3a;
+
+    -webkit-text-stroke-color: #b8b8b8;
+}
+
+.slot.dead .hp-container {
+    border-color: #b8b8b8;
+
+    opacity: 0.7;
+}
+
+.slot.dead .hp-bar {
+    background: #7a7a7a !important;
+
+    box-shadow: none;
+}
+
 /* =========================================
    SLOT VACÍO
 ========================================= */

@@ -541,7 +541,8 @@ function renderSlot(
 
 
         slot.className =
-            "slot";
+            "slot" +
+            (isDead ? " dead" : "");
 
 
         slot.innerHTML = `
@@ -592,6 +593,11 @@ function renderSlot(
        ANTERIOR: actualizar solo lo
        dinámico, sin tocar el <img>.
     ================================= */
+
+    slot.classList.toggle(
+        "dead",
+        isDead
+    );
 
     const img =
         slot.querySelector(".sprite");
