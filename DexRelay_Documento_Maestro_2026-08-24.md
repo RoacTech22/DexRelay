@@ -662,9 +662,20 @@ Pero no hay todavía un bus/dispatcher que los emita o los consuma — es solo u
 
 ---
 
-## 18. Concurrencia (pendiente de decisión)
+## 18. Concurrencia — RESUELTO (24/08/2026)
 
-Riesgo identificado y aún sin resolver: cuando el loop realtime (`Runtime`), el servidor HTTP, y eventualmente la GUI convivan en el mismo proceso, hace falta decidir el modelo de concurrencia (asyncio vs. threads). Hoy el HTTP server ya corre en un hilo separado (`ThreadingHTTPServer` + `Thread` daemon) y el loop realtime corre de forma síncrona/bloqueante en el hilo principal — funciona porque todavía no hay una GUI compitiendo por el hilo principal. Decidir esto **antes** de empezar la FASE 4 (GUI).
+**Modelo elegido: threads, no asyncio.**
+
+Motivo:
+- `HTTPServer` ya corría en su propio `Thread` (`ThreadingHTTPServer`) — era continuar un patrón existente, no introducir uno nuevo.
+- Las GUI de escritorio en Python (Tkinter, PyQt/PySide) esperan correr su propio mainloop bloqueante en el **hilo principal**. Con threads, eso encaja naturalmente: la GUI ocupará el hilo principal cuando exista (FASE 4), y el loop realtime + el HTTP server siguen en hilos de fondo leyendo/escribiendo el mismo `ApplicationState`.
+- Asyncio hubiera significado reescribir `citra.py` (UDP) y el HTTP server (vía `aiohttp` u otro) para un beneficio de escala que este proyecto no necesita — un puñado de overlays locales, no miles de conexiones concurrentes.
+
+**Implementación:** `Application.run()` ya no ejecuta el loop realtime directamente en el hilo principal. `start()` lanza un `Thread` daemon (`_runtime_thread`) que corre `_run_realtime_loop()` (mismo pacing por `time.monotonic()` que antes). `run()` pasó a ser un simple bucle de espera (`time.sleep(0.25)`) que mantiene vivo el proceso mientras los hilos de fondo trabajan — el hilo principal queda libre para el mainloop de la GUI. `stop()` hace `join()` del hilo realtime (timeout 2s) además de detener el HTTP server, para un apagado limpio.
+
+Verificado con un test de ciclo de vida completo sobre la clase `Application` real (`Config`/`Runtime` reemplazados por fakes, sin necesitar Azahar real): el hilo corre separado del principal, `update()` se llama periódicamente según `refresh_ms`, y `stop()` termina el hilo limpiamente sin updates fantasma después.
+
+**Nota de thread-safety:** `ApplicationState` ahora se escribe desde el hilo del `Runtime` y se lee desde el hilo del `HTTPServer` concurrentemente — la misma categoría de concurrencia que ya existía antes (antes era hilo principal vs. hilo de `HTTPServer`, ahora es hilo de `Runtime` vs. hilo de `HTTPServer`). No se agregó ningún lock explícito: las asignaciones simples de atributos en Python son atómicas a nivel del GIL, y el peor caso posible es leer un frame de estado ligeramente desactualizado (un overlay mostrando el ciclo anterior por 200ms), no una corrupción de datos. Si en el futuro `ApplicationState` crece a estructuras más complejas con actualizaciones multi-paso, revisar si conviene agregar un `threading.Lock`.
 
 ---
 
@@ -746,7 +757,7 @@ git diff --check
 - [ ] Detección del slot real en combate (pausada sin resultado — sección 8)
 - [ ] Detección persistente de muertes tipo Nuzlocke (la del prototipo, no la visual — sección 9.1, todavía no reimplementada en la arquitectura actual)
 - [x] Mover `process_name` a `config.json` (sección 4/17)
-- [ ] Decidir modelo de concurrencia antes de FASE 4 (sección 18)
+- [x] Decidir modelo de concurrencia (threads) e implementarlo (sección 18)
 
 ### FASE 2 — MEDALLAS
 **✅ COMPLETADA**
@@ -846,7 +857,7 @@ TEAM OVERLAY — ANIMACIONES    🟢 FUNCIONAL (evolución/muerte/entrada correg
 HTTP SERVER                   🟢 FUNCIONAL
 RUNTIME LOOP                  🟢 FUNCIONAL
 CONFIG — process_name         🟢 RESUELTO (lee config.json)
-CONCURRENCIA (asyncio/threads) 🔴 PENDIENTE DE DECISIÓN
+CONCURRENCIA (asyncio/threads) 🟢 RESUELTO (threads; loop realtime en su propio hilo)
 SISTEMA DE EVENTOS             🟡 NOMBRES DEFINIDOS, BUS NO IMPLEMENTADO
 NUZLOCKE TRACKER               🔴 PENDIENTE
 GUI                            🔴 PENDIENTE
@@ -876,6 +887,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-21:** `v4`/`v5` — HTTP server, PKHeX bridge integrado como fuente automática, badges persistente, roadmap corregido.
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
-- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`.
+- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**
