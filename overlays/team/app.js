@@ -377,6 +377,18 @@ function renderSlot(
         Number(previous.level);
 
 
+    /* Un Pokémon distinto (otro nickname) pasó a
+       ocupar este slot -- típicamente al reordenar
+       el equipo en el menú. No es evolución ni
+       muerte, pero sigue siendo una entrada real y
+       debería animarse igual que cuando el slot
+       venía vacío. */
+    const changed =
+        previous &&
+        previous.nickname !==
+        pokemon.nickname;
+
+
     const isDead =
         Number(pokemon.hp) <= 0;
 
@@ -451,7 +463,7 @@ function renderSlot(
             animation =
                 " sprite-wrapper-death";
 
-        } else if (!previous) {
+        } else if (!previous || changed) {
 
             animation =
                 " sprite-wrapper-enter";

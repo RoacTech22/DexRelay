@@ -125,6 +125,38 @@ def decrypt_data(encrypted_data):
             end
         )
 
+        # Checksum incorporado del formato PK6: la
+        # cabecera (bytes 0x06-0x07, sin cifrar) guarda
+        # la suma de 16 bits de los 4 bloques recién
+        # descifrados, EN SU ORDEN FISICO original (antes
+        # de reordenarlos con shuffle_array).
+        #
+        # Si la memoria se leyo a mitad de una escritura
+        # del juego (por ejemplo justo cuando evoluciona
+        # o se reordena la party), el descifrado igual
+        # "funciona" pero produce basura: species_id
+        # aleatorio (evoluciones fantasma) y nickname
+        # aleatorio (que al decodificarse como texto cae
+        # a menudo en caracteres CJK). El checksum es
+        # justo lo que el formato ofrece para detectar
+        # esto, asi que se descarta la lectura si no
+        # coincide, en vez de confiar ciegamente en un
+        # descifrado que "parece" valido.
+        stored_checksum = struct.unpack(
+            "<H",
+            encrypted_data[6:8]
+        )[0]
+
+        calculated_checksum = sum(
+            struct.unpack(
+                f"<{len(blocks) // 2}H",
+                blocks
+            )
+        ) & 0xFFFF
+
+        if calculated_checksum != stored_checksum:
+            return b""
+
         stats = crypt_array(
             encrypted_data,
             pv,
