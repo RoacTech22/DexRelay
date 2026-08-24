@@ -339,6 +339,46 @@ body {
 }
 
 /* =========================================
+   TRANSICIÓN A POKÉMON MUERTO
+========================================= */
+
+.sprite-wrapper-death {
+    animation:
+        pokemonDeath 0.8s ease-out both;
+}
+
+@keyframes pokemonDeath {
+
+    0% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) scale(1);
+    }
+
+    35% {
+        opacity: 0.9;
+
+        transform:
+            translate(-50%, -50%) scale(1.03);
+    }
+
+    70% {
+        opacity: 0.72;
+
+        transform:
+            translate(-50%, -50%) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%) scale(1);
+    }
+}
+
+/* =========================================
    SUBIDA DE NIVEL
 ========================================= */
 

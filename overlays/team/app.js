@@ -337,6 +337,15 @@ function renderSlot(
 
     /* ================================
        CAMBIOS
+
+       Todas estas comparaciones usan el HP
+       "real" de la party (pokemon.hp), no el
+       valor de `hp` calculado arriba (que
+       puede venir de /api/combat mientras el
+       slot está en combate). La muerte es un
+       estado de la party, no algo que deba
+       depender del HP en vivo de una pelea que
+       todavía no terminó de sincronizarse.
     ================================= */
 
     const samePokemon =
@@ -347,8 +356,17 @@ function renderSlot(
         pokemon.speciesId;
 
 
+    /* Una evolución cambia speciesId pero
+       sigue siendo el mismo Pokémon: por eso
+       el nickname tiene que coincidir. Sin
+       este chequeo, reordenar el equipo y que
+       otro Pokémon (con otro nickname) ocupe
+       el slot con una especie distinta se
+       confundía con una evolución. */
     const evolved =
         previous &&
+        previous.nickname ===
+        pokemon.nickname &&
         previous.speciesId !==
         pokemon.speciesId;
 
@@ -359,17 +377,39 @@ function renderSlot(
         Number(previous.level);
 
 
+    const isDead =
+        Number(pokemon.hp) <= 0;
+
+    const wasDead =
+        previous &&
+        Number(previous.hp) <= 0;
+
+    /* Debilitarse NO cambia nickname ni
+       speciesId, así que `samePokemon` sigue
+       siendo true y normalmente no se
+       reconstruiría el slot. `died` fuerza esa
+       reconstrucción para poder disparar la
+       animación en el momento exacto. */
+    const died =
+        isDead &&
+        !wasDead;
+
+
     /* ================================
        ¿HACE FALTA RECONSTRUIR EL SPRITE?
 
        Solo si es un Pokémon distinto al
-       que ya estaba en este slot, o si el
+       que ya estaba en este slot, si el
        slot todavía no tiene la estructura
-       montada (primera vez / venía vacío).
+       montada (primera vez / venía vacío),
+       o si el Pokémon se acaba de debilitar
+       (para poder disparar la animación de
+       muerte).
     ================================= */
 
     const needsRebuild =
         !samePokemon ||
+        died ||
         !slot.querySelector(".sprite");
 
 
@@ -393,12 +433,23 @@ function renderSlot(
                 : "";
 
 
+        const deadClass =
+            isDead
+                ? " nuzlocke-dead"
+                : "";
+
+
         let animation = "";
 
         if (evolved) {
 
             animation =
                 " sprite-wrapper-evolution";
+
+        } else if (died) {
+
+            animation =
+                " sprite-wrapper-death";
 
         } else if (!previous) {
 
@@ -420,7 +471,7 @@ function renderSlot(
         slot.innerHTML = `
             <div class="sprite-wrapper${animation}">
                 <img
-                    class="sprite ${spriteSize}${shinyClass}${criticalClass}"
+                    class="sprite ${spriteSize}${shinyClass}${criticalClass}${deadClass}"
                     alt="${escapeHTML(
             pokemon.species || ""
         )}"
@@ -474,6 +525,11 @@ function renderSlot(
         img.classList.toggle(
             "hp-critical",
             critical
+        );
+
+        img.classList.toggle(
+            "nuzlocke-dead",
+            isDead
         );
     }
 
