@@ -566,6 +566,32 @@ NUZLOCKE TRACKER
 
 JSON es suficiente para la comunicación inicial con overlays. Cuando el Tracker crezca, SQLite es la opción recomendada para el historial (`Azahar → Reader → Services → SQLite → Tracker`), manteniendo JSON para la comunicación rápida con overlays.
 
+### Lógica reutilizable ya validada en el prototipo (PokeOverlay) — no portada todavía
+
+En `PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py` (proyecto anterior, no en el repo actual de DexRelay) existe detección de muerte persistente ya probada en juego real, con estas funciones:
+
+```text
+pokemon_identity(pokemon)       — identidad basada en nickname + speciesId
+is_already_dead(...)            — evita registrar la misma muerte dos veces
+register_death(...)             — agrega el Pokémon a la lista de muertos
+update_death_detector(...)      — detecta HP <= 0 y dispara el registro
+load_nuzlocke() / save...       — persistencia en data/nuzlocke.json
+```
+
+Formato de persistencia usado:
+
+```json
+{
+  "dead": [
+    { "nickname": "Conter", "speciesId": 659, "species": "Bunnelby", "level": 6 }
+  ]
+}
+```
+
+Es la misma lógica de identidad (`nickname` + `speciesId`) que ya se reutilizó para las animaciones del Team Overlay (sección 12). Cuando se implemente esta fase, portar esta lógica a `app/services/nuzlocke_service.py` en vez de diseñarla desde cero — ya está validada, solo falta adaptarla a la arquitectura de servicios actual (y separarla claramente del estado visual "debilitado" del overlay, ver sección 9).
+
+**Nota de contexto:** el `decrypt_data()` de ese mismo script antiguo tampoco validaba el checksum PK6 (mismo bug corregido en la sección 5) — confirma que no fue una regresión de la reconstrucción de DexRelay, es un bug de nacimiento del proyecto original que nunca se había notado hasta las pruebas de animaciones de esta semana.
+
 ---
 
 ## 15. GUI (futuro)
@@ -809,7 +835,7 @@ PARTY REALTIME                🟢 FUNCIONAL (con checksum PK6)
 SPECIES ID / RESOLVER         🟢 FUNCIONAL (PKHeX integrado)
 PKHEX BRIDGE                  🟢 VALIDADO (falta self-contained para release)
 MUERTES — VISUAL (OVERLAY)    🟢 FUNCIONAL
-MUERTES — TRACKER PERSISTENTE 🔴 PENDIENTE (no reimplementado en arquitectura actual)
+MUERTES — TRACKER PERSISTENTE 🔴 PENDIENTE (lógica ya validada en el prototipo, no portada — ver sección 14)
 MEDALLAS — MEMORIA            🟢 VALIDADO
 MEDALLAS — SERVICIO/API       🟢 FUNCIONAL
 BADGES OVERLAY                🟢 FUNCIONAL
@@ -850,6 +876,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-21:** `v4`/`v5` — HTTP server, PKHeX bridge integrado como fuente automática, badges persistente, roadmap corregido.
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
-- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; **reconstrucción consolidada de este documento** a partir de las 7 versiones históricas para recuperar contexto perdido.
+- **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**
