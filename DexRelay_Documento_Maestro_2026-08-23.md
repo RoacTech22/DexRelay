@@ -1,6 +1,6 @@
 # DexRelay — Documento Maestro
 ## Estado consolidado del proyecto
-**Fecha:** 23 de agosto de 2026 (actualizado — bloque: HP de combate en overlay + Badges Overlay)
+**Fecha:** 23 de agosto de 2026 (actualizado — bloque: bugs de animaciones del Team Overlay + checksum PK6)
 
 ## 1. Identidad y objetivo
 **Nombre oficial:** DexRelay.
@@ -54,6 +54,8 @@ Ejemplo confirmado:
 
 ## 5. Memoria
 `app/memory/structures.py` contiene el descifrado y `Pokemon6`, incluyendo species ID, nickname, level, HP y max HP.
+
+**Validación de checksum PK6 — agregada en este bloque.** El formato PK6 guarda un checksum en la cabecera (bytes `0x06-0x07`, sin cifrar): la suma de 16 bits de los 4 bloques recién descifrados, en su orden físico original (antes de `shuffle_array`). Antes no se validaba, así que una lectura de memoria "torn" (a mitad de una escritura del juego — típicamente al evolucionar o reordenar la party) se descifraba "con éxito" pero producía basura: `speciesId` aleatorio (evoluciones fantasma en el overlay) y `nickname` aleatorio (que al decodificarse como texto caía a menudo en caracteres CJK — artefacto clásico de este tipo de corrupción). Ahora `decrypt_data()` calcula el checksum y descarta la lectura (`raw_data` vacío) si no coincide con el guardado; `azahar_reader.read_pokemon()` ya trataba eso como `READ_FAILED` y reutiliza el último dato válido conocido del slot. Verificado con un roundtrip sintético (cifrar/descifrar con checksum correcto se acepta; con un byte corrupto se rechaza).
 
 ## 6. PKHeX
 Bridge:
@@ -186,7 +188,14 @@ Diseño final definido por el usuario:
 
 El CSS proporcionado por el usuario el 22/08/2026 es la referencia visual final.
 
-**HP de combate ya integrado (ver sección 14 para el detalle completo).** `app.js` consulta `/api/team` y `/api/combat` en el mismo ciclo de 200ms; mientras `combat.active` es `true`, el slot 1 usa el HP de `/api/combat` para la barra en vez del de `/api/team`, logrando la animación de bajada progresiva (`31 → 24 → 18 → 3`) en vez de un salto directo.
+**HP de combate ya integrado (ver sección 14 para el detalle completo).**
+
+**Animaciones de evolución/muerte/entrada — bugs corregidos en este bloque.** Se compararon contra la lógica de referencia del proyecto anterior (PokeOverlay) y se encontraron y corrigieron tres problemas reales:
+1. La detección de evolución no comparaba `nickname`, solo `speciesId`; reordenar el equipo y que otro Pokémon (con especie distinta) ocupara un slot se confundía con una evolución. Corregido: ahora requiere `nickname` igual + `speciesId` distinto.
+2. La animación de muerte no existía en absoluto en `app.js` (la clase `.nuzlocke-dead` ya estaba en el CSS pero nunca se aplicaba). Agregada: `isDead`/`wasDead`/`died` basados en `pokemon.hp <= 0` (el HP real de la party, no el HP en vivo de combate), fuerza reconstrucción del slot al morir para disparar `sprite-wrapper-death` (keyframe `pokemonDeath`, agregado a `style.css`), y `.nuzlocke-dead` se mantiene aplicada mientras el Pokémon siga debilitado.
+3. La animación de "entrada" (`sprite-wrapper-enter`) solo se disparaba cuando el slot venía vacío (`!previous`). Al reordenar el equipo, un Pokémon distinto puede ocupar un slot que ya tenía otro Pokémon (`previous` no es `null`), así que no se animaba nada. Agregado el caso `changed` (mismo slot, `nickname` distinto) para que también dispare la entrada.
+
+Las evoluciones/muertes "fantasma" que se veían de forma intermitente (junto con nicknames mostrando caracteres CJK) no eran un bug de esta lógica de animación, sino el síntoma del bug de checksum PK6 corregido en la sección 5 — datos de memoria corruptos llegando como si fueran válidos. `app.js` consulta `/api/team` y `/api/combat` en el mismo ciclo de 200ms; mientras `combat.active` es `true`, el slot 1 usa el HP de `/api/combat` para la barra en vez del de `/api/team`, logrando la animación de bajada progresiva (`31 → 24 → 18 → 3`) en vez de un salto directo.
 
 ## 12bis. Badges Overlay — COMPLETADO
 
@@ -252,7 +261,9 @@ barra HP animada (CSS transition: width 0.4s ease, ya existente)
 
 Fuera de combate, `/api/team` sigue siendo la fuente normal de `hp/maxHp`. El HP de combate no se convierte en el HP permanente de la party: solo afecta el cálculo visual de la barra del slot en combate.
 
-**Slot fijo (limitación conocida, decisión explícita del usuario):** el overlay asume que el Pokémon en combate es siempre el del **slot 1**. No hay todavía forma de detectar cuál slot real está peleando — ver sección 14bis para el detalle de la investigación (pausada, sin resultado).
+**Slot fijo (limitación conocida, decisión explícita del usuario):** el overlay asume que el Pokémon en combate es siempre el del **slot 1**. No hay todavía forma de detectar cuál slot real está peleando — ver sección 14bis para el detalle de la investigación (pausada, sin resultado, incluyendo un intento adicional con el `maxHp` de combate).
+
+**Manifestación observada:** al cambiar manualmente a un Pokémon activo que no es el slot 1 durante un combate, el overlay le aplica el HP de combate (de ese otro Pokémon) a lo que sea que `/api/team` reporte como slot 1 — mostrando, por ejemplo, la barra de un Pokémon sano en 0 si el que realmente está peleando está debilitado. No es un bug de implementación nuevo, es el costo directo de la simplificación de slot fijo. Pendiente de una solución real cuando se retome la sección 14bis.
 
 Pruebas realizadas y confirmadas:
 - entrar en combate — barra baja en pasos reales;
@@ -274,6 +285,8 @@ Se investigó extensamente cómo identificar, desde memoria, cuál de los 6 slot
 4. **Hipótesis descartada: reordenamiento de la party.** Se consideró que el juego pudiera mover al Pokémon activo al slot 1 internamente durante el combate (como pasa en algunos títulos). Confirmado por el usuario que **no es así**: `/api/team` no cambia de orden ni durante ni después del combate.
 
 5. **Cheat Engine conectado directamente al proceso de Azahar:** se hizo el puente de traducción entre direcciones "del juego" (las que usa `citra.py`) y las direcciones que ve Cheat Engine en el proceso host, y se corrió el flujo clásico "Unknown initial value → Exact Value narrowing" cambiando de Pokémon activo varias veces. Se redujo de ~64 millones de resultados a 1 candidato, pero resultó ser un **falso positivo**: el valor seguía cambiando sin relación real con el slot activo.
+
+6. **HP máximo de combate como "huella" para identificar el slot** (`tools/probes/combat/probar_maxhp_combate.py`): en `Pokemon6`, el HP máximo está justo después del HP actual (`0xF0` → hp, `0xF2` → maxHp). Se probó la hipótesis de que la estructura de combate siguiera el mismo patrón (`COMBAT_HP_OFFSET + 2`), con la idea de comparar ese valor contra el `maxHp` de cada uno de los 6 slots en `/api/team` para identificar cuál está peleando — más confiable que asumir slot 1 a ciegas. **Descartada:** el valor leído no coincidió con el `maxHp` real.
 
 **Decisión:** se mantiene el slot 1 fijo como Pokémon "en combate" para la barra de HP del overlay. Es una limitación conocida y documentada, no bloquea el resto del proyecto. Para retomar esta investigación en el futuro, lo más prometedor sería un debugger real conectado al código ARM emulado (no solo al proceso host de Windows), ya que el enfoque de escaneo por valores desde Python (por UDP) y desde Cheat Engine (proceso host) llegó a su límite práctico sin esa visibilidad.
 
@@ -299,7 +312,7 @@ Se investigó extensamente cómo identificar, desde memoria, cuál de los 6 slot
 
 `tools/probes/combat/` (nuevo en este bloque):
 - `observar_puntero_combate.py` — observa en vivo `COMBAT_POINTER_ADDRESS`, usado para confirmar el bug del puntero que no vuelve a 0 (ver sección 9).
-- `buscar_offset_slot_combate.py`, `buscar_puntero_slot_combate.py`, `rastrear_slot_activo.py` — probes de investigación de detección del slot activo en combate, sin resultado por ahora (ver sección 14bis). Se conservan para retomar la investigación más adelante.
+- `buscar_offset_slot_combate.py`, `buscar_puntero_slot_combate.py`, `rastrear_slot_activo.py`, `probar_maxhp_combate.py` — probes de investigación de detección del slot activo en combate, sin resultado por ahora (ver sección 14bis). Se conservan para retomar la investigación más adelante.
 
 `tools/pkhex_probe/` contiene la herramienta de prueba del bridge.
 
@@ -312,6 +325,9 @@ git diff --check
 
 ## 18. Historial relevante
 ```text
+7ebac26 Corregir lecturas corruptas de party (checksum PK6) y animacion de entrada al reordenar
+01ed424 Corregir animaciones de evolucion y agregar animacion de muerte faltante
+774a325 Actualizar Documento Maestro (HP de combate + Badges Overlay)
 a07a408 Añadir Badges Overlay y probes de investigacion de slot activo en combate
 91ca1a2 Corregir deteccion de fin de combate (puntero no vuelve a 0)
 5ceffdc Integrar HP de combate en la barra del Team Overlay
