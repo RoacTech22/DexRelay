@@ -37,7 +37,8 @@ class AzaharReader:
     def __init__(
         self,
         citra=None,
-        species_resolver=None
+        species_resolver=None,
+        process_name="sango-2"
     ):
         self.citra = citra or Citra()
 
@@ -49,6 +50,13 @@ class AzaharReader:
             species_resolver
             or SpeciesResolver()
         )
+
+        # Nombre del proceso de juego dentro de Azahar.
+        # Configurable via config.json (azahar.process_name);
+        # "sango-2" queda como valor por defecto para no
+        # romper usos existentes (probes, tests) que crean
+        # AzaharReader() sin pasar este argumento.
+        self.process_name = process_name
 
         # Último dato válido conocido por slot (1 a 6).
         # Se usa como fallback cuando una lectura de
@@ -69,7 +77,7 @@ class AzaharReader:
 
             title_id, process_name = data
 
-            if process_name == "sango-2":
+            if process_name == self.process_name:
                 return process_id
 
         return None

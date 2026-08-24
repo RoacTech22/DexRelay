@@ -11,7 +11,16 @@ class Application:
     def __init__(self):
         self.config = Config()
         self.state = ApplicationState()
-        self.reader = AzaharReader()
+
+        process_name = self.config.get(
+            "azahar",
+            "process_name",
+            default="sango-2",
+        )
+
+        self.reader = AzaharReader(
+            process_name=process_name,
+        )
         self.runtime = Runtime(
             self.reader,
             self.state,
