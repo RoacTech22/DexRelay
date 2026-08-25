@@ -240,6 +240,26 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/nuzlocke/pending-encounters":
+
+                    if nuzlocke_service is None:
+                        self._send_json(
+                            {"pending_encounters": []},
+                            200,
+                        )
+                        return
+
+                    self._send_json(
+                        {
+                            "pending_encounters": (
+                                nuzlocke_service
+                                .get_pending_encounters()
+                            )
+                        },
+                        200,
+                    )
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
@@ -251,9 +271,79 @@ class HTTPServer:
                     self._handle_save_encounter()
                     return
 
+                if self.path == (
+                    "/api/nuzlocke/encounters/assign"
+                ):
+                    self._handle_assign_encounter()
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
+                )
+
+            def _handle_assign_encounter(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                nickname = str(
+                    payload.get("nickname", "")
+                ).strip()
+
+                location = str(
+                    payload.get("location", "")
+                ).strip()
+
+                if not nickname or not location:
+                    self._send_json(
+                        {
+                            "error": (
+                                "'nickname' y 'location' "
+                                "son requeridos."
+                            )
+                        },
+                        400,
+                    )
+                    return
+
+                try:
+                    result = (
+                        nuzlocke_service
+                        .assign_encounter_location(
+                            nickname,
+                            location,
+                        )
+                    )
+
+                except ValueError as error:
+                    self._send_json(
+                        {"error": str(error)},
+                        404,
+                    )
+                    return
+
+                self._send_json(
+                    result,
+                    200,
                 )
 
             def _handle_save_encounter(self):

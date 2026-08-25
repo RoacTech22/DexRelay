@@ -57,6 +57,95 @@ h1 {
 }
 
 /* =========================================
+   CAPTURAS PENDIENTES DE RUTA
+========================================= */
+
+#pending-section {
+    margin-bottom: 22px;
+}
+
+#pending-section h2 {
+    margin: 0 0 10px;
+
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+
+    color: var(--text-dim);
+}
+
+#pending-section:has(#pending-list:empty) {
+    display: none;
+}
+
+.pending-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    margin-bottom: 8px;
+
+    background: #23262f;
+
+    border: 1px solid #d9a441;
+    border-radius: 8px;
+}
+
+.pending-info {
+    flex: 1;
+
+    font-size: 14px;
+}
+
+.pending-info strong {
+    color: #f0c674;
+}
+
+.pending-select {
+    min-width: 180px;
+
+    padding: 7px 9px;
+
+    background: #0e1015;
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.pending-assign-button {
+    padding: 7px 14px;
+
+    background: #d9a441;
+    color: #14161c;
+
+    border: none;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.pending-assign-button:hover {
+    background: #e8b755;
+}
+
+.pending-assign-button:disabled {
+    background: #4a4a4a;
+    color: #8a8a8a;
+
+    cursor: default;
+}
+
+/* =========================================
    TABLA
 ========================================= */
 

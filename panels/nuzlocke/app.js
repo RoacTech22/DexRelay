@@ -1,4 +1,6 @@
 const ENCOUNTERS_API_URL = "/api/nuzlocke/encounters";
+const PENDING_API_URL = "/api/nuzlocke/pending-encounters";
+const ASSIGN_API_URL = "/api/nuzlocke/encounters/assign";
 
 const VALID_RESULTS = [
     "sin_intentar",
@@ -73,6 +75,9 @@ const DEFAULT_LOCATIONS = [
 const tableBody =
     document.getElementById("encounters-body");
 
+const pendingList =
+    document.getElementById("pending-list");
+
 const newLocationInput =
     document.getElementById("new-location-input");
 
@@ -119,6 +124,293 @@ async function init() {
 
         renderedLocations.add(entry.location);
     }
+
+    await refreshPending();
+
+    // Las capturas nuevas se detectan solas mientras juegas --
+    // el panel se refresca cada 3s para mostrarlas sin que haga
+    // falta recargar la página a mano. No hace falta más
+    // frecuencia que esa: es una lista que cambia cuando el
+    // jugador atrapa algo, no algo animado en vivo.
+    setInterval(refreshPending, 3000);
+}
+
+
+async function refreshPending() {
+
+    const pending =
+        await loadPendingEncounters();
+
+    renderPending(pending);
+}
+
+
+async function loadPendingEncounters() {
+
+    try {
+
+        const response =
+            await fetch(
+                PENDING_API_URL,
+                { cache: "no-store" }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        return Array.isArray(
+            data.pending_encounters
+        )
+            ? data.pending_encounters
+            : [];
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando capturas pendientes:",
+            error
+        );
+
+        return [];
+    }
+}
+
+
+function renderPending(pending) {
+
+    const currentNicknames = new Set(
+        pending.map(entry => entry.nickname)
+    );
+
+    // No reconstruir tarjetas que ya estaban (evita perder el
+    // <select> a medio elegir si el usuario está por confirmar
+    // justo cuando cae el refresh de 3s).
+    for (const card of Array.from(
+        pendingList.children
+    )) {
+
+        if (
+            !currentNicknames.has(
+                card.dataset.nickname
+            )
+        ) {
+            card.remove();
+        }
+    }
+
+    for (const entry of pending) {
+
+        const alreadyRendered =
+            pendingList.querySelector(
+                `[data-nickname="${
+                    CSS.escape(entry.nickname)
+                }"]`
+            );
+
+        if (alreadyRendered) {
+            continue;
+        }
+
+        pendingList.appendChild(
+            createPendingCard(entry)
+        );
+    }
+}
+
+
+function createPendingCard(entry) {
+
+    const card =
+        document.createElement("div");
+
+    card.className = "pending-card";
+    card.dataset.nickname = entry.nickname;
+
+    const info =
+        document.createElement("div");
+
+    info.className = "pending-info";
+
+    info.innerHTML =
+        `<strong>${
+            escapeHTML(entry.species || "")
+        }</strong> (${
+            escapeHTML(entry.nickname || "")
+        }) -- ¿en qué ruta lo atrapaste?`;
+
+    const select =
+        document.createElement("select");
+
+    select.className = "pending-select";
+
+    const blankOption =
+        document.createElement("option");
+
+    blankOption.value = "";
+    blankOption.textContent = "Elegir ruta...";
+
+    select.appendChild(blankOption);
+
+    for (const location of DEFAULT_LOCATIONS) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = location;
+        option.textContent = location;
+
+        select.appendChild(option);
+    }
+
+    const button =
+        document.createElement("button");
+
+    button.type = "button";
+    button.className = "pending-assign-button";
+    button.textContent = "Asignar";
+    button.disabled = true;
+
+    select.addEventListener(
+        "change",
+        () => {
+            button.disabled =
+                !select.value;
+        }
+    );
+
+    button.addEventListener(
+        "click",
+        () => assignPending(
+            entry.nickname,
+            select.value,
+            card
+        )
+    );
+
+    card.appendChild(info);
+    card.appendChild(select);
+    card.appendChild(button);
+
+    return card;
+}
+
+
+async function assignPending(
+    nickname,
+    location,
+    card
+) {
+
+    if (!location) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                ASSIGN_API_URL,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        nickname,
+                        location
+                    })
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        card.remove();
+
+        // La ruta recién asignada ya tiene esta especie/resultado
+        // -- refleja eso en la tabla sin esperar al próximo poll.
+        updateRowFromAssignment(
+            location,
+            await response.json()
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error asignando ruta:",
+            error
+        );
+    }
+}
+
+
+function updateRowFromAssignment(
+    location,
+    responseData
+) {
+
+    const encounters =
+        Array.isArray(responseData.encounters)
+            ? responseData.encounters
+            : [];
+
+    const savedEntry =
+        encounters.find(
+            entry => entry.location === location
+        );
+
+    if (!savedEntry) {
+        return;
+    }
+
+    const row =
+        tableBody.querySelector(
+            `tr[data-location="${
+                CSS.escape(location)
+            }"]`
+        );
+
+    if (!row) {
+
+        // La ruta no estaba en la lista por defecto ni ya
+        // renderizada (caso raro: se asignó a una ubicación
+        // completamente nueva). Se agrega como fila nueva.
+        addRow(location, savedEntry);
+        return;
+    }
+
+    const speciesInput =
+        row.querySelector(".species-input");
+
+    const resultSelect =
+        row.querySelector(".result-select");
+
+    if (speciesInput) {
+        speciesInput.value =
+            savedEntry.species || "";
+    }
+
+    if (resultSelect) {
+        resultSelect.value =
+            savedEntry.result || "sin_intentar";
+
+        applyResultClass(
+            resultSelect,
+            resultSelect.value
+        );
+    }
+
+    flashSaved(row);
 }
 
 
@@ -412,6 +704,22 @@ newLocationInput.addEventListener(
         }
     }
 );
+
+
+/* =========================================
+   ESCAPAR HTML
+========================================= */
+
+function escapeHTML(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+}
 
 
 init();

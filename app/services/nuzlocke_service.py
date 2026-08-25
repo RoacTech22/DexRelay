@@ -111,6 +111,26 @@ class NuzlockeService:
                 roster.append(entry)
                 roster_by_nickname[nickname] = entry
 
+                # Automatización de capturas (Bloque C): toda
+                # captura nueva genera sola un "encuentro
+                # pendiente" con especie y resultado ya resueltos
+                # -- lo único que falta es que el usuario le
+                # asigne la ruta desde el panel (un clic, no un
+                # formulario completo). No se agrega directo a
+                # `encounters` porque esa lista está indexada por
+                # ubicación, y todavía no sabemos cuál es.
+                self._data.setdefault(
+                    "pending_encounters",
+                    [],
+                )
+
+                self._data["pending_encounters"].append({
+                    "nickname": nickname,
+                    "speciesId": species_id,
+                    "species": species,
+                    "caughtAt": entry["caughtAt"],
+                })
+
                 changed = True
 
             elif (
@@ -182,6 +202,62 @@ class NuzlockeService:
         self._data.setdefault("encounters", [])
 
         return self._data["encounters"]
+
+    def get_pending_encounters(self) -> list[dict]:
+        """
+        Devuelve las capturas detectadas automáticamente que
+        todavía no tienen una ruta asignada.
+        """
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        self._data.setdefault("pending_encounters", [])
+
+        return self._data["pending_encounters"]
+
+    def assign_encounter_location(
+        self,
+        nickname: str,
+        location: str,
+    ) -> dict:
+        """
+        Asigna una ubicación a una captura pendiente: la saca de
+        `pending_encounters` y la registra en `encounters` (con
+        result='atrapado', especie ya conocida). Devuelve
+        {'encounters': [...], 'pending_encounters': [...]}
+        actualizados.
+        """
+
+        pending = self.get_pending_encounters()
+
+        match = next(
+            (
+                entry
+                for entry in pending
+                if entry["nickname"] == nickname
+            ),
+            None,
+        )
+
+        if match is None:
+            raise ValueError(
+                f"No hay ninguna captura pendiente con "
+                f"nickname {nickname!r}."
+            )
+
+        pending.remove(match)
+
+        encounters = self.save_encounter(
+            location,
+            match["species"],
+            "atrapado",
+        )
+
+        return {
+            "encounters": encounters,
+            "pending_encounters": pending,
+        }
 
     def save_encounter(
         self,
