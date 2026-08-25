@@ -149,6 +149,26 @@ h1 {
     cursor: default;
 }
 
+.pending-discard-button {
+    padding: 7px 14px;
+
+    background: transparent;
+    color: var(--text-dim);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.pending-discard-button:hover {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
 /* =========================================
    TABLA
 ========================================= */

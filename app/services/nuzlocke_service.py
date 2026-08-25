@@ -230,6 +230,23 @@ class NuzlockeService:
 
             return
 
+        # Regla de especie repetida (species clause): si YA hay
+        # otro Pokémon de la misma especie vivo en el equipo, esta
+        # captura no cuenta como un encuentro nuevo -- ni se
+        # registra en `encounters` ni queda pendiente. Sigue
+        # existiendo en `roster` con normalidad (el Bloque A no
+        # cambia: si muere, se sigue detectando igual), solo no se
+        # cuenta para el tracker de rutas. Si el primero de esa
+        # especie ya está en el cementerio, esta SÍ cuenta normal.
+        species_already_alive = any(
+            entry.get("speciesId") == species_id
+            and entry.get("nickname") != nickname
+            for entry in self._data.get("roster", [])
+        )
+
+        if species_already_alive:
+            return
+
         if met_location:
 
             location_taken = any(
@@ -306,6 +323,45 @@ class NuzlockeService:
 
         return self._data["pending_encounters"]
 
+    def discard_pending_encounter(
+        self,
+        nickname: str,
+    ) -> list[dict]:
+        """
+        Botón "Descartar" del panel: saca una captura de
+        `pending_encounters` sin registrarla en `encounters`. El
+        Pokémon sigue en `roster` con normalidad (sigue siendo
+        parte del equipo real) -- esto solo significa "no quiero
+        que esta captura cuente para el tracker de rutas".
+
+        Devuelve la lista de pendientes actualizada. Lanza
+        ValueError si no había ninguna captura pendiente con ese
+        nickname.
+        """
+
+        pending = self.get_pending_encounters()
+
+        match = next(
+            (
+                entry
+                for entry in pending
+                if entry["nickname"] == nickname
+            ),
+            None,
+        )
+
+        if match is None:
+            raise ValueError(
+                f"No hay ninguna captura pendiente con "
+                f"nickname {nickname!r}."
+            )
+
+        pending.remove(match)
+
+        self.storage.save(self._data)
+
+        return pending
+
     def delete_encounter(self, location: str) -> list[dict]:
         """
         Botón de reseteo de una ruta (panel): elimina el registro
@@ -315,13 +371,22 @@ class NuzlockeService:
         registrada (ej. una fila duplicada por el bug de idioma),
         no para el uso normal del juego.
 
-        Si la ubicación era "Inicial", además libera
-        `starter_assigned` para que el próximo Pokémon que se
-        detecte vuelva a poder tomar ese lugar.
+        "Inicial" es la única excepción: nunca se puede resetear,
+        ni siquiera si ese Pokémon murió después -- el inicial de
+        la partida es permanente por definición, no depende de que
+        siga vivo.
 
         Devuelve la lista de encuentros actualizada. Lanza
-        ValueError si no había ningún encuentro en esa ubicación.
+        ValueError si no había ningún encuentro en esa ubicación,
+        o si se intenta resetear "Inicial".
         """
+
+        if location == "Inicial":
+            raise ValueError(
+                "El Inicial no se puede resetear -- es "
+                "permanente por definición, incluso si ese "
+                "Pokémon murió después."
+            )
 
         if self._data is None:
             self._data = self.storage.load()
@@ -362,9 +427,6 @@ class NuzlockeService:
                 )
                 if entry.get("nickname") != nickname
             ]
-
-        if location == "Inicial":
-            self._data["starter_assigned"] = False
 
         self.storage.save(self._data)
 

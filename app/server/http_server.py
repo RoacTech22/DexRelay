@@ -331,9 +331,73 @@ class HTTPServer:
                     self._handle_delete_encounter()
                     return
 
+                if self.path == (
+                    "/api/nuzlocke/pending-encounters/discard"
+                ):
+                    self._handle_discard_pending()
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
+                )
+
+            def _handle_discard_pending(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                nickname = str(
+                    payload.get("nickname", "")
+                ).strip()
+
+                if not nickname:
+                    self._send_json(
+                        {
+                            "error": (
+                                "'nickname' es requerido."
+                            )
+                        },
+                        400,
+                    )
+                    return
+
+                try:
+                    pending = (
+                        nuzlocke_service
+                        .discard_pending_encounter(
+                            nickname
+                        )
+                    )
+
+                except ValueError as error:
+                    self._send_json(
+                        {"error": str(error)},
+                        404,
+                    )
+                    return
+
+                self._send_json(
+                    {"pending_encounters": pending},
+                    200,
                 )
 
             def _handle_delete_encounter(self):

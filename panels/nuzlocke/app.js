@@ -509,22 +509,28 @@ function addRow(location, existingEntry) {
 
     locationCell.appendChild(locationLabel);
 
-    const resetButton =
-        document.createElement("button");
+    // "Inicial" es permanente por definición -- ni siquiera se
+    // muestra el botón de reseteo (el backend también lo rechaza,
+    // esto es solo para no invitar al click en primer lugar).
+    if (location !== "Inicial") {
 
-    resetButton.type = "button";
-    resetButton.className = "reset-button";
-    resetButton.title =
-        "Eliminar este encuentro y el Pokémon " +
-        "capturado ahí";
-    resetButton.textContent = "✕";
+        const resetButton =
+            document.createElement("button");
 
-    resetButton.addEventListener(
-        "click",
-        () => resetLocation(location, row)
-    );
+        resetButton.type = "button";
+        resetButton.className = "reset-button";
+        resetButton.title =
+            "Eliminar este encuentro y el Pokémon " +
+            "capturado ahí";
+        resetButton.textContent = "✕";
 
-    locationCell.appendChild(resetButton);
+        resetButton.addEventListener(
+            "click",
+            () => resetLocation(location, row)
+        );
+
+        locationCell.appendChild(resetButton);
+    }
 
 
     const nicknameCell =
@@ -994,11 +1000,66 @@ function createPendingCard(entry) {
         )
     );
 
+    const discardButton =
+        document.createElement("button");
+
+    discardButton.type = "button";
+    discardButton.className =
+        "pending-discard-button";
+    discardButton.textContent = "Descartar";
+    discardButton.title =
+        "No contar esta captura para el tracker " +
+        "de rutas (sigue en tu equipo real)";
+
+    discardButton.addEventListener(
+        "click",
+        () => discardPending(
+            entry.nickname,
+            card
+        )
+    );
+
     card.appendChild(info);
     card.appendChild(select);
     card.appendChild(button);
+    card.appendChild(discardButton);
 
     return card;
+}
+
+
+async function discardPending(nickname, card) {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/nuzlocke/pending-encounters/discard",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({ nickname })
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        card.remove();
+
+    } catch (error) {
+
+        console.error(
+            "Error descartando captura:",
+            error
+        );
+    }
 }
 
 
