@@ -137,26 +137,41 @@ class LocationCatalog:
         Devuelve la lista [{'id', 'name'}, ...], filtrada a solo
         ubicaciones de Hoenn y ordenada por progresión de historia.
         Vacía si el bridge no está disponible y tampoco hay caché
-        en disco -- nunca lanza. Un resultado vacío no se cachea en
-        memoria, para poder reintentar en la próxima petición (ver
-        SpeciesCatalog, mismo motivo).
+        en disco -- nunca lanza.
+
+        Importante: lo que se cachea en disco es la lista CRUDA que
+        devuelve PKHeX (sin filtrar ni traducir). El filtro, el
+        orden de historia y la traducción al español se aplican
+        SIEMPRE frescos, tanto si los datos vienen del bridge como
+        si vienen del caché. Si en vez de esto se cacheara el
+        resultado ya procesado, cualquier mejora futura al filtro o
+        a la tabla de traducción (hoenn_locations_es.py) quedaría
+        "atrapada" en el caché viejo hasta borrarlo a mano -- ya
+        pasó una vez (el caché tenía los nombres en inglés de antes
+        de agregar la traducción, y seguía sirviéndolos tal cual).
         """
 
         if self._locations:
             return self._locations
 
-        cached = self._load_from_disk()
+        raw_locations = self._load_from_disk()
 
-        if cached:
-            self._locations = cached
-            return self._locations
+        if not raw_locations:
 
-        try:
-            result = self.bridge.location_list()
-            raw_locations = result.get("locations", [])
+            try:
+                result = self.bridge.location_list()
+                raw_locations = result.get(
+                    "locations", []
+                )
 
-        except Exception:
-            raw_locations = []
+            except Exception:
+                raw_locations = []
+
+            if raw_locations:
+                self._save_to_disk(raw_locations)
+
+        if not raw_locations:
+            return []
 
         locations = self._filter_and_order(
             raw_locations
@@ -164,7 +179,6 @@ class LocationCatalog:
 
         if locations:
             self._locations = locations
-            self._save_to_disk(locations)
 
         return locations
 
