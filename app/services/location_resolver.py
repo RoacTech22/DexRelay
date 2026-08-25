@@ -1,3 +1,4 @@
+from app.services.hoenn_locations_es import translate_location_name
 from app.services.pkhex.bridge import PKHeXBridge
 
 
@@ -54,15 +55,26 @@ class LocationResolver:
         except Exception:
             return empty_result
 
-        info = {
-            "metLocation": result.get(
+        met_location_id = result.get(
+            "metLocationId",
+            0,
+        )
+
+        # Misma traducción que usa LocationCatalog, por ID -- si
+        # esto no fuera idéntico, el nombre de una captura real no
+        # coincidiría con la fila precargada en el panel y
+        # volveríamos a tener el bug de rutas duplicadas.
+        met_location_name = translate_location_name(
+            met_location_id,
+            result.get(
                 "metLocationName",
                 "",
             ),
-            "metLocationId": result.get(
-                "metLocationId",
-                0,
-            ),
+        )
+
+        info = {
+            "metLocation": met_location_name,
+            "metLocationId": met_location_id,
             "eggLocationId": result.get(
                 "eggLocationId",
                 0,

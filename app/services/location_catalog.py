@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from app.services.hoenn_locations_es import translate_location_name
 from app.services.pkhex.bridge import PKHeXBridge
 
 
@@ -170,7 +171,13 @@ class LocationCatalog:
     def _filter_and_order(self, raw_locations):
 
         hoenn_locations = {
-            entry["id"]: entry
+            entry["id"]: {
+                "id": entry["id"],
+                "name": translate_location_name(
+                    entry["id"],
+                    entry.get("name", ""),
+                ),
+            }
             for entry in raw_locations
             if _HOENN_ID_MIN
             <= entry.get("id", -1)
