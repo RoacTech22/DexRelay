@@ -22,6 +22,7 @@ class NuzlockeStorage:
                 "graveyard": [],
                 "encounters": [],
                 "pending_encounters": [],
+                "starter_assigned": False,
             }
 
         with self.path.open(
@@ -34,6 +35,7 @@ class NuzlockeStorage:
         data.setdefault("graveyard", [])
         data.setdefault("encounters", [])
         data.setdefault("pending_encounters", [])
+        data.setdefault("starter_assigned", False)
 
         return data
 

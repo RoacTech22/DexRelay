@@ -3,6 +3,16 @@ using System.Collections.Generic;
 using System.Text.Json;
 using PKHeX.Core;
 
+// Sin esto, PKHeX resuelve nombres de especie/ubicación con su
+// idioma por defecto (inglés), que no coincide con la lista de
+// rutas en español precargada en panels/nuzlocke/app.js (ej.
+// "Route 101" vs "Ruta 101") -- eso hacía que una captura nueva
+// no encontrara su fila existente y creara una fila duplicada en
+// vez de actualizar la que ya estaba. Fijar el idioma acá asegura
+// que species/species_list/met_location devuelvan siempre nombres
+// en español, consistentes entre sí.
+GameInfo.CurrentLanguage = "es";
+
 while (true)
 {
     string? input = Console.ReadLine();

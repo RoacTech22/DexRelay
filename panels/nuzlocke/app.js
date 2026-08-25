@@ -87,8 +87,13 @@ const tableBody =
 const pendingList =
     document.getElementById("pending-list");
 
-const speciesDatalist =
-    document.getElementById("species-datalist");
+// Catálogo completo de especies, cargado una vez al iniciar
+// (ver loadSpeciesList()). Usado por el buscador propio de cada
+// fila (species-picker) -- reemplaza al <datalist> nativo del
+// navegador, que resultaba poco confiable para mostrar
+// sugerencias de forma consistente.
+let speciesCatalog = [];
+let speciesIdByLowerName = new Map();
 
 const newLocationInput =
     document.getElementById("new-location-input");
@@ -98,12 +103,221 @@ const addRowButton =
 
 
 /* =========================================
+   BÚSQUEDA DE FILA POR UBICACIÓN (normalizada)
+
+   El lugar de encuentro que devuelve PKHeX podría no coincidir
+   caracter por caracter con el texto de DEFAULT_LOCATIONS (ej.
+   espacios extra, mayúsculas distintas). Comparar normalizado
+   (minúsculas + sin espacios de más) evita crear una fila
+   duplicada para lo que en realidad es la misma ruta.
+========================================= */
+
+function normalizeLocation(text) {
+
+    return (text || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+
+function findRowByLocation(location) {
+
+    const targetKey =
+        normalizeLocation(location);
+
+    return Array.from(
+        tableBody.children
+    ).find(
+        row =>
+            normalizeLocation(
+                row.dataset.location
+            ) === targetKey
+    ) || null;
+}
+
+
+/* =========================================
+   BUSCADOR DE ESPECIE (sprite + input + lista
+   de sugerencias propia)
+
+   Reemplaza al <datalist> nativo del navegador -- resultó poco
+   confiable para mostrar sugerencias de forma consistente.
+   Reutiliza los sprites que ya existen en overlays/team/sprites/
+   (ruta absoluta /overlay/team/sprites/{id}.png) en vez de pedir
+   un set de imágenes aparte para el panel.
+========================================= */
+
+function createSpeciesPicker(initialValue) {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className = "species-picker";
+
+    const sprite =
+        document.createElement("img");
+
+    sprite.className = "species-sprite";
+    sprite.alt = "";
+
+    sprite.addEventListener("error", () => {
+        sprite.classList.remove("visible");
+    });
+
+    const input =
+        document.createElement("input");
+
+    input.type = "text";
+    input.className = "species-input";
+    input.placeholder = "Especie...";
+    input.autocomplete = "off";
+    input.value = initialValue;
+
+    const suggestions =
+        document.createElement("div");
+
+    suggestions.className =
+        "species-suggestions";
+
+    wrapper.appendChild(sprite);
+    wrapper.appendChild(input);
+    wrapper.appendChild(suggestions);
+
+    function updateSprite(name) {
+
+        const speciesId =
+            speciesIdByLowerName.get(
+                (name || "").trim().toLowerCase()
+            );
+
+        if (speciesId) {
+
+            sprite.src =
+                `/overlay/team/sprites/${speciesId}.png`;
+
+            sprite.classList.add("visible");
+
+        } else {
+
+            sprite.classList.remove("visible");
+            sprite.removeAttribute("src");
+        }
+    }
+
+    function renderSuggestions(query) {
+
+        suggestions.innerHTML = "";
+
+        const trimmed =
+            query.trim().toLowerCase();
+
+        if (!trimmed) {
+            suggestions.classList.remove(
+                "visible"
+            );
+            return;
+        }
+
+        const matches = speciesCatalog
+            .filter(
+                entry =>
+                    entry.name
+                        .toLowerCase()
+                        .includes(trimmed)
+            )
+            .slice(0, 8);
+
+        if (matches.length === 0) {
+            suggestions.classList.remove(
+                "visible"
+            );
+            return;
+        }
+
+        for (const entry of matches) {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "species-suggestion-item";
+
+            item.textContent = entry.name;
+
+            // "mousedown", no "click": se dispara ANTES de que
+            // el input pierda el foco, asi la seleccion se
+            // procesa antes de que la lista se oculte por el
+            // blur. preventDefault() evita que el click le robe
+            // el foco al input a mitad de camino; el blur()
+            // explicito de abajo sigue disparando el guardado
+            // normal (el listener de "blur" que ya tiene el
+            // input en addRow).
+            item.addEventListener(
+                "mousedown",
+                event => {
+
+                    event.preventDefault();
+
+                    input.value = entry.name;
+
+                    updateSprite(entry.name);
+
+                    suggestions.classList.remove(
+                        "visible"
+                    );
+
+                    input.blur();
+                }
+            );
+
+            suggestions.appendChild(item);
+        }
+
+        suggestions.classList.add("visible");
+    }
+
+    input.addEventListener("input", () => {
+        renderSuggestions(input.value);
+        updateSprite(input.value);
+    });
+
+    input.addEventListener("focus", () => {
+
+        if (input.value.trim()) {
+            renderSuggestions(input.value);
+        }
+    });
+
+    input.addEventListener("blur", () => {
+
+        // Pequeño margen para no ocultar la lista justo antes
+        // de que el mousedown de una sugerencia llegue a
+        // procesarse.
+        setTimeout(() => {
+            suggestions.classList.remove(
+                "visible"
+            );
+        }, 100);
+    });
+
+    updateSprite(initialValue);
+
+    return {
+        wrapper,
+        input,
+        spriteImg: sprite
+    };
+}
+
+
+/* =========================================
    INICIO
 ========================================= */
 
 async function init() {
 
-    await loadSpeciesDatalist();
+    await loadSpeciesList();
 
     const existing =
         await loadEncounters();
@@ -157,7 +371,7 @@ async function init() {
 }
 
 
-async function loadSpeciesDatalist() {
+async function loadSpeciesList() {
 
     try {
 
@@ -176,20 +390,19 @@ async function loadSpeciesDatalist() {
         const data =
             await response.json();
 
-        const species =
+        speciesCatalog =
             Array.isArray(data.species)
                 ? data.species
                 : [];
 
-        for (const entry of species) {
-
-            const option =
-                document.createElement("option");
-
-            option.value = entry.name;
-
-            speciesDatalist.appendChild(option);
-        }
+        speciesIdByLowerName = new Map(
+            speciesCatalog.map(
+                entry => [
+                    entry.name.toLowerCase(),
+                    entry.id
+                ]
+            )
+        );
 
     } catch (error) {
 
@@ -312,21 +525,17 @@ function addRow(location, existingEntry) {
     const speciesCell =
         document.createElement("td");
 
-    const speciesInput =
-        document.createElement("input");
+    const speciesPicker =
+        createSpeciesPicker(
+            existingEntry?.species || ""
+        );
 
-    speciesInput.type = "text";
-    speciesInput.className = "species-input";
-    speciesInput.placeholder = "Especie...";
-    speciesInput.setAttribute(
-        "list",
-        "species-datalist"
+    speciesCell.appendChild(
+        speciesPicker.wrapper
     );
 
-    speciesInput.value =
-        existingEntry?.species || "";
-
-    speciesCell.appendChild(speciesInput);
+    const speciesInput =
+        speciesPicker.input;
 
 
     const statusCell =
@@ -744,11 +953,7 @@ function updateRowFromAssignment(
     }
 
     const row =
-        tableBody.querySelector(
-            `tr[data-location="${
-                CSS.escape(location)
-            }"]`
-        );
+        findRowByLocation(location);
 
     if (!row) {
 
@@ -768,33 +973,92 @@ function updateRowFromAssignment(
     const statusSelect =
         row.querySelector(".status-select");
 
+    let changed = false;
+
     if (
         nicknameInput &&
         document.activeElement !== nicknameInput
     ) {
-        nicknameInput.value =
-            savedEntry.nickname || "";
+
+        const newValue = savedEntry.nickname || "";
+
+        if (nicknameInput.value !== newValue) {
+            nicknameInput.value = newValue;
+            changed = true;
+        }
     }
 
     if (
         speciesInput &&
         document.activeElement !== speciesInput
     ) {
-        speciesInput.value =
-            savedEntry.species || "";
+
+        const newValue = savedEntry.species || "";
+
+        if (speciesInput.value !== newValue) {
+
+            speciesInput.value = newValue;
+
+            const spriteImg =
+                row.querySelector(".species-sprite");
+
+            if (spriteImg) {
+
+                const speciesId =
+                    speciesIdByLowerName.get(
+                        newValue.trim().toLowerCase()
+                    );
+
+                if (speciesId) {
+
+                    spriteImg.src =
+                        `/overlay/team/sprites/${speciesId}.png`;
+
+                    spriteImg.classList.add(
+                        "visible"
+                    );
+
+                } else {
+
+                    spriteImg.classList.remove(
+                        "visible"
+                    );
+
+                    spriteImg.removeAttribute(
+                        "src"
+                    );
+                }
+            }
+
+            changed = true;
+        }
     }
 
     if (statusSelect) {
-        statusSelect.value =
+
+        const newValue =
             savedEntry.status || "sin_intentar";
 
-        applyStatusClass(
-            statusSelect,
-            statusSelect.value
-        );
+        if (statusSelect.value !== newValue) {
+
+            statusSelect.value = newValue;
+
+            applyStatusClass(
+                statusSelect,
+                statusSelect.value
+            );
+
+            changed = true;
+        }
     }
 
-    flashSaved(row);
+    // Solo se resalta la fila cuando algo cambió de verdad --
+    // antes se disparaba en cada refresh automático (cada 3s)
+    // aunque los datos fueran exactamente los mismos, lo que se
+    // veía como un parpadeo azul constante en toda la tabla.
+    if (changed) {
+        flashSaved(row);
+    }
 }
 
 
@@ -815,11 +1079,7 @@ addRowButton.addEventListener(
 
         const alreadyExists =
             Boolean(
-                tableBody.querySelector(
-                    `tr[data-location="${
-                        CSS.escape(location)
-                    }"]`
-                )
+                findRowByLocation(location)
             );
 
         if (alreadyExists) {

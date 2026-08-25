@@ -39,14 +39,20 @@ class SpeciesCatalog:
         bridge no está disponible y tampoco hay caché en disco
         -- nunca lanza, el buscador simplemente queda vacío en
         vez de romper el panel.
+
+        Un resultado vacío NO se cachea en memoria a propósito:
+        si el bridge falló porque todavía estaba arrancando (el
+        proceso .NET puede tardar unos segundos la primera vez),
+        la próxima petición a /api/species vuelve a intentarlo en
+        vez de quedar vacía para siempre hasta reiniciar DexRelay.
         """
 
-        if self._species is not None:
+        if self._species:
             return self._species
 
         cached = self._load_from_disk()
 
-        if cached is not None:
+        if cached:
             self._species = cached
             return self._species
 
@@ -57,12 +63,11 @@ class SpeciesCatalog:
         except Exception:
             species = []
 
-        self._species = species
-
         if species:
+            self._species = species
             self._save_to_disk(species)
 
-        return self._species
+        return species
 
     def _load_from_disk(self):
 

@@ -237,6 +237,79 @@ td {
     font-family: inherit;
 }
 
+/* =========================================
+   BUSCADOR DE ESPECIE (sprite + input + lista
+   de sugerencias propia, en vez del <datalist>
+   nativo del navegador -- mas confiable entre
+   navegadores y permite mostrar el sprite).
+========================================= */
+
+.species-picker {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.species-sprite {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+
+    object-fit: contain;
+
+    image-rendering: pixelated;
+
+    display: none;
+}
+
+.species-sprite.visible {
+    display: block;
+}
+
+.species-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.species-suggestions {
+    position: absolute;
+
+    top: calc(100% + 2px);
+    left: 38px;
+    right: 0;
+
+    z-index: 30;
+
+    max-height: 200px;
+    overflow-y: auto;
+
+    background: #0e1015;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+
+    display: none;
+}
+
+.species-suggestions.visible {
+    display: block;
+}
+
+.species-suggestion-item {
+    padding: 7px 10px;
+
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.species-suggestion-item:hover,
+.species-suggestion-item.highlighted {
+    background: #23262f;
+}
+
 .species-input::placeholder,
 .nickname-input::placeholder {
     color: #5a5e6b;

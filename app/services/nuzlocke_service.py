@@ -65,6 +65,7 @@ class NuzlockeService:
 
         self._data.setdefault("pending_encounters", [])
         self._data.setdefault("encounters", [])
+        self._data.setdefault("starter_assigned", False)
 
         roster_by_nickname = {
             entry["nickname"]: entry
@@ -183,16 +184,29 @@ class NuzlockeService:
         """
         Se llama justo cuando se detecta una captura nueva.
 
-        Si el Pokémon ya trae resuelto el lugar de encuentro
-        (`metLocation`, vía PKHeX -- ver LocationResolver en
-        azahar_reader.py), el encuentro se registra directo en
-        `encounters`, ruta incluida: automatización completa, sin
-        que el usuario tenga que hacer nada.
+        Orden de decisión:
 
-        Si no hay lugar de encuentro disponible (huevo, regalo,
-        intercambio, o el bridge PKHeX no resolvió nada), cae al
-        flujo anterior: se guarda en `pending_encounters` para que
-        el usuario le asigne la ruta a mano desde el panel.
+        1. Si es el PRIMER Pokémon que se obtiene en toda la
+           partida (nunca se asignó un inicial antes), se
+           registra como "Inicial" sin importar lo que diga
+           metLocation -- el juego suele reportar el regalo del
+           inicial con un lugar de encuentro especial/vacío, no
+           una ruta real, y aunque reportara algo, la regla acá
+           es "el primero que se obtiene es el inicial", punto.
+
+        2. Si no es el inicial y ya trae `metLocation` resuelto
+           (vía PKHeX), se intenta registrar directo en
+           `encounters` -- PERO solo si esa ubicación todavía no
+           tiene un encuentro registrado. Si ya hay uno (por
+           ejemplo, una segunda captura que por lo que sea quedó
+           marcada con el mismo lugar), NO se pisa el registro
+           existente -- cae a pending_encounters para que el
+           usuario decida a mano, en vez de perder en silencio el
+           primer encuentro real de esa ruta.
+
+        3. Si no hay metLocation disponible (huevo, regalo,
+           intercambio, o el bridge falló), cae a
+           pending_encounters como siempre.
         """
 
         nickname = pokemon.get("nickname")
@@ -203,16 +217,40 @@ class NuzlockeService:
 
         status = "shiny" if is_shiny else "capturado"
 
-        if met_location:
+        if not self._data.get("starter_assigned"):
+
+            self._data["starter_assigned"] = True
 
             self.save_encounter(
-                met_location,
+                "Inicial",
                 nickname,
                 species,
                 status,
             )
 
             return
+
+        if met_location:
+
+            location_taken = any(
+                entry["location"] == met_location
+                for entry in self._data["encounters"]
+            )
+
+            if not location_taken:
+
+                self.save_encounter(
+                    met_location,
+                    nickname,
+                    species,
+                    status,
+                )
+
+                return
+
+            # Ya hay un encuentro registrado en esa ubicación --
+            # no se pisa. Cae al flujo pendiente de abajo para que
+            # el usuario lo revise a mano.
 
         self._data["pending_encounters"].append({
             "nickname": nickname,
