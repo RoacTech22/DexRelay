@@ -7,6 +7,7 @@ from app.memory.pointers import (
     SLOT_DATA_SIZE,
     STAT_DATA_OFFSET,
     STAT_DATA_SIZE,
+    LAST_CAUGHT_ADDRESS,
 )
 from app.memory.structures import Pokemon6
 from app.services.location_resolver import LocationResolver
@@ -195,6 +196,21 @@ class AzaharReader:
             + POKEMON_POINTER_OFFSET
         )
 
+        return self._read_pokemon_at_address(
+            address
+        )
+
+    def _read_pokemon_at_address(self, address):
+        """
+        Lee y descifra un Pokémon en una dirección absoluta
+        (ya resuelta, sin sumarle POKEMON_POINTER_OFFSET).
+        Reutilizada por read_pokemon() (party) y
+        read_last_caught() (LAST_CAUGHT_ADDRESS).
+
+        Devuelve READ_FAILED si la lectura o el descifrado
+        fallan; un Pokemon6 si fue exitosa.
+        """
+
         party_data = self.memory.read(
             address,
             SLOT_DATA_SIZE
@@ -376,3 +392,31 @@ class AzaharReader:
             )
 
         return party
+
+    def read_last_caught(self):
+        """
+        Lee LAST_CAUGHT_ADDRESS (ver pointers.py): la dirección fija
+        que contiene el Pokémon capturado más recientemente, incluso
+        si fue directo a la Caja PC porque la party estaba llena
+        (en ese caso nunca aparece en read_party()).
+
+        Devuelve el mismo formato que build_pokemon_data(), o None
+        si la lectura falló (transitoriamente, o si nunca hubo
+        ninguna captura todavía en esta partida -- la estructura
+        vacía se descarta igual que un slot de party vacío).
+        """
+
+        pokemon = self._read_pokemon_at_address(
+            LAST_CAUGHT_ADDRESS
+        )
+
+        if pokemon is READ_FAILED:
+            return None
+
+        if pokemon is None:
+            return None
+
+        return self.build_pokemon_data(
+            0,
+            pokemon
+        )

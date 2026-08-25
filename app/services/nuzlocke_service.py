@@ -72,12 +72,59 @@ class NuzlockeService:
 
         return self._data
 
-    def update(self, team: list[dict]) -> dict:
+    def _add_new_roster_entry(
+        self,
+        pokemon: dict,
+        roster: list[dict],
+        roster_by_nickname: dict,
+    ) -> dict:
+        """
+        Crea el registro de roster para una captura nueva (venga
+        de la party o de la Caja PC vía read_last_caught()) y
+        dispara _register_new_capture() para el tracker de rutas.
+        Devuelve el registro nuevo.
+        """
+
+        nickname = pokemon.get("nickname")
+
+        entry = {
+            "nickname": nickname,
+            "speciesId": pokemon.get("speciesId"),
+            "species": pokemon.get("species"),
+            "level": pokemon.get("level"),
+            "caughtAt": _now_iso(),
+        }
+
+        roster.append(entry)
+        roster_by_nickname[nickname] = entry
+
+        self._register_new_capture(
+            pokemon,
+            entry["caughtAt"],
+        )
+
+        return entry
+
+    def update(
+        self,
+        team: list[dict],
+        boxed_capture: dict | None = None,
+    ) -> dict:
         """
         Compara la party actual contra el estado guardado, detecta
         capturas/evoluciones/muertes, persiste solo si hubo
         cambios, y devuelve el estado actual completo
         (roster + graveyard).
+
+        `boxed_capture`: resultado de
+        AzaharReader.read_last_caught() -- el Pokémon capturado más
+        recientemente, incluso si fue directo a la Caja PC porque la
+        party estaba llena (en ese caso nunca aparece en `team`, y
+        sin esto el Tracker nunca se enteraba de esas capturas).
+        Identidad-basada, sin estado adicional que mantener: si su
+        nickname ya está en roster/graveyard, ya lo conocemos (vino
+        por la party o ya se había registrado antes) y no se hace
+        nada; si es nuevo, se registra igual que una captura normal.
         """
 
         if self._data is None:
@@ -127,20 +174,10 @@ class NuzlockeService:
             if entry is None:
 
                 # Captura nueva.
-                entry = {
-                    "nickname": nickname,
-                    "speciesId": species_id,
-                    "species": species,
-                    "level": level,
-                    "caughtAt": _now_iso(),
-                }
-
-                roster.append(entry)
-                roster_by_nickname[nickname] = entry
-
-                self._register_new_capture(
+                entry = self._add_new_roster_entry(
                     pokemon,
-                    entry["caughtAt"],
+                    roster,
+                    roster_by_nickname,
                 )
 
                 changed = True
@@ -189,6 +226,33 @@ class NuzlockeService:
                     if encounter.get("nickname") == nickname:
                         encounter["status"] = "muerto"
                         encounter["updatedAt"] = _now_iso()
+
+                changed = True
+
+        # Captura que fue directo a la Caja PC porque la party
+        # estaba llena -- nunca aparece en `team`, así que sin esto
+        # el Tracker no se enteraba de ella. Si el nickname ya está
+        # en roster/graveyard, ya la conocemos (llegó por la party
+        # más arriba, o ya se había registrado antes) y no se hace
+        # nada; no hace falta ningún estado adicional para evitar
+        # duplicados, roster/graveyard ya son la fuente de verdad.
+        if boxed_capture and not boxed_capture.get("empty"):
+
+            boxed_nickname = boxed_capture.get(
+                "nickname"
+            )
+
+            if (
+                boxed_nickname
+                and boxed_nickname not in roster_by_nickname
+                and boxed_nickname not in graveyard_nicknames
+            ):
+
+                self._add_new_roster_entry(
+                    boxed_capture,
+                    roster,
+                    roster_by_nickname,
+                )
 
                 changed = True
 
