@@ -6,9 +6,13 @@
     --text: #e6e6ea;
     --text-dim: #8b8f9c;
 
-    --result-none: #3a3d47;
-    --result-caught: #2e7d4f;
-    --result-lost: #a13c3c;
+    --status-none: #3a3d47;
+    --status-caught: #2e7d4f;
+    --status-lost: #a13c3c;
+    --status-dead: #55585f;
+    --status-traded: #2f6fa8;
+    --status-gift: #7c4fc2;
+    --status-shiny: #d9b23c;
 }
 
 * {
@@ -178,15 +182,19 @@ thead th {
 }
 
 .col-location {
-    width: 34%;
+    width: 24%;
+}
+
+.col-nickname {
+    width: 18%;
 }
 
 .col-species {
-    width: 36%;
+    width: 30%;
 }
 
-.col-result {
-    width: 30%;
+.col-status {
+    width: 28%;
 }
 
 tbody tr {
@@ -213,7 +221,8 @@ td {
 }
 
 .species-input,
-.result-select {
+.nickname-input,
+.status-select {
     width: 100%;
 
     padding: 7px 9px;
@@ -228,17 +237,19 @@ td {
     font-family: inherit;
 }
 
-.species-input::placeholder {
+.species-input::placeholder,
+.nickname-input::placeholder {
     color: #5a5e6b;
 }
 
 .species-input:focus,
-.result-select:focus {
+.nickname-input:focus,
+.status-select:focus {
     outline: none;
     border-color: #4a90d9;
 }
 
-.result-select {
+.status-select {
     appearance: none;
 
     cursor: pointer;
@@ -246,22 +257,42 @@ td {
     font-weight: 600;
 }
 
-/* Color de fondo del select segun el resultado
-   elegido -- se actualiza desde app.js poniendo
-   la clase correspondiente. */
-.result-select.result-sin_intentar {
-    background-color: var(--result-none);
+/* Color de fondo del select segun el estado elegido --
+   se actualiza desde app.js poniendo la clase
+   correspondiente. */
+.status-select.status-sin_intentar {
+    background-color: var(--status-none);
     color: #cfd1d8;
 }
 
-.result-select.result-atrapado {
-    background-color: var(--result-caught);
+.status-select.status-capturado {
+    background-color: var(--status-caught);
     color: #ffffff;
 }
 
-.result-select.result-perdido {
-    background-color: var(--result-lost);
+.status-select.status-perdido {
+    background-color: var(--status-lost);
     color: #ffffff;
+}
+
+.status-select.status-muerto {
+    background-color: var(--status-dead);
+    color: #ffffff;
+}
+
+.status-select.status-intercambiado {
+    background-color: var(--status-traded);
+    color: #ffffff;
+}
+
+.status-select.status-regalo {
+    background-color: var(--status-gift);
+    color: #ffffff;
+}
+
+.status-select.status-shiny {
+    background-color: var(--status-shiny);
+    color: #1a1600;
 }
 
 /* =========================================

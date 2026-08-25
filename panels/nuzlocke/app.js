@@ -1,17 +1,26 @@
 const ENCOUNTERS_API_URL = "/api/nuzlocke/encounters";
 const PENDING_API_URL = "/api/nuzlocke/pending-encounters";
 const ASSIGN_API_URL = "/api/nuzlocke/encounters/assign";
+const SPECIES_API_URL = "/api/species";
 
-const VALID_RESULTS = [
+const VALID_STATUSES = [
     "sin_intentar",
-    "atrapado",
-    "perdido"
+    "capturado",
+    "perdido",
+    "muerto",
+    "intercambiado",
+    "regalo",
+    "shiny"
 ];
 
-const RESULT_LABELS = {
+const STATUS_LABELS = {
     sin_intentar: "Sin intentar",
-    atrapado: "Atrapado",
-    perdido: "Perdido"
+    capturado: "Capturado",
+    perdido: "Perdido",
+    muerto: "Muerto",
+    intercambiado: "Intercambiado",
+    regalo: "Regalo",
+    shiny: "Shiny"
 };
 
 /* Orden principal de rutas/ciudades de ORAS (progresión de
@@ -78,6 +87,9 @@ const tableBody =
 const pendingList =
     document.getElementById("pending-list");
 
+const speciesDatalist =
+    document.getElementById("species-datalist");
+
 const newLocationInput =
     document.getElementById("new-location-input");
 
@@ -90,6 +102,8 @@ const addRowButton =
 ========================================= */
 
 async function init() {
+
+    await loadSpeciesDatalist();
 
     const existing =
         await loadEncounters();
@@ -127,14 +141,364 @@ async function init() {
 
     await refreshPending();
 
-    // Las capturas nuevas se detectan solas mientras juegas --
-    // el panel se refresca cada 3s para mostrarlas sin que haga
-    // falta recargar la página a mano. No hace falta más
-    // frecuencia que esa: es una lista que cambia cuando el
-    // jugador atrapa algo, no algo animado en vivo.
+    // La mayoría de las capturas ahora se completan solas
+    // (especie + nickname + ruta + shiny, vía PKHeX). Este
+    // refresh solo importa para el puñado de casos que no se
+    // pudieron resolver automático (huevos, regalos,
+    // intercambios). Se refresca cada 3s sin que haga falta
+    // recargar la página.
     setInterval(refreshPending, 3000);
+
+    // Las filas de la tabla también pueden llenarse solas
+    // (captura automática con ruta ya resuelta) mientras el
+    // panel está abierto -- se refrescan igual, sin pisar lo
+    // que el usuario esté editando en ese momento.
+    setInterval(refreshEncounters, 3000);
 }
 
+
+async function loadSpeciesDatalist() {
+
+    try {
+
+        const response =
+            await fetch(
+                SPECIES_API_URL,
+                { cache: "no-store" }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        const species =
+            Array.isArray(data.species)
+                ? data.species
+                : [];
+
+        for (const entry of species) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = entry.name;
+
+            speciesDatalist.appendChild(option);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando el catálogo de especies:",
+            error
+        );
+    }
+}
+
+
+async function loadEncounters() {
+
+    try {
+
+        const response =
+            await fetch(
+                ENCOUNTERS_API_URL,
+                { cache: "no-store" }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        return Array.isArray(data.encounters)
+            ? data.encounters
+            : [];
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando encuentros:",
+            error
+        );
+
+        return [];
+    }
+}
+
+
+async function refreshEncounters() {
+
+    // Evita pisar un <input> que el usuario tenga enfocado
+    // justo cuando cae el refresh automático.
+    if (
+        document.activeElement &&
+        (
+            document.activeElement.classList.contains(
+                "species-input"
+            ) ||
+            document.activeElement.classList.contains(
+                "nickname-input"
+            )
+        )
+    ) {
+        return;
+    }
+
+    const encounters =
+        await loadEncounters();
+
+    for (const entry of encounters) {
+
+        updateRowFromAssignment(
+            entry.location,
+            { encounters: [entry] }
+        );
+    }
+}
+
+
+/* =========================================
+   FILAS DE LA TABLA
+========================================= */
+
+function addRow(location, existingEntry) {
+
+    const row =
+        document.createElement("tr");
+
+    row.dataset.location = location;
+
+    const locationCell =
+        document.createElement("td");
+
+    const locationLabel =
+        document.createElement("div");
+
+    locationLabel.className =
+        "location-label";
+
+    locationLabel.textContent =
+        location;
+
+    locationCell.appendChild(locationLabel);
+
+
+    const nicknameCell =
+        document.createElement("td");
+
+    const nicknameInput =
+        document.createElement("input");
+
+    nicknameInput.type = "text";
+    nicknameInput.className = "nickname-input";
+    nicknameInput.placeholder = "Nickname...";
+
+    nicknameInput.value =
+        existingEntry?.nickname || "";
+
+    nicknameCell.appendChild(nicknameInput);
+
+
+    const speciesCell =
+        document.createElement("td");
+
+    const speciesInput =
+        document.createElement("input");
+
+    speciesInput.type = "text";
+    speciesInput.className = "species-input";
+    speciesInput.placeholder = "Especie...";
+    speciesInput.setAttribute(
+        "list",
+        "species-datalist"
+    );
+
+    speciesInput.value =
+        existingEntry?.species || "";
+
+    speciesCell.appendChild(speciesInput);
+
+
+    const statusCell =
+        document.createElement("td");
+
+    const statusSelect =
+        document.createElement("select");
+
+    statusSelect.className =
+        "status-select";
+
+    for (const value of VALID_STATUSES) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = value;
+        option.textContent = STATUS_LABELS[value];
+
+        statusSelect.appendChild(option);
+    }
+
+    statusSelect.value =
+        existingEntry?.status || "sin_intentar";
+
+    applyStatusClass(
+        statusSelect,
+        statusSelect.value
+    );
+
+    statusCell.appendChild(statusSelect);
+
+
+    row.appendChild(locationCell);
+    row.appendChild(nicknameCell);
+    row.appendChild(speciesCell);
+    row.appendChild(statusCell);
+
+    tableBody.appendChild(row);
+
+
+    /* ================================
+       AUTOGUARDADO
+    ================================= */
+
+    nicknameInput.addEventListener(
+        "blur",
+        () => saveRow(
+            row,
+            location,
+            nicknameInput,
+            speciesInput,
+            statusSelect
+        )
+    );
+
+    speciesInput.addEventListener(
+        "blur",
+        () => saveRow(
+            row,
+            location,
+            nicknameInput,
+            speciesInput,
+            statusSelect
+        )
+    );
+
+    statusSelect.addEventListener(
+        "change",
+        () => {
+
+            applyStatusClass(
+                statusSelect,
+                statusSelect.value
+            );
+
+            saveRow(
+                row,
+                location,
+                nicknameInput,
+                speciesInput,
+                statusSelect
+            );
+        }
+    );
+}
+
+
+function applyStatusClass(
+    selectElement,
+    status
+) {
+
+    for (const value of VALID_STATUSES) {
+
+        selectElement.classList.remove(
+            `status-${value}`
+        );
+    }
+
+    selectElement.classList.add(
+        `status-${status}`
+    );
+}
+
+
+async function saveRow(
+    row,
+    location,
+    nicknameInput,
+    speciesInput,
+    statusSelect
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                ENCOUNTERS_API_URL,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        location,
+                        nickname: nicknameInput.value,
+                        species: speciesInput.value,
+                        status: statusSelect.value
+                    })
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        flashSaved(row);
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando encuentro:",
+            error
+        );
+    }
+}
+
+
+function flashSaved(row) {
+
+    row.classList.remove("saved-flash");
+
+    // Fuerza un reflow para poder retriggerear la
+    // animación si se guarda dos veces seguidas.
+    void row.offsetWidth;
+
+    row.classList.add("saved-flash");
+}
+
+
+/* =========================================
+   CAPTURAS PENDIENTES DE RUTA
+
+   Solo aparecen acá las que PKHeX NO pudo resolver solas
+   (huevos, regalos, intercambios, o si el bridge falló). La
+   mayoría de las capturas normales ya se completan directo en
+   la tabla, sin pasar por esta sección.
+========================================= */
 
 async function refreshPending() {
 
@@ -237,12 +601,18 @@ function createPendingCard(entry) {
 
     info.className = "pending-info";
 
+    const shinyTag =
+        entry.shiny
+            ? " ✨"
+            : "";
+
     info.innerHTML =
         `<strong>${
             escapeHTML(entry.species || "")
         }</strong> (${
             escapeHTML(entry.nickname || "")
-        }) -- ¿en qué ruta lo atrapaste?`;
+        })${shinyTag} -- no se pudo resolver la ruta sola, ` +
+        `¿en qué ruta lo atrapaste?`;
 
     const select =
         document.createElement("select");
@@ -337,7 +707,7 @@ async function assignPending(
 
         card.remove();
 
-        // La ruta recién asignada ya tiene esta especie/resultado
+        // La ruta recién asignada ya tiene esta especie/estado
         // -- refleja eso en la tabla sin esperar al próximo poll.
         updateRowFromAssignment(
             location,
@@ -389,251 +759,42 @@ function updateRowFromAssignment(
         return;
     }
 
+    const nicknameInput =
+        row.querySelector(".nickname-input");
+
     const speciesInput =
         row.querySelector(".species-input");
 
-    const resultSelect =
-        row.querySelector(".result-select");
+    const statusSelect =
+        row.querySelector(".status-select");
 
-    if (speciesInput) {
+    if (
+        nicknameInput &&
+        document.activeElement !== nicknameInput
+    ) {
+        nicknameInput.value =
+            savedEntry.nickname || "";
+    }
+
+    if (
+        speciesInput &&
+        document.activeElement !== speciesInput
+    ) {
         speciesInput.value =
             savedEntry.species || "";
     }
 
-    if (resultSelect) {
-        resultSelect.value =
-            savedEntry.result || "sin_intentar";
+    if (statusSelect) {
+        statusSelect.value =
+            savedEntry.status || "sin_intentar";
 
-        applyResultClass(
-            resultSelect,
-            resultSelect.value
+        applyStatusClass(
+            statusSelect,
+            statusSelect.value
         );
     }
 
     flashSaved(row);
-}
-
-
-async function loadEncounters() {
-
-    try {
-
-        const response =
-            await fetch(
-                ENCOUNTERS_API_URL,
-                { cache: "no-store" }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                `HTTP ${response.status}`
-            );
-        }
-
-        const data =
-            await response.json();
-
-        return Array.isArray(data.encounters)
-            ? data.encounters
-            : [];
-
-    } catch (error) {
-
-        console.error(
-            "Error cargando encuentros:",
-            error
-        );
-
-        return [];
-    }
-}
-
-
-/* =========================================
-   FILAS
-========================================= */
-
-function addRow(location, existingEntry) {
-
-    const row =
-        document.createElement("tr");
-
-    row.dataset.location = location;
-
-    const locationCell =
-        document.createElement("td");
-
-    const locationLabel =
-        document.createElement("div");
-
-    locationLabel.className =
-        "location-label";
-
-    locationLabel.textContent =
-        location;
-
-    locationCell.appendChild(locationLabel);
-
-
-    const speciesCell =
-        document.createElement("td");
-
-    const speciesInput =
-        document.createElement("input");
-
-    speciesInput.type = "text";
-    speciesInput.className = "species-input";
-    speciesInput.placeholder = "Especie...";
-
-    speciesInput.value =
-        existingEntry?.species || "";
-
-    speciesCell.appendChild(speciesInput);
-
-
-    const resultCell =
-        document.createElement("td");
-
-    const resultSelect =
-        document.createElement("select");
-
-    resultSelect.className =
-        "result-select";
-
-    for (const value of VALID_RESULTS) {
-
-        const option =
-            document.createElement("option");
-
-        option.value = value;
-        option.textContent = RESULT_LABELS[value];
-
-        resultSelect.appendChild(option);
-    }
-
-    resultSelect.value =
-        existingEntry?.result || "sin_intentar";
-
-    applyResultClass(
-        resultSelect,
-        resultSelect.value
-    );
-
-    resultCell.appendChild(resultSelect);
-
-
-    row.appendChild(locationCell);
-    row.appendChild(speciesCell);
-    row.appendChild(resultCell);
-
-    tableBody.appendChild(row);
-
-
-    /* ================================
-       AUTOGUARDADO
-    ================================= */
-
-    speciesInput.addEventListener(
-        "blur",
-        () => saveRow(
-            row,
-            location,
-            speciesInput,
-            resultSelect
-        )
-    );
-
-    resultSelect.addEventListener(
-        "change",
-        () => {
-
-            applyResultClass(
-                resultSelect,
-                resultSelect.value
-            );
-
-            saveRow(
-                row,
-                location,
-                speciesInput,
-                resultSelect
-            );
-        }
-    );
-}
-
-
-function applyResultClass(
-    selectElement,
-    result
-) {
-
-    for (const value of VALID_RESULTS) {
-
-        selectElement.classList.remove(
-            `result-${value}`
-        );
-    }
-
-    selectElement.classList.add(
-        `result-${result}`
-    );
-}
-
-
-async function saveRow(
-    row,
-    location,
-    speciesInput,
-    resultSelect
-) {
-
-    try {
-
-        const response =
-            await fetch(
-                ENCOUNTERS_API_URL,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-                    body: JSON.stringify({
-                        location,
-                        species: speciesInput.value,
-                        result: resultSelect.value
-                    })
-                }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                `HTTP ${response.status}`
-            );
-        }
-
-        flashSaved(row);
-
-    } catch (error) {
-
-        console.error(
-            "Error guardando encuentro:",
-            error
-        );
-    }
-}
-
-
-function flashSaved(row) {
-
-    row.classList.remove("saved-flash");
-
-    // Fuerza un reflow para poder retriggerear la
-    // animación si se guarda dos veces seguidas.
-    void row.offsetWidth;
-
-    row.classList.add("saved-flash");
 }
 
 
@@ -676,21 +837,27 @@ addRowButton.addEventListener(
         const newRow =
             tableBody.lastElementChild;
 
+        const nicknameInput =
+            newRow.querySelector(
+                ".nickname-input"
+            );
+
         const speciesInput =
             newRow.querySelector(
                 ".species-input"
             );
 
-        const resultSelect =
+        const statusSelect =
             newRow.querySelector(
-                ".result-select"
+                ".status-select"
             );
 
         saveRow(
             newRow,
             location,
+            nicknameInput,
             speciesInput,
-            resultSelect
+            statusSelect
         );
     }
 );

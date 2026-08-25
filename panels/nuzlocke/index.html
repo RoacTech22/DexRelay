@@ -16,9 +16,9 @@
     <header>
         <h1>Encuentros por ruta</h1>
         <p class="subtitle">
-            Las capturas se detectan solas al aparecer en tu
-            equipo -- solo falta asignarles la ruta. Lo que no
-            atrapaste se anota a mano abajo.
+            La mayoría de las capturas se detectan y completan
+            solas (especie, nickname, ruta y si es shiny). Lo que
+            no se pudo resolver automático se carga a mano abajo.
         </p>
     </header>
 
@@ -31,13 +31,16 @@
         <thead>
             <tr>
                 <th class="col-location">Ruta / Ubicación</th>
+                <th class="col-nickname">Nickname</th>
                 <th class="col-species">Especie</th>
-                <th class="col-result">Resultado</th>
+                <th class="col-status">Estado</th>
             </tr>
         </thead>
         <tbody id="encounters-body">
         </tbody>
     </table>
+
+    <datalist id="species-datalist"></datalist>
 
     <div id="add-row">
         <input
