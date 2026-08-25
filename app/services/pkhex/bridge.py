@@ -148,6 +148,42 @@ class PKHeXBridge:
             }
         )
 
+    def species_list(self):
+        """
+        Obtiene la lista completa {id, name} de especies
+        conocidas por PKHeX. Se llama una sola vez -- el
+        resultado se cachea del lado de Python
+        (species_resolver.py / el endpoint /api/species).
+        """
+
+        return self.request(
+            {
+                "action": "species_list",
+            }
+        )
+
+    def met_location(self, decrypted_box_data):
+        """
+        Resuelve el lugar de encuentro (y si es shiny) a
+        partir de los 232 bytes YA DESCIFRADOS de un
+        Pokémon (Pokemon6.raw_data[:232] en
+        app/memory/structures.py -- la misma fuente que ya
+        usamos para species_id/nickname/level/hp).
+        """
+
+        import base64
+
+        encoded_data = base64.b64encode(
+            decrypted_box_data
+        ).decode("ascii")
+
+        return self.request(
+            {
+                "action": "met_location",
+                "data": encoded_data,
+            }
+        )
+
     def stop(self):
         """
         Detiene el proceso del bridge.

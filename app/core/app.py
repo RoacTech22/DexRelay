@@ -8,6 +8,7 @@ from app.readers.azahar_reader import AzaharReader
 from app.server.http_server import HTTPServer
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
+from app.services.species_catalog import SpeciesCatalog
 
 
 class Application:
@@ -68,6 +69,7 @@ class Application:
             host=server_host,
             port=int(server_port),
             nuzlocke_service=self.nuzlocke_service,
+            species_catalog=SpeciesCatalog(),
         )
 
         self.running = False

@@ -8,6 +8,7 @@ from threading import Thread
 
 from app.core.state import ApplicationState
 from app.services.nuzlocke_service import NuzlockeService
+from app.services.species_catalog import SpeciesCatalog
 
 
 # Errores esperados cuando el navegador (o el Browser Source de
@@ -55,11 +56,13 @@ class HTTPServer:
         host: str = "127.0.0.1",
         port: int = 8080,
         nuzlocke_service: NuzlockeService | None = None,
+        species_catalog: SpeciesCatalog | None = None,
     ) -> None:
         self.state = state
         self.host = host
         self.port = port
         self.nuzlocke_service = nuzlocke_service
+        self.species_catalog = species_catalog
 
         project_root = (
             Path(__file__)
@@ -140,6 +143,7 @@ class HTTPServer:
         overlay_directory = self.overlay_directory
         panel_directory = self.panel_directory
         nuzlocke_service = self.nuzlocke_service
+        species_catalog = self.species_catalog
 
         class Handler(BaseHTTPRequestHandler):
 
@@ -260,6 +264,26 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/species":
+
+                    if species_catalog is None:
+                        self._send_json(
+                            {"species": []},
+                            200,
+                        )
+                        return
+
+                    self._send_json(
+                        {
+                            "species": (
+                                species_catalog
+                                .list_all()
+                            )
+                        },
+                        200,
+                    )
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
@@ -373,13 +397,17 @@ class HTTPServer:
                     payload.get("location", "")
                 ).strip()
 
+                nickname = str(
+                    payload.get("nickname", "")
+                ).strip()
+
                 species = str(
                     payload.get("species", "")
                 ).strip()
 
-                result = str(
+                status = str(
                     payload.get(
-                        "result",
+                        "status",
                         "sin_intentar",
                     )
                 ).strip()
@@ -399,8 +427,9 @@ class HTTPServer:
                     encounters = (
                         nuzlocke_service.save_encounter(
                             location,
+                            nickname,
                             species,
-                            result,
+                            status,
                         )
                     )
 

@@ -9,6 +9,7 @@ from app.memory.pointers import (
     STAT_DATA_SIZE,
 )
 from app.memory.structures import Pokemon6
+from app.services.location_resolver import LocationResolver
 from app.services.species_resolver import SpeciesResolver
 
 
@@ -38,6 +39,7 @@ class AzaharReader:
         self,
         citra=None,
         species_resolver=None,
+        location_resolver=None,
         process_name="sango-2"
     ):
         self.citra = citra or Citra()
@@ -49,6 +51,13 @@ class AzaharReader:
         self.species_resolver = (
             species_resolver
             or SpeciesResolver()
+        )
+
+        # Resuelve lugar de encuentro y shiny vía PKHeX,
+        # cacheado por nickname (ver location_resolver.py).
+        self.location_resolver = (
+            location_resolver
+            or LocationResolver()
         )
 
         # Nombre del proceso de juego dentro de Azahar.
@@ -254,6 +263,8 @@ class AzaharReader:
                 "level": 0,
                 "hp": 0,
                 "maxHp": 0,
+                "shiny": False,
+                "metLocation": "",
             }
 
         species_id = (
@@ -266,15 +277,33 @@ class AzaharReader:
             )
         )
 
+        nickname = pokemon.nickname()
+
+        # Lugar de encuentro + shiny vía PKHeX. Se le pasan los
+        # primeros 232 bytes de raw_data (la estructura PK6 "box
+        # format" ya descifrada) -- la misma fuente que ya usan
+        # species_id()/nickname()/level()/hp() arriba, no memoria
+        # nueva. Cacheado por nickname en LocationResolver, así
+        # que esto solo golpea el bridge PKHeX la primera vez que
+        # se ve cada Pokémon puntual.
+        location_info = (
+            self.location_resolver.resolve(
+                nickname,
+                pokemon.raw_data[:232],
+            )
+        )
+
         return {
             "slot": slot,
             "empty": species_id == 0,
-            "nickname": pokemon.nickname(),
+            "nickname": nickname,
             "species": species,
             "speciesId": species_id,
             "level": pokemon.level(),
             "hp": pokemon.hp(),
             "maxHp": pokemon.max_hp(),
+            "shiny": location_info["shiny"],
+            "metLocation": location_info["metLocation"],
         }
 
     def read_party(self):

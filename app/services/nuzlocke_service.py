@@ -63,6 +63,9 @@ class NuzlockeService:
         roster = self._data["roster"]
         graveyard = self._data["graveyard"]
 
+        self._data.setdefault("pending_encounters", [])
+        self._data.setdefault("encounters", [])
+
         roster_by_nickname = {
             entry["nickname"]: entry
             for entry in roster
@@ -111,25 +114,10 @@ class NuzlockeService:
                 roster.append(entry)
                 roster_by_nickname[nickname] = entry
 
-                # Automatización de capturas (Bloque C): toda
-                # captura nueva genera sola un "encuentro
-                # pendiente" con especie y resultado ya resueltos
-                # -- lo único que falta es que el usuario le
-                # asigne la ruta desde el panel (un clic, no un
-                # formulario completo). No se agrega directo a
-                # `encounters` porque esa lista está indexada por
-                # ubicación, y todavía no sabemos cuál es.
-                self._data.setdefault(
-                    "pending_encounters",
-                    [],
+                self._register_new_capture(
+                    pokemon,
+                    entry["caughtAt"],
                 )
-
-                self._data["pending_encounters"].append({
-                    "nickname": nickname,
-                    "speciesId": species_id,
-                    "species": species,
-                    "caughtAt": entry["caughtAt"],
-                })
 
                 changed = True
 
@@ -166,6 +154,18 @@ class NuzlockeService:
 
                 graveyard_nicknames.add(nickname)
 
+                # Sincronización con el panel de encuentros
+                # (Bloque C): si ya existe un registro de
+                # encuentro para este Pokémon (por nickname), su
+                # estado pasa a 'muerto' automáticamente, sin
+                # importar cuál fuera antes (capturado/shiny/etc).
+                # No hace falta que el usuario lo actualice a mano.
+                for encounter in self._data["encounters"]:
+
+                    if encounter.get("nickname") == nickname:
+                        encounter["status"] = "muerto"
+                        encounter["updatedAt"] = _now_iso()
+
                 changed = True
 
         if changed:
@@ -175,22 +175,72 @@ class NuzlockeService:
 
         return self._data
 
+    def _register_new_capture(
+        self,
+        pokemon: dict,
+        caught_at: str,
+    ) -> None:
+        """
+        Se llama justo cuando se detecta una captura nueva.
+
+        Si el Pokémon ya trae resuelto el lugar de encuentro
+        (`metLocation`, vía PKHeX -- ver LocationResolver en
+        azahar_reader.py), el encuentro se registra directo en
+        `encounters`, ruta incluida: automatización completa, sin
+        que el usuario tenga que hacer nada.
+
+        Si no hay lugar de encuentro disponible (huevo, regalo,
+        intercambio, o el bridge PKHeX no resolvió nada), cae al
+        flujo anterior: se guarda en `pending_encounters` para que
+        el usuario le asigne la ruta a mano desde el panel.
+        """
+
+        nickname = pokemon.get("nickname")
+        species_id = pokemon.get("speciesId")
+        species = pokemon.get("species")
+        met_location = pokemon.get("metLocation")
+        is_shiny = bool(pokemon.get("shiny"))
+
+        status = "shiny" if is_shiny else "capturado"
+
+        if met_location:
+
+            self.save_encounter(
+                met_location,
+                nickname,
+                species,
+                status,
+            )
+
+            return
+
+        self._data["pending_encounters"].append({
+            "nickname": nickname,
+            "speciesId": species_id,
+            "species": species,
+            "shiny": is_shiny,
+            "caughtAt": caught_at,
+        })
+
     # =====================================
     # BLOQUE C: ENCUENTROS POR RUTA
     #
-    # A diferencia de roster/graveyard, esto no se
-    # deriva de la memoria del juego -- lo carga el
-    # usuario a mano desde el panel de control
-    # (panels/nuzlocke/). Un registro por ubicación
-    # (se actualiza el mismo si ya existía en vez de
-    # duplicar), identificado por el texto exacto de
-    # `location`.
+    # Un registro por ubicación (se actualiza el mismo si ya
+    # existía en vez de duplicar), identificado por el texto
+    # exacto de `location`. La mayoría de las capturas se
+    # completan solas (ver _register_new_capture); lo que no se
+    # pudo resolver automático se carga a mano desde el panel
+    # (panels/nuzlocke/).
     # =====================================
 
-    VALID_ENCOUNTER_RESULTS = (
+    VALID_ENCOUNTER_STATUSES = (
         "sin_intentar",
-        "atrapado",
+        "capturado",
         "perdido",
+        "muerto",
+        "intercambiado",
+        "regalo",
+        "shiny",
     )
 
     def get_encounters(self) -> list[dict]:
@@ -206,7 +256,9 @@ class NuzlockeService:
     def get_pending_encounters(self) -> list[dict]:
         """
         Devuelve las capturas detectadas automáticamente que
-        todavía no tienen una ruta asignada.
+        todavía no tienen una ruta asignada (porque PKHeX no pudo
+        resolver el lugar de encuentro -- huevos, regalos,
+        intercambios, o una lectura fallida del bridge).
         """
 
         if self._data is None:
@@ -223,9 +275,8 @@ class NuzlockeService:
     ) -> dict:
         """
         Asigna una ubicación a una captura pendiente: la saca de
-        `pending_encounters` y la registra en `encounters` (con
-        result='atrapado', especie ya conocida). Devuelve
-        {'encounters': [...], 'pending_encounters': [...]}
+        `pending_encounters` y la registra en `encounters`.
+        Devuelve {'encounters': [...], 'pending_encounters': [...]}
         actualizados.
         """
 
@@ -248,10 +299,17 @@ class NuzlockeService:
 
         pending.remove(match)
 
+        status = (
+            "shiny"
+            if match.get("shiny")
+            else "capturado"
+        )
+
         encounters = self.save_encounter(
             location,
+            match["nickname"],
             match["species"],
-            "atrapado",
+            status,
         )
 
         return {
@@ -262,8 +320,9 @@ class NuzlockeService:
     def save_encounter(
         self,
         location: str,
+        nickname: str,
         species: str,
-        result: str,
+        status: str,
     ) -> list[dict]:
         """
         Crea o actualiza el registro de encuentro de una
@@ -271,10 +330,10 @@ class NuzlockeService:
         ya actualizada.
         """
 
-        if result not in self.VALID_ENCOUNTER_RESULTS:
+        if status not in self.VALID_ENCOUNTER_STATUSES:
             raise ValueError(
-                f"Resultado invalido: {result!r}. "
-                f"Debe ser uno de {self.VALID_ENCOUNTER_RESULTS}."
+                f"Estado invalido: {status!r}. "
+                f"Debe ser uno de {self.VALID_ENCOUNTER_STATUSES}."
             )
 
         encounters = self.get_encounters()
@@ -292,15 +351,17 @@ class NuzlockeService:
 
             encounters.append({
                 "location": location,
+                "nickname": nickname,
                 "species": species,
-                "result": result,
+                "status": status,
                 "updatedAt": _now_iso(),
             })
 
         else:
 
+            existing["nickname"] = nickname
             existing["species"] = species
-            existing["result"] = result
+            existing["status"] = status
             existing["updatedAt"] = _now_iso()
 
         self.storage.save(self._data)
