@@ -1,7 +1,7 @@
 # DexRelay — Documento Maestro
 ## Estado consolidado del proyecto
 
-**Fecha:** 24 de agosto de 2026
+**Fecha:** 25 de agosto de 2026
 **Versión de este documento:** consolidada — reconstruida a partir de las 7 versiones históricas (`MASTER`, `v1`-`v6`) más todo el trabajo de las sesiones recientes, porque se detectó pérdida real de información entre `v5` (1364 líneas) y `v6` (289 líneas). Este documento reincorpora lo perdido y es, de aquí en adelante, la referencia única.
 
 ---
@@ -290,6 +290,8 @@ Proceso .NET independiente (`Program.cs`), recibe JSON por stdin, soporta `actio
 
 `app/services/pkhex/bridge.py` (`PKHeXBridge`): inicia el proceso, mantiene stdin/stdout, envía/recibe JSON, detecta errores, reinicia el proceso cuando corresponde, se detiene correctamente. Herramientas de validación en `tools/pkhex_probe/` y `tools/probes/pkhex_bridge_probe.py`.
 
+**Acciones adicionales del bridge (25/08/2026):** `met_location`, `species_list`, `location_list` — agregadas para automatizar el Bloque C del Nuzlocke Tracker. Detalle completo en la sección 14.
+
 **Pendiente de fase final:** publicar el bridge como ejecutable self-contained (no `dotnet run`) para el empaquetado de distribución (FASE 6).
 
 ---
@@ -543,62 +545,99 @@ Ver sección 7.
 
 ## 14. Nuzlocke Tracker
 
-**Estado: 🟡 en progreso — Bloques A y B completos, Bloque C pendiente.** No confundir la muerte persistente de esta sección con la detección visual del overlay (sección 9) — están integradas entre sí (ver más abajo) pero conceptualmente siguen siendo dos cosas distintas.
-
-Alcance completo definido (24/08/2026), en 3 bloques:
+**Estado: 🟢 Bloques A, B y C completos** (con automatización de ruta real, no solo carga manual — mucho más de lo que se había planeado originalmente para el Bloque C). No confundir la muerte persistente de esta sección con la detección visual del overlay (sección 9) — están integradas entre sí (ver más abajo) pero conceptualmente siguen siendo dos cosas distintas.
 
 - **Bloque A — Núcleo** (🟢 completo): captura automática, evolución sin duplicar registro, muerte persistente, `/api/nuzlocke`.
 - **Bloque B — Overlay** (🟢 completo): cementerio visual + estadísticas.
-- **Bloque C — Encuentros por ruta** (🔴 pendiente): requiere decisión de diseño (registro manual vs. investigar dirección de "zona actual" en memoria) — ver más abajo.
+- **Bloque C — Encuentros por ruta** (🟢 completo, con automatización real vía PKHeX, no solo el panel manual planeado originalmente).
 
 ### Bloque A — Núcleo (`app/services/nuzlocke_service.py` + `nuzlocke_storage.py`)
 
-Portado directamente desde la lógica ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`: `pokemon_identity`, `is_already_dead`, `register_death`, `update_death_detector`), adaptado a la arquitectura de servicios actual.
+Portado directamente desde la lógica ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), adaptado a la arquitectura de servicios actual.
 
-**Identidad:** solo `nickname` (a diferencia de las animaciones del Team Overlay, que usan `nickname` + `speciesId` porque comparan el mismo slot entre dos ciclos consecutivos). Acá la identidad tiene que ser estable a través de **toda la partida**, incluyendo evoluciones — una evolución actualiza el registro existente, no crea uno nuevo. Limitación conocida (heredada del prototipo): un Pokémon sin nickname personalizado pierde continuidad de identidad al evolucionar, porque el nombre por defecto suele ser el de la especie.
+**Identidad:** solo `nickname`. Acá la identidad tiene que ser estable a través de **toda la partida**, incluyendo evoluciones — una evolución actualiza el registro existente, no crea uno nuevo.
 
-**Formato de persistencia** (`data/nuzlocke.json`):
-```json
-{
-  "roster": [
-    { "nickname": "...", "speciesId": ..., "species": "...", "level": ..., "caughtAt": "ISO 8601" }
-  ],
-  "graveyard": [
-    { "nickname": "...", "speciesId": ..., "species": "...", "level": ..., "diedAt": "ISO 8601" }
-  ]
-}
-```
+**Regla clave:** una vez que un `nickname` aparece en `graveyard`, nunca vuelve a `roster` aunque el HP actual sea > 0 — la muerte es historial permanente.
 
-**Regla clave:** una vez que un `nickname` aparece en `graveyard`, nunca vuelve a `roster` aunque el HP actual sea > 0 (curación) — la muerte es historial permanente, coherente con el principio de la sección 3.
-
-El disco es la fuente de verdad (no hay memoria del juego de la que re-derivar el cementerio): `NuzlockeService` carga una sola vez y cachea en memoria, escribiendo a disco solo cuando algo cambia.
-
-Integrado en `Runtime.update()` (justo después de leer la party) y expuesto en `/api/nuzlocke`.
-
-Verificado con un test end-to-end sobre las clases reales: captura → sube de nivel (mismo registro) → evoluciona (mismo registro, sin duplicar) → muere (pasa a `graveyard`) → HP vuelve a subir (confirmado que NO revive) → persistencia real en disco.
+El disco es la fuente de verdad: `NuzlockeService` carga una sola vez y cachea en memoria, escribiendo a disco solo cuando algo cambia. Integrado en `Runtime.update()`, expuesto en `/api/nuzlocke`.
 
 ### Bloque B — Overlay del cementerio (`overlays/nuzlocke/`)
 
-Sirve en `/overlay/nuzlocke`. Barra de estadísticas (Capturados = `roster.length + graveyard.length`, Vivos = `roster.length`, Caídos = `graveyard.length`, Medallas X/8 vía `/api/badges`) + grilla del cementerio (sprite atenuado + nickname + nivel al morir + una cruz `†` decorativa). Reutiliza los sprites del Team Overlay vía ruta relativa (`../team/sprites/{speciesId}.png`) en vez de duplicar assets. Mismo patrón anti-bug de los otros overlays: como las muertes son permanentes, el cementerio solo crece — se trackean los nicknames ya renderizados y solo se agregan elementos nuevos.
+Sirve en `/overlay/nuzlocke`. Barra de estadísticas + grilla del cementerio, reutilizando sprites del Team Overlay vía ruta relativa.
 
-### Muerte visual persistente en el Team Overlay (integración entre secciones 9 y 14, 24/08/2026)
+### Muerte visual persistente en el Team Overlay
 
-Antes, `.nuzlocke-dead` en el Team Overlay dependía solo de `pokemon.hp <= 0` en el ciclo actual — si el Pokémon se curaba en el juego, la apariencia de muerto desaparecía. Esto era una regresión respecto al comportamiento del proyecto anterior (PokeOverlay), donde la muerte visual sí era persistente.
+`overlays/team/app.js` consulta `/api/nuzlocke` y arma un `Set` de nicknames en `graveyard`. `isDead` es `true` si `hp <= 0` **o** si el nickname ya está en el cementerio (mantiene la apariencia para siempre, sin importar el HP después). Todo el slot (nickname, nivel, barra de HP) se atenúa, no solo el sprite.
 
-Fix: `overlays/team/app.js` ahora también consulta `/api/nuzlocke` y arma un `Set` de nicknames en `graveyard`. `isDead` es `true` si `hp <= 0` (dispara la animación en el instante exacto) **o** si el nickname ya está en el cementerio (mantiene la apariencia para siempre, sin importar el HP después). Se agregó además la clase `dead` al `<div class="slot">` completo (no solo al `<img>`), con CSS nuevo que atenúa nickname, nivel y barra de HP — antes solo se atenuaba el sprite.
+### Bloque C — Encuentros por ruta (COMPLETO, 24-25/08/2026)
 
-### Bloque C — Encuentros por ruta (pendiente, requiere decisión de diseño)
+**Automatización completa vía PKHeX** — mucho más ambicioso que el plan original (que era solo un panel de carga manual). Se descubrió que el formato PK6 guarda el lugar de encuentro real dentro del propio Pokémon (`Met_Location`), y que ya se capturan completos y sin huecos los 232 bytes donde vive ese campo (los mismos que usan `species_id()`/`nickname()`/etc. en `structures.py`) — no hizo falta investigar memoria nueva.
 
-La regla Nuzlocke de "un encuentro por ruta" necesita saber **dónde** está el jugador y **qué** apareció — hoy no se lee ubicación ni encuentros salvajes de memoria. Dos caminos no excluyentes:
-- **Registro manual**: formulario/endpoint donde el usuario anota ruta + resultado. Funciona sin investigación de memoria.
-- **Investigar dirección de "zona/mapa actual"** en memoria: plausible que exista y sea más fácil de encontrar que el slot de combate (la posición del jugador suele vivir en una zona de memoria predecible), pero no garantizado. Línea de investigación opcional, no bloqueante.
+**Extensión del bridge PKHeX** (`dotnet/DexRelay.PKHeX/Program.cs`), 3 acciones nuevas, todas verificadas contra documentación oficial de PKHeX (no adivinadas):
 
-### Mejoras/ideas propuestas para más adelante (no bloqueantes)
+- `met_location`: recibe los 232 bytes ya descifrados de un Pokémon, construye un `PK6`, devuelve `metLocationName` (vía `pk.MetLocation` + `GameInfo.GetLocationName(...)`) y `shiny` (`pk.IsShiny` — de paso se conectó un campo que **nunca había estado conectado** en el backend, a pesar de que el CSS/JS del Team Overlay ya tenían el estilo shiny listo).
+- `species_list`: lista completa `{id, name}` de especies, para el buscador del panel.
+- `location_list`: lista completa `{id, name}` de ubicaciones, vía `GameInfo.GetLocationList(GameVersion.AS, EntityContext.Gen6, egg: false)` — la misma fuente que `met_location` usa para una captura real, **a propósito**, para que los nombres coincidan siempre.
 
-- Reglas configurables del run (dupes clause, species clause, etc.) en un futuro campo `run.ruleset`.
-- Validación anti-basura en capturas/muertes (mismo principio del fix de checksum PK6 — no registrar a partir de una sola lectura sin confirmar).
-- Exportar resumen del run al terminar (JSON o texto).
-- Notificaciones tipo "toast" en el overlay ante eventos importantes, aprovechando el futuro bus de eventos (sección 16).
+**Servicios Python nuevos:**
+- `app/services/location_resolver.py`: resuelve `metLocation` + `shiny`, cacheado por `nickname` (el lugar de encuentro de un Pokémon puntual no cambia nunca — evita golpear el bridge en cada ciclo de 200ms).
+- `app/services/species_catalog.py` / `app/services/location_catalog.py`: listas completas cacheadas en memoria y disco (`data/species_cache.json` / `data/location_cache.json`). **Importante:** se cachea el dato **crudo** de PKHeX, y el filtro/orden/traducción se aplican siempre frescos al leer — si se cacheara el resultado ya procesado, cualquier mejora futura al filtro quedaría "atrapada" en el caché viejo (pasó una vez con la traducción al español, corregido).
+- `app/services/hoenn_locations_es.py`: tabla de traducción español (España) verificada contra fuentes confiables (WikiDex, PokéWiki Fandom) el 25/08/2026 — **77 de 93 ubicaciones confirmadas**, las ~16 restantes (zonas post-juego/DexNav poco comunes: cuevas y ruinas secundarias) quedan en inglés a propósito por no poder confirmarlas con una fuente confiable. **Se aplica en dos lugares a la vez** (`LocationCatalog` y `LocationResolver`), obligatoriamente — si solo se tradujera uno de los dos, el nombre mostrado no coincidiría con el que reporta una captura real y reaparecería el bug de duplicados.
+
+**Filtro y orden de ubicaciones** (`location_catalog.py`): confirmado con datos reales que **todas** las ubicaciones de Hoenn (ORAS) caen entre el ID 170 y el 354, sin excepciones — fuera de ese rango queda Kalos completo (IDs 2-168), eventos/torneos (40000+), transferencias entre juegos (30000+) y regalos especiales (60000+). Se ordena además por progresión narrativa aproximada (`_STORY_ORDER_IDS`), no por el orden crudo de PKHeX.
+
+**`nuzlocke_service.py` — modelo de datos final:**
+```json
+{
+  "roster": [...], "graveyard": [...],
+  "encounters": [
+    { "location": "...", "nickname": "...", "species": "...", "status": "...", "updatedAt": "ISO 8601" }
+  ],
+  "pending_encounters": [
+    { "nickname": "...", "speciesId": ..., "species": "...", "shiny": bool, "caughtAt": "ISO 8601" }
+  ],
+  "starter_assigned": bool
+}
+```
+
+`status` (antes `result`) admite: `sin_intentar`, `capturado`, `perdido`, `muerto`, `intercambiado`, `regalo`, `shiny`.
+
+**Lógica de `_register_new_capture()` (orden de decisión):**
+1. **Primer Pokémon de toda la partida** → se registra como `"Inicial"` **sin importar** lo que diga `metLocation` (regalo del inicial no reporta ruta real). `starter_assigned=True`. **"Inicial" nunca se puede resetear**, ni siquiera si ese Pokémon murió después — `delete_encounter()` lo rechaza explícitamente (ValueError / 404 vía HTTP), y el botón de reseteo del panel ni se renderiza para esa fila.
+2. **Regla de especie repetida (species clause):** si ya hay otro Pokémon de la **misma especie vivo** en el roster, la captura no cuenta — no se registra en `encounters` ni en `pending_encounters`. Sigue existiendo en `roster` con normalidad (Bloque A no cambia). En cuanto el primero de esa especie muere, una captura nueva de esa especie vuelve a contar normal.
+3. **Con `metLocation` resuelto:** se registra directo en `encounters` — **pero solo si esa ubicación todavía no tiene un encuentro registrado**. Si ya hay uno, no se pisa (protección contra sobrescritura) — cae a `pending_encounters` para revisión manual.
+4. **Sin `metLocation`** (huevo, regalo, intercambio, bridge caído): cae a `pending_encounters` como siempre.
+
+**Sync automático con el cementerio:** cuando un Pokémon muere (Bloque A), cualquier `encounter` con su mismo `nickname` pasa a `status="muerto"` automáticamente.
+
+**Endpoints nuevos** (`http_server.py`):
+- `GET /api/species`, `GET /api/locations`
+- `GET /api/nuzlocke/pending-encounters`
+- `POST /api/nuzlocke/encounters` (manual, ahora con `nickname`+`status`)
+- `POST /api/nuzlocke/encounters/assign` (asignar ruta a una captura pendiente)
+- `POST /api/nuzlocke/encounters/delete` (botón de reseteo por ruta — borra el encuentro **y** el Pokémon del roster/graveyard; rechaza `"Inicial"`)
+- `POST /api/nuzlocke/pending-encounters/discard` (botón "Descartar" — saca de pendientes sin registrar, el Pokémon sigue en roster)
+- `POST /api/nuzlocke/reset` (botón "Reiniciar Nuzlocke Tracker", provisional — borra roster/graveyard/encounters/pending/starter_assigned de un solo golpe, doble confirmación en el panel)
+
+**Panel** (`panels/nuzlocke/`, servido en `/panel/nuzlocke` — no es un overlay para OBS, es una página de control para el usuario, mismo patrón `_serve_static_page` que los overlays):
+- Sección "Capturas sin ruta asignada" (solo aparecen los casos que PKHeX no pudo resolver solo), con botones **Asignar** y **Descartar**, refresco automático cada 3s.
+- Tabla de rutas (Ruta / Nickname / Especie / Estado) precargada desde `/api/locations`, con botón de reseteo (✕) por fila (oculto en "Inicial").
+- Buscador de especie propio (`createSpeciesPicker`, reemplaza `<datalist>` nativo por poco confiable entre navegadores) con sprite al lado, reutilizando `/overlay/team/sprites/{id}.png` — no hizo falta ninguna carpeta ni sprite nuevo para esto.
+- Guard: solo se guarda un encuentro cuando `nickname` **y** `species` tienen contenido (antes, cualquier click en un input vacío creaba un registro fantasma).
+- `NuzlockeService` es una **instancia compartida única** entre `Runtime` y `HTTPServer` (antes cada uno tenía la suya) — el panel necesita escribir sobre los mismos datos que el resto del sistema lee.
+
+**Bugs encontrados y corregidos en el camino:**
+- El campo `shiny` nunca había estado conectado en el backend (arreglado de paso, gratis con la misma llamada a PKHeX).
+- `refreshEncounters()` disparaba la animación de "guardado" en cada refresh automático aunque nada hubiera cambiado (parpadeo azul constante) — ahora solo resalta si algo cambió de verdad.
+- Caché en disco de `LocationCatalog` servía datos ya procesados (viejos, en inglés, de antes de la traducción) para siempre — corregido cacheando el dato crudo y aplicando filtro/traducción siempre frescos.
+
+### Pendiente / mejoras futuras
+
+- ~16 ubicaciones post-juego/DexNav siguen en inglés (no se pudo confirmar una traducción confiable) — completar cuando se identifiquen con certeza.
+- Ronald mencionó (25/08/2026) que sigue teniendo cosas para mejorar en el Tracker, sin especificar cuáles todavía — retomar en la próxima sesión.
+- Reglas configurables del run (dupes clause completa, etc.) en un futuro campo `run.ruleset`.
+- Exportar resumen del run al terminar.
+- Notificaciones tipo "toast" en el overlay ante eventos importantes (captura, muerte) — aprovechando el futuro bus de eventos (sección 16).
 - Leer la caja (PC) completa, no solo el equipo activo, para que el roster incluya todo lo capturado — requiere investigar la dirección del box.
 
 ---
@@ -698,6 +737,19 @@ Tags previstos: `v0.1.0`, `v0.2.0`, ... `v1.0.0`.
 ### Historial de commits (de más reciente a más antiguo)
 
 ```text
+26e452a Boton provisional para reiniciar todo el Nuzlocke Tracker
+8ea0871 Corregir cache de ubicaciones desactualizado (mostraba nombres viejos en ingles)
+d8129f2 Traducir nombres de ubicaciones de Hoenn al español (España), verificado
+a3c4935 Filtrar y ordenar /api/locations por rango de Hoenn y progresion de historia
+2a41a41 Inicial permanente, regla de especie repetida, boton Descartar en pendientes
+c887af4 Lista de rutas desde PKHeX (fix de raiz de duplicados), boton de reseteo, guard de campos vacios
+1cf4401 Corregir bugs del panel: Inicial, duplicados, parpadeo, buscador con sprite
+0a53b02 Panel: columna de nickname, buscador de especies y estados ampliados
+a418267 Backend: deteccion automatica de ruta via PKHeX, nickname, estado ampliado
+4a03722 Agregar probe para investigar la zona actual en memoria
+aaeddd5 Automatizar captura de encuentros: especie y resultado se detectan solos
+b9f0a4c Nuzlocke Tracker (Bloque C): panel de encuentros por ruta (carga manual)
+5a02152 Actualizar Documento Maestro: cierre de sesion (Nuzlocke Tracker, fixes HTTP, muerte persistente)
 49227cb Aplicar el gris de 'muerto' a todo el slot (nickname, nivel, barra de HP)
 991324b Muerte visual persistente en el overlay + desactivar HP de combate temporalmente
 9e1fdcc Corregir CSS/JS que no cargaban por falta de redirect a barra final
@@ -812,12 +864,14 @@ git diff --check
 - [ ] URLs copiables, estado de servicios, logs, configuración
 
 ### FASE 5 — NUZLOCKE TRACKER
-**🟡 EN PROGRESO — Bloques A y B completos**
+**🟢 MAYORMENTE COMPLETA — Bloques A, B y C completos**
 
 - [x] Base de datos (JSON — `data/nuzlocke.json`)
 - [x] Capturas automáticas, muertes persistentes, evoluciones (sección 14, Bloque A)
 - [x] Overlay del Tracker (cementerio + estadísticas, sección 14, Bloque B)
-- [ ] Encuentros por ruta/zona (sección 14, Bloque C — pendiente, requiere decisión de diseño)
+- [x] Encuentros por ruta/zona — detección automática vía PKHeX (`met_location`), no solo carga manual (sección 14, Bloque C)
+- [x] Panel de control (`panels/nuzlocke/`): asignar/descartar pendientes, resetear por ruta, resetear todo
+- [ ] ~16 ubicaciones post-juego sin traducir al español (confirmar cuando se identifiquen)
 - [ ] Partidas (multi-run), gestión manual desde GUI
 
 ### FASE 6 — APLICACIÓN
@@ -882,7 +936,8 @@ MEDALLAS — SERVICIO/API       🟢 FUNCIONAL
 BADGES OVERLAY                🟢 FUNCIONAL
 NUZLOCKE TRACKER — NÚCLEO     🟢 FUNCIONAL (captura/evolución/muerte automáticas)
 NUZLOCKE OVERLAY               🟢 FUNCIONAL (cementerio + estadísticas)
-NUZLOCKE — ENCUENTROS/RUTA     🔴 PENDIENTE (Bloque C, requiere decisión de diseño)
+NUZLOCKE — ENCUENTROS/RUTA     🟢 FUNCIONAL (automático vía PKHeX, no solo carga manual)
+NUZLOCKE — PANEL DE CONTROL    🟢 FUNCIONAL (/panel/nuzlocke: asignar, descartar, resetear)
 HP DE COMBATE — BACKEND       🟢 FUNCIONAL (sigue corriendo, no afecta overlay)
 HP DE COMBATE — OVERLAY       🟡 DESACTIVADO TEMPORALMENTE (comentado en app.js, no borrado)
 DETECCIÓN DE SLOT EN COMBATE  🔴 PAUSADA, SIN RESULTADO
@@ -920,5 +975,6 @@ El documento debe actualizarse cuando: se complete una fase, cambie la arquitect
 - **2026-08-22:** `v6` — versión fuertemente condensada (pérdida de detalle detectada posteriormente).
 - **2026-08-23:** Team Overlay, HP de combate animado, fix del puntero de combate, Badges Overlay.
 - **2026-08-24:** fix de checksum PK6 y de animación de entrada al reordenar; reconstrucción consolidada de este documento a partir de las 7 versiones históricas para recuperar contexto perdido; agregada referencia a la lógica de muerte persistente ya validada en el prototipo (`PokeOverlay/scripts/azahar_reader_nuzlocke_realtime.py`), pendiente de portar cuando se retome la FASE 5; `process_name` movido de código hardcodeado a `config.json`; decisión de concurrencia resuelta (threads) e implementada — loop realtime movido a su propio hilo; silenciados los tracebacks de desconexiones esperadas del cliente (keep-alive); sincronizados los ajustes visuales manuales del usuario en `overlays/team/style.css` y `overlays/badges/style.css` + sprites reales de medallas; **Nuzlocke Tracker Bloques A y B completos** (captura/evolución/muerte automáticas + overlay de cementerio y estadísticas, portado desde el prototipo); corregido bug de CSS/JS sin cargar por falta de redirect a barra final en las 3 rutas de overlay; muerte visual del Team Overlay ahora es persistente (integrada con el cementerio del Tracker) y se extiende a todo el slot (nickname, nivel, barra de HP), no solo al sprite; HP de combate en tiempo real desactivado temporalmente en el overlay (comentado, no borrado) por estar afectando visualizaciones ya funcionales mientras la detección real del slot sigue pendiente.
+- **2026-08-25:** **Nuzlocke Tracker Bloque C completo**, con automatización real vía PKHeX (mucho más de lo planeado originalmente): descubierto que el formato PK6 guarda el lugar de encuentro real del Pokémon (`Met_Location`), extendido el bridge C# con 3 acciones nuevas (`met_location`, `species_list`, `location_list`) verificadas contra documentación oficial de PKHeX; panel de control nuevo (`panels/nuzlocke/`) con buscador de especies + sprite, capturas pendientes con Asignar/Descartar, reseteo por ruta, y botón de reinicio total del Tracker; campo `shiny` conectado al backend por primera vez (nunca lo había estado); "Inicial" siempre primero y permanente (no se puede resetear); regla de especie repetida (species clause); protección contra sobrescribir una ruta ya registrada; lista de rutas filtrada por rango de ID de Hoenn y ordenada por progresión de historia (en vez de una lista escrita a mano, que tenía errores reales); 77 de 93 ubicaciones traducidas al español verificadas contra fuentes confiables (WikiDex, PokéWiki), aplicada en los dos lugares a la vez (catálogo y resolución de capturas) para no reintroducir el bug de duplicados; corregido un bug de caché en disco que servía nombres viejos en inglés indefinidamente.
 
 **Este archivo es la referencia maestra de continuidad del proyecto.**
