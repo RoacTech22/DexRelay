@@ -20,6 +20,7 @@ class NuzlockeStorage:
             return {
                 "roster": [],
                 "graveyard": [],
+                "encounters": [],
             }
 
         with self.path.open(
@@ -30,6 +31,7 @@ class NuzlockeStorage:
 
         data.setdefault("roster", [])
         data.setdefault("graveyard", [])
+        data.setdefault("encounters", [])
 
         return data
 

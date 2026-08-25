@@ -6,6 +6,8 @@ from app.core.runtime import Runtime
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.server.http_server import HTTPServer
+from app.services.nuzlocke_service import NuzlockeService
+from app.services.nuzlocke_storage import NuzlockeStorage
 
 
 class Application:
@@ -22,9 +24,20 @@ class Application:
         self.reader = AzaharReader(
             process_name=process_name,
         )
+
+        # Instancia única, compartida entre Runtime (que lee/escribe
+        # roster y graveyard cada ciclo realtime) y HTTPServer (que
+        # necesita escribir encuentros desde el panel de control) --
+        # ambos deben trabajar sobre los mismos datos en memoria,
+        # no sobre copias independientes que se pisarían entre sí.
+        self.nuzlocke_service = NuzlockeService(
+            NuzlockeStorage()
+        )
+
         self.runtime = Runtime(
             self.reader,
             self.state,
+            nuzlocke_service=self.nuzlocke_service,
         )
 
         refresh_ms = self.config.get(
@@ -54,6 +67,7 @@ class Application:
             state=self.state,
             host=server_host,
             port=int(server_port),
+            nuzlocke_service=self.nuzlocke_service,
         )
 
         self.running = False

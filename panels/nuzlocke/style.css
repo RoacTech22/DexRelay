@@ -1,0 +1,240 @@
+:root {
+    --bg: #14161c;
+    --bg-row: #1b1e26;
+    --bg-row-alt: #1f232c;
+    --border: #2c2f3a;
+    --text: #e6e6ea;
+    --text-dim: #8b8f9c;
+
+    --result-none: #3a3d47;
+    --result-caught: #2e7d4f;
+    --result-lost: #a13c3c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    background: var(--bg);
+    color: var(--text);
+
+    font-family:
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        sans-serif;
+}
+
+body {
+    max-width: 760px;
+
+    margin: 0 auto;
+
+    padding: 28px 24px 60px;
+}
+
+header {
+    margin-bottom: 22px;
+}
+
+h1 {
+    margin: 0 0 6px;
+
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.subtitle {
+    margin: 0;
+
+    color: var(--text-dim);
+    font-size: 14px;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    overflow: hidden;
+}
+
+thead th {
+    text-align: left;
+
+    padding: 10px 14px;
+
+    background: #101217;
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+
+    color: var(--text-dim);
+
+    border-bottom: 1px solid var(--border);
+}
+
+.col-location {
+    width: 34%;
+}
+
+.col-species {
+    width: 36%;
+}
+
+.col-result {
+    width: 30%;
+}
+
+tbody tr {
+    background: var(--bg-row);
+}
+
+tbody tr:nth-child(even) {
+    background: var(--bg-row-alt);
+}
+
+tbody tr + tr {
+    border-top: 1px solid var(--border);
+}
+
+td {
+    padding: 8px 10px;
+
+    vertical-align: middle;
+}
+
+.location-label {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.species-input,
+.result-select {
+    width: 100%;
+
+    padding: 7px 9px;
+
+    background: #0e1015;
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.species-input::placeholder {
+    color: #5a5e6b;
+}
+
+.species-input:focus,
+.result-select:focus {
+    outline: none;
+    border-color: #4a90d9;
+}
+
+.result-select {
+    appearance: none;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+/* Color de fondo del select segun el resultado
+   elegido -- se actualiza desde app.js poniendo
+   la clase correspondiente. */
+.result-select.result-sin_intentar {
+    background-color: var(--result-none);
+    color: #cfd1d8;
+}
+
+.result-select.result-atrapado {
+    background-color: var(--result-caught);
+    color: #ffffff;
+}
+
+.result-select.result-perdido {
+    background-color: var(--result-lost);
+    color: #ffffff;
+}
+
+/* =========================================
+   AGREGAR FILA
+========================================= */
+
+#add-row {
+    display: flex;
+    gap: 10px;
+
+    margin-top: 16px;
+}
+
+#new-location-input {
+    flex: 1;
+
+    padding: 10px 12px;
+
+    background: var(--bg-row);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-family: inherit;
+}
+
+#add-row-button {
+    padding: 10px 18px;
+
+    background: #2c3e50;
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#add-row-button:hover {
+    background: #34495e;
+}
+
+/* =========================================
+   INDICADOR DE GUARDADO
+========================================= */
+
+.saved-flash {
+    animation: savedFlash 0.6s ease-out;
+}
+
+@keyframes savedFlash {
+
+    0% {
+        box-shadow: inset 0 0 0 2px #4a90d9;
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 2px transparent;
+    }
+}

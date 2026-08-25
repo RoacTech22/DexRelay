@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import Thread
 
 from app.core.state import ApplicationState
+from app.services.nuzlocke_service import NuzlockeService
 
 
 # Errores esperados cuando el navegador (o el Browser Source de
@@ -53,16 +54,33 @@ class HTTPServer:
         state: ApplicationState,
         host: str = "127.0.0.1",
         port: int = 8080,
+        nuzlocke_service: NuzlockeService | None = None,
     ) -> None:
         self.state = state
         self.host = host
         self.port = port
+        self.nuzlocke_service = nuzlocke_service
 
-        self.overlay_directory = (
+        project_root = (
             Path(__file__)
             .resolve()
             .parents[2]
-            / "overlays"
+        )
+
+        # /overlay/* -- vistas para OBS (Browser Source):
+        # transparentes, de solo lectura, pensadas para verse en
+        # stream.
+        self.overlay_directory = (
+            project_root / "overlays"
+        )
+
+        # /panel/* -- páginas de control interactivas (ej. carga
+        # manual de encuentros del Nuzlocke Tracker). No son para
+        # OBS: son para que el usuario las abra en su propio
+        # navegador mientras juega. Sirven como sustituto liviano
+        # de la GUI hasta que exista (FASE 4).
+        self.panel_directory = (
+            project_root / "panels"
         )
 
         self._server: ThreadingHTTPServer | None = None
@@ -120,6 +138,8 @@ class HTTPServer:
 
         state = self.state
         overlay_directory = self.overlay_directory
+        panel_directory = self.panel_directory
+        nuzlocke_service = self.nuzlocke_service
 
         class Handler(BaseHTTPRequestHandler):
 
@@ -150,6 +170,9 @@ class HTTPServer:
                     return
 
                 if self._serve_overlay("nuzlocke"):
+                    return
+
+                if self._serve_panel("nuzlocke"):
                     return
 
                 if self.path == "/api/status":
@@ -197,45 +220,212 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/nuzlocke/encounters":
+
+                    if nuzlocke_service is None:
+                        self._send_json(
+                            {"encounters": []},
+                            200,
+                        )
+                        return
+
+                    self._send_json(
+                        {
+                            "encounters": (
+                                nuzlocke_service
+                                .get_encounters()
+                            )
+                        },
+                        200,
+                    )
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
                 )
+
+            def do_POST(self):
+
+                if self.path == "/api/nuzlocke/encounters":
+                    self._handle_save_encounter()
+                    return
+
+                self._send_text(
+                    "Not Found",
+                    404,
+                )
+
+            def _handle_save_encounter(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                location = str(
+                    payload.get("location", "")
+                ).strip()
+
+                species = str(
+                    payload.get("species", "")
+                ).strip()
+
+                result = str(
+                    payload.get(
+                        "result",
+                        "sin_intentar",
+                    )
+                ).strip()
+
+                if not location:
+                    self._send_json(
+                        {
+                            "error": (
+                                "'location' es requerido."
+                            )
+                        },
+                        400,
+                    )
+                    return
+
+                try:
+                    encounters = (
+                        nuzlocke_service.save_encounter(
+                            location,
+                            species,
+                            result,
+                        )
+                    )
+
+                except ValueError as error:
+                    self._send_json(
+                        {"error": str(error)},
+                        400,
+                    )
+                    return
+
+                self._send_json(
+                    {"encounters": encounters},
+                    200,
+                )
+
+            def _read_json_body(self):
+                """
+                Lee y parsea el body JSON de la petición.
+                Devuelve None si no se pudo parsear.
+                """
+
+                try:
+                    content_length = int(
+                        self.headers.get(
+                            "Content-Length",
+                            0,
+                        )
+                    )
+
+                except (TypeError, ValueError):
+                    return None
+
+                if content_length <= 0:
+                    return {}
+
+                raw_body = self.rfile.read(
+                    content_length
+                )
+
+                try:
+                    return json.loads(
+                        raw_body.decode("utf-8")
+                    )
+
+                except (
+                    json.JSONDecodeError,
+                    UnicodeDecodeError,
+                ):
+                    return None
 
             def _serve_overlay(
                 self,
                 overlay_name: str,
             ) -> bool:
                 """
-                Sirve el index.html de un overlay
-                (team/badges/nuzlocke) y los archivos estáticos
-                dentro de su carpeta. Devuelve True si la petición
-                era para este overlay (ya se respondió, con éxito
-                o 404), False si no tiene nada que ver con él.
+                Sirve un overlay (team/badges/nuzlocke) desde
+                overlays/{overlay_name}/, bajo /overlay/{overlay_name}.
+                """
+
+                return self._serve_static_page(
+                    url_base=f"/overlay/{overlay_name}",
+                    root_directory=overlay_directory,
+                    relative_root=overlay_name,
+                )
+
+            def _serve_panel(
+                self,
+                panel_name: str,
+            ) -> bool:
+                """
+                Sirve un panel de control (ej. carga manual de
+                encuentros del Nuzlocke Tracker) desde
+                panels/{panel_name}/, bajo /panel/{panel_name}.
+                """
+
+                return self._serve_static_page(
+                    url_base=f"/panel/{panel_name}",
+                    root_directory=panel_directory,
+                    relative_root=panel_name,
+                )
+
+            def _serve_static_page(
+                self,
+                url_base: str,
+                root_directory: Path,
+                relative_root: str,
+            ) -> bool:
+                """
+                Sirve el index.html de una página estática y los
+                archivos dentro de su carpeta. Devuelve True si la
+                petición era para esta página (ya se respondió,
+                con éxito o 404), False si no tiene nada que ver.
 
                 Redirige a la versión con "/" al final cuando
                 falta: sin esa barra, el navegador resuelve los
                 <link>/<script> relativos (style.css, app.js)
-                contra el directorio PADRE (/overlay/) en vez de
-                /overlay/{overlay_name}/, y el CSS/JS no cargan.
+                contra el directorio PADRE de la URL en vez del
+                propio, y el CSS/JS no cargan.
                 """
 
-                base_path = f"/overlay/{overlay_name}"
-
-                if self.path == base_path:
+                if self.path == url_base:
                     self._send_redirect(
-                        f"{base_path}/"
+                        f"{url_base}/"
                     )
                     return True
 
-                if self.path == f"{base_path}/":
+                if self.path == f"{url_base}/":
                     self._send_file(
-                        f"{overlay_name}/index.html",
+                        root_directory,
+                        f"{relative_root}/index.html",
                         "text/html; charset=utf-8",
                     )
                     return True
 
-                prefix = f"{base_path}/"
+                prefix = f"{url_base}/"
 
                 if self.path.startswith(prefix):
                     relative_path = self.path[
@@ -243,7 +433,8 @@ class HTTPServer:
                     ]
 
                     self._send_file(
-                        f"{overlay_name}/{relative_path}",
+                        root_directory,
+                        f"{relative_root}/{relative_path}",
                         self._content_type(
                             relative_path
                         ),
@@ -269,11 +460,12 @@ class HTTPServer:
 
             def _send_file(
                 self,
+                root_directory: Path,
                 relative_path: str,
                 content_type: str,
             ):
                 file_path = (
-                    overlay_directory
+                    root_directory
                     / relative_path
                 )
 

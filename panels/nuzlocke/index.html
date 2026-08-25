@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DexRelay — Encuentros Nuzlocke</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Encuentros por ruta</h1>
+        <p class="subtitle">
+            Carga manual — todavía no leemos la ubicación desde
+            memoria. Los cambios se guardan solos.
+        </p>
+    </header>
+
+    <table id="encounters-table">
+        <thead>
+            <tr>
+                <th class="col-location">Ruta / Ubicación</th>
+                <th class="col-species">Especie</th>
+                <th class="col-result">Resultado</th>
+            </tr>
+        </thead>
+        <tbody id="encounters-body">
+        </tbody>
+    </table>
+
+    <div id="add-row">
+        <input
+            type="text"
+            id="new-location-input"
+            placeholder="Agregar otra ubicación..."
+        >
+        <button id="add-row-button" type="button">
+            Agregar
+        </button>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

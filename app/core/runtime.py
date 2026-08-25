@@ -17,6 +17,7 @@ class Runtime:
         self,
         reader: AzaharReader,
         state: ApplicationState,
+        nuzlocke_service: NuzlockeService | None = None,
     ):
         self.reader = reader
         self.state = state
@@ -31,8 +32,14 @@ class Runtime:
 
         self.badges_storage = BadgesStorage()
 
-        self.nuzlocke_service = NuzlockeService(
-            NuzlockeStorage()
+        # Se puede compartir la misma instancia con HTTPServer
+        # (ver app.py) para que el panel de encuentros escriba
+        # sobre los mismos datos que el resto del sistema lee.
+        # Si no se pasa ninguna, crea la suya propia (compatibilidad
+        # con código/tests existentes que construyen Runtime solo).
+        self.nuzlocke_service = (
+            nuzlocke_service
+            or NuzlockeService(NuzlockeStorage())
         )
 
         self._last_badges = None

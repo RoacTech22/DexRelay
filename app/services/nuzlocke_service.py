@@ -154,3 +154,79 @@ class NuzlockeService:
             self.storage.save(self._data)
 
         return self._data
+
+    # =====================================
+    # BLOQUE C: ENCUENTROS POR RUTA
+    #
+    # A diferencia de roster/graveyard, esto no se
+    # deriva de la memoria del juego -- lo carga el
+    # usuario a mano desde el panel de control
+    # (panels/nuzlocke/). Un registro por ubicación
+    # (se actualiza el mismo si ya existía en vez de
+    # duplicar), identificado por el texto exacto de
+    # `location`.
+    # =====================================
+
+    VALID_ENCOUNTER_RESULTS = (
+        "sin_intentar",
+        "atrapado",
+        "perdido",
+    )
+
+    def get_encounters(self) -> list[dict]:
+        """Devuelve la lista actual de encuentros registrados."""
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        self._data.setdefault("encounters", [])
+
+        return self._data["encounters"]
+
+    def save_encounter(
+        self,
+        location: str,
+        species: str,
+        result: str,
+    ) -> list[dict]:
+        """
+        Crea o actualiza el registro de encuentro de una
+        ubicación. Devuelve la lista completa de encuentros
+        ya actualizada.
+        """
+
+        if result not in self.VALID_ENCOUNTER_RESULTS:
+            raise ValueError(
+                f"Resultado invalido: {result!r}. "
+                f"Debe ser uno de {self.VALID_ENCOUNTER_RESULTS}."
+            )
+
+        encounters = self.get_encounters()
+
+        existing = next(
+            (
+                entry
+                for entry in encounters
+                if entry["location"] == location
+            ),
+            None,
+        )
+
+        if existing is None:
+
+            encounters.append({
+                "location": location,
+                "species": species,
+                "result": result,
+                "updatedAt": _now_iso(),
+            })
+
+        else:
+
+            existing["species"] = species
+            existing["result"] = result
+            existing["updatedAt"] = _now_iso()
+
+        self.storage.save(self._data)
+
+        return encounters
