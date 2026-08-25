@@ -337,10 +337,32 @@ class HTTPServer:
                     self._handle_discard_pending()
                     return
 
+                if self.path == "/api/nuzlocke/reset":
+                    self._handle_reset_all()
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
                 )
+
+            def _handle_reset_all(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                data = nuzlocke_service.reset_all()
+
+                self._send_json(data, 200)
 
             def _handle_discard_pending(self):
 

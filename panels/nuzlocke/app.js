@@ -1332,4 +1332,71 @@ function escapeHTML(value) {
 }
 
 
+/* =========================================
+   REINICIAR TODO EL NUZLOCKE TRACKER
+   (provisional)
+
+   Borra roster, cementerio, encounters y pending_encounters --
+   arranca la partida en DexRelay como si fuera nueva. Doble
+   confirmación porque es mucho más destructivo que resetear una
+   sola ruta (ver resetLocation): no hay forma de deshacerlo.
+========================================= */
+
+const resetAllButton =
+    document.getElementById("reset-all-button");
+
+resetAllButton.addEventListener(
+    "click",
+    async () => {
+
+        const firstConfirm = window.confirm(
+            "Esto borra TODO el Nuzlocke Tracker: " +
+            "capturados, cementerio y todos los " +
+            "encuentros registrados. No se puede " +
+            "deshacer.\n\n¿Seguro que querés continuar?"
+        );
+
+        if (!firstConfirm) {
+            return;
+        }
+
+        const secondConfirm = window.confirm(
+            "Confirmá una vez más: se va a borrar TODO " +
+            "de verdad. ¿Continuar?"
+        );
+
+        if (!secondConfirm) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/nuzlocke/reset",
+                    { method: "POST" }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP ${response.status}`
+                );
+            }
+
+            // Recargar la página es lo más simple y
+            // confiable para reflejar el estado vacío en
+            // toda la tabla, las tarjetas pendientes, etc.
+            window.location.reload();
+
+        } catch (error) {
+
+            console.error(
+                "Error reiniciando el Nuzlocke Tracker:",
+                error
+            );
+        }
+    }
+);
+
+
 init();

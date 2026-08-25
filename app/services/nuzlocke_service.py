@@ -49,6 +49,29 @@ class NuzlockeService:
         self.storage = storage
         self._data = None
 
+    def reset_all(self) -> dict:
+        """
+        Botón "reiniciar todo" del panel (provisional): borra
+        roster, graveyard, encounters, pending_encounters y
+        starter_assigned -- vuelve a un estado como si DexRelay
+        nunca hubiera visto esta partida. No toca config.json ni
+        nada fuera del Nuzlocke Tracker.
+
+        Devuelve el estado vacío recién guardado.
+        """
+
+        self._data = {
+            "roster": [],
+            "graveyard": [],
+            "encounters": [],
+            "pending_encounters": [],
+            "starter_assigned": False,
+        }
+
+        self.storage.save(self._data)
+
+        return self._data
+
     def update(self, team: list[dict]) -> dict:
         """
         Compara la party actual contra el estado guardado, detecta
