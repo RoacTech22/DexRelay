@@ -162,6 +162,23 @@ class PKHeXBridge:
             }
         )
 
+    def location_list(self):
+        """
+        Obtiene la lista completa {id, name} de ubicaciones
+        conocidas por PKHeX para Alpha Sapphire -- la misma
+        fuente que met_location() usa para resolver el lugar de
+        encuentro real de una captura, así que ambas siempre
+        coinciden textualmente. Se llama una sola vez -- el
+        resultado se cachea del lado de Python
+        (location_catalog.py / el endpoint /api/locations).
+        """
+
+        return self.request(
+            {
+                "action": "location_list",
+            }
+        )
+
     def met_location(self, decrypted_box_data):
         """
         Resuelve el lugar de encuentro (y si es shiny) a

@@ -6,6 +6,7 @@ from app.core.runtime import Runtime
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.server.http_server import HTTPServer
+from app.services.location_catalog import LocationCatalog
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
 from app.services.species_catalog import SpeciesCatalog
@@ -70,6 +71,7 @@ class Application:
             port=int(server_port),
             nuzlocke_service=self.nuzlocke_service,
             species_catalog=SpeciesCatalog(),
+            location_catalog=LocationCatalog(),
         )
 
         self.running = False

@@ -215,9 +215,45 @@ td {
     vertical-align: middle;
 }
 
+.location-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
 .location-label {
     font-size: 15px;
     font-weight: 600;
+}
+
+.reset-button {
+    flex: 0 0 auto;
+
+    width: 22px;
+    height: 22px;
+
+    padding: 0;
+
+    background: transparent;
+    color: var(--text-dim);
+
+    border: 1px solid var(--border);
+    border-radius: 5px;
+
+    font-size: 13px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0.6;
+}
+
+.reset-button:hover {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+
+    opacity: 1;
 }
 
 .species-input,

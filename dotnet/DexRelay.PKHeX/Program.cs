@@ -48,6 +48,10 @@ while (true)
                 HandleMetLocation(root);
                 break;
 
+            case "location_list":
+                HandleLocationList();
+                break;
+
             default:
                 WriteError(
                     $"Acción no soportada: {action}"
@@ -112,6 +116,44 @@ static void HandleSpeciesList()
     }
 
     var response = new { species };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+static void HandleLocationList()
+{
+    // Misma fuente de verdad que HandleMetLocation() usa para
+    // resolver el lugar de encuentro de una captura real -- así
+    // la lista de rutas que se le muestra al usuario en el panel
+    // SIEMPRE coincide textualmente con lo que la detección
+    // automática va a reportar. Antes el panel tenía su propia
+    // lista escrita a mano (con errores: nombres en inglés,
+    // variantes regionales de traducción incorrectas), lo que
+    // hacía que una captura nueva no encontrara su fila existente
+    // y creara una duplicada.
+    var locations =
+        GameInfo.GetLocationList(
+            GameVersion.AS,
+            EntityContext.Gen6,
+            egg: false
+        );
+
+    var result = new List<object>();
+
+    foreach (var item in locations)
+    {
+        if (string.IsNullOrEmpty(item.Text))
+        {
+            continue;
+        }
+
+        result.Add(new { id = item.Value, name = item.Text });
+    }
+
+    var response = new { locations = result };
 
     Console.WriteLine(
         JsonSerializer.Serialize(response)

@@ -306,6 +306,70 @@ class NuzlockeService:
 
         return self._data["pending_encounters"]
 
+    def delete_encounter(self, location: str) -> list[dict]:
+        """
+        Botón de reseteo de una ruta (panel): elimina el registro
+        de encuentro de esa ubicación Y el Pokémon capturado ahí
+        -- lo saca de `roster`/`graveyard` también, no solo de
+        `encounters`. Pensado para deshacer una captura mal
+        registrada (ej. una fila duplicada por el bug de idioma),
+        no para el uso normal del juego.
+
+        Si la ubicación era "Inicial", además libera
+        `starter_assigned` para que el próximo Pokémon que se
+        detecte vuelva a poder tomar ese lugar.
+
+        Devuelve la lista de encuentros actualizada. Lanza
+        ValueError si no había ningún encuentro en esa ubicación.
+        """
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        encounters = self.get_encounters()
+
+        match = next(
+            (
+                entry
+                for entry in encounters
+                if entry["location"] == location
+            ),
+            None,
+        )
+
+        if match is None:
+            raise ValueError(
+                f"No hay ningún encuentro registrado en "
+                f"{location!r}."
+            )
+
+        encounters.remove(match)
+
+        nickname = match.get("nickname")
+
+        if nickname:
+
+            self._data["roster"] = [
+                entry
+                for entry in self._data.get("roster", [])
+                if entry.get("nickname") != nickname
+            ]
+
+            self._data["graveyard"] = [
+                entry
+                for entry in self._data.get(
+                    "graveyard", []
+                )
+                if entry.get("nickname") != nickname
+            ]
+
+        if location == "Inicial":
+            self._data["starter_assigned"] = False
+
+        self.storage.save(self._data)
+
+        return encounters
+
     def assign_encounter_location(
         self,
         nickname: str,

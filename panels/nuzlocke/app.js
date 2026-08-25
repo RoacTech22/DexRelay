@@ -2,6 +2,7 @@ const ENCOUNTERS_API_URL = "/api/nuzlocke/encounters";
 const PENDING_API_URL = "/api/nuzlocke/pending-encounters";
 const ASSIGN_API_URL = "/api/nuzlocke/encounters/assign";
 const SPECIES_API_URL = "/api/species";
+const LOCATIONS_API_URL = "/api/locations";
 
 const VALID_STATUSES = [
     "sin_intentar",
@@ -23,63 +24,17 @@ const STATUS_LABELS = {
     shiny: "Shiny"
 };
 
-/* Orden principal de rutas/ciudades de ORAS (progresión de
-   historia). No es 100% exhaustivo (no cubre cada cueva lateral) --
-   lo que falte se agrega a mano con "Agregar" al final de la
-   tabla. */
-const DEFAULT_LOCATIONS = [
-    "Ruta 101",
-    "Ruta 102",
-    "Ruta 103",
-    "Petalburg City",
-    "Ruta 104",
-    "Petalburg Woods",
-    "Rustboro City",
-    "Ruta 105",
-    "Ruta 116",
-    "Rusturf Tunnel",
-    "Dewford Town",
-    "Ruta 106",
-    "Ruta 107",
-    "Ruta 108",
-    "Ruta 109",
-    "Slateport City",
-    "Ruta 110",
-    "Ruta 111",
-    "Ruta 112",
-    "Fallarbor Town",
-    "Ruta 113",
-    "Ruta 114",
-    "Meteor Falls",
-    "Ruta 115",
-    "Mauville City",
-    "Ruta 117",
-    "Verdanturf Town",
-    "Ruta 118",
-    "Ruta 119",
-    "Fortree City",
-    "Ruta 120",
-    "Ruta 121",
-    "Ruta 122",
-    "Ruta 123",
-    "Lilycove City",
-    "Ruta 124",
-    "Ruta 125",
-    "Ruta 126",
-    "Ruta 127",
-    "Ruta 128",
-    "Mossdeep City",
-    "Ruta 129",
-    "Ruta 130",
-    "Ruta 131",
-    "Pacifidlog Town",
-    "Ruta 132",
-    "Ruta 133",
-    "Ruta 134",
-    "Sootopolis City",
-    "Ever Grande City",
-    "Victory Road"
-];
+/* Se completa en loadLocationList() con la lista oficial que
+   devuelve PKHeX (/api/locations) -- la MISMA fuente que usa la
+   detección automática para resolver el lugar de encuentro real,
+   así los nombres coinciden siempre y una captura nueva encuentra
+   su fila existente en vez de crear una duplicada.
+
+   "Inicial" es una excepción: no es un lugar real del juego, es
+   una marca propia de DexRelay para el primer Pokémon obtenido en
+   la partida (ver nuzlocke_service.py). Va fija de primera en la
+   lista. */
+let DEFAULT_LOCATIONS = ["Inicial"];
 
 const tableBody =
     document.getElementById("encounters-body");
@@ -318,6 +273,7 @@ function createSpeciesPicker(initialValue) {
 async function init() {
 
     await loadSpeciesList();
+    await loadLocationList();
 
     const existing =
         await loadEncounters();
@@ -414,6 +370,51 @@ async function loadSpeciesList() {
 }
 
 
+async function loadLocationList() {
+
+    try {
+
+        const response =
+            await fetch(
+                LOCATIONS_API_URL,
+                { cache: "no-store" }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        const fetched =
+            Array.isArray(data.locations)
+                ? data.locations
+                    .map(entry => entry.name)
+                    .filter(Boolean)
+                : [];
+
+        // "Inicial" siempre primero, después la lista oficial
+        // que devuelve PKHeX. Si el bridge todavía no respondió
+        // (arrancando) o falló, se queda solo con "Inicial" --
+        // igual se puede usar el botón "Agregar" mientras tanto.
+        DEFAULT_LOCATIONS = [
+            "Inicial",
+            ...fetched
+        ];
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando el catálogo de ubicaciones:",
+            error
+        );
+    }
+}
+
+
 async function loadEncounters() {
 
     try {
@@ -494,6 +495,9 @@ function addRow(location, existingEntry) {
     const locationCell =
         document.createElement("td");
 
+    locationCell.className =
+        "location-cell";
+
     const locationLabel =
         document.createElement("div");
 
@@ -504,6 +508,23 @@ function addRow(location, existingEntry) {
         location;
 
     locationCell.appendChild(locationLabel);
+
+    const resetButton =
+        document.createElement("button");
+
+    resetButton.type = "button";
+    resetButton.className = "reset-button";
+    resetButton.title =
+        "Eliminar este encuentro y el Pokémon " +
+        "capturado ahí";
+    resetButton.textContent = "✕";
+
+    resetButton.addEventListener(
+        "click",
+        () => resetLocation(location, row)
+    );
+
+    locationCell.appendChild(resetButton);
 
 
     const nicknameCell =
@@ -650,6 +671,19 @@ async function saveRow(
     statusSelect
 ) {
 
+    // Solo se guarda cuando hay nickname Y especie -- antes
+    // cualquier click en un input vacío (foco + blur, sin
+    // escribir nada) creaba un registro "fantasma" con los
+    // campos en blanco. El estado siempre tiene un valor por
+    // defecto (sin_intentar), así que no cuenta como "campo
+    // lleno" a los efectos de esta validación.
+    if (
+        !nicknameInput.value.trim() ||
+        !speciesInput.value.trim()
+    ) {
+        return;
+    }
+
     try {
 
         const response =
@@ -697,6 +731,94 @@ function flashSaved(row) {
     void row.offsetWidth;
 
     row.classList.add("saved-flash");
+}
+
+
+/* =========================================
+   RESETEAR UNA RUTA
+
+   Borra el encuentro Y el Pokémon capturado ahí (roster/
+   cementerio incluidos, ver NuzlockeService.delete_encounter).
+   La fila NO se elimina de la tabla -- es una ruta real del
+   juego, sigue disponible para una futura captura -- solo se
+   limpia de vuelta a "sin_intentar".
+========================================= */
+
+async function resetLocation(location, row) {
+
+    const confirmed = window.confirm(
+        `¿Eliminar el encuentro de "${location}" y el ` +
+        `Pokémon capturado ahí? Esta acción no se puede ` +
+        `deshacer.`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/nuzlocke/encounters/delete",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({ location })
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const nicknameInput =
+            row.querySelector(".nickname-input");
+
+        const speciesInput =
+            row.querySelector(".species-input");
+
+        const spriteImg =
+            row.querySelector(".species-sprite");
+
+        const statusSelect =
+            row.querySelector(".status-select");
+
+        if (nicknameInput) {
+            nicknameInput.value = "";
+        }
+
+        if (speciesInput) {
+            speciesInput.value = "";
+        }
+
+        if (spriteImg) {
+            spriteImg.classList.remove("visible");
+            spriteImg.removeAttribute("src");
+        }
+
+        if (statusSelect) {
+            statusSelect.value = "sin_intentar";
+            applyStatusClass(
+                statusSelect,
+                "sin_intentar"
+            );
+        }
+
+        flashSaved(row);
+
+    } catch (error) {
+
+        console.error(
+            "Error eliminando encuentro:",
+            error
+        );
+    }
 }
 
 

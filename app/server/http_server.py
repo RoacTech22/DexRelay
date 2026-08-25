@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import Thread
 
 from app.core.state import ApplicationState
+from app.services.location_catalog import LocationCatalog
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.species_catalog import SpeciesCatalog
 
@@ -57,12 +58,14 @@ class HTTPServer:
         port: int = 8080,
         nuzlocke_service: NuzlockeService | None = None,
         species_catalog: SpeciesCatalog | None = None,
+        location_catalog: LocationCatalog | None = None,
     ) -> None:
         self.state = state
         self.host = host
         self.port = port
         self.nuzlocke_service = nuzlocke_service
         self.species_catalog = species_catalog
+        self.location_catalog = location_catalog
 
         project_root = (
             Path(__file__)
@@ -144,6 +147,7 @@ class HTTPServer:
         panel_directory = self.panel_directory
         nuzlocke_service = self.nuzlocke_service
         species_catalog = self.species_catalog
+        location_catalog = self.location_catalog
 
         class Handler(BaseHTTPRequestHandler):
 
@@ -284,6 +288,26 @@ class HTTPServer:
                     )
                     return
 
+                if self.path == "/api/locations":
+
+                    if location_catalog is None:
+                        self._send_json(
+                            {"locations": []},
+                            200,
+                        )
+                        return
+
+                    self._send_json(
+                        {
+                            "locations": (
+                                location_catalog
+                                .list_all()
+                            )
+                        },
+                        200,
+                    )
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
@@ -301,9 +325,72 @@ class HTTPServer:
                     self._handle_assign_encounter()
                     return
 
+                if self.path == (
+                    "/api/nuzlocke/encounters/delete"
+                ):
+                    self._handle_delete_encounter()
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
+                )
+
+            def _handle_delete_encounter(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                location = str(
+                    payload.get("location", "")
+                ).strip()
+
+                if not location:
+                    self._send_json(
+                        {
+                            "error": (
+                                "'location' es requerido."
+                            )
+                        },
+                        400,
+                    )
+                    return
+
+                try:
+                    encounters = (
+                        nuzlocke_service.delete_encounter(
+                            location
+                        )
+                    )
+
+                except ValueError as error:
+                    self._send_json(
+                        {"error": str(error)},
+                        404,
+                    )
+                    return
+
+                self._send_json(
+                    {"encounters": encounters},
+                    200,
                 )
 
             def _handle_assign_encounter(self):
