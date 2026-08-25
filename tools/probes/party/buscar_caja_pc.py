@@ -42,17 +42,25 @@ COMO USARLO:
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import PARTY_ORDER_ADDRESS, SLOT_DATA_SIZE
+from app.memory.pointers import (
+    PARTY_ORDER_ADDRESS,
+    POKEMON_POINTER_OFFSET,
+    SLOT_DATA_SIZE,
+)
 from app.memory.structures import Pokemon6, decrypt_data
 
 
 # Ventana de memoria a escanear, centrada en PARTY_ORDER_ADDRESS --
 # la Caja PC suele vivir cerca de la party dentro del mismo bloque
-# de datos de guardado. 4MB a cada lado (8MB total) alcanza para
-# cubrir una caja completa de Gen 6 (30 cajas x 30 slots) si esta
-# ahi cerca; si no aparece nada, hay que probar mas lejos.
-WINDOW_BEFORE = 0x400000
-WINDOW_AFTER = 0x400000
+# de datos de guardado. Ampliado a 16MB por lado (32MB total,
+# 25/08/2026) porque la primera pasada con 4MB por lado no encontro
+# la caja real -- lo que encontro ahi resulto ser memoria vieja
+# ("basura") de una sesion anterior, no datos en vivo. Con este
+# tamaño ya se cubre tambien la zona de BADGES_ADDRESS
+# (0x08C6DDD4), la otra direccion fija conocida, que esta a solo
+# ~1.1MB de PARTY_ORDER_ADDRESS.
+WINDOW_BEFORE = 0x1000000
+WINDOW_AFTER = 0x1000000
 
 # Alineacion de bytes a probar. 4 es lo minimo razonable (las
 # estructuras del juego casi siempre estan alineadas a 4 bytes).
@@ -77,6 +85,25 @@ def main():
     print()
 
     memory = reader.memory
+
+    # Direcciones reales de la party ACTUAL, para marcar en los
+    # resultados cuáles candidatos son simplemente tu equipo de
+    # ahora mismo (nada nuevo) en vez de tener que cruzarlo a mano.
+    live_party_addresses = set()
+
+    try:
+
+        raw_pointers = reader.read_party_order()
+
+        for raw_pointer in raw_pointers or []:
+
+            if raw_pointer:
+                live_party_addresses.add(
+                    raw_pointer + POKEMON_POINTER_OFFSET
+                )
+
+    except Exception:
+        pass
 
     scan_start = PARTY_ORDER_ADDRESS - WINDOW_BEFORE
     scan_size = WINDOW_BEFORE + WINDOW_AFTER
@@ -166,13 +193,31 @@ def main():
     print("Primeros 40 candidatos (dirección, especie, nickname):")
 
     for address, species_id, nickname in matches[:40]:
+
+        tag = (
+            " [EQUIPO ACTUAL]"
+            if address in live_party_addresses
+            else ""
+        )
+
         print(
             f"  {hex(address)}  speciesId={species_id}  "
-            f"nickname={nickname!r}"
+            f"nickname={nickname!r}{tag}"
         )
 
     if len(matches) > 40:
         print(f"  ... y {len(matches) - 40} más")
+
+    new_matches = [
+        m for m in matches
+        if m[0] not in live_party_addresses
+    ]
+
+    print()
+    print(
+        f"De esos, {len(new_matches)} NO son tu equipo actual -- "
+        f"son los que vale la pena revisar."
+    )
 
     print()
 
