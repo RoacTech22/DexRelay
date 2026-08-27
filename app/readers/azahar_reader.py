@@ -1,3 +1,5 @@
+import struct
+
 from app.readers.citra import Citra
 from app.memory.memory_reader import MemoryReader
 from app.memory.pointers import (
@@ -8,6 +10,10 @@ from app.memory.pointers import (
     STAT_DATA_OFFSET,
     STAT_DATA_SIZE,
     LAST_CAUGHT_ADDRESS,
+    TOTAL_CAUGHT_ADDRESS,
+    BOX_BASE_ADDRESS,
+    BOX_SLOT_STRIDE,
+    BOX_SLOT_COUNT,
 )
 from app.memory.structures import Pokemon6
 from app.services.location_resolver import LocationResolver
@@ -420,3 +426,112 @@ class AzaharReader:
             0,
             pokemon
         )
+
+    def read_total_caught_count(self):
+        """
+        Lee TOTAL_CAUGHT_ADDRESS (ver pointers.py): sube en
+        exactamente 1 cada vez que se captura un Pokémon real
+        (equipo o Caja PC). Se usa como confirmación de que
+        read_last_caught() refleja una captura de verdad, y no
+        solo un encuentro salvaje sin capturar (ver Documento
+        Maestro, investigación del 25/08/2026).
+
+        Devuelve el valor entero, o None si la lectura falló.
+        """
+
+        data = self.memory.read(
+            TOTAL_CAUGHT_ADDRESS,
+            4
+        )
+
+        if len(data) != 4:
+            return None
+
+        return struct.unpack(
+            "<I",
+            data
+        )[0]
+
+    def read_box(self):
+        """
+        Escanea la Caja PC (Caja 1) completa: BOX_SLOT_COUNT slots
+        de BOX_SLOT_STRIDE bytes cada uno, a partir de
+        BOX_BASE_ADDRESS (ver pointers.py -- confirmado
+        empíricamente el 26-27/08/2026 escaneando por checksum
+        válido, estable entre reinicios de Azahar).
+
+        A diferencia de la party, la Caja PC es un array compacto
+        y persistente -- no hay tabla de punteros ni buffer
+        reciclado, así que no hace falta el manejo de
+        READ_FAILED/último-valor-conocido de read_party(): si una
+        lectura falla de forma transitoria, el dato sigue estando
+        ahí en el siguiente ciclo (no "desaparece" como podía pasar
+        con el viejo LAST_CAUGHT_ADDRESS).
+
+        El formato de la Caja PC son los 232 bytes crudos del PK6
+        SIN los datos extra que sí tiene la party (nivel/HP actual
+        no existen en el formato de caja -- el juego los recalcula
+        al retirar el Pokémon). Por eso acá se construye Pokemon6
+        directo con el chunk de SLOT_DATA_SIZE, sin leer STAT_DATA
+        como hace read_pokemon()/_read_pokemon_at_address().
+        build_pokemon_data() sigue funcionando igual sobre este
+        resultado, solo que level/hp/maxHp quedan en 0 para estas
+        entradas -- no afecta al Nuzlocke Tracker, que de una
+        captura en la caja solo necesita nickname/especie/
+        ubicación/shiny.
+
+        Devuelve una lista con SOLO los slots ocupados (checksum
+        válido) en el mismo formato que build_pokemon_data(). Los
+        slots vacíos o con lectura fallida se omiten directamente
+        -- a diferencia de read_party(), nada en el proyecto
+        necesita ver los 30 slots completos, solo cuáles hay.
+        Lista vacía si la lectura de memoria falló por completo.
+        """
+
+        window_size = (
+            BOX_SLOT_COUNT
+            * BOX_SLOT_STRIDE
+        )
+
+        data = self.memory.read(
+            BOX_BASE_ADDRESS,
+            window_size
+        )
+
+        if not data:
+            return []
+
+        if len(data) != window_size:
+            return []
+
+        occupied = []
+
+        for slot_index in range(BOX_SLOT_COUNT):
+
+            start = (
+                slot_index
+                * BOX_SLOT_STRIDE
+            )
+
+            chunk = data[
+                start:
+                start + SLOT_DATA_SIZE
+            ]
+
+            if len(chunk) != SLOT_DATA_SIZE:
+                continue
+
+            pokemon = Pokemon6(chunk)
+
+            if not pokemon.raw_data:
+                # Slot vacío o checksum inválido -- se omite.
+                continue
+
+            occupied.append(
+                self.build_pokemon_data(
+                    slot_index + 1,
+                    pokemon
+                )
+            )
+
+        return occupied

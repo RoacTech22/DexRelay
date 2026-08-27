@@ -80,9 +80,9 @@ class NuzlockeService:
     ) -> dict:
         """
         Crea el registro de roster para una captura nueva (venga
-        de la party o de la Caja PC vía read_last_caught()) y
-        dispara _register_new_capture() para el tracker de rutas.
-        Devuelve el registro nuevo.
+        de la party o de la Caja PC vía read_box()) y dispara
+        _register_new_capture() para el tracker de rutas. Devuelve
+        el registro nuevo.
         """
 
         nickname = pokemon.get("nickname")
@@ -108,7 +108,7 @@ class NuzlockeService:
     def update(
         self,
         team: list[dict],
-        boxed_capture: dict | None = None,
+        boxed_party: list[dict] | None = None,
     ) -> dict:
         """
         Compara la party actual contra el estado guardado, detecta
@@ -116,15 +116,14 @@ class NuzlockeService:
         cambios, y devuelve el estado actual completo
         (roster + graveyard).
 
-        `boxed_capture`: resultado de
-        AzaharReader.read_last_caught() -- el Pokémon capturado más
-        recientemente, incluso si fue directo a la Caja PC porque la
-        party estaba llena (en ese caso nunca aparece en `team`, y
-        sin esto el Tracker nunca se enteraba de esas capturas).
-        Identidad-basada, sin estado adicional que mantener: si su
-        nickname ya está en roster/graveyard, ya lo conocemos (vino
-        por la party o ya se había registrado antes) y no se hace
-        nada; si es nuevo, se registra igual que una captura normal.
+        `boxed_party`: resultado de AzaharReader.read_box() -- la
+        lista completa de Pokémon actualmente en la Caja PC (fue
+        ahí directo porque la party estaba llena; en ese caso nunca
+        aparecen en `team`, y sin esto el Tracker nunca se enteraba
+        de esas capturas). Identidad-basada, sin estado adicional
+        que mantener: cualquier nickname que no esté ya en
+        roster/graveyard se registra como captura nueva, igual que
+        un Pokémon nuevo visto en la party.
         """
 
         if self._data is None:
@@ -149,7 +148,7 @@ class NuzlockeService:
 
         changed = False
 
-        for pokemon in team:
+        for slot_index, pokemon in enumerate(team):
 
             if not pokemon or pokemon.get("empty"):
                 continue
@@ -173,7 +172,37 @@ class NuzlockeService:
 
             if entry is None:
 
-                # Captura nueva.
+                # Captura nueva vista en la party -- se registra
+                # directo acá, sin espera (26-27/08/2026: vuelve a
+                # este comportamiento, el mismo del Bloque A
+                # original).
+                #
+                # Nota histórica: entre el 26/08 y el 27/08 esto
+                # estuvo restringido solo al Inicial, delegando
+                # TODA otra captura -- de party o de Caja PC por
+                # igual -- a un único camino de memoria
+                # (TOTAL_CAUGHT_ADDRESS + LAST_CAUGHT_ADDRESS en
+                # Runtime), para que ambos destinos compartieran la
+                # misma lógica de espera de nickname/ruta. Se
+                # revierte esa unificación acá: el problema de
+                # nombre/ruta a medio escribir resultó ser
+                # específico de la Caja PC (ver
+                # AzaharReader.read_box() y el bloque de
+                # `boxed_party` más abajo) -- el camino directo de
+                # party nunca mostró ese bug en el Bloque A
+                # original, y forzarlo a esperar igual solo sumaba
+                # una dependencia innecesaria de una dirección de
+                # memoria (el buffer reciclado) que además resultó
+                # ser poco confiable para el propósito real que
+                # motivó investigarla. El checksum de
+                # structures.py ya garantiza que una lectura válida
+                # de un slot de party es un snapshot completo, así
+                # que no hace falta ninguna espera adicional acá.
+                #
+                # _register_new_capture() decide sola si esta
+                # captura es el Inicial (primera de la partida) o
+                # una normal, con su lógica de siempre (species
+                # clause, protección de ruta ya tomada, etc).
                 entry = self._add_new_roster_entry(
                     pokemon,
                     roster,
@@ -229,32 +258,56 @@ class NuzlockeService:
 
                 changed = True
 
-        # Captura que fue directo a la Caja PC porque la party
-        # estaba llena -- nunca aparece en `team`, así que sin esto
-        # el Tracker no se enteraba de ella. Si el nickname ya está
-        # en roster/graveyard, ya la conocemos (llegó por la party
-        # más arriba, o ya se había registrado antes) y no se hace
-        # nada; no hace falta ningún estado adicional para evitar
-        # duplicados, roster/graveyard ya son la fuente de verdad.
-        if boxed_capture and not boxed_capture.get("empty"):
+        # Capturas nuevas detectadas directo en la Caja PC
+        # (26-27/08/2026, ver AzaharReader.read_box() y Documento
+        # Maestro sección 14 "Detección de capturas en la Caja
+        # PC"). Reemplaza al viejo camino de TOTAL_CAUGHT_ADDRESS +
+        # LAST_CAUGHT_ADDRESS (un buffer reciclado de "último
+        # Pokémon salvaje enfrentado", con datos que tardaban en
+        # terminar de escribirse y que además no lograba resolver
+        # bien el lugar de encuentro específicamente para
+        # capturas de caja).
+        #
+        # La Caja PC real es almacenamiento persistente, no un
+        # buffer de scratch -- cada slot ocupado es una captura
+        # real y completa, así que se registra igual que un
+        # Pokémon nuevo de la party: sin espera. Si en pruebas
+        # reales resulta que el juego escribe el slot de forma
+        # progresiva (nombre por defecto primero, nickname real
+        # después, igual que hacía el buffer viejo), esto va a
+        # registrar el nombre por defecto -- pendiente de
+        # confirmar en el juego (decisión explícita: probar sin
+        # colchón de estabilidad primero, agregar uno después solo
+        # si hace falta).
+        #
+        # Misma identidad por nickname que el resto del sistema:
+        # si ya está en roster/graveyard (porque ya se había
+        # registrado antes, en un ciclo anterior), no se hace nada
+        # -- no hace falta ningún estado adicional para evitar
+        # duplicados.
+        for boxed_pokemon in (boxed_party or []):
 
-            boxed_nickname = boxed_capture.get(
-                "nickname"
-            )
+            if not boxed_pokemon or boxed_pokemon.get("empty"):
+                continue
+
+            boxed_nickname = boxed_pokemon.get("nickname")
+
+            if not boxed_nickname:
+                continue
 
             if (
-                boxed_nickname
-                and boxed_nickname not in roster_by_nickname
-                and boxed_nickname not in graveyard_nicknames
+                boxed_nickname in roster_by_nickname
+                or boxed_nickname in graveyard_nicknames
             ):
+                continue
 
-                self._add_new_roster_entry(
-                    boxed_capture,
-                    roster,
-                    roster_by_nickname,
-                )
+            self._add_new_roster_entry(
+                boxed_pokemon,
+                roster,
+                roster_by_nickname,
+            )
 
-                changed = True
+            changed = True
 
         if changed:
             self._data["roster"] = roster

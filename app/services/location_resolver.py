@@ -10,10 +10,12 @@ class LocationResolver:
     dotnet/DexRelay.PKHeX/Program.cs).
 
     Se cachea por nickname, no por especie: el lugar de encuentro
-    de un Pokémon puntual no cambia nunca una vez capturado, así
-    que solo hace falta resolverlo la primera vez que se lo ve, no
-    en cada ciclo realtime de 200ms. Sin esta caché, cada lectura
-    de party dispararía hasta 6 llamadas al bridge por ciclo.
+    de un Pokémon puntual no cambia nunca una vez resuelto, así que
+    solo hace falta resolverlo una vez, no en cada ciclo realtime de
+    200ms. Sin esta caché, cada lectura de party dispararía hasta 6
+    llamadas al bridge por ciclo. Solo se cachean resultados
+    EXITOSOS (metLocation ya resuelto) -- ver el docstring de
+    resolve() para el bug real que causaba esto y por qué importa.
     """
 
     def __init__(self, bridge=None):
@@ -32,6 +34,22 @@ class LocationResolver:
         error, datos insuficientes), devuelve un dict "vacío" con
         metLocation="" y shiny=False -- nunca lanza, para no
         romper la lectura de party por esto.
+
+        BUG REAL corregido (26/08/2026): antes se cacheaba
+        CUALQUIER resultado, incluso uno "vacío". Un Pokémon recién
+        atrapado se lee por primera vez mientras el cuadro de
+        diálogo de nombre sigue abierto -- en ese momento el juego
+        todavía no terminó de escribir el lugar de encuentro, así
+        que la primera resolución con ese nickname da vacío. Si el
+        nickname no cambia después (el jugador tarda mucho en
+        decidir, o elige no ponerle nombre y se queda con el de la
+        especie), ese resultado vacío quedaba cacheado PARA SIEMPRE
+        bajo esa clave -- ninguna lectura futura volvía a
+        preguntarle al bridge, aunque el juego ya hubiera terminado
+        de escribir la ruta real. Ahora solo se cachea un resultado
+        exitoso (metLocation resuelto, no vacío); un resultado vacío
+        se reintenta en la próxima lectura, hasta que el juego
+        termine de escribir el dato y el bridge lo resuelva bien.
         """
 
         empty_result = {
@@ -44,8 +62,10 @@ class LocationResolver:
         if not nickname:
             return empty_result
 
-        if nickname in self.cache:
-            return self.cache[nickname]
+        cached = self.cache.get(nickname)
+
+        if cached is not None:
+            return cached
 
         try:
             result = self.bridge.met_location(
@@ -87,7 +107,10 @@ class LocationResolver:
             ),
         }
 
-        self.cache[nickname] = info
+        if met_location_name:
+            # Solo se cachea un resultado ya resuelto -- uno vacío
+            # se reintenta en la próxima lectura (ver docstring).
+            self.cache[nickname] = info
 
         return info
 

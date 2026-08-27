@@ -1,0 +1,128 @@
+{
+  "roster": [
+    {
+      "nickname": "Daron",
+      "speciesId": 259,
+      "species": "Marshtomp",
+      "level": 18,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "ZBK",
+      "speciesId": 16,
+      "species": "Pidgey",
+      "level": 13,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "TRE",
+      "speciesId": 674,
+      "species": "Pancham",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "Fer",
+      "speciesId": 33,
+      "species": "Nidorino",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "RTY",
+      "speciesId": 403,
+      "species": "Shinx",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "SAE",
+      "speciesId": 228,
+      "species": "Houndour",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "Marill",
+      "speciesId": 183,
+      "species": "Marill",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "Yun",
+      "speciesId": 535,
+      "species": "Tympole",
+      "level": 0,
+      "caughtAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "nickname": "WER",
+      "speciesId": 667,
+      "species": "Litleo",
+      "level": 10,
+      "caughtAt": "2026-08-27T07:12:26+00:00"
+    },
+    {
+      "nickname": "TIAGO",
+      "speciesId": 511,
+      "species": "Pansage",
+      "level": 9,
+      "caughtAt": "2026-08-27T07:16:46+00:00"
+    }
+  ],
+  "graveyard": [],
+  "encounters": [
+    {
+      "location": "Inicial",
+      "nickname": "Daron",
+      "species": "Marshtomp",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "location": "Ruta 101",
+      "nickname": "ZBK",
+      "species": "Pidgey",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "location": "Ruta 103",
+      "nickname": "Fer",
+      "species": "Nidorino",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "location": "Ruta 104",
+      "nickname": "mirian",
+      "species": "Marill",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:17:07+00:00"
+    },
+    {
+      "location": "Ruta 102",
+      "nickname": "Yun",
+      "species": "Tympole",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:12:20+00:00"
+    },
+    {
+      "location": "Ruta 116",
+      "nickname": "WER",
+      "species": "Litleo",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:12:26+00:00"
+    },
+    {
+      "location": "Bosque Petalia",
+      "nickname": "TIAGO",
+      "species": "Pansage",
+      "status": "capturado",
+      "updatedAt": "2026-08-27T07:16:46+00:00"
+    }
+  ],
+  "pending_encounters": [],
+  "starter_assigned": true
+}

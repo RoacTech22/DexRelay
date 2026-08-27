@@ -66,18 +66,25 @@ class Runtime:
         self.state.team = party
         self.state.reader_active = True
 
-        # Captura que fue directo a la Caja PC porque la party
-        # estaba llena -- no viene en `party`, así que hay que
-        # leerla aparte (ver AzaharReader.read_last_caught() y
-        # LAST_CAUGHT_ADDRESS en pointers.py). Si la lectura falla
-        # transitoriamente, boxed_capture queda None y
-        # NuzlockeService simplemente no detecta nada nuevo ese
-        # ciclo -- se reintenta solo en el próximo.
-        boxed_capture = self.reader.read_last_caught()
+        # Detección de capturas nuevas (26-27/08/2026, reemplaza al
+        # viejo camino de dos etapas por TOTAL_CAUGHT_ADDRESS +
+        # LAST_CAUGHT_ADDRESS -- ver Documento Maestro sección 14,
+        # "Detección de capturas en la Caja PC", y el comentario en
+        # NuzlockeService.update() sobre por qué se separó de nuevo
+        # por destino):
+        #
+        # - Las capturas que van a la PARTY se detectan directo en
+        #   NuzlockeService.update() comparando `party` contra el
+        #   roster guardado -- no hace falta nada especial acá.
+        # - Las capturas que van a la CAJA PC (party llena) nunca
+        #   aparecen en `party`, así que se escanea la caja real
+        #   (AzaharReader.read_box(), array persistente confirmado
+        #   empíricamente) y se pasa como `boxed_party`.
+        box = self.reader.read_box()
 
         self.state.nuzlocke = self.nuzlocke_service.update(
             party,
-            boxed_capture=boxed_capture,
+            boxed_party=box,
         )
 
         badges = self.badges_service.read_badges()
