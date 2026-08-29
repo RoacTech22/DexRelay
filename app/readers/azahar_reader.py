@@ -4,6 +4,7 @@ from app.readers.citra import Citra
 from app.memory.memory_reader import MemoryReader
 from app.memory.pointers import (
     PARTY_ORDER_ADDRESS,
+    PARTY_COUNT_ADDRESS,
     ORDER_ENTRY_SIZE,
     POKEMON_POINTER_OFFSET,
     SLOT_DATA_SIZE,
@@ -14,6 +15,7 @@ from app.memory.pointers import (
     BOX_BASE_ADDRESS,
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
+    CURRENT_ZONE_ID_ADDRESS,
 )
 from app.memory.structures import Pokemon6
 from app.services.location_resolver import LocationResolver
@@ -148,6 +150,27 @@ class AzaharReader:
         """
         Lee la tabla que determina el orden
         actual de los seis Pokémon.
+
+        Corrección (29/08/2026, bug real CONFIRMADO con Cheat
+        Engine -- ver PARTY_COUNT_ADDRESS en pointers.py): al
+        depositar un Pokémon en la Caja PC, el puntero que le
+        correspondía NO se limpia -- PARTY_ORDER_ADDRESS son 6
+        casilleros fijos que el juego siempre mantiene reservados,
+        y el puntero "sobrante" queda apuntando a datos viejos
+        pero todavía válidos (por eso decodificaba bien y el
+        overlay lo mostraba como si siguiera en el equipo).
+
+        Se lee PARTY_COUNT_ADDRESS (la cantidad real, confirmada
+        en vivo: bajó de 6 a 2 exactamente en cada depósito, ver
+        tools/probes/party/observar_candidato_party_count.py) y
+        cualquier slot en una posición >= esa cantidad se fuerza a
+        0 (vacío), sin importar qué basura tenga el puntero ahí.
+
+        (Se descarta acá un intento anterior -- tratar como vacío
+        un puntero idéntico a uno de un slot anterior -- que
+        resultó ser una hipótesis incorrecta: se confirmó con un
+        probe de observación en vivo que el juego jamás duplica
+        punteros entre slots, simplemente no limpia el que sobra.)
         """
 
         data = self.memory.read(
@@ -161,6 +184,22 @@ class AzaharReader:
         if len(data) != ORDER_ENTRY_SIZE * 6:
             return []
 
+        count_byte = self.memory.read(
+            PARTY_COUNT_ADDRESS,
+            1
+        )
+
+        # Si por algún motivo transitorio esta lectura falla, no
+        # hay forma segura de saber cuántos slots son reales --
+        # se prefiere devolver los 6 punteros tal cual (mismo
+        # comportamiento que antes de este fix) a arriesgarse a
+        # vaciar de más por una lectura perdida.
+        party_count = (
+            count_byte[0]
+            if len(count_byte) == 1
+            else 6
+        )
+
         pointers = []
 
         for slot in range(6):
@@ -172,6 +211,11 @@ class AzaharReader:
                 ],
                 byteorder="little"
             )
+
+            if slot >= party_count:
+                # Slot "sobrante" -- el puntero puede tener datos
+                # viejos pero válidos ahí, se fuerza a vacío.
+                pointer = 0
 
             pointers.append(
                 pointer
@@ -287,6 +331,9 @@ class AzaharReader:
                 "maxHp": 0,
                 "shiny": False,
                 "metLocation": "",
+                "metLocationId": 0,
+                "eggLocation": "",
+                "isEgg": False,
             }
 
         species_id = (
@@ -326,6 +373,19 @@ class AzaharReader:
             "maxHp": pokemon.max_hp(),
             "shiny": location_info["shiny"],
             "metLocation": location_info["metLocation"],
+            # 29/08/2026, a pedido del usuario (detección de
+            # fósiles poco confiable dependiendo solo del
+            # placeholder "Egg"): se propaga también el ID crudo,
+            # no solo el texto ya traducido -- permite comparar
+            # contra ubicaciones puntuales (ej. Devon Corp) sin
+            # depender de que la traducción exista/coincida.
+            "metLocationId": location_info["metLocationId"],
+            "eggLocation": location_info["eggLocation"],
+            # 29/08/2026, a pedido del usuario: para que el Team
+            # Overlay pueda mostrar el sprite genérico de huevo en
+            # vez de la especie real de un huevo sin nacer todavía
+            # (spoiler) -- ver LocationResolver.resolve().
+            "isEgg": location_info["isEgg"],
         }
 
     def read_party(self):
@@ -451,6 +511,30 @@ class AzaharReader:
             "<I",
             data
         )[0]
+
+    def read_current_zone_id(self):
+        """
+        Lee CURRENT_ZONE_ID_ADDRESS (ver pointers.py): 1 byte con
+        el ID crudo de la zona/ruta donde está parado el jugador
+        ahora mismo. Usado por la detección automática del estado
+        "perdido" del Nuzlocke Tracker (ver Runtime.update() y
+        app/services/zone_names.py) -- es un dato distinto de
+        `metLocation` (que solo existe dentro de un Pokémon ya
+        capturado).
+
+        Devuelve el entero crudo (0-255), o None si la lectura
+        falló.
+        """
+
+        data = self.memory.read(
+            CURRENT_ZONE_ID_ADDRESS,
+            1
+        )
+
+        if len(data) != 1:
+            return None
+
+        return data[0]
 
     def read_box(self):
         """

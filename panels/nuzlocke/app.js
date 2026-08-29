@@ -1,27 +1,78 @@
 const ENCOUNTERS_API_URL = "/api/nuzlocke/encounters";
 const PENDING_API_URL = "/api/nuzlocke/pending-encounters";
+// Sigue existiendo en el backend (assign_encounter_location) pero
+// el panel ya no la usa -- el flujo de "Capturas sin ruta
+// asignada" pasó a ser "¿Pokémon Especial?" (27/08/2026), que usa
+// PENDING_ASSIGN_SPECIAL_API_URL en su lugar. Se deja declarada
+// por si hace falta reactivar un flujo de asignación de ruta
+// libre a futuro.
 const ASSIGN_API_URL = "/api/nuzlocke/encounters/assign";
 const SPECIES_API_URL = "/api/species";
 const LOCATIONS_API_URL = "/api/locations";
+
+const PENDING_ASSIGN_SPECIAL_API_URL =
+    "/api/nuzlocke/pending-encounters/assign-special";
 
 const VALID_STATUSES = [
     "sin_intentar",
     "capturado",
     "perdido",
     "muerto",
-    "intercambiado",
-    "regalo",
-    "shiny"
+    "especial"
 ];
 
 const STATUS_LABELS = {
-    sin_intentar: "Sin intentar",
+    sin_intentar: "Sin Capturar",
     capturado: "Capturado",
     perdido: "Perdido",
     muerto: "Muerto",
-    intercambiado: "Intercambiado",
+    especial: "Especial"
+};
+
+// Origenes posibles para una captura "Especial" (27/08/2026,
+// reemplaza a los viejos estados sueltos intercambiado/regalo/
+// shiny). El valor elegido acá se guarda aparte del status
+// ("origin" en el encuentro) -- la etiqueta mostrada en la tabla
+// combina los dos como "Especial/Shiny", "Especial/Huevo", etc.
+// (ver updateSpecialOptionLabel()).
+const VALID_ORIGINS = [
+    "shiny",
+    "huevo",
+    "intercambio",
+    "evento",
+    "regalo",
+    "fosil"
+];
+
+// Subconjunto seleccionable A MANO en la tarjeta "¿Pokémon
+// Especial?" (29/08/2026, a pedido del usuario): huevo,
+// intercambio y fósil ya se detectan solos (ver
+// nuzlocke_service.py) -- dejarlos en este dropdown invita a
+// elegir mal y pisar la detección automática por error. Quedan
+// afuera de esta lista, pero siguen siendo VALID_ORIGINS válidos
+// para el resto del panel (labels, colores, etc.) -- por eso es
+// una lista aparte, no un recorte de VALID_ORIGINS.
+//
+// "captura_extra" (29/08/2026) es un caso aparte: NO es un
+// origen real de VALID_ORIGINS (no usa status="especial", ver
+// _assign_extra_capture() en el backend) -- se agrega acá nomás
+// para que aparezca como opción en el mismo dropdown, aunque el
+// backend lo maneje distinto.
+const MANUAL_ORIGIN_OPTIONS = [
+    "shiny",
+    "evento",
+    "regalo",
+    "captura_extra"
+];
+
+const ORIGIN_LABELS = {
+    shiny: "Shiny",
+    huevo: "Huevo",
+    intercambio: "Intercambio",
+    evento: "Evento",
     regalo: "Regalo",
-    shiny: "Shiny"
+    fosil: "Fósil",
+    captura_extra: "Captura Extra"
 };
 
 /* Se completa en loadLocationList() con la lista oficial que
@@ -89,6 +140,100 @@ function findRowByLocation(location) {
                 row.dataset.location
             ) === targetKey
     ) || null;
+}
+
+
+/* =========================================
+   UBICACIÓN DE FILAS "ESPECIAL" EN LA TABLA
+   (27/08/2026, a pedido explícito)
+
+   Por defecto toda fila nueva se agrega al final
+   (comportamiento de siempre, sin tocar). Las filas
+   "especial" son la única excepción: se reubican
+   justo debajo de su ruta real (`anchorLocation`,
+   ver backend) o, si no tienen ninguna ruta real
+   conocida (huevo/regalo/intercambio/evento), debajo
+   de la ÚLTIMA ruta real que ya tenga algo capturado
+   -- nunca se tocan otras filas para hacerles lugar,
+   solo se reposiciona la fila nueva.
+
+   Se llama DESPUÉS de que addRow() ya agregó la fila
+   al final (comportamiento normal) -- esta función
+   solo la mueve si corresponde.
+========================================= */
+
+function repositionSpecialRow(row, entry) {
+
+    if (!row || entry?.status !== "especial") {
+        return;
+    }
+
+    // Agrupa esta fila con otras "especial" ancladas al mismo
+    // lugar (misma ruta real, o mismo "sin ruta real") -- así
+    // varias capturas especiales apiladas quedan en el orden en
+    // que se fueron asignando, no se pisan entre sí.
+    const anchorGroup =
+        entry.anchorLocation || "__sin_ruta__";
+
+    row.dataset.anchorGroup = anchorGroup;
+
+    const referenceRow =
+        entry.anchorLocation
+            ? findRowByLocation(entry.anchorLocation)
+            : findLastCapturedRouteRow();
+
+    if (!referenceRow || referenceRow === row) {
+        // Sin ancla real todavía (ruta no encontrada en la tabla,
+        // o directamente nada capturado aún) -- se queda al
+        // final, que es donde addRow() ya la puso.
+        return;
+    }
+
+    let insertAfter = referenceRow;
+
+    while (
+        insertAfter.nextElementSibling &&
+        insertAfter.nextElementSibling.dataset.anchorGroup ===
+            anchorGroup
+    ) {
+        insertAfter = insertAfter.nextElementSibling;
+    }
+
+    if (insertAfter === row) {
+        return;
+    }
+
+    tableBody.insertBefore(
+        row,
+        insertAfter.nextSibling
+    );
+}
+
+
+function findLastCapturedRouteRow() {
+
+    let last = null;
+
+    for (const row of tableBody.children) {
+
+        // Otra fila "especial" (anclada o no) no cuenta como
+        // ruta real -- solo interesan las rutas de verdad.
+        if (row.dataset.anchorGroup) {
+            continue;
+        }
+
+        const statusSelect =
+            row.querySelector(".status-select");
+
+        if (
+            statusSelect &&
+            statusSelect.value !== "sin_intentar"
+        ) {
+            last = row;
+        }
+    }
+
+    return last;
 }
 
 
@@ -239,6 +384,14 @@ function createSpeciesPicker(initialValue) {
 
     input.addEventListener("focus", () => {
 
+        // En modo lectura (readOnly) el campo puede recibir foco
+        // por clic, pero no se puede escribir -- no tiene sentido
+        // mostrar sugerencias que no se pueden seleccionar sin
+        // antes habilitar la edición con el ícono de lápiz.
+        if (input.readOnly) {
+            return;
+        }
+
         if (input.value.trim()) {
             renderSuggestions(input.value);
         }
@@ -297,16 +450,33 @@ async function init() {
     }
 
     // Ubicaciones guardadas que no están en la lista por
-    // defecto (agregadas a mano en una sesión anterior).
-    for (const entry of existing) {
+    // defecto: rutas agregadas a mano en una sesión anterior, y
+    // las pseudo-rutas de "¿Pokémon Especial?" (Inicial también
+    // cae acá si por algún motivo no viniera en DEFAULT_LOCATIONS,
+    // aunque siempre debería). Se ordenan por updatedAt para que,
+    // si hay varias especiales sin ruta real apiladas en el mismo
+    // lugar (ver repositionSpecialRow), queden en el orden en que
+    // se fueron asignando -- no en el orden en que llegaron del
+    // servidor, que no está garantizado.
+    const extras = existing
+        .filter(entry => !renderedLocations.has(entry.location))
+        .sort(
+            (a, b) =>
+                (a.updatedAt || "").localeCompare(
+                    b.updatedAt || ""
+                )
+        );
 
-        if (renderedLocations.has(entry.location)) {
-            continue;
-        }
+    for (const entry of extras) {
 
         addRow(entry.location, entry);
 
         renderedLocations.add(entry.location);
+
+        repositionSpecialRow(
+            tableBody.lastElementChild,
+            entry
+        );
     }
 
     await refreshPending();
@@ -485,6 +655,23 @@ async function refreshEncounters() {
    FILAS DE LA TABLA
 ========================================= */
 
+function syncNicknameSize(nicknameInput) {
+
+    // El atributo `size` (no CSS width) es lo que realmente hace
+    // que un <input> mida según su contenido en vez de quedarse
+    // con el ancho por defecto del navegador (~20 caracteres) --
+    // sin esto, el ícono de shiny quedaba pegado al borde derecho
+    // de la celda en vez de al texto del nickname, aunque el
+    // input ya no se estirara con flex (28/08/2026, a pedido del
+    // usuario). Mínimo 4 para que no quede una cajita minúscula
+    // con el placeholder o un nickname muy corto.
+    nicknameInput.size = Math.max(
+        nicknameInput.value.length,
+        4
+    );
+}
+
+
 function addRow(location, existingEntry) {
 
     const row =
@@ -509,6 +696,40 @@ function addRow(location, existingEntry) {
 
     locationCell.appendChild(locationLabel);
 
+    // Ícono de edición: por defecto la tabla es de SOLO
+    // INFORMACIÓN (27/08/2026, a pedido explícito) -- los campos
+    // se ven pero no se pueden tocar hasta hacer clic acá. Existe
+    // para TODAS las filas, incluida "Inicial" (a diferencia del
+    // botón de reseteo, que sigue excluido para esa fila).
+    const editButton =
+        document.createElement("button");
+
+    editButton.type = "button";
+    editButton.className = "edit-button";
+    editButton.title = "Editar esta fila";
+    editButton.textContent = "✎";
+
+    editButton.addEventListener(
+        "click",
+        () => {
+
+            const isEditable =
+                !row.classList.contains(
+                    "row-readonly"
+                );
+
+            toggleRowEditing(row, !isEditable);
+        }
+    );
+
+    const actionsWrapper =
+        document.createElement("div");
+
+    actionsWrapper.className =
+        "location-actions";
+
+    actionsWrapper.appendChild(editButton);
+
     // "Inicial" es permanente por definición -- ni siquiera se
     // muestra el botón de reseteo (el backend también lo rechaza,
     // esto es solo para no invitar al click en primer lugar).
@@ -529,12 +750,19 @@ function addRow(location, existingEntry) {
             () => resetLocation(location, row)
         );
 
-        locationCell.appendChild(resetButton);
+        actionsWrapper.appendChild(resetButton);
     }
+
+    locationCell.appendChild(actionsWrapper);
 
 
     const nicknameCell =
         document.createElement("td");
+
+    const nicknameWrapper =
+        document.createElement("div");
+
+    nicknameWrapper.className = "nickname-wrapper";
 
     const nicknameInput =
         document.createElement("input");
@@ -542,11 +770,46 @@ function addRow(location, existingEntry) {
     nicknameInput.type = "text";
     nicknameInput.className = "nickname-input";
     nicknameInput.placeholder = "Nickname...";
+    nicknameInput.readOnly = true;
 
     nicknameInput.value =
         existingEntry?.nickname || "";
 
-    nicknameCell.appendChild(nicknameInput);
+    syncNicknameSize(nicknameInput);
+
+    nicknameInput.addEventListener(
+        "input",
+        () => syncNicknameSize(nicknameInput)
+    );
+
+    nicknameWrapper.appendChild(nicknameInput);
+
+    // Ícono de shiny (28/08/2026, a pedido del usuario) --
+    // mismo criterio que los íconos de editar/resetear (✎/✕):
+    // un carácter, no una imagen, para no depender de ningún
+    // sprite nuevo. Va DESPUÉS del nickname, pegado (mismo
+    // estilo " ✨" que ya usan las tarjetas de "¿Pokémon
+    // Especial?"). Se muestra cuando `entry.shiny` es true --
+    // YA NO depende de origin === "shiny" (29/08/2026): desde
+    // que se invirtió la prioridad de origen (huevo/fósil/
+    // intercambio le ganan a shiny), un Pokémon shiny puede
+    // tener cualquier otro origen y el ícono tiene que seguir
+    // mostrándose igual.
+    const shinyIcon =
+        document.createElement("span");
+
+    shinyIcon.className = "shiny-icon";
+    shinyIcon.textContent = "✨";
+    shinyIcon.title = "Shiny";
+
+    shinyIcon.classList.toggle(
+        "visible",
+        existingEntry?.shiny === true
+    );
+
+    nicknameWrapper.appendChild(shinyIcon);
+
+    nicknameCell.appendChild(nicknameWrapper);
 
 
     const speciesCell =
@@ -564,6 +827,8 @@ function addRow(location, existingEntry) {
     const speciesInput =
         speciesPicker.input;
 
+    speciesInput.readOnly = true;
+
 
     const statusCell =
         document.createElement("td");
@@ -574,6 +839,8 @@ function addRow(location, existingEntry) {
     statusSelect.className =
         "status-select";
 
+    statusSelect.disabled = true;
+
     for (const value of VALID_STATUSES) {
 
         const option =
@@ -582,19 +849,43 @@ function addRow(location, existingEntry) {
         option.value = value;
         option.textContent = STATUS_LABELS[value];
 
+        // "Especial" ya no se puede elegir a mano desde acá
+        // (29/08/2026, a pedido del usuario) -- huevo/intercambio/
+        // fósil/shiny se detectan solos, y el resto de los casos
+        // "especial" (evento/regalo/captura extra) se asignan
+        // desde la tarjeta "¿Pokémon Especial?", que sí sabe pedir
+        // el origen. Elegir "Especial" directo acá no tenía forma
+        // de pedir el origen y rompía con ValueError. La opción
+        // sigue en el DOM (deshabilitada) para que una fila YA
+        // marcada como especial se pueda seguir mostrando/
+        // seleccionar programáticamente.
+        if (value === "especial") {
+            option.disabled = true;
+        }
+
         statusSelect.appendChild(option);
     }
 
     statusSelect.value =
         existingEntry?.status || "sin_intentar";
 
+    updateSpecialOptionLabel(
+        statusSelect,
+        existingEntry
+    );
+
     applyStatusClass(
         statusSelect,
-        statusSelect.value
+        statusSelect.value,
+        row,
+        existingEntry?.tradedAway === true,
+        existingEntry?.extraCapture === true
     );
 
     statusCell.appendChild(statusSelect);
 
+
+    row.classList.add("row-readonly");
 
     row.appendChild(locationCell);
     row.appendChild(nicknameCell);
@@ -605,29 +896,41 @@ function addRow(location, existingEntry) {
 
 
     /* ================================
-       AUTOGUARDADO
+       AUTOGUARDADO -- y vuelta automática a
+       modo lectura cuando el foco sale de la
+       fila (ver toggleRowEditing/lockRowIfFocusLeft).
     ================================= */
 
     nicknameInput.addEventListener(
         "blur",
-        () => saveRow(
-            row,
-            location,
-            nicknameInput,
-            speciesInput,
-            statusSelect
-        )
+        () => {
+
+            saveRow(
+                row,
+                location,
+                nicknameInput,
+                speciesInput,
+                statusSelect
+            );
+
+            lockRowIfFocusLeft(row);
+        }
     );
 
     speciesInput.addEventListener(
         "blur",
-        () => saveRow(
-            row,
-            location,
-            nicknameInput,
-            speciesInput,
-            statusSelect
-        )
+        () => {
+
+            saveRow(
+                row,
+                location,
+                nicknameInput,
+                speciesInput,
+                statusSelect
+            );
+
+            lockRowIfFocusLeft(row);
+        }
     );
 
     statusSelect.addEventListener(
@@ -636,7 +939,8 @@ function addRow(location, existingEntry) {
 
             applyStatusClass(
                 statusSelect,
-                statusSelect.value
+                statusSelect.value,
+                row
             );
 
             saveRow(
@@ -646,14 +950,137 @@ function addRow(location, existingEntry) {
                 speciesInput,
                 statusSelect
             );
+
+            lockRowIfFocusLeft(row);
         }
     );
 }
 
 
+/* =========================================
+   MODO SOLO LECTURA / EDICIÓN POR FILA
+
+   Por defecto la tabla es de solo información
+   (27/08/2026, a pedido explícito) -- cada fila
+   arranca bloqueada (row-readonly) y el ícono de
+   lápiz la desbloquea puntualmente. Se vuelve a
+   bloquear sola cuando el foco sale de la fila
+   (blur de nickname/especie, change de estado),
+   sin necesidad de un botón de "guardar" aparte --
+   reutiliza el autoguardado que ya existía.
+========================================= */
+
+function toggleRowEditing(row, editable) {
+
+    const nicknameInput =
+        row.querySelector(".nickname-input");
+
+    const speciesInput =
+        row.querySelector(".species-input");
+
+    const statusSelect =
+        row.querySelector(".status-select");
+
+    const editButton =
+        row.querySelector(".edit-button");
+
+    if (nicknameInput) {
+        nicknameInput.readOnly = !editable;
+    }
+
+    if (speciesInput) {
+        speciesInput.readOnly = !editable;
+    }
+
+    if (statusSelect) {
+        statusSelect.disabled = !editable;
+    }
+
+    row.classList.toggle(
+        "row-readonly",
+        !editable
+    );
+
+    if (editButton) {
+
+        editButton.classList.toggle(
+            "active",
+            editable
+        );
+
+        editButton.title = editable
+            ? "Terminar de editar"
+            : "Editar esta fila";
+    }
+
+    if (editable && nicknameInput) {
+        nicknameInput.focus();
+    }
+}
+
+
+function lockRowIfFocusLeft(row) {
+
+    // Mismo margen que ya se usaba para las sugerencias del
+    // buscador de especie (100ms) -- un poco más generoso acá
+    // porque a veces el blur de un campo y el focus del
+    // siguiente (nickname -> especie) no son perfectamente
+    // atómicos.
+    setTimeout(
+        () => {
+
+            if (!row.contains(document.activeElement)) {
+                toggleRowEditing(row, false);
+            }
+        },
+        150
+    );
+}
+
+
+// La opción "especial" de un <select> de estado es la MISMA para
+// todas las filas (viene del loop de VALID_STATUSES en addRow()),
+// pero el origen (shiny/huevo/intercambio/evento/regalo/fosil) es
+// un dato POR FILA -- así que la etiqueta visible de esa opción
+// puntual se ajusta acá, por instancia de <select>. A pedido del
+// usuario (29/08/2026) ya no se antepone "Especial/" -- se muestra
+// directo el origen ("Fósil", "Huevo", "Shiny", etc.), el status
+// interno sigue siendo "especial" igual (value del <option> no
+// cambia). Sin origen conocido (fila nueva, o estado puesto a
+// mano sin pasar por la tarjeta de "¿Pokémon Especial?"), se deja
+// el texto genérico "Especial".
+function updateSpecialOptionLabel(
+    statusSelect,
+    entry
+) {
+
+    const option =
+        statusSelect.querySelector(
+            'option[value="especial"]'
+        );
+
+    if (!option) {
+        return;
+    }
+
+    const origin =
+        entry?.status === "especial"
+            ? entry.origin
+            : null;
+
+    option.textContent =
+        origin && ORIGIN_LABELS[origin]
+            ? ORIGIN_LABELS[origin]
+            : STATUS_LABELS.especial;
+}
+
+
 function applyStatusClass(
     selectElement,
-    status
+    status,
+    row,
+    tradedAway,
+    extraCapture
 ) {
 
     for (const value of VALID_STATUSES) {
@@ -666,6 +1093,77 @@ function applyStatusClass(
     selectElement.classList.add(
         `status-${status}`
     );
+
+    // Filas "perdido"/"muerto" quedan apagadas (grises,
+    // atenuadas) -- mismo lenguaje visual que ya usa el Team
+    // Overlay para un Pokémon debilitado (.nuzlocke-dead),
+    // aplicado acá a la fila entera de la tabla del panel.
+    if (row) {
+
+        const isDimmed =
+            status === "perdido" ||
+            status === "muerto";
+
+        row.classList.toggle(
+            "row-dimmed",
+            isDimmed
+        );
+
+        // Pokémon intercambiado, se fue (28/08/2026, a pedido del
+        // usuario): nickname y especie quedan tachados y el
+        // color del estado pasa a gris, sin perder el registro de
+        // dónde se lo había atrapado (status/ubicación no
+        // cambian). Si no se pasa `tradedAway` explícitamente
+        // (ej. el listener de "cambiar estado a mano"), se
+        // preserva lo que la fila ya tenía en vez de borrarlo.
+        const resolvedTradedAway =
+            tradedAway !== undefined
+                ? tradedAway
+                : row.classList.contains("row-traded-away");
+
+        row.classList.toggle(
+            "row-traded-away",
+            resolvedTradedAway
+        );
+
+        // "Captura Extra" (29/08/2026, a pedido del usuario):
+        // mismo patrón que tradedAway -- el status en sí sigue
+        // siendo "capturado" (dato histórico real), solo cambia
+        // el TEXTO que se muestra para esta fila puntual. Mismo
+        // criterio de "preservar si no se pasa explícito".
+        const resolvedExtraCapture =
+            extraCapture !== undefined
+                ? extraCapture
+                : row.classList.contains("row-extra-capture");
+
+        row.classList.toggle(
+            "row-extra-capture",
+            resolvedExtraCapture
+        );
+
+        // El status en sí sigue siendo "capturado" (es un dato
+        // histórico real -- ahí se lo atrapó), pero el texto que
+        // se muestra en el <select> pasa a "Intercambiado" o
+        // "Captura Extra" para esta fila puntual -- mismo patrón
+        // que updateSpecialOptionLabel() usa para "Especial/
+        // Huevo". Intercambiado tiene prioridad si por algún
+        // motivo coincidieran los dos (el Pokémon literalmente
+        // ya no está en el juego, es el dato más "final").
+        const capturadoOption =
+            selectElement.querySelector(
+                'option[value="capturado"]'
+            );
+
+        if (capturadoOption) {
+
+            capturadoOption.textContent =
+                resolvedTradedAway
+                    ? "Intercambiado"
+                    : resolvedExtraCapture
+                        ? "Captura Extra"
+                        : STATUS_LABELS.capturado;
+        }
+    }
 }
 
 
@@ -797,6 +1295,7 @@ async function resetLocation(location, row) {
 
         if (nicknameInput) {
             nicknameInput.value = "";
+            syncNicknameSize(nicknameInput);
         }
 
         if (speciesInput) {
@@ -812,7 +1311,8 @@ async function resetLocation(location, row) {
             statusSelect.value = "sin_intentar";
             applyStatusClass(
                 statusSelect,
-                "sin_intentar"
+                "sin_intentar",
+                row
             );
         }
 
@@ -943,13 +1443,58 @@ function createPendingCard(entry) {
             ? " ✨"
             : "";
 
-    info.innerHTML =
+    const speciesLine =
+        document.createElement("div");
+
+    speciesLine.className = "pending-species";
+
+    speciesLine.innerHTML =
         `<strong>${
             escapeHTML(entry.species || "")
-        }</strong> (${
-            escapeHTML(entry.nickname || "")
-        })${shinyTag} -- no se pudo resolver la ruta sola, ` +
-        `¿en qué ruta lo atrapaste?`;
+        }</strong>${shinyTag}`;
+
+    const questionLine =
+        document.createElement("div");
+
+    questionLine.className = "pending-question";
+
+    questionLine.textContent =
+        `No te quedan capturas en esta ruta. ` +
+        `¿Es ${entry.nickname || ""} un Pokémon especial?`;
+
+    info.appendChild(speciesLine);
+    info.appendChild(questionLine);
+
+    // La ruta real solo se conoce cuando PKHeX SÍ pudo resolver
+    // un lugar de encuentro, pero esa ruta ya tenía otro
+    // encuentro registrado (colisión) -- ver
+    // NuzlockeService._register_new_capture(), caso 2. Para
+    // huevo/regalo/intercambio no hay ruta real que mostrar,
+    // directamente no existió un encuentro salvaje.
+    if (entry.metLocation) {
+
+        const realLocationLine =
+            document.createElement("div");
+
+        realLocationLine.className =
+            "pending-real-location";
+
+        realLocationLine.textContent =
+            `Ruta real detectada: ${entry.metLocation}`;
+
+        info.appendChild(realLocationLine);
+    }
+
+    const controls =
+        document.createElement("div");
+
+    controls.className = "pending-controls";
+
+    const originLabel =
+        document.createElement("label");
+
+    originLabel.className = "pending-origin-label";
+    originLabel.textContent = "Origen";
 
     const select =
         document.createElement("select");
@@ -960,20 +1505,28 @@ function createPendingCard(entry) {
         document.createElement("option");
 
     blankOption.value = "";
-    blankOption.textContent = "Elegir ruta...";
+    blankOption.textContent = "Elegir origen...";
 
     select.appendChild(blankOption);
 
-    for (const location of DEFAULT_LOCATIONS) {
+    for (const origin of MANUAL_ORIGIN_OPTIONS) {
 
         const option =
             document.createElement("option");
 
-        option.value = location;
-        option.textContent = location;
+        option.value = origin;
+        option.textContent = ORIGIN_LABELS[origin];
 
         select.appendChild(option);
     }
+
+    // Ya sabemos por PKHeX si es shiny -- preseleccionarlo de
+    // una, el jugador lo puede cambiar igual si no corresponde.
+    if (entry.shiny) {
+        select.value = "shiny";
+    }
+
+    originLabel.appendChild(select);
 
     const button =
         document.createElement("button");
@@ -981,7 +1534,7 @@ function createPendingCard(entry) {
     button.type = "button";
     button.className = "pending-assign-button";
     button.textContent = "Asignar";
-    button.disabled = true;
+    button.disabled = !select.value;
 
     select.addEventListener(
         "change",
@@ -993,7 +1546,7 @@ function createPendingCard(entry) {
 
     button.addEventListener(
         "click",
-        () => assignPending(
+        () => assignSpecialOrigin(
             entry.nickname,
             select.value,
             card
@@ -1019,13 +1572,16 @@ function createPendingCard(entry) {
         )
     );
 
+    controls.appendChild(originLabel);
+    controls.appendChild(button);
+    controls.appendChild(discardButton);
+
     card.appendChild(info);
-    card.appendChild(select);
-    card.appendChild(button);
-    card.appendChild(discardButton);
+    card.appendChild(controls);
 
     return card;
 }
+
 
 
 async function discardPending(nickname, card) {
@@ -1063,13 +1619,13 @@ async function discardPending(nickname, card) {
 }
 
 
-async function assignPending(
+async function assignSpecialOrigin(
     nickname,
-    location,
+    origin,
     card
 ) {
 
-    if (!location) {
+    if (!origin) {
         return;
     }
 
@@ -1077,7 +1633,7 @@ async function assignPending(
 
         const response =
             await fetch(
-                ASSIGN_API_URL,
+                PENDING_ASSIGN_SPECIAL_API_URL,
                 {
                     method: "POST",
                     headers: {
@@ -1086,7 +1642,7 @@ async function assignPending(
                     },
                     body: JSON.stringify({
                         nickname,
-                        location
+                        origin
                     })
                 }
             );
@@ -1099,17 +1655,31 @@ async function assignPending(
 
         card.remove();
 
-        // La ruta recién asignada ya tiene esta especie/estado
-        // -- refleja eso en la tabla sin esperar al próximo poll.
-        updateRowFromAssignment(
-            location,
-            await response.json()
-        );
+        const data =
+            await response.json();
+
+        // A diferencia del viejo flujo (el usuario elegía la
+        // ruta, así que ya la sabíamos), acá la pseudo-ubicación
+        // "Especial (Nickname)" la genera el backend -- hay que
+        // buscarla en la respuesta por nickname en vez de
+        // asumirla de antemano.
+        const savedEntry =
+            (data.encounters || []).find(
+                entry => entry.nickname === nickname
+            );
+
+        if (savedEntry) {
+
+            updateRowFromAssignment(
+                savedEntry.location,
+                data
+            );
+        }
 
     } catch (error) {
 
         console.error(
-            "Error asignando ruta:",
+            "Error asignando origen especial:",
             error
         );
     }
@@ -1144,6 +1714,12 @@ function updateRowFromAssignment(
         // renderizada (caso raro: se asignó a una ubicación
         // completamente nueva). Se agrega como fila nueva.
         addRow(location, savedEntry);
+
+        repositionSpecialRow(
+            tableBody.lastElementChild,
+            savedEntry
+        );
+
         return;
     }
 
@@ -1156,7 +1732,25 @@ function updateRowFromAssignment(
     const statusSelect =
         row.querySelector(".status-select");
 
+    const shinyIcon =
+        row.querySelector(".shiny-icon");
+
     let changed = false;
+
+    if (shinyIcon) {
+
+        // Ver comentario en addRow() (29/08/2026): ya no depende
+        // de origin === "shiny".
+        const isShiny = savedEntry.shiny === true;
+
+        if (
+            shinyIcon.classList.contains("visible")
+            !== isShiny
+        ) {
+            shinyIcon.classList.toggle("visible", isShiny);
+            changed = true;
+        }
+    }
 
     if (
         nicknameInput &&
@@ -1167,6 +1761,7 @@ function updateRowFromAssignment(
 
         if (nicknameInput.value !== newValue) {
             nicknameInput.value = newValue;
+            syncNicknameSize(nicknameInput);
             changed = true;
         }
     }
@@ -1222,13 +1817,58 @@ function updateRowFromAssignment(
         const newValue =
             savedEntry.status || "sin_intentar";
 
-        if (statusSelect.value !== newValue) {
+        const newTradedAway =
+            savedEntry.tradedAway === true;
+
+        const newExtraCapture =
+            savedEntry.extraCapture === true;
+
+        const previousOptionLabel =
+            statusSelect
+                .querySelector(
+                    'option[value="especial"]'
+                )
+                ?.textContent;
+
+        updateSpecialOptionLabel(
+            statusSelect,
+            savedEntry
+        );
+
+        const newOptionLabel =
+            statusSelect
+                .querySelector(
+                    'option[value="especial"]'
+                )
+                ?.textContent;
+
+        // tradedAway/extraCapture pueden cambiar SIN que cambie
+        // el status (el Pokémon sigue "capturado", solo cambia
+        // el texto mostrado) -- por eso se comparan aparte, no
+        // alcanza con mirar statusSelect.value/newOptionLabel.
+        const tradedAwayChanged =
+            row.classList.contains("row-traded-away")
+            !== newTradedAway;
+
+        const extraCaptureChanged =
+            row.classList.contains("row-extra-capture")
+            !== newExtraCapture;
+
+        if (
+            statusSelect.value !== newValue ||
+            previousOptionLabel !== newOptionLabel ||
+            tradedAwayChanged ||
+            extraCaptureChanged
+        ) {
 
             statusSelect.value = newValue;
 
             applyStatusClass(
                 statusSelect,
-                statusSelect.value
+                statusSelect.value,
+                row,
+                newTradedAway,
+                newExtraCapture
             );
 
             changed = true;
@@ -1274,12 +1914,17 @@ addRowButton.addEventListener(
 
         newLocationInput.value = "";
 
-        // Persistir la ubicación nueva de una vez, para
-        // que sobreviva un refresh de la página aunque
-        // todavía no se haya cargado nada ahí.
         const newRow =
             tableBody.lastElementChild;
 
+        // Recién agregada -- se abre directo en modo edición, no
+        // tiene sentido pedirle al usuario un clic más para poder
+        // cargar los datos de algo que acaba de crear a mano.
+        toggleRowEditing(newRow, true);
+
+        // Persistir la ubicación nueva de una vez, para
+        // que sobreviva un refresh de la página aunque
+        // todavía no se haya cargado nada ahí.
         const nicknameInput =
             newRow.querySelector(
                 ".nickname-input"
