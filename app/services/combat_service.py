@@ -8,6 +8,39 @@ from app.memory.memory_reader import MemoryReader
 COMBAT_POINTER_ADDRESS = 0x083F8658
 COMBAT_HP_OFFSET = 0x404
 
+# ============================================================
+# FLAG SALVAJE / ENTRENADOR
+# ============================================================
+#
+# Confirmado empiricamente el 27/08/2026, como parte de la
+# investigacion del estado "perdido" automatico del Nuzlocke
+# Tracker (ver DexRelay_Contexto_Deteccion_Perdido.md -- pieza 2 de
+# 3, ya resuelta).
+#
+# Encontrado con tools/probes/memory/buscar_flag_tipo_combate.py:
+# offset relativo a la base de combate (la misma base dinamica que
+# ya usa COMBAT_HP_OFFSET) donde el juego deja la zona en CERO
+# durante un combate de entrenador, y la deja con datos (valores
+# constantes pero !=0, probablemente una entrada de una tabla de
+# encuentro salvaje) durante un combate salvaje.
+#
+# Confirmado con 2 rondas de pruebas (9 muestras salvajes + 8 de
+# entrenador en total, bases de combate distintas cada vez) y una
+# prueba de robustez especifica: combate salvaje inmediatamente
+# seguido de un combate de entrenador (sin otro salvaje en el
+# medio), repetido 3 veces -- el valor de entrenador siguio dando 0
+# las 3 veces, descartando que fuera memoria vieja del salvaje
+# anterior sin limpiar (mismo tipo de trampa que ya paso una vez
+# con LAST_CAUGHT_ADDRESS, seccion 14 del Documento Maestro).
+#
+# IMPORTANTE: se lee como flag booleano (0 = entrenador, !=0 =
+# salvaje), NO se compara contra un valor exacto -- los valores
+# vistos durante la investigacion (20, 227, etc.) se mantuvieron
+# constantes en las pruebas realizadas, pero no hay garantia de que
+# sean iguales para todas las especies/niveles no probados todavia.
+# Comparar solo contra cero es mas robusto.
+WILD_BATTLE_FLAG_OFFSET = 0x87F
+
 # Confirmado con tools/probes/combat/observar_puntero_combate.py:
 # al salir de combate, el puntero NO vuelve a 0x00000000. Se queda
 # en este valor fijo (COMBAT_POINTER_ADDRESS - 4), que es memoria
@@ -65,3 +98,54 @@ class CombatService:
             "<H",
             hp_data,
         )[0]
+
+    def read_wild_flag(self):
+        """
+        Lee si el combate activo es salvaje o de entrenador (ver
+        WILD_BATTLE_FLAG_OFFSET arriba), con la misma validación
+        de consistencia de puntero antes/después que read(). Usado
+        por Runtime para la detección automática del estado
+        "perdido" del Nuzlocke Tracker.
+
+        Devuelve:
+        - None: no hay combate activo.
+        - True: hay un combate salvaje activo.
+        - False: hay un combate de entrenador activo.
+        - LECTURA_DESCARTADA: lectura inconsistente (el puntero
+          cambió a mitad de lectura) -- igual que read(), se
+          descarta y se reintenta el próximo ciclo.
+        """
+
+        pointer_before = self.memory_reader.read(
+            COMBAT_POINTER_ADDRESS,
+            4,
+        )
+
+        if len(pointer_before) != 4:
+            return LECTURA_DESCARTADA
+
+        base_address = struct.unpack(
+            "<I",
+            pointer_before,
+        )[0]
+
+        if base_address in (0, COMBAT_INACTIVE_POINTER):
+            return None
+
+        flag_data = self.memory_reader.read(
+            base_address + WILD_BATTLE_FLAG_OFFSET,
+            1,
+        )
+
+        if len(flag_data) != 1:
+            return LECTURA_DESCARTADA
+
+        pointer_after = self.memory_reader.read(
+            COMBAT_POINTER_ADDRESS,
+            4,
+        )
+
+        if pointer_after != pointer_before:
+            return LECTURA_DESCARTADA
+
+        return flag_data[0] != 0

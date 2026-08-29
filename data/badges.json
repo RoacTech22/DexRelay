@@ -1,14 +1,14 @@
 {
-  "value": 0,
-  "count": 0,
+  "value": 255,
+  "count": 8,
   "badges": [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
   ]
 }

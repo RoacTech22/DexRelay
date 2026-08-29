@@ -10,9 +10,7 @@
     --status-caught: #2e7d4f;
     --status-lost: #a13c3c;
     --status-dead: #55585f;
-    --status-traded: #2f6fa8;
-    --status-gift: #7c4fc2;
-    --status-shiny: #d9b23c;
+    --status-special: #7c4fc2;
 }
 
 * {
@@ -119,8 +117,8 @@ h1 {
 
 .pending-card {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
 
     padding: 10px 12px;
 
@@ -133,13 +131,47 @@ h1 {
 }
 
 .pending-info {
-    flex: 1;
-
     font-size: 14px;
 }
 
 .pending-info strong {
     color: #f0c674;
+}
+
+.pending-species {
+    font-size: 15px;
+}
+
+.pending-question {
+    margin-top: 2px;
+
+    color: var(--text-dim);
+    font-size: 13px;
+}
+
+.pending-real-location {
+    margin-top: 2px;
+
+    color: var(--text-dim);
+    font-size: 12px;
+    font-style: italic;
+}
+
+.pending-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pending-origin-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .pending-select {
@@ -259,6 +291,40 @@ tbody tr:nth-child(even) {
     background: var(--bg-row-alt);
 }
 
+/* Filas "perdido"/"muerto" (28/08/2026): solo el texto (ruta,
+   nickname, especie) y el sprite quedan apagados -- el resto de
+   la fila (fondo, bordes, y el color del <select> de estado, que
+   ya es su propio indicador visual) se deja intacto. La clase
+   "row-dimmed" la maneja applyStatusClass() en app.js según el
+   status elegido. */
+.row-dimmed .location-label,
+.row-dimmed .nickname-input,
+.row-dimmed .species-input {
+    color: var(--text-dim);
+    opacity: 0.55;
+}
+
+.row-dimmed .species-sprite {
+    filter: grayscale(100%) brightness(0.75);
+    opacity: 0.6;
+}
+
+/* Pokémon intercambiado, se fue (28/08/2026, a pedido del
+   usuario): nickname y especie tachados, y el color del estado
+   pasa a gris (el mismo gris que ya usa "muerto") -- sin tocar el
+   status/ubicación en sí, que sigue siendo el de la captura
+   original. La clase "row-traded-away" la maneja
+   applyStatusClass() en app.js según el campo `tradedAway` del
+   encuentro. */
+.row-traded-away .nickname-input,
+.row-traded-away .species-input {
+    text-decoration: line-through;
+}
+
+.row-traded-away .status-select {
+    background-color: var(--status-dead) !important;
+}
+
 tbody tr + tr {
     border-top: 1px solid var(--border);
 }
@@ -279,6 +345,51 @@ td {
 .location-label {
     font-size: 15px;
     font-weight: 600;
+}
+
+.location-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    flex: 0 0 auto;
+}
+
+.edit-button {
+    flex: 0 0 auto;
+
+    width: 22px;
+    height: 22px;
+
+    padding: 0;
+
+    background: transparent;
+    color: var(--text-dim);
+
+    border: 1px solid var(--border);
+    border-radius: 5px;
+
+    font-size: 12px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0.6;
+}
+
+.edit-button:hover {
+    color: #4a90d9;
+    border-color: #4a90d9;
+
+    opacity: 1;
+}
+
+.edit-button.active {
+    color: #4a90d9;
+    border-color: #4a90d9;
+    background: rgba(74, 144, 217, 0.15);
+
+    opacity: 1;
 }
 
 .reset-button {
@@ -308,6 +419,39 @@ td {
     border-color: #ff6b6b;
 
     opacity: 1;
+}
+
+/* =========================================
+   MODO SOLO LECTURA (27/08/2026)
+
+   Por defecto la tabla es de solo información --
+   nickname/especie quedan en readOnly y el estado
+   en disabled hasta que se hace clic en el ícono
+   de lápiz (ver toggleRowEditing() en app.js).
+   Los estilos de abajo aplican solos vía los
+   pseudo-selectores :read-only/:disabled, sin
+   depender de la clase "row-readonly" del <tr>
+   (esa clase solo se usa para el chequeo de "el
+   foco salió de la fila" en JS).
+========================================= */
+
+.nickname-input:read-only,
+.species-input:read-only {
+    background: transparent;
+    border-color: transparent;
+
+    cursor: default;
+}
+
+.status-select:disabled {
+    cursor: default;
+
+    /* Sin esto, los navegadores atenúan el texto/fondo de un
+       <select disabled> -- pero acá el color de fondo ES la
+       información (verde/rojo/amarillo según estado), así que
+       tiene que verse igual de nítido que en modo edición. */
+    opacity: 1;
+    -webkit-text-fill-color: currentColor;
 }
 
 .species-input,
@@ -358,6 +502,54 @@ td {
     display: block;
 }
 
+/* Ícono de shiny (28/08/2026, a pedido del usuario): al lado del
+   nickname, mismo patrón que el sprite de especie (display:none
+   por defecto, .visible lo muestra). El flex va en un <div>
+   interno (.nickname-wrapper), NUNCA directo en el <td> -- darle
+   display:flex a un <td> le saca el display:table-cell implícito
+   y rompe el layout de toda la tabla (bug real encontrado el
+   28/08/2026: columnas corridas/superpuestas). */
+.nickname-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    /* inline-flex, no flex: el contenedor no se estira a llenar
+       toda la celda -- mide exactamente lo que ocupan
+       input+ícono, así el ícono queda pegado al input sin
+       importar el ancho real del texto (28/08/2026, a pedido del
+       usuario -- el atributo `size` del input es una
+       aproximación por caracter, no exacta, así que no alcanzaba
+       por sí solo para "pegar" el ícono). */
+    max-width: 100%;
+}
+
+.nickname-wrapper .nickname-input {
+    /* Sin flex:1 a propósito -- que NO se estire a ocupar toda
+       la celda, si no el ícono queda pegado al borde derecho de
+       la columna en vez de pegado al texto del nickname (a
+       pedido del usuario, 28/08/2026, como se ve en la tarjeta
+       de "¿Pokémon Especial?"). */
+    width: auto;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.shiny-icon {
+    display: none;
+
+    flex: 0 0 auto;
+
+    font-size: 15px;
+    line-height: 1;
+
+    filter: drop-shadow(0 0 2px rgba(255, 214, 87, 0.7));
+}
+
+.shiny-icon.visible {
+    display: inline-block;
+}
+
 .species-input {
     flex: 1;
     min-width: 0;
@@ -405,9 +597,9 @@ td {
     color: #5a5e6b;
 }
 
-.species-input:focus,
-.nickname-input:focus,
-.status-select:focus {
+.species-input:not(:read-only):focus,
+.nickname-input:not(:read-only):focus,
+.status-select:not(:disabled):focus {
     outline: none;
     border-color: #4a90d9;
 }
@@ -443,19 +635,9 @@ td {
     color: #ffffff;
 }
 
-.status-select.status-intercambiado {
-    background-color: var(--status-traded);
+.status-select.status-especial {
+    background-color: var(--status-special);
     color: #ffffff;
-}
-
-.status-select.status-regalo {
-    background-color: var(--status-gift);
-    color: #ffffff;
-}
-
-.status-select.status-shiny {
-    background-color: var(--status-shiny);
-    color: #1a1600;
 }
 
 /* =========================================

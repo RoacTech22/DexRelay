@@ -326,6 +326,13 @@ class HTTPServer:
                     return
 
                 if self.path == (
+                    "/api/nuzlocke/pending-encounters/"
+                    "assign-special"
+                ):
+                    self._handle_assign_special_origin()
+                    return
+
+                if self.path == (
                     "/api/nuzlocke/encounters/delete"
                 ):
                     self._handle_delete_encounter()
@@ -543,6 +550,70 @@ class HTTPServer:
                     200,
                 )
 
+            def _handle_assign_special_origin(self):
+
+                if nuzlocke_service is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Nuzlocke service no "
+                                "disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                nickname = str(
+                    payload.get("nickname", "")
+                ).strip()
+
+                origin = str(
+                    payload.get("origin", "")
+                ).strip()
+
+                if not nickname or not origin:
+                    self._send_json(
+                        {
+                            "error": (
+                                "'nickname' y 'origin' "
+                                "son requeridos."
+                            )
+                        },
+                        400,
+                    )
+                    return
+
+                try:
+                    result = (
+                        nuzlocke_service
+                        .assign_special_origin(
+                            nickname,
+                            origin,
+                        )
+                    )
+
+                except ValueError as error:
+                    self._send_json(
+                        {"error": str(error)},
+                        404,
+                    )
+                    return
+
+                self._send_json(
+                    result,
+                    200,
+                )
+
             def _handle_save_encounter(self):
 
                 if nuzlocke_service is None:
@@ -585,6 +656,15 @@ class HTTPServer:
                     )
                 ).strip()
 
+                # Opcional -- el select de estado de la tabla
+                # principal no tiene forma de elegir origen inline
+                # (eso vive en la tarjeta de "¿Pokémon Especial?"),
+                # así que normalmente no viaja acá. Si el registro
+                # editado YA era "especial" antes, save_encounter()
+                # conserva el origen que tenía en vez de exigir que
+                # se vuelva a elegir (ver su docstring).
+                origin = payload.get("origin")
+
                 if not location:
                     self._send_json(
                         {
@@ -603,6 +683,7 @@ class HTTPServer:
                             nickname,
                             species,
                             status,
+                            origin=origin,
                         )
                     )
 

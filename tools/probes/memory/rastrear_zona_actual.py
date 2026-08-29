@@ -20,6 +20,14 @@ interno puede cambiar todo el tiempo, pero es muy dificil que por
 casualidad tenga el mismo valor las dos veces que estuviste en la
 misma ruta Y un valor distinto en cada ruta diferente.
 
+Ademas, en cada paso el script hace varias lecturas seguidas para
+detectar, offset por offset, si el valor esta REALMENTE quieto
+mientras estas parado (y no algo ligado al movimiento/animacion del
+personaje, que puede coincidir por casualidad y colarse como falso
+positivo -- paso ya por esto una vez, ver STABILITY_READS mas
+abajo). Solo se consideran candidatos los offsets que fueron
+estables en TODOS los pasos.
+
 COMO USARLO (necesitas volver a un lugar ya visitado al menos una
 vez en la secuencia, para poder aplicar la regla de "mismo lugar =
 mismo valor"):
@@ -47,6 +55,7 @@ positivos por casualidad, sobre todo con secuencias cortas.
 
 import argparse
 import struct
+import time
 
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BADGES_ADDRESS
@@ -76,6 +85,95 @@ def read_window(memory, start, size):
     return data
 
 
+# Cuantas lecturas seguidas se usan para detectar, POR OFFSET, si
+# un valor esta quieto mientras el jugador esta parado. Agregado
+# tras un falso positivo real (26/08/2026): un candidato coincidio
+# por casualidad en dos corridas distintas, pero resulto ser algo
+# ligado al movimiento del personaje (cambiaba varias veces por
+# segundo), no un ID de zona fijo.
+#
+# IMPORTANTE (correccion 27/08/2026): la primera version de este
+# filtro exigia que TODA la ventana de 512KB fuera identica en las
+# N lecturas -- resulto ser una exigencia imposible de cumplir, un
+# bloque asi de grande de la memoria de un juego SIEMPRE tiene algo
+# cambiando en algun lado (temporizadores de sonido, contadores de
+# frame, semillas de RNG, animaciones de fondo) aunque el jugador
+# este perfectamente quieto. La version actual filtra por OFFSET
+# individual: cada candidato se descarta por separado si SU propio
+# byte(s) cambio durante las lecturas de estabilidad de cualquier
+# paso, sin importar que otras partes de la ventana si hayan
+# cambiado.
+STABILITY_READS = 4
+
+# Pausa entre lecturas de estabilidad. Tiene que ser lo bastante
+# larga para que algo que cambia con el movimiento/animacion lo
+# muestre (los ciclos normales del proyecto son de 200ms), pero sin
+# hacer la espera desesperante.
+STABILITY_DELAY_SECONDS = 0.3
+
+
+def collect_stability_reads(memory, start, size):
+    """
+    Lee la ventana STABILITY_READS veces seguidas, con una pausa
+    entre cada lectura. Devuelve la lista completa de lecturas (no
+    filtra nada todavia -- eso lo hace build_stable_mask).
+    """
+
+    reads = []
+
+    for _ in range(STABILITY_READS):
+
+        snapshot = read_window(memory, start, size)
+
+        if snapshot is None:
+            return None
+
+        reads.append(snapshot)
+        time.sleep(STABILITY_DELAY_SECONDS)
+
+    return reads
+
+
+def build_stable_mask(reads):
+    """
+    A partir de varias lecturas de la misma ventana, devuelve un
+    bytes() del mismo tamano donde cada posicion es 0x00 si ese
+    byte fue IGUAL en todas las lecturas (estable), o distinto de
+    0x00 si cambio en alguna (inestable -- descartar ese offset).
+
+    Implementado con enteros grandes (XOR de toda la ventana de una
+    sola vez) para que sea rapido incluso con una ventana de 512KB;
+    un bucle byte a byte en Python puro seria demasiado lento para
+    correr varias veces por sesion.
+    """
+
+    base = int.from_bytes(reads[0], "big")
+    diff_mask = 0
+
+    for snapshot in reads[1:]:
+        diff_mask |= int.from_bytes(snapshot, "big") ^ base
+
+    return diff_mask.to_bytes(len(reads[0]), "big")
+
+
+def read_stable_step(memory, start, size):
+    """
+    Lee la ventana para un paso de la secuencia y arma tanto el
+    snapshot base (primera lectura) como la mascara de estabilidad
+    por offset. Devuelve (snapshot, stable_mask) o (None, None) si
+    alguna lectura fallo.
+    """
+
+    reads = collect_stability_reads(memory, start, size)
+
+    if reads is None:
+        return None, None
+
+    stable_mask = build_stable_mask(reads)
+
+    return reads[0], stable_mask
+
+
 def parse_sequence(raw_value):
     labels = [
         piece.strip()
@@ -99,15 +197,20 @@ def parse_sequence(raw_value):
     return labels
 
 
-def find_candidates(snapshots, labels, width):
+def find_candidates(steps, labels, width):
     """
-    Devuelve una lista de (offset, valores) para los offsets donde
-    el valor de `width` bytes (little-endian) es igual en todos los
-    pasos con la misma etiqueta, y distinto entre etiquetas
-    distintas.
+    `steps` es una lista de (snapshot, stable_mask), uno por paso
+    de la secuencia (mismo orden que `labels`).
+
+    Devuelve una lista de (offset, valores) para los offsets donde:
+      - el byte/los bytes fueron ESTABLES (no cambiaron durante las
+        lecturas de estabilidad) en TODOS los pasos, y
+      - el valor de `width` bytes (little-endian) es igual en todos
+        los pasos con la misma etiqueta, y distinto entre etiquetas
+        distintas.
     """
 
-    size = len(snapshots[0])
+    size = len(steps[0][0])
 
     unpack_format = "<B" if width == 1 else "<H"
 
@@ -123,12 +226,20 @@ def find_candidates(snapshots, labels, width):
 
     for offset in range(size - width + 1):
 
+        stable_everywhere = all(
+            stable_mask[offset:offset + width] == b"\x00" * width
+            for _snapshot, stable_mask in steps
+        )
+
+        if not stable_everywhere:
+            continue
+
         values = [
             struct.unpack(
                 unpack_format,
                 snapshot[offset:offset + width],
             )[0]
-            for snapshot in snapshots
+            for snapshot, _stable_mask in steps
         ]
 
         consistent = True
@@ -235,7 +346,7 @@ def main():
     )
     print()
 
-    snapshots = []
+    steps = []
 
     for step_number, label in enumerate(labels, start=1):
 
@@ -246,10 +357,12 @@ def main():
         )
 
         print(
-            "Leyendo memoria (puede tardar varios segundos)..."
+            f"Leyendo memoria ({STABILITY_READS} lecturas para "
+            f"detectar que esta quieto, quedate quieto "
+            f"~{STABILITY_READS * STABILITY_DELAY_SECONDS:.1f}s)..."
         )
 
-        snapshot = read_window(
+        snapshot, stable_mask = read_stable_step(
             memory,
             scan_start,
             scan_size,
@@ -259,15 +372,23 @@ def main():
             print(f"Lectura del paso {step_number} fallo.")
             return
 
-        snapshots.append(snapshot)
-        print(f"Snapshot {step_number} capturado.")
+        steps.append((snapshot, stable_mask))
+
+        stable_ratio = (
+            100 * stable_mask.count(0) / len(stable_mask)
+        )
+
+        print(
+            f"Snapshot {step_number} capturado "
+            f"({stable_ratio:.1f}% de la ventana estuvo quieta)."
+        )
         print()
 
     print("Analizando candidatos (1 byte)...")
-    candidates_1 = find_candidates(snapshots, labels, width=1)
+    candidates_1 = find_candidates(steps, labels, width=1)
 
     print("Analizando candidatos (2 bytes)...")
-    candidates_2 = find_candidates(snapshots, labels, width=2)
+    candidates_2 = find_candidates(steps, labels, width=2)
 
     print()
     print("================================")

@@ -148,6 +148,11 @@ def test_runtime_pasa_boxed_party_a_nuzlocke_service():
         "badges": [False] * 8,
     }
     runtime.combat_service.read = lambda: None
+    # 27/08/2026: Runtime.update() ahora también llama a
+    # read_wild_flag() (detección de "perdido") -- este test
+    # prueba boxed_party, no esa lógica, así que se stubea "sin
+    # combate" para no romper por una dependencia no relacionada.
+    runtime.combat_service.read_wild_flag = lambda: None
 
     box_contents = [
         {

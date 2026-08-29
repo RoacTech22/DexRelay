@@ -10,6 +10,7 @@ from app.services.combat_service import (
 )
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
+from app.services.zone_names import resolve_zone_name
 
 
 class Runtime:
@@ -43,6 +44,14 @@ class Runtime:
         )
 
         self._last_badges = None
+
+        # Detección automática del estado "perdido" (27/08/2026,
+        # ver DexRelay_Contexto_Deteccion_Perdido.md). Estado de
+        # tracking entre ciclos -- ver
+        # _update_lost_encounter_tracking().
+        self._lost_encounter_snapshot = None
+        self._lost_tracking_resolved = False
+        self._combat_was_active = False
 
     def update(self):
         """Actualiza el estado realtime de DexRelay."""
@@ -111,3 +120,139 @@ class Runtime:
         else:
             self.state.combat_active = True
             self.state.combat_hp = combat_hp
+
+        self._update_lost_encounter_tracking()
+
+    def _update_lost_encounter_tracking(self):
+        """
+        Detección automática del estado "perdido" del Nuzlocke
+        Tracker (27/08/2026, ver
+        DexRelay_Contexto_Deteccion_Perdido.md): cuando el primer
+        combate salvaje en una ruta termina sin captura, esa ruta
+        se registra sola como "perdido" -- sin distinguir huida de
+        derrota (simplificación explícita del usuario).
+
+        - Mientras el combate esté activo y todavía no se haya
+          resuelto si corresponde un snapshot (`_lost_tracking_resolved`
+          sigue en False), se reintenta CADA ciclo si
+          `read_wild_flag()` ya da salvaje -- NO alcanza con mirarlo
+          una sola vez en el instante exacto en que el puntero pasa
+          a activo (bug real encontrado y confirmado en el juego el
+          28/08/2026: el juego puede tardar uno o más ciclos de
+          200ms en terminar de escribir la tabla de datos del
+          encuentro salvaje que lee WILD_BATTLE_FLAG_OFFSET, el
+          mismo tipo de escritura progresiva que ya obligó al
+          "Intento 3" del nickname/ruta de LAST_CAUGHT_ADDRESS.
+          Leer una sola vez, justo en el primer ciclo, podía
+          capturar un 0 transitorio y quedarse fijado en
+          "entrenador" para siempre -- validado con una partida
+          real: reintentar cada ciclo lo resuelve).
+        - Si la ruta actual (pieza 1) ya tiene un encuentro
+          registrado, se marca resuelto sin snapshot (no hace falta
+          reintentar cada ciclo restante del combate).
+        - Al terminar el combate (puntero vuelve a inactivo): si
+          había un snapshot pendiente, compara el contador de
+          capturas contra el del snapshot -- si no subió, se
+          perdió. Si subió, no hace falta hacer nada (la captura ya
+          se registra sola por el camino normal de party/Caja PC).
+        - `_lost_tracking_resolved` se reinicia a False recién
+          cuando el combate termina, así el próximo combate salvaje
+          vuelve a tener sus propios intentos.
+
+        Un combate de ENTRENADOR activo (wild_result == False) no
+        dispara ningún snapshot, pero SÍ cuenta como "combate
+        activo" para no confundir la transición de fin de combate.
+        """
+
+        wild_result = self.combat_service.read_wild_flag()
+
+        if wild_result is LECTURA_DESCARTADA:
+            # Lectura inconsistente (el puntero cambió a mitad de
+            # lectura): se reintenta el próximo ciclo, sin tocar
+            # el estado de tracking.
+            return
+
+        combat_active_now = wild_result is not None
+
+        if (
+            combat_active_now
+            and wild_result is True
+            and self._lost_encounter_snapshot is None
+            and not self._lost_tracking_resolved
+        ):
+
+            zone_id = self.reader.read_current_zone_id()
+            location = resolve_zone_name(zone_id)
+
+            already_registered = (
+                location is not None
+                and self.nuzlocke_service.has_encounter_for_location(
+                    location
+                )
+            )
+
+            if location is None:
+                # Lectura de zona fallida -- no marcar resuelto,
+                # reintentar el próximo ciclo (podría ser
+                # transitorio, igual que el flag salvaje).
+                pass
+
+            elif already_registered:
+                # Esta ruta ya tiene un resultado -- no tomar
+                # snapshot, y no hace falta reintentar el resto de
+                # este combate (la ruta no va a "desregistrarse" a
+                # mitad de la pelea).
+                self._lost_tracking_resolved = True
+
+            else:
+
+                total_caught = self.reader.read_total_caught_count()
+                last_caught = self.reader.read_last_caught()
+
+                species = (
+                    last_caught.get("species")
+                    if last_caught
+                    else None
+                )
+
+                if total_caught is not None and species:
+
+                    self._lost_encounter_snapshot = {
+                        "location": location,
+                        "species": species,
+                        "total_caught": total_caught,
+                    }
+
+                # Si total_caught/species vinieron None, no se
+                # marca resuelto -- se reintenta el próximo ciclo
+                # (mismo criterio que el flag salvaje: puede ser
+                # una escritura progresiva del juego, no un dato
+                # definitivo).
+
+        if not combat_active_now and self._combat_was_active:
+
+            if self._lost_encounter_snapshot is not None:
+
+                total_after = self.reader.read_total_caught_count()
+
+                if (
+                    total_after is not None
+                    and total_after
+                    <= self._lost_encounter_snapshot["total_caught"]
+                ):
+
+                    self.nuzlocke_service.register_lost_encounter(
+                        self._lost_encounter_snapshot["location"],
+                        self._lost_encounter_snapshot["species"],
+                    )
+
+            # Se reinicia siempre al terminar el combate (haya
+            # habido snapshot o no -- por ejemplo, un combate de
+            # entrenador genuino nunca toma snapshot pero igual
+            # tiene que resetear _lost_tracking_resolved para que
+            # el próximo combate salvaje tenga sus propios
+            # intentos).
+            self._lost_encounter_snapshot = None
+            self._lost_tracking_resolved = False
+
+        self._combat_was_active = combat_active_now
