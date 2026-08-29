@@ -165,4 +165,14 @@ class Application:
                 )
 
             self.http_server.stop()
+
+            # Sin esto, `state.azahar_connected`/`reader_active`
+            # quedan "pegados" en su último valor (True si estaba
+            # conectado al frenar) -- nadie más los actualiza una
+            # vez que el hilo del Runtime dejó de correr. Afecta
+            # tanto a la GUI como a /api/status por igual, porque
+            # ambos leen del mismo ApplicationState.
+            self.state.azahar_connected = False
+            self.state.reader_active = False
+
             print("Deteniendo DexRelay.")
