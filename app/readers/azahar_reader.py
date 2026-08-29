@@ -5,6 +5,8 @@ from app.memory.memory_reader import MemoryReader
 from app.memory.pointers import (
     PARTY_ORDER_ADDRESS,
     PARTY_COUNT_ADDRESS,
+    get_party_order_address,
+    get_party_count_address,
     ORDER_ENTRY_SIZE,
     POKEMON_POINTER_OFFSET,
     SLOT_DATA_SIZE,
@@ -166,15 +168,25 @@ class AzaharReader:
         cualquier slot en una posición >= esa cantidad se fuerza a
         0 (vacío), sin importar qué basura tenga el puntero ahí.
 
-        (Se descarta acá un intento anterior -- tratar como vacío
-        un puntero idéntico a uno de un slot anterior -- que
-        resultó ser una hipótesis incorrecta: se confirmó con un
-        probe de observación en vivo que el juego jamás duplica
-        punteros entre slots, simplemente no limpia el que sobra.)
+        Multi-versión (29/08/2026): PARTY_ORDER_ADDRESS y
+        PARTY_COUNT_ADDRESS NO son las mismas entre Alpha Sapphire
+        y Omega Ruby (confirmado -- la dirección de AS da 0x0 en
+        los 6 slots probando en OR). Se elige el par correcto según
+        `self.process_name` (ver get_party_order_address()/
+        get_party_count_address() en pointers.py) -- mismo criterio
+        que ya usa el proyecto para encontrar el proceso del juego.
         """
 
+        party_order_address = get_party_order_address(
+            self.process_name
+        )
+
+        party_count_address = get_party_count_address(
+            self.process_name
+        )
+
         data = self.memory.read(
-            PARTY_ORDER_ADDRESS,
+            party_order_address,
             ORDER_ENTRY_SIZE * 6
         )
 
@@ -185,7 +197,7 @@ class AzaharReader:
             return []
 
         count_byte = self.memory.read(
-            PARTY_COUNT_ADDRESS,
+            party_count_address,
             1
         )
 

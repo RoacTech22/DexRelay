@@ -121,9 +121,19 @@ def main():
     print(f"PARTY_ORDER_ADDRESS = {hex(PARTY_ORDER_ADDRESS)}")
     print()
 
-    reader = AzaharReader()
+    # Lee el process_name real de config.json (mismo criterio que
+    # usa la app principal) en vez de asumir "sango-2" -- para que
+    # este probe funcione igual con Alpha Sapphire u Omega Ruby
+    # sin tener que tocar el script a mano cada vez.
+    from app.core.config import Config
 
-    print("Buscando proceso sango-2...")
+    process_name = Config().get(
+        "azahar", "process_name", default="sango-2"
+    )
+
+    reader = AzaharReader(process_name=process_name)
+
+    print(f"Buscando proceso {process_name!r}...")
 
     if not reader.connect():
         print("No se encontro sango-2.")

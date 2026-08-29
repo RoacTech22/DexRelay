@@ -1,9 +1,30 @@
 # ============================================================
-# PUNTEROS Y TAMAÑOS DE MEMORIA DE POKÉMON ALPHA SAPPHIRE
+# PUNTEROS Y TAMAÑOS DE MEMORIA DE POKÉMON ALPHA SAPPHIRE / OMEGA RUBY
 # ============================================================
 
+# Nombres de proceso dentro de Azahar -- confirmados empíricamente
+# (29/08/2026, ver Documento Maestro sección 14/17): las dos
+# versiones NO comparten process_name, así que se usa como llave
+# para elegir qué set de direcciones corresponde. Configurable en
+# config.json -> azahar.process_name.
+PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2"
+PROCESS_NAME_OMEGA_RUBY = "sango-1"
+
 # Tabla que contiene el orden lógico de los Pokémon de la party.
-PARTY_ORDER_ADDRESS = 0x08CF71F0
+# CONFIRMADO (29/08/2026): esta dirección NO es la misma entre
+# Alpha Sapphire y Omega Ruby -- la de AS da 0x0 en los 6 slots
+# probando en OR (investigación completa en el Documento Maestro,
+# sección 14 y 19). Encontrada la de OR con el mismo método que
+# PARTY_COUNT_ADDRESS: por la relación PARTY_COUNT = PARTY_ORDER +
+# 0x18, ya confirmada para AS, aplicada a la inversa sobre el
+# PARTY_COUNT_ADDRESS de OR (confirmado primero, en vivo, con
+# Cheat Engine) para llegar a esta dirección -- y confirmada en
+# vivo con observar_orden_party_or.py: 6 punteros no-cero que se
+# reordenan solos al reordenar el equipo, igual que en AS.
+_PARTY_ORDER_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CF71F0,
+    PROCESS_NAME_OMEGA_RUBY: 0x08CFB1E0,
+}
 
 # Cada entrada de la tabla ocupa 4 bytes.
 ORDER_ENTRY_SIZE = 4
@@ -15,18 +36,67 @@ ORDER_ENTRY_SIZE = 4
 # equipo). Justo el byte siguiente al final de la tabla de 6
 # punteros (PARTY_ORDER_ADDRESS + 0x18, ya que 6 punteros × 4
 # bytes = 0x18) -- un lugar muy lógico, pegado a la tabla que
-# describe.
+# describe. Misma relación confirmada para las dos versiones.
 #
-# Confirmado en vivo bajando de 6 a 2 en tiempo real, exactamente
-# en el momento de cada depósito (probe
-# tools/probes/party/observar_candidato_party_count.py). La causa
-# real del bug: PARTY_ORDER_ADDRESS son 6 casilleros FIJOS que el
-# juego siempre mantiene reservados en memoria -- al depositar un
-# Pokémon, su puntero NO se limpia (sigue apuntando a datos
-# válidos, por eso decodificaba bien y aparecía "fantasma" en el
-# overlay). Hay que consultar esta dirección para saber cuántos de
-# esos 6 punteros son realmente parte de la party actual.
-PARTY_COUNT_ADDRESS = 0x08CF7208
+# Confirmado en vivo bajando de 6 a 2 en tiempo real (Alpha
+# Sapphire) y subiendo/bajando 1→5→4 (Omega Ruby), exactamente en
+# el momento de cada depósito/extracción. La causa real del bug:
+# PARTY_ORDER_ADDRESS son 6 casilleros FIJOS que el juego siempre
+# mantiene reservados en memoria -- al depositar un Pokémon, su
+# puntero NO se limpia (sigue apuntando a datos válidos, por eso
+# decodificaba bien y aparecía "fantasma" en el overlay). Hay que
+# consultar esta dirección para saber cuántos de esos 6 punteros
+# son realmente parte de la party actual.
+_PARTY_COUNT_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CF7208,
+    PROCESS_NAME_OMEGA_RUBY: 0x08CFB1F8,
+}
+
+
+def get_party_order_address(process_name):
+    """
+    Devuelve la PARTY_ORDER_ADDRESS correcta según qué versión
+    está corriendo (identificada por `process_name`, el mismo
+    valor que ya usa AzaharReader para encontrar el proceso en
+    Azahar). Si `process_name` no es ninguno de los confirmados,
+    devuelve la de Alpha Sapphire como default -- mismo criterio
+    que el resto del proyecto (preferir un valor conocido antes
+    que fallar por completo), documentado para que quede claro
+    que es una suposición, no una confirmación.
+    """
+
+    return _PARTY_ORDER_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _PARTY_ORDER_ADDRESS_BY_PROCESS[
+            PROCESS_NAME_ALPHA_SAPPHIRE
+        ],
+    )
+
+
+def get_party_count_address(process_name):
+    """Ídem get_party_order_address(), para PARTY_COUNT_ADDRESS."""
+
+    return _PARTY_COUNT_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _PARTY_COUNT_ADDRESS_BY_PROCESS[
+            PROCESS_NAME_ALPHA_SAPPHIRE
+        ],
+    )
+
+
+# Se mantienen como constantes planas también, apuntando a Alpha
+# Sapphire -- para no romper código/tests/probes existentes que
+# las importan directo sin pasar por el selector de versión (la
+# gran mayoría de los usos actuales de DexRelay siguen siendo
+# sobre Alpha Sapphire). El código que sí necesita ser correcto
+# para las dos versiones (AzaharReader.read_party_order()) usa
+# los getters de arriba en cambio.
+PARTY_ORDER_ADDRESS = _PARTY_ORDER_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
+PARTY_COUNT_ADDRESS = _PARTY_COUNT_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
 
 # El puntero obtenido de la tabla apunta 0x40 bytes
 # antes de la estructura principal del Pokémon.
