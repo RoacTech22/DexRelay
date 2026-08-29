@@ -8,22 +8,28 @@ la decisión de concurrencia de la sección 18 del Documento
 Maestro (Application.run() dejó libre el hilo principal
 justamente para esto).
 
-Simplificación deliberada de esta primera versión: "Lector"
-(Runtime) y "Servidor HTTP" se inician/detienen juntos, porque
-así ya funciona `Application.start()`/`stop()` -- separarlos en
-controles independientes (como sugiere el mockup original de la
-sección 15) es una extensión futura, no una necesidad para
-reemplazar el uso actual de `main.py` a mano. No se tocó
-`Application` para esta primera versión.
+Decisión explícita del usuario (29/08/2026): "Lector" (Runtime) y
+"Servidor HTTP" se mantienen en un solo control combinado, no se
+separan -- así ya funciona `Application.start()`/`stop()` y no
+hay necesidad real de más granularidad por ahora. No cambiar esto
+sin instrucción nueva.
 
 Arranque manual a propósito: al abrir la ventana NO se inicia el
 lector/servidor solo -- el usuario lo hace con el botón "Iniciar
-Lector", igual que el mockup de la sección 15 lo plantea como una
-acción explícita.
+Lector".
+
+Secciones: AZAHAR, HTTP SERVER, OVERLAYS, NUZLOCKE, CONFIGURACIÓN
+(edita config.json, cambios aplican al reiniciar DexRelay -- no
+hay hot-reload, `Application` ya está construida con los valores
+viejos) y LOGS (redirige stdout/stderr a un Text widget, ver
+`_StreamToLogWidget` más abajo -- DexRelay no tiene módulo
+`logging` todavía, solo `print()`).
 """
 
 from __future__ import annotations
 
+import sys
+import tkinter as tk
 import webbrowser
 
 import ttkbootstrap as ttk
@@ -31,6 +37,52 @@ from ttkbootstrap.constants import DANGER, SECONDARY, SUCCESS, WARNING
 
 POLL_INTERVAL_MS = 500
 BADGE_TOTAL = 8
+MAX_LOG_LINES = 500
+
+
+class _StreamToLogWidget:
+    """
+    Redirige un stream (stdout/stderr) a un Text widget de la GUI,
+    manteniendo también la salida original (la terminal, si la
+    hay). DexRelay hoy solo usa `print()` para reportar estado
+    (Application, HTTPServer) -- no hay módulo `logging` todavía,
+    así que redirigir el stream entero es mucho más simple que
+    tocar cada `print()` uno por uno.
+
+    Las escrituras se marshalean al hilo principal con
+    `window.after(0, ...)` porque pueden venir del hilo del
+    Runtime o del hilo del HTTPServer, y Tkinter no es thread-safe
+    (mismo criterio de la sección 18 del Documento Maestro).
+    """
+
+    def __init__(self, window, text_widget, original_stream=None):
+        self.window = window
+        self.text_widget = text_widget
+        self.original_stream = original_stream
+
+    def write(self, text: str) -> None:
+        if self.original_stream is not None:
+            self.original_stream.write(text)
+
+        if text.strip():
+            self.window.after(0, self._append, text)
+
+    def flush(self) -> None:
+        if self.original_stream is not None:
+            self.original_stream.flush()
+
+    def _append(self, text: str) -> None:
+        widget = self.text_widget
+        widget.configure(state="normal")
+        widget.insert("end", text if text.endswith("\n") else text + "\n")
+
+        line_count = int(widget.index("end-1c").split(".")[0])
+
+        if line_count > MAX_LOG_LINES:
+            widget.delete("1.0", f"{line_count - MAX_LOG_LINES}.0")
+
+        widget.see("end")
+        widget.configure(state="disabled")
 
 
 class MainWindow:
@@ -40,14 +92,19 @@ class MainWindow:
         self.window = ttk.Window(
             title="DexRelay",
             themename="darkly",
-            resizable=(False, False),
+            resizable=(True, True),
         )
-        self.window.geometry("440x560")
+        self.window.geometry("480x900")
+        self.window.minsize(420, 640)
 
         self._build_azahar_section()
         self._build_server_section()
         self._build_overlays_section()
         self._build_nuzlocke_section()
+        self._build_config_section()
+        self._build_logs_section()
+
+        self._install_log_redirect()
 
         self.window.protocol(
             "WM_DELETE_WINDOW",
@@ -184,6 +241,138 @@ class MainWindow:
             command=self._open_tracker_panel,
         ).pack(fill="x", pady=(10, 0))
 
+    def _build_config_section(self) -> None:
+        frame = ttk.Labelframe(
+            self.window,
+            text="CONFIGURACIÓN",
+            padding=12,
+        )
+        frame.pack(fill="x", padx=12, pady=6)
+
+        config = self.app.config
+
+        self._config_vars = {
+            "process_name": ttk.StringVar(
+                value=config.get(
+                    "azahar", "process_name", default=""
+                )
+            ),
+            "host": ttk.StringVar(
+                value=config.get("server", "host", default="")
+            ),
+            "port": ttk.StringVar(
+                value=str(config.get("server", "port", default=8080))
+            ),
+            "refresh_ms": ttk.StringVar(
+                value=str(
+                    config.get("realtime", "refresh_ms", default=200)
+                )
+            ),
+        }
+
+        fields = [
+            ("Proceso Azahar", "process_name"),
+            ("Host servidor", "host"),
+            ("Puerto servidor", "port"),
+            ("Refresco (ms)", "refresh_ms"),
+        ]
+
+        for label_text, key in fields:
+            row = ttk.Frame(frame)
+            row.pack(fill="x", pady=2)
+
+            ttk.Label(
+                row,
+                text=label_text,
+                width=14,
+            ).pack(side="left")
+
+            ttk.Entry(
+                row,
+                textvariable=self._config_vars[key],
+            ).pack(side="left", expand=True, fill="x")
+
+        self.config_status_label = ttk.Label(
+            frame,
+            text="Cambios de proceso/host/puerto/refresco requieren "
+            "reiniciar DexRelay para aplicarse.",
+            bootstyle=SECONDARY,
+            wraplength=380,
+        )
+        self.config_status_label.pack(anchor="w", pady=(8, 0))
+
+        ttk.Button(
+            frame,
+            text="Guardar configuración",
+            command=self._save_config,
+        ).pack(fill="x", pady=(6, 0))
+
+    def _build_logs_section(self) -> None:
+        frame = ttk.Labelframe(
+            self.window,
+            text="LOGS",
+            padding=12,
+        )
+        frame.pack(
+            fill="both",
+            expand=True,
+            padx=12,
+            pady=(6, 12),
+        )
+
+        container = ttk.Frame(frame)
+        container.pack(fill="both", expand=True)
+
+        self.log_text = tk.Text(
+            container,
+            height=10,
+            wrap="word",
+            state="disabled",
+            background="#1e1e1e",
+            foreground="#d0d0d0",
+            insertbackground="#d0d0d0",
+            relief="flat",
+            borderwidth=0,
+        )
+        self.log_text.pack(side="left", fill="both", expand=True)
+
+        scrollbar = ttk.Scrollbar(
+            container,
+            orient="vertical",
+            command=self.log_text.yview,
+        )
+        scrollbar.pack(side="right", fill="y")
+        self.log_text.configure(yscrollcommand=scrollbar.set)
+
+    def _save_config(self) -> None:
+        values = {
+            key: var.get().strip()
+            for key, var in self._config_vars.items()
+        }
+
+        try:
+            port = int(values["port"])
+            refresh_ms = int(values["refresh_ms"])
+        except ValueError:
+            self.config_status_label.configure(
+                text="Puerto y refresco tienen que ser números "
+                "enteros -- no se guardó nada.",
+                bootstyle=DANGER,
+            )
+            return
+
+        config = self.app.config
+        config.set("azahar", "process_name", value=values["process_name"])
+        config.set("server", "host", value=values["host"])
+        config.set("server", "port", value=port)
+        config.set("realtime", "refresh_ms", value=refresh_ms)
+        config.save()
+
+        self.config_status_label.configure(
+            text="Guardado. Reiniciá DexRelay para que tome efecto.",
+            bootstyle=SUCCESS,
+        )
+
     # ---------------------------------------------------------------
     # Acciones
     # ---------------------------------------------------------------
@@ -277,7 +466,23 @@ class MainWindow:
     def _on_close(self) -> None:
         if self.app.running:
             self.app.stop()
+        self._restore_log_redirect()
         self.window.destroy()
+
+    def _install_log_redirect(self) -> None:
+        self._original_stdout = sys.stdout
+        self._original_stderr = sys.stderr
+
+        sys.stdout = _StreamToLogWidget(
+            self.window, self.log_text, self._original_stdout
+        )
+        sys.stderr = _StreamToLogWidget(
+            self.window, self.log_text, self._original_stderr
+        )
+
+    def _restore_log_redirect(self) -> None:
+        sys.stdout = self._original_stdout
+        sys.stderr = self._original_stderr
 
     def run(self) -> None:
         self.window.mainloop()
