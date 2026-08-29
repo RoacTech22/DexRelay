@@ -229,13 +229,55 @@ static void HandleMetLocation(JsonElement root)
             pk.Version
         );
 
+    // "Entregado por" (28/08/2026, a pedido del usuario): el
+    // campo Egg_Location es DISTINTO de Met_Location -- guarda
+    // quién/dónde se recibió el Pokémon (ej. "Anciana del
+    // Balneario" para un huevo), no dónde se lo "encontró" en el
+    // mundo. Antes ya se leía eggLocationId pero nunca se
+    // resolvía a texto -- son las mismas tablas de PKHeX, solo
+    // que con el flag `eggLocation: true` en vez de `false`.
+    // Como GameInfo.CurrentLanguage ya está fijado en "es" arriba,
+    // sale en español igual que metLocationName, sin traducción
+    // aparte.
+    //
+    // BUG REAL corregido (28/08/2026, encontrado probando en el
+    // juego): eggLocationId == 0 significa "este Pokémon NUNCA
+    // fue huevo" (la inmensa mayoría de las capturas) -- pero a
+    // diferencia de metLocationId, la tabla de ubicaciones de
+    // huevo SÍ resuelve el ID 0 a un texto no vacío en vez de
+    // vacío. Sin este chequeo, TODAS las capturas (no solo los
+    // huevos reales) terminaban con un eggLocationName no vacío,
+    // y el lado Python -- que le da prioridad a eggLocation
+    // cuando no está vacío -- las registraba a todas como
+    // "especial/huevo". Se corta acá explícitamente: solo se
+    // resuelve el texto si el ID no es 0.
+    string eggLocationName =
+        eggLocationId == 0
+            ? ""
+            : GameInfo.GetLocationName(
+                true,
+                eggLocationId,
+                pk.Format,
+                pk.Generation,
+                pk.Version
+            );
+
     var response = new
     {
         metLocationId,
         metLocationName,
         eggLocationId,
+        eggLocationName,
         version = pk.Version.ToString(),
-        shiny = pk.IsShiny
+        shiny = pk.IsShiny,
+        // 29/08/2026, a pedido del usuario: el overlay del equipo
+        // mostraba el sprite de la especie REAL de un huevo sin
+        // nacer todavía (spoiler) -- species_id ya venía resuelto
+        // desde antes (el dato está en el PK6 aunque el nickname
+        // diga "Huevo"), pero no había forma de saber que HABÍA
+        // que ocultarlo. pk.IsEgg es la misma propiedad de PKHeX
+        // que ya usa el juego para decidir eso.
+        isEgg = pk.IsEgg
     };
 
     Console.WriteLine(

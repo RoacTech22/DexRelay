@@ -14,6 +14,27 @@ let previousTeam = [
     null
 ];
 
+// Delay de revelación al nacer un huevo (29/08/2026, a pedido
+// del usuario): sin esto, el overlay mostraba al Pokémon real en
+// el instante exacto en que el juego terminaba de escribir la
+// memoria -- que puede ser ANTES de que termine la animación de
+// eclosión en pantalla, adelantando el spoiler. `hatchReveals`
+// guarda, por slot, un "congelado" del estado de huevo (nickname
+// "Huevo", sprite genérico, todo) para seguir mostrándolo un rato
+// más después de detectar que ya nació de verdad, y recién ahí
+// revelar. No se toca nada del lado del backend/memoria -- es
+// puramente un retraso visual en este archivo.
+const HATCH_REVEAL_DELAY_MS = 9000;
+
+let hatchReveals = [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+];
+
 let loadInProgress = false;
 
 /* =========================================
@@ -204,10 +225,90 @@ function renderTeam(team, deadNicknames) {
         index++
     ) {
 
+        const previousPokemon =
+            previousTeam[index];
+
+        const realPokemon =
+            currentTeam[index];
+
+        // ¿Acaba de nacer? (isEgg pasó de true a false en este
+        // mismo Pokémon). Se arranca el temporizador UNA sola vez
+        // -- si ya había uno corriendo para este slot, no se
+        // reinicia por las dudas de que esta detección se repita
+        // en el ciclo siguiente por algún motivo.
+        const justHatched =
+            !hatchReveals[index] &&
+            previousPokemon &&
+            previousPokemon.isEgg === true &&
+            realPokemon &&
+            realPokemon.isEgg === false;
+
+        if (justHatched) {
+
+            hatchReveals[index] = {
+                revealAt:
+                    Date.now() +
+                    HATCH_REVEAL_DELAY_MS,
+                frozenPokemon: previousPokemon,
+                // Nickname YA revelado en el juego en el momento
+                // de detectar la eclosión -- si para cuando se
+                // cumple el delay el slot pasó a tener otro
+                // Pokémon (reordenamiento del equipo, o el que
+                // nació se movió de slot), se cancela el congelado
+                // en vez de tapar al Pokémon equivocado.
+                expectedNickname: realPokemon.nickname
+            };
+        }
+
+        let displayPokemon = realPokemon;
+        let displayPrevious = previousPokemon;
+
+        const pending = hatchReveals[index];
+
+        if (pending) {
+
+            const identityChanged =
+                !realPokemon ||
+                realPokemon.nickname !==
+                pending.expectedNickname;
+
+            if (identityChanged) {
+
+                hatchReveals[index] = null;
+
+            } else if (Date.now() < pending.revealAt) {
+
+                // Todavía dentro de la ventana de espera: se
+                // sigue mostrando exactamente el mismo congelado
+                // de huevo que ya se estaba mostrando (mismo
+                // objeto como `pokemon` Y como `previous`, para
+                // que renderSlot() lo trate como "sin cambios" y
+                // no dispare ninguna reconstrucción/animación).
+                displayPokemon =
+                    pending.frozenPokemon;
+
+                displayPrevious =
+                    pending.frozenPokemon;
+
+            } else {
+
+                // Se cumplió el delay: se revela de verdad. Se
+                // deja `displayPrevious` como el congelado de
+                // huevo (no el `previousPokemon` real) para que
+                // renderSlot() detecte el cambio de nickname/
+                // sprite y dispare la animación de entrada, igual
+                // que si hubiera pasado en este instante.
+                hatchReveals[index] = null;
+
+                displayPrevious =
+                    pending.frozenPokemon;
+            }
+        }
+
         renderSlot(
             index,
-            currentTeam[index],
-            previousTeam[index],
+            displayPokemon,
+            displayPrevious,
             deadNicknames
             // COMBAT_SLOT_INDEX / combat -- ver
             // nota de desactivación temporal del
@@ -491,9 +592,21 @@ function renderSlot(
 
     if (needsRebuild) {
 
+        // 29/08/2026, a pedido del usuario: species_id de un
+        // huevo sin nacer ya resuelve la especie REAL (el dato
+        // vive en el PK6 aunque el nickname diga "Huevo") -- sin
+        // esto, el overlay mostraba el sprite de la especie real
+        // antes de que naciera (spoiler). sprites/0.png ya es el
+        // sprite de huevo genérico (venía incluido en el pack de
+        // sprites del usuario, no hizo falta agregar ninguno).
+        const displaySpeciesId =
+            pokemon.isEgg
+                ? 0
+                : Number(pokemon.speciesId);
+
         const spriteSize =
             getSpriteSize(
-                Number(pokemon.speciesId)
+                displaySpeciesId
             );
 
 
@@ -550,7 +663,9 @@ function renderSlot(
                 <img
                     class="sprite ${spriteSize}${shinyClass}${criticalClass}${deadClass}"
                     alt="${escapeHTML(
-            pokemon.species || ""
+            pokemon.isEgg
+                ? "Huevo"
+                : (pokemon.species || "")
         )}"
                 >
             </div>
@@ -581,7 +696,7 @@ function renderSlot(
 
         loadSpriteWithRetry(
             spriteImg,
-            pokemon.speciesId
+            displaySpeciesId
         );
 
         return;
