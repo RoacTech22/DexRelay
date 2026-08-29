@@ -16,6 +16,38 @@ from app.services.pkhex.bridge import PKHeXBridge
 _HOENN_ID_MIN = 170
 _HOENN_ID_MAX = 354
 
+# Ubicaciones de Hoenn excluidas a propósito del catálogo
+# (29/08/2026, decisión explícita del usuario) -- no son
+# relevantes para un Nuzlocke normal: mirage spots de DexNav que
+# aparecen al azar (nunca forman parte de un recorrido real),
+# las cuevas de los Regis (post-juego, muy raras), y la base
+# secreta del propio jugador (no es un lugar de encuentro
+# salvaje). Esto SOLO afecta la lista precargada del panel (no
+# aparecen como fila esperando captura) -- si por algún motivo
+# rarísimo una captura real reportara uno de estos IDs, igual se
+# registraría normal (LocationResolver es un módulo aparte, no
+# consulta esta exclusión); el panel simplemente le crearía una
+# fila nueva sobre la marcha, como con cualquier ubicación no
+# precargada.
+EXCLUDED_LOCATION_IDS = {
+    276,  # "???" -- ID interno sin uso real, no una ubicación
+          # jugable (nombre crudo de PKHeX, nunca se pudo
+          # confirmar qué es)
+    278,  # Desert Ruins
+    306,  # Island Cave
+    308,  # Ancient Tomb
+    310,  # Sealed Chamber
+    334,  # Trackless Forest
+    336,  # Pathless Plain
+    338,  # Nameless Cavern
+    340,  # Fabled Cave
+    342,  # Gnarled Den
+    344,  # Crescent Isle
+    354,  # Secret Base
+    350,  # Secret Shore / "Costa Secreta"
+    352,  # Secret Meadow / "Prado Secreto"
+}
+
 # Orden narrativo aproximado (progresión de historia de ORAS), por
 # ID -- no por nombre, para que funcione sin importar en qué idioma
 # termine devolviendo el texto PKHeX. Lo que no está en este mapa
@@ -196,6 +228,7 @@ class LocationCatalog:
             if _HOENN_ID_MIN
             <= entry.get("id", -1)
             <= _HOENN_ID_MAX
+            and entry.get("id") not in EXCLUDED_LOCATION_IDS
         }
 
         ordered = []
