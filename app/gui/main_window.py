@@ -1,22 +1,22 @@
 """
-Ventana principal de DexRelay (FASE 4).
+Pantalla principal de DexRelay (FASE 4).
 
-Ocupa el hilo principal con su propio mainloop (Tkinter/
-ttkbootstrap) mientras el Runtime realtime y el HTTPServer siguen
-corriendo en sus hilos de fondo -- esto ya estaba preparado desde
-la decisión de concurrencia de la sección 18 del Documento
-Maestro (Application.run() dejó libre el hilo principal
-justamente para esto).
+Ya no es dueña de la ventana raíz -- desde que existe el flujo de
+bienvenida (`app/gui/app_window.py`), `MainWindow` recibe la
+ventana (`window`, para `.after()`/clipboard/mainloop) y un
+contenedor (`container`, un Frame donde empaquetar sus secciones)
+por separado, para poder convivir con las otras pantallas
+(Bienvenida, Espera) dentro del mismo `ttk.Window`. También recibe
+un callback opcional `on_back_to_welcome` -- si se pasa, se
+muestra un botón "◀ Volver a Bienvenida" arriba de todo; el
+detener el lector y restaurar los logs antes de volver lo maneja
+`AppWindow._back_to_welcome()`, no esta clase.
 
 Decisión explícita del usuario (29/08/2026): "Lector" (Runtime) y
 "Servidor HTTP" se mantienen en un solo control combinado, no se
 separan -- así ya funciona `Application.start()`/`stop()` y no
 hay necesidad real de más granularidad por ahora. No cambiar esto
 sin instrucción nueva.
-
-Arranque manual a propósito: al abrir la ventana NO se inicia el
-lector/servidor solo -- el usuario lo hace con el botón "Iniciar
-Lector".
 
 Secciones: AZAHAR, HTTP SERVER, OVERLAYS, NUZLOCKE, CONFIGURACIÓN
 (edita config.json, cambios aplican al reiniciar DexRelay -- no
@@ -86,17 +86,19 @@ class _StreamToLogWidget:
 
 
 class MainWindow:
-    def __init__(self, application) -> None:
+    def __init__(
+        self,
+        application,
+        window,
+        container=None,
+        on_back_to_welcome=None,
+    ) -> None:
         self.app = application
+        self.window = window
+        self.container = container if container is not None else window
+        self.on_back_to_welcome = on_back_to_welcome
 
-        self.window = ttk.Window(
-            title="DexRelay",
-            themename="darkly",
-            resizable=(True, True),
-        )
-        self.window.geometry("480x900")
-        self.window.minsize(420, 640)
-
+        self._build_back_button()
         self._build_azahar_section()
         self._build_server_section()
         self._build_overlays_section()
@@ -106,20 +108,26 @@ class MainWindow:
 
         self._install_log_redirect()
 
-        self.window.protocol(
-            "WM_DELETE_WINDOW",
-            self._on_close,
-        )
-
         self._poll_state()
 
     # ---------------------------------------------------------------
     # Construcción de secciones
     # ---------------------------------------------------------------
 
+    def _build_back_button(self) -> None:
+        if self.on_back_to_welcome is None:
+            return
+
+        ttk.Button(
+            self.container,
+            text="◀ Volver a Bienvenida",
+            bootstyle="link",
+            command=self.on_back_to_welcome,
+        ).pack(anchor="w", padx=12, pady=(12, 0))
+
     def _build_azahar_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="AZAHAR",
             padding=12,
         )
@@ -163,7 +171,7 @@ class MainWindow:
 
     def _build_server_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="HTTP SERVER",
             padding=12,
         )
@@ -180,7 +188,7 @@ class MainWindow:
 
     def _build_overlays_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="OVERLAYS (OBS)",
             padding=12,
         )
@@ -223,7 +231,7 @@ class MainWindow:
 
     def _build_nuzlocke_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="NUZLOCKE",
             padding=12,
         )
@@ -243,7 +251,7 @@ class MainWindow:
 
     def _build_config_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="CONFIGURACIÓN",
             padding=12,
         )
@@ -309,7 +317,7 @@ class MainWindow:
 
     def _build_logs_section(self) -> None:
         frame = ttk.Labelframe(
-            self.window,
+            self.container,
             text="LOGS",
             padding=12,
         )
@@ -463,12 +471,6 @@ class MainWindow:
         host, port = self._server_address()
         return f"http://{host}:{port}"
 
-    def _on_close(self) -> None:
-        if self.app.running:
-            self.app.stop()
-        self._restore_log_redirect()
-        self.window.destroy()
-
     def _install_log_redirect(self) -> None:
         self._original_stdout = sys.stdout
         self._original_stderr = sys.stderr
@@ -480,9 +482,12 @@ class MainWindow:
             self.window, self.log_text, self._original_stderr
         )
 
-    def _restore_log_redirect(self) -> None:
+    def restore_log_redirect(self) -> None:
+        """
+        Público a propósito -- lo llama `AppWindow` antes de cerrar
+        la ventana raíz, ya que `MainWindow` ya no maneja el cierre
+        de la ventana por su cuenta (ver `app/gui/app_window.py`).
+        """
+
         sys.stdout = self._original_stdout
         sys.stderr = self._original_stderr
-
-    def run(self) -> None:
-        self.window.mainloop()
