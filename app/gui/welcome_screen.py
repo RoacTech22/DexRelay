@@ -8,26 +8,19 @@ por el usuario el 29/08/2026) y un selector de versión del juego.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import tkinter as tk
 
 import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 from ttkbootstrap.constants import PRIMARY, SECONDARY, SUCCESS
 
+from app.core import paths
 from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
 
-# app/gui/welcome_screen.py -> parents[2] es la raíz del proyecto
-LOGO_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "assets"
-    / "ui"
-    / "dexrelay_logo.png"
-)
+LOGO_PATH = paths.path("assets", "ui", "dexrelay_logo.png")
 LOGO_DISPLAY_WIDTH = 320
 
 # (etiqueta visible, process_name, subtítulo opcional). Agregar un
