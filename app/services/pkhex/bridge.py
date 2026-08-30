@@ -2,22 +2,72 @@ import json
 import subprocess
 from pathlib import Path
 
+from app.core import paths
+
 
 class PKHeXBridge:
     """
     Cliente Python para comunicarse con DexRelay.PKHeX.
+
+    Detecta automáticamente si existe una publicación
+    self-contained del bridge (FASE 6, 29/08/2026 -- ver
+    Documento Maestro) en `releases/pkhex-bridge/` y, si está, la
+    usa directamente (no depende de tener el SDK de .NET
+    instalado). Si no está publicada todavía, cae al modo de
+    desarrollo de siempre (`dotnet run --project ...`), así que
+    seguir trabajando sobre el código C# sin publicar en cada
+    cambio sigue andando igual que antes.
+
+    Generar la publicación self-contained (Windows x64):
+
+        cd dotnet/DexRelay.PKHeX
+        dotnet publish -c Release -r win-x64 --self-contained true ^
+            -p:PublishSingleFile=true ^
+            -p:IncludeNativeLibrariesForSelfExtract=true ^
+            -o ../../releases/pkhex-bridge
     """
+
+    PUBLISHED_EXE_NAME = "DexRelay.PKHeX.exe"
 
     def __init__(self):
         self.process = None
 
+        # paths.base_dir() en modo desarrollo es la raiz del
+        # proyecto (igual que antes); en un build empaquetado
+        # es la carpeta del .exe -- ahi solo importa que exista
+        # el published_exe_path de abajo, el project_directory
+        # de dotnet run es de uso exclusivo en desarrollo.
+        project_root = paths.base_dir()
+
         self.project_directory = (
-            Path(__file__)
-            .resolve()
-            .parents[3]
+            project_root
             / "dotnet"
             / "DexRelay.PKHeX"
         )
+
+        self.published_exe_path = (
+            project_root
+            / "releases"
+            / "pkhex-bridge"
+            / self.PUBLISHED_EXE_NAME
+        )
+
+    def _build_command(self):
+        """
+        Devuelve el comando a lanzar: el ejecutable
+        self-contained publicado si existe, o `dotnet run` en
+        modo desarrollo si todavía no se publicó nada.
+        """
+
+        if self.published_exe_path.exists():
+            return [str(self.published_exe_path)]
+
+        return [
+            "dotnet",
+            "run",
+            "--project",
+            str(self.project_directory),
+        ]
 
     def start(self):
         """
@@ -31,12 +81,7 @@ class PKHeXBridge:
             self.process = None
 
         self.process = subprocess.Popen(
-            [
-                "dotnet",
-                "run",
-                "--project",
-                str(self.project_directory),
-            ],
+            self._build_command(),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

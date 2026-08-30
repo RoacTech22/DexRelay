@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from app.core import paths
 from app.services.pkhex.bridge import PKHeXBridge
 
 
@@ -22,7 +23,7 @@ class SpeciesCatalog:
     def __init__(
         self,
         bridge=None,
-        cache_path="data/species_cache.json",
+        cache_path=None,
     ):
         self.bridge = (
             bridge
@@ -30,7 +31,14 @@ class SpeciesCatalog:
             else PKHeXBridge()
         )
 
-        self.cache_path = Path(cache_path)
+        # Sin cache_path explícito, resuelve data/species_cache.json
+        # relativo a la carpeta del proyecto o del .exe empaquetado
+        # -- ver app/core/paths.py.
+        self.cache_path = (
+            Path(cache_path)
+            if cache_path is not None
+            else paths.path("data", "species_cache.json")
+        )
         self._species = None
 
     def list_all(self):

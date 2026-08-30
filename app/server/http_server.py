@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 
+from app.core import paths
 from app.core.state import ApplicationState
 from app.services.location_catalog import LocationCatalog
 from app.services.nuzlocke_service import NuzlockeService
@@ -67,11 +68,11 @@ class HTTPServer:
         self.species_catalog = species_catalog
         self.location_catalog = location_catalog
 
-        project_root = (
-            Path(__file__)
-            .resolve()
-            .parents[2]
-        )
+        # Modo desarrollo: raíz del proyecto (igual que antes). En
+        # un build empaquetado: la carpeta del .exe, donde
+        # overlays/ y panels/ tienen que estar copiados al lado
+        # (--add-data de PyInstaller) -- ver app/core/paths.py.
+        project_root = paths.base_dir()
 
         # /overlay/* -- vistas para OBS (Browser Source):
         # transparentes, de solo lectura, pensadas para verse en

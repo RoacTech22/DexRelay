@@ -1,10 +1,15 @@
 import json
 from pathlib import Path
 
+from app.core import paths
+
 
 class Config:
-    def __init__(self, path="config.json"):
-        self.path = Path(path)
+    def __init__(self, path=None):
+        # Sin path explícito, resuelve config.json relativo a la
+        # carpeta del proyecto (modo desarrollo) o a la carpeta
+        # del propio .exe (build empaquetado) -- ver app/core/paths.py.
+        self.path = Path(path) if path is not None else paths.path("config.json")
         self.data = self._load()
 
     def _load(self):

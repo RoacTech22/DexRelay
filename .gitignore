@@ -30,3 +30,7 @@ Thumbs.db
 # .NET build artifacts
 bin/
 obj/
+
+# Publicaciones self-contained / empaquetado (FASE 6, se regeneran con
+# dotnet publish / PyInstaller -- no versionar, pesan mucho)
+releases/

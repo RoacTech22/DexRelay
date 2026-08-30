@@ -3,12 +3,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from app.core import paths
+
 
 class NuzlockeStorage:
     """Persists the current Nuzlocke run (roster + graveyard) to disk."""
 
-    def __init__(self, path: str | Path = "data/nuzlocke.json") -> None:
-        self.path = Path(path)
+    def __init__(self, path: str | Path | None = None) -> None:
+        # Sin path explícito, resuelve data/nuzlocke.json relativo
+        # a la carpeta del proyecto o del .exe empaquetado -- ver
+        # app/core/paths.py.
+        self.path = (
+            Path(path) if path is not None else paths.path("data", "nuzlocke.json")
+        )
 
     def load(self) -> dict:
         """
