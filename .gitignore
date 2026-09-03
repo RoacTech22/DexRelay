@@ -34,3 +34,7 @@ obj/
 # Publicaciones self-contained / empaquetado (FASE 6, se regeneran con
 # dotnet publish / PyInstaller -- no versionar, pesan mucho)
 releases/
+
+# Datos y config locales (no versionar - se generan/editan en runtime)
+config.json
+data/*.json
