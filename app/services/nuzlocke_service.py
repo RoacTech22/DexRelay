@@ -77,6 +77,27 @@ class NuzlockeService:
         # en el medio, un caso extremadamente raro.
         self._last_visible_nicknames = None
 
+    def switch_storage(self, storage) -> None:
+        """
+        Cambia a qué archivo lee/escribe este servicio (02/09/2026,
+        GUI v2 -- Application.restart_reader() la llama cuando
+        detecta que el juego conectado cambió, con
+        NuzlockeStorage.for_game() del juego nuevo).
+
+        `self._data = None` fuerza que la próxima llamada a
+        update() recargue desde el storage nuevo en vez de seguir
+        usando el roster/cementerio del juego anterior todavía en
+        memoria -- sin esto, el bug de "/overlay/nuzlocke muestra
+        la partida de Omega Ruby con Alpha Sapphire abierto"
+        seguiría pasando aunque el archivo en disco ya fuera el
+        correcto, porque el caché en memoria no se habría
+        actualizado.
+        """
+
+        self.storage = storage
+        self._data = None
+        self._last_visible_nicknames = None
+
     def reset_all(self) -> dict:
         """
         Botón "reiniciar todo" del panel (provisional): borra
@@ -1847,6 +1868,12 @@ class NuzlockeService:
             match["nickname"],
             match["species"],
             "capturado",
+            # anchor_location (30/08/2026, bug real corregido): la
+            # fila caia siempre al final de la tabla porque esto
+            # nunca se pasaba -- el panel necesita la ruta real
+            # (sin el sufijo con nickname) para poder ubicarla
+            # debajo de su ruta, igual que ya hace "especial".
+            anchor_location=met_location,
             shiny=bool(match.get("shiny", False)),
             extra_capture=True,
         )
@@ -2001,6 +2028,20 @@ class NuzlockeService:
                     f"{origin!r}. Debe ser uno de "
                     f"{self.VALID_ORIGINS}."
                 )
+
+            if anchor_location is None and existing is not None:
+                anchor_location = existing.get("anchorLocation")
+
+        elif extra_capture:
+
+            # Captura Extra (30/08/2026, bug real corregido): aunque
+            # el status es "capturado" (no "especial"), esta fila
+            # igual necesita poder llevar anchor_location para que
+            # el panel la posicione debajo de su ruta real, en vez
+            # de caer siempre al final de la tabla (ver docstring
+            # de _assign_extra_capture()). origin sigue sin
+            # aplicar aca -- es exclusivo de status="especial".
+            origin = None
 
             if anchor_location is None and existing is not None:
                 anchor_location = existing.get("anchorLocation")
