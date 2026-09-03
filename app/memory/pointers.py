@@ -217,9 +217,47 @@ TOTAL_CAUGHT_ADDRESS = 0x08C8729C
 # Solo se confirmaron empíricamente los primeros 5 slots -- el
 # resto se asume por el tamaño estándar del juego, no está
 # validado slot por slot.
-BOX_BASE_ADDRESS = 0x08C9A144
+_BOX_BASE_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C9A144,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C9E134,
+}
+
+BOX_BASE_ADDRESS = _BOX_BASE_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
 BOX_SLOT_STRIDE = 0xE8
 BOX_SLOT_COUNT = 30
+
+
+def get_box_base_address(process_name):
+    """Idem get_party_order_address(), para BOX_BASE_ADDRESS.
+
+    Multi-version (30/08/2026): CONFIRMADO que BOX_BASE_ADDRESS NO es
+    la misma entre Alpha Sapphire y Omega Ruby -- mismo patron ya
+    visto con PARTY_ORDER_ADDRESS, no se puede asumir que coincide.
+
+    Investigacion en Omega Ruby: escaneo por checksum PK6 alrededor
+    de la PARTY_ORDER_ADDRESS de Omega Ruby
+    (tools/probes/party/buscar_caja_pc_or.py) encontro un candidato
+    aislado en 0x08C9E134 (sin vecinos con checksum valido -- patron
+    esperado de una caja con un solo Pokemon adentro, a diferencia de
+    otro cluster encontrado en la misma corrida que resulto ser
+    ruido: un buffer distinto que mezclaba el equipo actual con la
+    captura reciente, no la Caja PC real).
+
+    BOX_SLOT_STRIDE confirmado IGUAL a Alpha Sapphire (0xE8) con una
+    prueba en vivo (tools/probes/party/observar_caja_pc_or.py): al
+    depositar un segundo Pokemon real en la caja, aparecio exactamente
+    en BOX_BASE_ADDRESS + 0xE8, descartando el otro stride candidato
+    (0x104, del cluster ruidoso).
+    """
+
+    return _BOX_BASE_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _BOX_BASE_ADDRESS_BY_PROCESS[
+            PROCESS_NAME_ALPHA_SAPPHIRE
+        ],
+    )
 
 
 # ============================================================
@@ -279,5 +317,48 @@ BOX_SLOT_COUNT = 30
 #   Ruta101 = 23      PuebloEscaso = 7      Ruta103 = 25
 #   BosquePetalia = 82   Ruta104 = 26   CiudadFerrica = 16
 #   Ruta116 = 43         TunelFervegal = 75
-CURRENT_ZONE_ID_ADDRESS = 0x08C6A7B2
-CURRENT_ZONE_ID_MIRROR_ADDRESS = 0x08C6A894
+# Multi-version (30/08/2026): CONFIRMADO que CURRENT_ZONE_ID_ADDRESS
+# de Alpha Sapphire NO sirve en Omega Ruby -- se detecto porque la
+# deteccion automatica de "perdido" estaba registrando encuentros
+# fantasma en una ruta placeholder "Zona 0" (zone_id=0, el valor
+# que da leer la direccion de AS en la memoria de Omega Ruby).
+#
+# Encontrada con tools/probes/memory/rastrear_zona_actual_or.py
+# (mismo algoritmo de estabilidad+consistencia que ya encontro la
+# de Alpha Sapphire), ancla "badges" (BADGES_ADDRESS, compartida
+# entre versiones). Validacion cruzada mas fuerte que un segundo
+# escaneo comun: los valores encontrados para Ruta116 (43) y
+# CiudadFerrica (16) coinciden EXACTO con los ya documentados para
+# esos mismos lugares en Alpha Sapphire -- confirma que las dos
+# versiones comparten el mismo esquema de IDs de zona. El candidato
+# tambien aparecio en pareja separada por 0xE2 bytes, igual que la
+# relacion ya confirmada entre CURRENT_ZONE_ID_ADDRESS y su espejo
+# en Alpha Sapphire (0x08C6A894 - 0x08C6A7B2 == 0xE2).
+_CURRENT_ZONE_ID_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6A7B2,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6E7A2,
+}
+_CURRENT_ZONE_ID_MIRROR_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6A894,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6E884,
+}
+
+CURRENT_ZONE_ID_ADDRESS = _CURRENT_ZONE_ID_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
+CURRENT_ZONE_ID_MIRROR_ADDRESS = (
+    _CURRENT_ZONE_ID_MIRROR_ADDRESS_BY_PROCESS[
+        PROCESS_NAME_ALPHA_SAPPHIRE
+    ]
+)
+
+
+def get_current_zone_id_address(process_name):
+    """Idem get_party_order_address(), para CURRENT_ZONE_ID_ADDRESS."""
+
+    return _CURRENT_ZONE_ID_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _CURRENT_ZONE_ID_ADDRESS_BY_PROCESS[
+            PROCESS_NAME_ALPHA_SAPPHIRE
+        ],
+    )
