@@ -17,11 +17,26 @@ from app.memory.pointers import (
     BOX_BASE_ADDRESS,
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
+    get_box_base_address,
     CURRENT_ZONE_ID_ADDRESS,
+    get_current_zone_id_address,
+    PROCESS_NAME_ALPHA_SAPPHIRE,
+    PROCESS_NAME_OMEGA_RUBY,
 )
 from app.memory.structures import Pokemon6
 from app.services.location_resolver import LocationResolver
 from app.services.species_resolver import SpeciesResolver
+
+
+# Todos los juegos que DexRelay sabe leer hoy. Usado para el modo
+# "automático" (self.process_name = None -- ver find_game_process())
+# y para detect_process_name(), que solo mira sin conectarse (GUI
+# v2, 02/09/2026: Bienvenida sin selección manual + botón
+# "Reiniciar" del Reader que detecta un cambio de juego).
+KNOWN_PROCESS_NAMES = (
+    PROCESS_NAME_ALPHA_SAPPHIRE,
+    PROCESS_NAME_OMEGA_RUBY,
+)
 
 
 class ReadFailure:
@@ -84,21 +99,92 @@ class AzaharReader:
         # de reportar el slot como vacío.
         self._last_known_party = [None] * 6
 
+        # PID del proceso de juego dentro de Azahar, guardado la
+        # última vez que connect() lo encontró. Ver GUI v2
+        # (30/08/2026 en adelante, app/gui_web/), pantalla
+        # "Conectado" -- no se usaba antes de eso, no afecta nada
+        # de la lectura de memoria en sí.
+        self.process_id = None
+
+        # Title ID del juego cargado (8 bytes que Nintendo asigna
+        # por versión -- Alpha Sapphire y Omega Ruby tienen uno
+        # cada uno, confirmado en la instancia real del usuario el
+        # 31/08/2026). A diferencia de process_id, no hace falta
+        # refrescarlo cada ciclo: no cambia mientras siga
+        # seleccionado el mismo proceso, así que _refresh_title_id()
+        # se llama desde is_connected() solo mientras siga en
+        # `None`, para no gastar una llamada UDP de más (process_list(),
+        # más pesada que get_process()) en cada ciclo de 200ms sin
+        # necesidad real.
+        self.title_id = None
+
     def find_game_process(self):
         """
         Busca el proceso del juego dentro de Azahar.
+
+        Si `self.process_name` es `None` (modo automático -- ver
+        Api.start_auto(), GUI v2, 02/09/2026: Bienvenida ya no
+        pide elegir versión, se detecta sola), busca CUALQUIERA de
+        los juegos conocidos (KNOWN_PROCESS_NAMES) en vez de uno
+        fijo. Al encontrar uno, fija `self.process_name` a ese --
+        de ahí en adelante la sesión queda atada a ese juego (los
+        offsets de pointers.py se eligen por process_name, "seguir
+        en automático" después de conectar no tendría sentido).
         """
 
         processes = (
             self.citra.process_list()
         )
 
+        candidates = (
+            (self.process_name,)
+            if self.process_name is not None
+            else KNOWN_PROCESS_NAMES
+        )
+
         for process_id, data in processes.items():
 
             title_id, process_name = data
 
-            if process_name == self.process_name:
+            if process_name in candidates:
+                # Ya que estamos leyendo esto acá (mismo dato que
+                # _refresh_title_id() buscaría de nuevo con otra
+                # llamada UDP), lo guardamos directo -- cubre el
+                # camino normal de connect(). is_connected() sigue
+                # llamando _refresh_title_id() como respaldo para
+                # el caso en que connect() nunca se ejecuta (ver
+                # su docstring).
+                self.title_id = title_id
+                self.process_name = process_name
                 return process_id
+
+        return None
+
+    def detect_process_name(self):
+        """
+        Recorre process_list() y devuelve el primer process_name
+        conocido (KNOWN_PROCESS_NAMES) que encuentre entre los
+        procesos que reporta Azahar en este momento, o `None` si
+        no hay ninguno corriendo. A diferencia de
+        find_game_process(), NO selecciona nada ni toca
+        `self.process_name`/`self.title_id` -- solo mira.
+
+        Usado por Application.restart_reader() (detectar que el
+        usuario abrió un juego distinto al configurado) y por la
+        GUI (sugerir "hacé clic en Reiniciar" cuando corresponde,
+        sin conectarse todavía).
+        """
+
+        try:
+            processes = self.citra.process_list()
+        except Exception:
+            return None
+
+        for _process_id, data in processes.items():
+            _title_id, process_name = data
+
+            if process_name in KNOWN_PROCESS_NAMES:
+                return process_name
 
         return None
 
@@ -125,14 +211,60 @@ class AzaharReader:
                 process_id
             )
 
+            self.process_id = process_id
+
             return True
 
         except Exception:
             return False
 
+    def _refresh_title_id(self):
+        """
+        Busca el Title ID del proceso actualmente seleccionado
+        (self.process_id) recorriendo process_list() -- la misma
+        llamada que ya usa find_game_process(), reutilizada acá.
+        Silenciosa ante cualquier error: si falla, simplemente
+        self.title_id sigue en None y se reintenta en el próximo
+        ciclo (mismo criterio que el resto de la clase).
+        """
+
+        if self.process_id is None:
+            return
+
+        try:
+            processes = self.citra.process_list()
+        except Exception:
+            return
+
+        data = processes.get(self.process_id)
+
+        if data is not None:
+            title_id, _process_name = data
+            self.title_id = title_id
+
     def is_connected(self):
         """
         Comprueba si existe un proceso de juego válido seleccionado.
+
+        También actualiza `self.process_id` acá (no solo en
+        connect()) -- si Azahar ya tenía el proceso seleccionado
+        de una sesión anterior, `Runtime.update()` nunca llega a
+        llamar `connect()` (is_connected() ya da True de entrada),
+        y `self.process_id` se quedaba en `None` para siempre.
+        Bug real detectado el 31/08/2026: el panel "Conectado" de
+        la GUI v2 mostraba el ID de proceso vacío en ese escenario.
+        Mismo motivo por el que acá también se intenta resolver
+        `self.title_id` mientras siga sin conocerse.
+
+        Bug real relacionado, encontrado el 02/09/2026: en modo
+        automático (`self.process_name is None`, ver
+        find_game_process()) esto NO alcanza -- Azahar puede seguir
+        reportando un proceso "válido" de una sesión anterior (por
+        ejemplo, después de "Salir" y volver a entrar) sin que
+        DexRelay sepa todavía a qué JUEGO corresponde. Sin este
+        chequeo, is_connected() daba `True` de una, sin pasar nunca
+        por find_game_process(), y `process_name` se quedaba en
+        `None` para siempre -- el juego nunca se detectaba.
         """
 
         try:
@@ -140,10 +272,25 @@ class AzaharReader:
                 self.citra.get_process()
             )
 
-            return (
+            connected = (
                 process_id is not None
                 and process_id != 0xFFFFFFFF
             )
+
+            if connected and self.process_name is None:
+                # Hay un proceso seleccionado, pero en modo
+                # automático todavía no sabemos si es un juego
+                # conocido -- forzar el camino normal de connect()
+                # -> find_game_process(), que sí busca por nombre.
+                connected = False
+
+            if connected:
+                self.process_id = process_id
+
+                if self.title_id is None:
+                    self._refresh_title_id()
+
+            return connected
 
         except Exception:
             return False
@@ -538,8 +685,17 @@ class AzaharReader:
         falló.
         """
 
+        # Multi-version (30/08/2026): CURRENT_ZONE_ID_ADDRESS
+        # NO es la misma entre Alpha Sapphire y Omega Ruby
+        # (confirmado -- ver get_current_zone_id_address() en
+        # pointers.py). Se elige segun self.process_name, mismo
+        # criterio que ya usa read_party_order()/read_box().
+        zone_address = get_current_zone_id_address(
+            self.process_name
+        )
+
         data = self.memory.read(
-            CURRENT_ZONE_ID_ADDRESS,
+            zone_address,
             1
         )
 
@@ -584,13 +740,22 @@ class AzaharReader:
         Lista vacía si la lectura de memoria falló por completo.
         """
 
+        # Multi-version (30/08/2026): BOX_BASE_ADDRESS NO es la
+        # misma entre Alpha Sapphire y Omega Ruby (confirmado --
+        # ver get_box_base_address() en pointers.py). Se elige
+        # segun self.process_name, mismo criterio que ya usa
+        # read_party_order().
+        box_base_address = get_box_base_address(
+            self.process_name
+        )
+
         window_size = (
             BOX_SLOT_COUNT
             * BOX_SLOT_STRIDE
         )
 
         data = self.memory.read(
-            BOX_BASE_ADDRESS,
+            box_base_address,
             window_size
         )
 

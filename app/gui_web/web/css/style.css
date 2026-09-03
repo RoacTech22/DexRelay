@@ -1,0 +1,1660 @@
+:root {
+  --bg: #0a0e18;
+  --bg-elevated: #10151f;
+  --bg-elevated-2: #141b28;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text: #e8ecf1;
+  --text-secondary: #c4cddd;
+  --text-dim: #5c6579;
+  --accent: #2dd4dc;
+  --accent-strong: #22d3ee;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --sapphire: #4d8dff;
+  --ruby: #ff5d5d;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+.view {
+  display: none;
+  height: 100%;
+  width: 100%;
+}
+
+.view.active {
+  display: flex;
+}
+
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+}
+
+#btn-start {
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-block {
+  width: auto;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #17a6ad);
+  color: #04181a;
+}
+
+.btn-primary:not(:disabled):hover {
+  opacity: 0.92;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #06210f;
+}
+
+.btn-success:hover {
+  opacity: 0.92;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--text-secondary);
+}
+
+.section-title {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+}
+
+.center {
+  text-align: center;
+}
+
+/* ===================== BIENVENIDA ===================== */
+
+#view-welcome {
+  position: relative;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  padding: 40px 24px 20px;
+}
+
+/* Arte de fondo (imagen del usuario, 01/09/2026) fundido con el
+   degradado oscuro -- mismo espíritu que el mockup original
+   (Kyogre apenas visible detrás del logo, no a color pleno). Va
+   en un ::before separado (no directo en #view-welcome) para
+   poder aplicarle su propio filter sin afectar al contenido de
+   encima. `--welcome-bg` lo setea app.js una vez que resuelve la
+   imagen; si todavía no cargó, el degradado solo (sin imagen)
+   se ve exactamente igual que antes de agregar esto. */
+#view-welcome::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at 85% 20%, rgba(13, 34, 48, 0.95) 0%, rgba(10, 14, 24, 0.98) 45%, rgba(10, 14, 24, 0.99) 100%),
+    var(--welcome-bg, none);
+  background-size: cover;
+  background-position: center;
+  /*filter: saturate(0.55) brightness(0.75);*/
+}
+
+.welcome-wrapper,
+.welcome-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 460px;
+  width: 100%;
+  margin: auto 0;
+}
+
+.logo-img {
+  width: 220px;
+  margin-bottom: 8px;
+}
+
+.logo-fallback {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 8px 0 0;
+}
+
+.logo-fallback::after {
+  content: none;
+}
+
+.tagline {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 4px 0 20px;
+  letter-spacing: 0.3px;
+}
+
+.welcome-description {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 0 24px;
+}
+
+.divider {
+  width: 60px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  margin-bottom: 28px;
+}
+
+.version-list {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 22px;
+}
+
+.version-card {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  cursor: default;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+
+/* El fondo (Kyogre/Groudon) vive en un pseudo-elemento aparte en
+   vez de directo en `background-image` -- así se puede espejar
+   solo la imagen con `transform: scaleX(-1)` sin dar vuelta
+   también el texto/badge de la tarjeta. `--card-bg` lo setea
+   app.js por tarjeta (ver renderVersionList()).
+
+   Espejadas A PROPÓSITO las dos: Kyogre mira hacia la izquierda
+   en su archivo original y Groudon hacia la derecha -- con Kyogre
+   a la izquierda y Groudon a la derecha (orden de
+   GAME_VERSIONS en api.py), sin espejar quedarían mirando cada
+   uno para afuera. Si el orden de las tarjetas cambia alguna vez,
+   revisar esto de nuevo. */
+.version-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--card-bg);
+  background-size: cover;
+  background-position: center;
+  transform: scaleX(-1);
+  z-index: 0;
+}
+
+.version-card>* {
+  position: relative;
+  z-index: 1;
+}
+
+.version-card:last-child::before {
+  background-position: top;
+}
+
+.version-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.version-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.version-card .version-label {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 10px;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7), 0 0 14px rgba(0, 0, 0, 0.4);
+}
+
+.version-card .version-badge {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-elevated-2);
+  color: var(--text-secondary);
+}
+
+/* Azul zafiro / rojo rubí -- misma paleta del resto de la app
+   (mismo brillo/saturación que --accent), aplicado a la píldora
+   del badge (no al nombre del juego, que queda en blanco) para
+   que combine con el juego que representa. */
+.version-card[data-badge="AS"] .version-badge {
+  color: var(--sapphire);
+}
+
+.version-card[data-badge="OR"] .version-badge {
+  color: var(--ruby);
+}
+
+.version-card.selected .version-badge {
+  background: var(--accent);
+  color: #04181a;
+}
+
+.icon-play {
+  width: 11px;
+  height: 13px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.icon-launcher {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+.welcome-footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 8px 0;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 18px;
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+/* ===================== ESPERA ===================== */
+
+#view-waiting {
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting-wrapper {
+  max-width: 480px;
+  width: 100%;
+  padding: 24px;
+}
+
+.waiting-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+/* Sin caja/borde -- el ícono (agrandado) pasa a ser el elemento
+   principal, con el nombre chico debajo. Reemplaza a .waiting-box,
+   que se deja definida más abajo sin usarse por si hace falta
+   volver atrás. */
+.waiting-icon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Brillo estilo neón (referencia del usuario, 31/08/2026), bajado
+   un poco de intensidad respecto al primer intento. El fill real
+   de los íconos ya no es un color plano -- viene del degradado
+   compartido #neonGradient (cyan -> violeta, ver <defs> al
+   principio del <body>), aplicado con una máscara por ícono para
+   que el degradado sea uno solo parejo en todo el ícono y no se
+   corte forma por forma. */
+.waiting-icon {
+  width: 100px;
+  height: 100px;
+  filter: drop-shadow(0 0 4px rgba(45, 212, 220, .35)) drop-shadow(0 0 1.5px rgba(14, 116, 144, .5));
+}
+
+.waiting-box {
+  width: 110px;
+  height: 80px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  box-shadow: 0 0 22px rgba(45, 212, 220, 0.12);
+}
+
+.waiting-box-icon {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 0 5px rgba(45, 212, 220, .8)) drop-shadow(0 0 2px rgba(45, 212, 220, 1));
+}
+
+.waiting-box-console {
+  color: var(--accent);
+}
+
+/* Conector central entre AZAHAR y APP: puntitos a los dos lados
+   de la pokeball (mismo estilo/animación que .waiting-dots tenía
+   antes, reutilizado acá como .connector-dot), en vez de las
+   líneas punteadas del primer intento. */
+.waiting-connector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.connector-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+.connector-dot:nth-of-type(even) {
+  animation-delay: 0.2s;
+}
+
+.waiting-connector-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 4px rgba(45, 212, 220, .55)) drop-shadow(0 0 1.5px rgba(168, 85, 247, .6));
+  animation: connector-pulse 1.6s infinite ease-in-out;
+}
+
+@keyframes connector-pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.waiting-connector-line {
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed var(--accent);
+  opacity: 0.55;
+}
+
+.waiting-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.waiting-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+.waiting-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.waiting-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.checklist li {
+  display: flex;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.checklist li:last-child {
+  border-bottom: none;
+}
+
+.checklist strong {
+  display: block;
+  font-size: 13.5px;
+}
+
+.checklist p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.check-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.check-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.check-ok {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success);
+}
+
+.check-info {
+  background: rgba(45, 212, 220, 0.15);
+  color: var(--accent);
+}
+
+.waiting-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  padding: 14px 18px;
+}
+
+.waiting-status-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.waiting-status-left strong {
+  font-size: 13.5px;
+}
+
+.waiting-status-left p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================== CONECTADO ===================== */
+
+#view-connected {
+  align-items: center;
+  justify-content: center;
+}
+
+.connected-wrapper {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  padding: 24px;
+}
+
+.connected-illustration {
+  width: min(360px, 100%);
+  margin: 0 auto 8px;
+}
+
+.connected-illustration svg {
+  width: 75%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.connected-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  padding: 18px;
+  margin: 24px 0;
+  text-align: left;
+}
+
+.info-label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.info-value {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.info-value.accent {
+  color: var(--accent);
+}
+
+.info-value.muted {
+  color: var(--text-dim);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* ===================== SHELL PRINCIPAL ===================== */
+
+#view-main {
+  align-items: stretch;
+}
+
+.sidebar {
+  width: 260px;
+  flex: none;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.sidebar-logo-img {
+  width: 34px;
+  height: 34px;
+}
+
+.sidebar-title {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.sidebar-subtitle {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: rgba(45, 212, 220, 0.12);
+  color: var(--accent);
+  border-left: 2px solid var(--accent);
+}
+
+.nav-icon {
+  width: 20px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar-status {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.status-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex: none;
+}
+
+.status-dot.small {
+  width: 7px;
+  height: 7px;
+}
+
+.status-dot.on {
+  background: var(--success);
+}
+
+.status-dot.warn {
+  background: var(--warning);
+}
+
+.sidebar-version {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* Botón "Salir" (02/09/2026): vuelve a Bienvenida, deteniendo
+   Runtime+HTTPServer (misma acción que "Cancelar" en Espera --
+   ver api().cancel() en app.js). */
+.sidebar-exit-btn {
+  cursor: pointer;
+  width: 100%;
+  margin-top: 14px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sidebar-exit-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+  max-width: 1366px;
+  margin: 0 auto;
+  /* Habilita los @container de más abajo (dash-top-row,
+     dash-grid-4, dash-grid-2, dash-card-overlays) -- todos
+     reaccionan al ancho de ESTA caja (ya acotada, sin el
+     sidebar), no al de la ventana entera. Ya no hace falta
+     achicar el propio `max-width` de acá con @media: con
+     dash-grid-4/dash-grid-2 en anchos fijos (03/09/2026, ver más
+     abajo) ninguno de los dos se estira para repartirse el
+     espacio sobrante, así que el problema que ese @media
+     resolvía ya no existe. */
+  container-type: inline-size;
+}
+
+.content h1 {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  margin: 0 0 4px;
+  font-size: 24px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  margin: 0 0 20px;
+}
+
+/* Banner de alerta del Dashboard (02/09/2026): "se perdió la
+   conexión" (rojo) o "detectamos otro juego" (ámbar, con acceso
+   directo a Reiniciar) -- ver applyDashboardAlert() en app.js.
+   Los dos colores comparten la misma estructura, solo cambia
+   --dash-alert-color vía JS. */
+.dash-alert {
+  --dash-alert-color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--dash-alert-color);
+  background: color-mix(in srgb, var(--dash-alert-color) 12%, transparent);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* Bug real (02/09/2026): el atributo `hidden` del navegador y
+   nuestra propia regla `.dash-alert { display: flex; }` tienen la
+   MISMA especificidad -- sin esto, `display: flex` le ganaba al
+   `display: none` que pone `hidden` por defecto, así que el
+   banner nunca se ocultaba aunque `alertBox.hidden = true` se
+   ejecutara bien en JS. */
+.dash-alert[hidden] {
+  display: none;
+}
+
+.dash-alert-btn {
+  cursor: pointer;
+  flex: none;
+  border: 1px solid var(--dash-alert-color);
+  background: transparent;
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dash-alert-btn:hover {
+  background: var(--dash-alert-color);
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.placeholder-card {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  max-width: 560px;
+}
+
+/* ===================== DASHBOARD (Bloque 2) ===================== */
+
+/* Envuelve TODO el contenido del Dashboard (título, subtítulo,
+   alerta, dash-top-row, tarjeta de Overlays) -- 03/09/2026, a
+   pedido del usuario: el título "Dashboard" quedaba pegado al
+   borde izquierdo de .content mientras las tarjetas de abajo
+   estaban centradas (más angostas que .content en los estados
+   angostos), así que no se alineaban entre sí. Con un solo wrapper
+   compartiendo el mismo ancho máximo + centrado que antes tenían
+   dash-top-row/dash-card-overlays cada uno por su cuenta, todo se
+   mueve junto y el título siempre arranca en el mismo borde
+   izquierdo que las tarjetas. Mismos anchos que ya usaban esas
+   reglas (1008px la fila completa = 240*4+16*3 = 496*2+16;
+   752px lado a lado = 240+16+496; 496px apilado angosto). */
+.dashboard-inner {
+  max-width: 1008px;
+  margin: 0 auto;
+}
+
+@container (min-width: 760px) and (max-width: 1094px) {
+  .dashboard-inner {
+    max-width: 752px;
+  }
+}
+
+@container (max-width: 759px) {
+  .dashboard-inner {
+    max-width: 496px;
+  }
+}
+
+/* Fila superior (03/09/2026): envuelve dash-grid-4 + dash-grid-2.
+   En el estado ancho y en el angosto van uno arriba del otro
+   (column); en el estado intermedio se ponen lado a lado (row) --
+   ver los @container más abajo. */
+.dash-top-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dash-grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Anchos fijos, no responsivos por sí solos (03/09/2026, a pedido
+   del usuario) -- todo el reacomodo pasa por cambiar cuántas
+   columnas tiene cada grilla según el ancho de .content, nunca
+   por estirar/encoger las tarjetas mismas:
+
+   - dash-grid-4 (AZAHAR/READER/RUNTIME/HTTP SERVER): 240px c/u.
+   - dash-grid-2 (EQUIPO/MEDALLAS): 496px c/u.
+
+   Con eso, cada grilla en su estado "fila completa" mide EXACTO
+   1008px (4*240+3*16 = 2*496+16 = 1008) -- por eso dash-card-overlays
+   (más abajo) puede calzar el mismo ancho en cada estado sin
+   adivinar.
+
+   Tres estados según el ancho de .content, los tres con
+   @container (no @media: tienen que reaccionar a .content, que ya
+   descuenta el sidebar, no a la ventana entera):
+
+   A) .content >= 1095px (default acá abajo): cada grilla en su
+      fila completa (1008px), una arriba de la otra.
+   B) 760px <= .content < 1095px: ya no entra ninguna fila
+      completa una al lado de la otra dentro del ancho disponible
+      del dashboard normal, así que se turnan el espacio: cada una
+      pasa a una sola columna (dash-grid-4 240px de ancho,
+      dash-grid-2 496px) y las dos se ponen LADO A LADO en
+      dash-top-row (240+16+496 = 752px en total).
+   C) .content < 760px: ya no entran ni siquiera lado a lado
+      (752px no cabe). Vuelven a apilarse una arriba de la otra,
+      pero cada una en su versión más compacta: dash-grid-4 en 2x2
+      (2*240+16 = 496px) y dash-grid-2 en una sola columna (496px)
+      -- las dos vuelven a coincidir en ancho (496px). */
+.dash-grid-4 {
+  grid-template-columns: repeat(4, 240px);
+}
+
+.dash-grid-2 {
+  grid-template-columns: repeat(2, 496px);
+}
+
+/* Estado B: lado a lado, cada uno en columna única. */
+/* Estado B (760-1094px), "lado a lado": en vez de dos columnas
+   separadas (dash-grid-4 entera al lado de dash-grid-2 entera),
+   se arma un mosaico de 6 tarjetas en un solo grid -- Azahar
+   emparejada en altura con Reader, las dos igualando lo que mida
+   la tarjeta de Equipo; mismo criterio con Runtime+HTTP Server
+   contra Medallas (03/09/2026, a pedido del usuario).
+
+   `display: contents` en dash-grid-4/dash-grid-2 (03/09/2026): sin
+   esto, cada una seguiría siendo SU PROPIO contenedor de grid, y
+   sus tarjetas no podrían mezclarse en el mosaico de acá.
+   `display: contents` hace que la caja de esas dos grillas
+   "desaparezca" para el layout -- sus tarjetas pasan a ser hijas
+   directas de dash-top-row a efectos de grid-area, sin tocar el
+   DOM real (el JS que busca #dash-team, #dash-badges, etc. sigue
+   funcionando exactamente igual).
+
+   El "encaje en altura" no se calcula a mano: Equipo/Medallas
+   ocupan 2 filas (grid-row: span 2) y el propio motor de Grid
+   agranda esas dos filas lo que haga falta para que la tarjeta
+   más alta entre -- Azahar/Reader (o Runtime/HTTP Server) quedan
+   en esas mismas filas y se estiran solas (comportamiento
+   default de CSS Grid, align-items: stretch) para llenarlas. */
+@container (min-width: 760px) and (max-width: 1094px) {
+  .dash-top-row {
+    display: grid;
+    grid-template-columns: 240px 496px;
+    grid-template-areas:
+      "azahar equipo"
+      "reader equipo"
+      "runtime medallas"
+      "httpserver medallas";
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .dash-grid-4,
+  .dash-grid-2 {
+    display: contents;
+  }
+
+  .dash-card-azahar {
+    grid-area: azahar;
+  }
+
+  .dash-card-reader {
+    grid-area: reader;
+  }
+
+  .dash-card-runtime {
+    grid-area: runtime;
+  }
+
+  .dash-card-httpserver {
+    grid-area: httpserver;
+  }
+
+  .dash-card-equipo {
+    grid-area: equipo;
+  }
+
+  .dash-card-medallas {
+    grid-area: medallas;
+  }
+
+  /* Ajustes del usuario (03/09/2026) para la tarjeta Equipo ya
+     estirada en este estado -- todos válidos tal cual los había
+     escrito, el único que no andaba era height:30% en .dash-team
+     (ver esa regla, ahora con flex:1). */
+  .dash-team-slot {
+    justify-content: center;
+  }
+
+  .dash-team-stats {
+    padding-top: 28px;
+    margin-bottom: 28px;
+  }
+
+  .dash-team-stats div span {
+    font-size: 26px;
+  }
+
+  .dash-team-stats div small {
+    font-size: 12px;
+  }
+
+  .dash-hp-bar-track {
+    margin-bottom: 5px;
+  }
+}
+
+/* Estado C: apilados de nuevo, dash-grid-4 en 2x2. */
+@container (max-width: 759px) {
+  .dash-grid-4 {
+    grid-template-columns: repeat(2, 240px);
+  }
+
+  .dash-grid-2 {
+    grid-template-columns: 496px;
+  }
+}
+
+.dash-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+/* flex-column (03/09/2026): necesario para que .dash-team pueda
+   usar flex:1 y absorber el espacio extra cuando la tarjeta se
+   estira en el estado "lado a lado" (ver mosaico del @container
+   de dash-top-row). Sin esto, aunque la tarjeta creciera, sus
+   hijos (.dash-card-header, .dash-team, .dash-team-stats,
+   .dash-hp-box) seguirían apilados con flujo de bloque normal --
+   el espacio de más quedaría como un hueco vacío al final en vez
+   de repartirse. En los estados donde la tarjeta NO se estira
+   (no hay espacio extra), esto no cambia nada visualmente. */
+.dash-card-equipo {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-grid .dash-card {
+  margin-bottom: 0;
+}
+
+/* La tarjeta de Overlays (única, fuera de cualquier .dash-grid) se
+   ajusta al mismo ancho que ocupa la fila de arriba en cada
+   estado, en vez de estirarse a todo .content -- ver los números
+   en el comentario de dash-grid-4 más arriba: los tres estados dan
+   1008px / 752px / 496px, siempre coincidiendo con lo que mide
+   dash-top-row en ese momento. */
+/* .dash-card-overlays: el ancho y centrado ya no se manejan acá --
+   los hereda del wrapper .dashboard-inner (que envuelve título,
+   alerta, dash-top-row y esta tarjeta), así quedan todos alineados
+   entre sí sin duplicar la lógica por zona en cada elemento. No
+   necesita ninguna regla propia -- se deja el selector documentado
+   acá por si hace falta algo puntual más adelante. */
+
+@container (min-width: 760px) and (max-width: 1094px) {
+
+  /* Ya no hace falta max-width acá para dash-card-overlays -- lo
+     hereda de .dashboard-inner. Se deja este bloque para el
+     pedido del usuario (03/09/2026): cada cajita de medalla a
+     200px de alto en este estado -- centrado el contenido
+     (sprite + leyenda) para que no quede pegado arriba con hueco
+     vacío abajo. */
+  .dash-badge-cell {
+    height: 99px;
+    justify-content: center;
+  }
+}
+
+/* Título viejo (ícono chico + texto uppercase todo del mismo
+   tamaño) -- reemplazado por .dash-card-icon-row +
+   .dash-card-title-text más abajo. Se deja definida sin usar por
+   si hace falta volver atrás. */
+.dash-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+
+/* Ícono grande (azahar/reader/runtime/http-server) + título en
+   una fila -- el ícono ya no es el indicador de estado (eso pasó
+   al puntito de .dash-status-dot, en la fila de abajo, sobre el
+   subtítulo). */
+.dash-card-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dash-card-icon {
+  display: flex;
+  color: var(--accent);
+  flex: none;
+}
+
+.dash-card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dash-card-title-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.dash-card-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.dash-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex: none;
+}
+
+.dash-status-dot.on {
+  background: var(--success);
+}
+
+.dash-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 0 12px;
+}
+
+/* .dash-dot: ícono de estado viejo, ya no se usa en las 4
+   tarjetas de arriba (reemplazado por .dash-status-dot) -- se
+   deja definida sin usar. */
+.dash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex: none;
+}
+
+.dash-dot.on {
+  background: var(--success);
+}
+
+.dash-card-status {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dash-card-status.on {
+  color: var(--success);
+}
+
+.dash-card-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.dash-row span:last-child {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.dash-card-header-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.4px;
+}
+
+.dash-card-header-icon-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex: none;
+}
+
+/* .dash-card-header-value: valor "X/8" que iba arriba a la
+   derecha del header -- se movió abajo del todo
+   (.dash-badges-count-big) y el conteo del equipo bajó a
+   .dash-team-stats. Se deja definida sin usar. */
+.dash-card-header-value {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.dash-btn-sm {
+  cursor: not-allowed;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.6;
+}
+
+/* Botones reales de acción (Reiniciar/Iniciar/Detener) de las
+   tarjetas READER, RUNTIME y HTTP SERVER -- a diferencia de
+   .dash-btn-sm (todavía inactivo, "Ver todo" del equipo), estos
+   sí disparan una acción real vía Api (ver app.js,
+   initDashboardActions()). */
+.dash-btn-action {
+  cursor: pointer;
+  width: 100%;
+  margin-top: 14px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 11.5px;
+  font-family: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: opacity 0.15s ease;
+}
+
+.dash-btn-action:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.dash-btn-action:active {
+  transform: scale(0.98);
+}
+
+.dash-btn-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dash-team {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  /* flex-grow (03/09/2026, reemplaza un intento con height:30% que
+     no podía funcionar -- un % de altura necesita que el padre
+     tenga una altura explícita, y la de .dash-card-equipo viene
+     del estiramiento de CSS Grid en el estado "lado a lado", no de
+     un `height` fijo). Con .dash-card-equipo en flex-column (ver
+     esa regla), esto hace que .dash-team absorba el espacio extra
+     cuando la tarjeta se estira -- en los otros dos estados, donde
+     no hay espacio extra, no cambia nada. */
+  flex: 1;
+}
+
+.dash-team-slot {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius);
+  padding: 8px 4px;
+}
+
+.dash-team-slot img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.dash-team-slot .dash-team-level {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+/* Slot vacío: pokeball atenuada en vez del texto "Vacío" -- ver
+   renderDashTeam() en app.js. justify-content:center para que
+   quede centrada verticalmente (el slot con Pokémon tiene 2
+   hijos -- sprite + nivel -- que ya ocupan toda la altura; el
+   vacío solo tiene el ícono, así que sin esto quedaba pegado
+   arriba). */
+.dash-team-slot.empty {
+  justify-content: center;
+  opacity: 0.3;
+}
+
+.dash-team-slot.empty svg {
+  width: 26px;
+  height: 26px;
+  color: var(--text-dim);
+}
+
+/* Muerto (02/09/2026): hp<=0 en la lectura actual O el nickname
+   ya está en el cementerio del Nuzlocke Tracker (mismo criterio
+   que overlays/team/app.js -- una muerte queda persistente aunque
+   el Pokémon se cure/reviva después). Todo el slot en gris, no
+   solo el sprite. */
+.dash-team-slot.dead {
+  filter: grayscale(1) brightness(0.6);
+}
+
+.dash-team-slot.dead .dash-team-level {
+  color: var(--text-dim);
+}
+
+/* Insignia de shiny: estrellita en la esquina del slot, no tapa
+   el sprite. */
+.dash-shiny-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 13px;
+  height: 13px;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, .8));
+}
+
+.dash-team-stats {
+  display: flex;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-bottom: 14px;
+}
+
+@container (min-width: 760px) and (max-width: 1094px) {
+  .dash-team-stats {
+    padding-top: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+.dash-team-stats>div {
+  flex: 1;
+  text-align: center;
+}
+
+.dash-team-stats span {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dash-team-stats small {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Caja de HP total: corazón rosa + fondo + barra, separada de
+   .dash-team-stats (antes era un tercer valor más ahí). */
+.dash-hp-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.dash-hp-icon {
+  display: flex;
+  flex: none;
+  color: #ec4899;
+}
+
+.dash-hp-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dash-hp-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-hp-label {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.dash-hp-bar-track {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.dash-hp-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--success);
+  width: 0%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.dash-hp-value {
+  flex: none;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.dash-badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.dash-badge-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius);
+  padding: 8px 4px;
+}
+
+.dash-badge-cell img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Medalla no obtenida: gris/azulado a tono con el fondo de la
+   app en vez de un gris plano -- se logra bajándole saturación y
+   brillo, no con un tinte de color aparte (el fondo ya es
+   azul/navy, así que un ícono gris oscuro "lee" azulado encima
+   sin necesidad de un filtro de color más elaborado). */
+.dash-badge-cell img.pending {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.65;
+}
+
+.dash-badge-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  color: var(--text-dim);
+}
+
+.dash-badge-label.on {
+  color: var(--success);
+}
+
+.dash-badges-total {
+  text-align: center;
+  border-top: 1px solid var(--border);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+.dash-badges-count-big {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.dash-badges-total small {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+
+.dash-overlay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dash-overlay-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.dash-overlay-name {
+  font-size: 13px;
+  font-weight: 600;
+  flex: none;
+  width: 110px;
+}
+
+.dash-overlay-url {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-overlay-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.dash-overlay-actions button {
+  cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.dash-overlay-actions button:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}

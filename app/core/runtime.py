@@ -121,6 +121,16 @@ class Runtime:
             self.state.combat_active = True
             self.state.combat_hp = combat_hp
 
+        # Multi-version (30/08/2026): CURRENT_ZONE_ID_ADDRESS ya
+        # esta confirmada para las dos versiones (ver
+        # get_current_zone_id_address() en pointers.py) --
+        # AzaharReader.read_current_zone_id() elige la correcta
+        # solo. La guardia que desactivaba esto por completo en
+        # Omega Ruby (bug real: "Zona 0" fantasma con la
+        # direccion vieja de Alpha Sapphire) ya no hace falta --
+        # sigue pendiente confirmar COMBAT_POINTER_ADDRESS/
+        # WILD_BATTLE_FLAG_OFFSET en Omega Ruby, que es lo
+        # proximo en la lista.
         self._update_lost_encounter_tracking()
 
     def _update_lost_encounter_tracking(self):

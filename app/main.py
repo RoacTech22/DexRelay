@@ -18,7 +18,15 @@ if sys.stderr is None:
     sys.stderr = open(os.devnull, "w")
 
 from app.core.app import Application
-from app.gui.app_window import AppWindow
+
+# GUI v2 (pywebview), reemplaza a la Tkinter/ttkbootstrap
+# (app/gui/) como punto de entrada por defecto -- ver
+# Documento Maestro, plan del 30/08/2026. La GUI vieja no se
+# borró, queda en el proyecto sin usarse (mismo criterio que
+# con los probes: documenta lo que ya se probó, no estorba). Si
+# hiciera falta volver atrás temporalmente, alcanza con volver a
+# importar `from app.gui.app_window import AppWindow` acá.
+from app.gui_web.window import AppWindow
 
 
 def main():
@@ -27,9 +35,10 @@ def main():
 
     try:
         # window.run() bloquea el hilo principal en el mainloop de
-        # Tkinter -- el flujo Bienvenida -> Espera -> Principal
-        # decide cuándo arrancar/detener el Runtime realtime y el
-        # HTTPServer (ver app/gui/app_window.py), no acá.
+        # pywebview -- el flujo Bienvenida -> Espera -> Conectado ->
+        # Principal decide cuándo arrancar/detener el Runtime
+        # realtime y el HTTPServer (ver app/gui_web/web/js/app.js y
+        # app/gui_web/api.py), no acá.
         window.run()
     finally:
         app.stop()

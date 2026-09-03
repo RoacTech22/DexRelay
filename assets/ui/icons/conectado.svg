@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 748.67 554.62">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #95c11f;
+      }
+
+      .cls-2 {
+        fill: #063;
+      }
+
+      .cls-3 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-4 {
+        font-family: SpaceGrotesk-SemiBold, 'Space Grotesk';
+        font-size: 110px;
+        font-weight: 600;
+      }
+
+      .cls-4, .cls-5 {
+        fill: #22c55e;
+      }
+
+      .cls-6 {
+        letter-spacing: -.07em;
+      }
+
+      .cls-7 {
+        fill: #ff9f50;
+      }
+    </style>
+  </defs>
+  <g id="Capa_1-2" data-name="Capa 1">
+    <g id="conectado">
+      <g id="check">
+        <path class="cls-5" d="M367.85,365.57c-93.34,0-169.28-75.94-169.28-169.28S274.51,27.01,367.85,27.01s169.28,75.94,169.28,169.28-75.94,169.28-169.28,169.28ZM367.85,43.01c-84.52,0-153.28,68.76-153.28,153.28s68.76,153.28,153.28,153.28,153.28-68.76,153.28-153.28S452.37,43.01,367.85,43.01Z"/>
+        <path class="cls-5" d="M322.91,273.04l-62.09-62.09c-1.96-1.96-1.96-5.14,0-7.1l7.72-7.72c1.96-1.96,5.14-1.96,7.1,0l49.93,49.93c.85.89,2.37.72,3.12-.02l116.96-116.96c1.96-1.96,5.14-1.96,7.1,0l7.07,7.07c1.96,1.96,1.96,5.14,0,7.1l-129.8,129.8c-1.96,1.96-5.14,1.96-7.1,0Z"/>
+        <text class="cls-4" transform="translate(0 523.27)"><tspan x="0" y="0">! CONE</tspan><tspan class="cls-3" x="339.13" y="0">C</tspan><tspan class="cls-6" x="408.2" y="0">T</tspan><tspan x="465.52" y="0">ADO</tspan></text>
+        <text class="cls-4" transform="translate(711.6 498.78)"><tspan x="0" y="0">¡</tspan></text>
+      </g>
+      <circle class="cls-7" cx="553.78" cy="8.22" r="8.22"/>
+      <circle class="cls-7" cx="132.35" cy="79.83" r="8.22"/>
+      <circle class="cls-7" cx="49" cy="311.09" r="8.22"/>
+      <circle class="cls-7" cx="611.31" cy="327.52" r="8.22"/>
+      <circle class="cls-1" cx="495.08" cy="339.65" r="3.91"/>
+      <circle class="cls-1" cx="324.47" cy="430.96" r="3.91"/>
+      <circle class="cls-1" cx="158.6" cy="307.64" r="3.91"/>
+      <circle class="cls-1" cx="94.43" cy="181.64" r="3.91"/>
+      <circle class="cls-1" cx="645.39" cy="211.38" r="3.91"/>
+      <circle class="cls-1" cx="727.54" cy="110.42" r="3.91"/>
+      <circle class="cls-2" cx="744.75" cy="196.29" r="3.91"/>
+      <circle class="cls-2" cx="176.58" cy="158.49" r="3.91"/>
+      <circle class="cls-2" cx="120.22" cy="388.3" r="3.91"/>
+      <circle class="cls-2" cx="629.73" cy="102.59" r="3.91"/>
+      <circle class="cls-2" cx="247.04" cy="16.43" r="3.91"/>
+    </g>
+  </g>
+</svg>

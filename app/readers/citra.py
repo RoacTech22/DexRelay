@@ -24,6 +24,19 @@ class Citra:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.address = address
 
+        # Timeout de 2s (02/09/2026): sin esto, cualquier
+        # recv() se queda colgado para siempre si Azahar no
+        # responde (por ejemplo, no está abierto todavía) --
+        # bug latente encontrado mientras se probaba
+        # detect_process_name() sin Azahar corriendo. Todos los
+        # llamadores ya envuelven sus llamadas a Citra en
+        # try/except Exception (is_connected(), connect(),
+        # detect_process_name(), etc.), así que un
+        # socket.timeout (subclase de OSError) ya se maneja
+        # igual que cualquier otra falla de comunicación, sin
+        # que haga falta tocar nada más.
+        self.socket.settimeout(2.0)
+
     def is_connected(self):
         return self.socket is not None
 

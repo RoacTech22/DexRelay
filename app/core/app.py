@@ -32,8 +32,21 @@ class Application:
         # necesita escribir encuentros desde el panel de control) --
         # ambos deben trabajar sobre los mismos datos en memoria,
         # no sobre copias independientes que se pisarían entre sí.
+        #
+        # NuzlockeStorage.for_game() (02/09/2026): antes había un
+        # solo data/nuzlocke.json sin importar qué juego estuviera
+        # corriendo -- bug real reportado por el usuario,
+        # /overlay/nuzlocke mostraba la partida de Omega Ruby con
+        # Alpha Sapphire abierto. Ahora cada juego tiene su propio
+        # archivo. `_nuzlocke_game` guarda a qué juego está
+        # sincronizado ahora mismo -- update() lo revisa cada ciclo
+        # (ver _sync_nuzlocke_storage()) para mantenerlo al día
+        # incluso en una conexión normal/automática, no solo cuando
+        # se toca "Reiniciar" a mano.
+        self._nuzlocke_game = process_name
+
         self.nuzlocke_service = NuzlockeService(
-            NuzlockeStorage()
+            NuzlockeStorage.for_game(process_name)
         )
 
         self.runtime = Runtime(
@@ -74,14 +87,29 @@ class Application:
             location_catalog=LocationCatalog(),
         )
 
-        self.running = False
+        # Runtime (Runtime.update() en su propio hilo) y HTTPServer
+        # ahora se controlan por separado -- pedido del usuario
+        # (01/09/2026) para poder detener/iniciar cada uno desde el
+        # Dashboard (GUI v2) sin afectar al otro. Antes había un
+        # solo `self.running` que gobernaba los dos juntos; ese
+        # nombre se mantiene como propiedad de solo lectura (ver
+        # más abajo) para no romper todo el código que ya lo lee
+        # (Api, app.js, window.py) -- ahora es `True` si CUALQUIERA
+        # de los dos está activo, no los dos a la vez.
+        self._runtime_active = False
+        self._http_active = False
+
+        # Marca de tiempo (time.monotonic()) de cuando arrancó el
+        # Runtime -- usado para el "Uptime" de la tarjeta RUNTIME
+        # del Dashboard. monotonic() en vez de time.time() porque
+        # no importa la hora de reloj, solo cuánto tiempo pasó.
+        self._runtime_started_at = None
 
         # Hilo del loop realtime (Runtime.update()). Corre
         # separado del hilo principal, igual que HTTPServer ya
         # corre en el suyo, para que el hilo principal quede
-        # libre para una futura GUI (los frameworks de GUI en
-        # Python -- Tkinter, PyQt/PySide -- esperan correr su
-        # propio mainloop bloqueante en el hilo principal).
+        # libre para la GUI (pywebview espera correr su propio
+        # mainloop bloqueante en el hilo principal).
         #
         # Modelo de concurrencia elegido: threads, no asyncio.
         # Motivo: HTTPServer ya usa threads (es continuar el
@@ -91,17 +119,64 @@ class Application:
         # Documento Maestro, seccion 18.
         self._runtime_thread = None
 
+    @property
+    def running(self):
+        """
+        `True` si CUALQUIERA de los dos subsistemas (Runtime o
+        HTTPServer) está activo -- mantenido como propiedad de
+        solo lectura porque `Api`, `app.js` y `window.py` ya lo
+        leen así (sección "RUNNING"/"DETENIDO" del sidebar, cierre
+        de ventana, etc.). Para saber el estado de cada uno por
+        separado, usar `runtime_running`/`http_running`.
+        """
+
+        return self._runtime_active or self._http_active
+
+    @property
+    def runtime_running(self):
+        return self._runtime_active
+
+    @property
+    def http_running(self):
+        return self._http_active
+
     def start(self):
+        """
+        Arranca los dos subsistemas juntos -- lo que hace la
+        pantalla de Espera al elegir versión y conectar. Para
+        control independiente desde el Dashboard, ver
+        `start_runtime()`/`start_http_server()`.
+        """
+
         print("Iniciando DexRelay...")
         print("Configuración cargada correctamente.")
+
+        self.start_http_server()
+        self.start_runtime()
+
+    def stop(self):
+        """Detiene los dos subsistemas juntos (ver start())."""
+
+        self.stop_runtime()
+        self.stop_http_server()
+
+        print("Deteniendo DexRelay.")
+
+    # -----------------------------------------------------------
+    # Control independiente -- Dashboard (GUI v2, 01/09/2026)
+    # -----------------------------------------------------------
+
+    def start_runtime(self):
+        if self._runtime_active:
+            return
+
         print(
-            f"Refresh realtime: "
-            f"{self.refresh_seconds * 1000:.0f} ms"
+            f"Runtime realtime iniciado "
+            f"(refresh: {self.refresh_seconds * 1000:.0f} ms)."
         )
 
-        self.http_server.start()
-
-        self.running = True
+        self._runtime_active = True
+        self._runtime_started_at = time.monotonic()
 
         self._runtime_thread = Thread(
             target=self._run_realtime_loop,
@@ -111,8 +186,121 @@ class Application:
 
         self._runtime_thread.start()
 
+    def stop_runtime(self):
+        if not self._runtime_active:
+            return
+
+        self._runtime_active = False
+        self._runtime_started_at = None
+
+        if self._runtime_thread is not None:
+            self._runtime_thread.join(timeout=2.0)
+
+        # Sin esto, `state.azahar_connected`/`reader_active`
+        # quedan "pegados" en su último valor (True si estaba
+        # conectado al frenar) -- nadie más los actualiza una vez
+        # que el hilo del Runtime dejó de correr. Afecta tanto a
+        # la GUI como a /api/status por igual, porque ambos leen
+        # del mismo ApplicationState.
+        self.state.azahar_connected = False
+        self.state.reader_active = False
+
+        print("Runtime detenido.")
+
+    def start_http_server(self):
+        if self._http_active:
+            return
+
+        self.http_server.start()
+        self._http_active = True
+
+    def stop_http_server(self):
+        if not self._http_active:
+            return
+
+        self.http_server.stop()
+        self._http_active = False
+
+    def restart_reader(self):
+        """
+        "Reiniciar" del Reader (tarjeta READER del Dashboard).
+
+        Dos cosas, en orden:
+
+        1. Detecta si hay un juego CONOCIDO corriendo en Azahar
+           distinto al configurado (`reader.process_name`) -- caso
+           real reportado por el usuario (02/09/2026): cambiás de
+           Alpha Sapphire a Omega Ruby sin cerrar DexRelay, y se
+           queda "colgado" esperando el juego viejo para siempre,
+           porque antes esto solo limpiaba process_id/title_id sin
+           tocar qué nombre de proceso buscar. Si detecta un juego
+           distinto, actualiza `process_name` (y lo guarda en
+           config.json) y re-sincroniza el Nuzlocke Tracker al
+           archivo de ESE juego (NuzlockeStorage.for_game()) -- sin
+           esto, el Tracker seguiría mostrando la partida del juego
+           anterior aunque la memoria ya se lea del nuevo.
+        2. Limpia `process_id`/`title_id` cacheados para forzar una
+           búsqueda nueva del proceso en el próximo ciclo, sea el
+           mismo juego o uno distinto.
+
+        No hace falta que el Runtime esté corriendo para llamar
+        esto -- si está detenido, el reset queda listo para cuando
+        se vuelva a iniciar.
+        """
+
+        detected_name = self.reader.detect_process_name()
+
+        if (
+            detected_name is not None
+            and detected_name != self.reader.process_name
+        ):
+            self.reader.process_name = detected_name
+
+            self.config.set(
+                "azahar", "process_name", value=detected_name
+            )
+            self.config.save()
+
+            self.nuzlocke_service.switch_storage(
+                NuzlockeStorage.for_game(detected_name)
+            )
+
+        self.reader.process_id = None
+        self.reader.title_id = None
+        self.state.reader_active = False
+        self.state.azahar_connected = False
+
     def update(self):
         self.runtime.update()
+        self._sync_nuzlocke_storage()
+
+    def _sync_nuzlocke_storage(self):
+        """
+        Mantiene el Nuzlocke Tracker apuntando al archivo del juego
+        REALMENTE conectado -- se llama después de cada
+        Runtime.update() (que es quien resuelve `reader.process_name`
+        vía find_game_process() al conectar, incluso en modo
+        automático).
+
+        Bug real reportado el 02/09/2026: restart_reader() ya
+        re-sincronizaba el storage, pero solo cuando el usuario
+        tocaba el botón "Reiniciar" a mano -- en una conexión
+        normal/automática (por ejemplo, "Salir" y volver a
+        "Comenzar", que detecta el juego solo), nada re-sincronizaba
+        el Nuzlocke Tracker, así que /overlay/nuzlocke seguía
+        mostrando los datos del juego de la sesión anterior. Este
+        chequeo corre cada ciclo (~200ms) pero es barato -- una
+        comparación de strings; solo toca disco cuando el juego
+        conectado realmente cambió.
+        """
+
+        current = self.reader.process_name
+
+        if current is not None and current != self._nuzlocke_game:
+            self._nuzlocke_game = current
+            self.nuzlocke_service.switch_storage(
+                NuzlockeStorage.for_game(current)
+            )
 
     def _run_realtime_loop(self):
         """
@@ -121,11 +309,9 @@ class Application:
         __init__ sobre el modelo de concurrencia elegido.
         """
 
-        print("Runtime realtime iniciado.")
-
         next_update = time.monotonic()
 
-        while self.running:
+        while self._runtime_active:
             self.update()
 
             next_update += self.refresh_seconds
@@ -143,10 +329,10 @@ class Application:
 
         El trabajo real (Runtime realtime loop + HTTP server) ya
         corre en hilos de fondo iniciados por start(); este método
-        solo mantiene vivo el proceso principal mientras tanto.
-        Cuando exista la GUI (FASE 4), su mainloop reemplazará este
-        bucle de espera -- el hilo principal ya queda libre para
-        eso desde este cambio.
+        solo mantiene vivo el proceso principal mientras tanto. No
+        lo usa la GUI v2 (pywebview tiene su propio mainloop, ver
+        app/gui_web/window.py) -- se mantiene por compatibilidad
+        con cualquier modo headless/futuro.
         """
 
         if not self.running:
@@ -155,24 +341,3 @@ class Application:
         while self.running:
             time.sleep(0.25)
 
-    def stop(self):
-        if self.running:
-            self.running = False
-
-            if self._runtime_thread is not None:
-                self._runtime_thread.join(
-                    timeout=2.0
-                )
-
-            self.http_server.stop()
-
-            # Sin esto, `state.azahar_connected`/`reader_active`
-            # quedan "pegados" en su último valor (True si estaba
-            # conectado al frenar) -- nadie más los actualiza una
-            # vez que el hilo del Runtime dejó de correr. Afecta
-            # tanto a la GUI como a /api/status por igual, porque
-            # ambos leen del mismo ApplicationState.
-            self.state.azahar_connected = False
-            self.state.reader_active = False
-
-            print("Deteniendo DexRelay.")
