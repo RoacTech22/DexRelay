@@ -15,13 +15,16 @@ ya no coincidiría con el nombre que reporta una captura real --
 reaparecería el mismo bug de rutas duplicadas que motivó traer la
 lista directo de PKHeX en primer lugar.
 
-Deliberadamente NO están todas las ~93 ubicaciones de Hoenn: los
-IDs que no aparecen acá son zonas post-juego/DexNav poco comunes
-(cuevas y ruinas secundarias) cuyo nombre en español no se pudo
-confirmar con una fuente confiable -- para esas se prefiere dejar
-el nombre en inglés (lo que devuelve PKHeX) antes que arriesgar una
-traducción incorrecta. Si en algún momento se confirman, agregarlas
-acá.
+Actualizada 30/08/2026: 4 traducciones nuevas pasadas por el
+usuario (Cueva Cardumen/Shoal Cave, Malvamar/Sea Mauville,
+Gruta Solar/Scorched Slab, Firmamento/Soaring in the Sky) --
+quedan 79 de las 93 ubicaciones de Hoenn con traduccion
+verificada. Las 14 restantes son zonas post-juego/DexNav no
+relevantes para un Nuzlocke normal (mirage spots, cuevas de
+los Regis, base secreta, Costa Secreta, Prado Secreto, y el ID
+276 sin nombre real) -- excluidas a proposito del panel via
+EXCLUDED_LOCATION_IDS en location_catalog.py, asi que ya no
+hace falta traducirlas ni tenerlas en este diccionario.
 """
 
 HOENN_LOCATION_NAMES_ES = {
@@ -97,7 +100,16 @@ HOENN_LOCATION_NAMES_ES = {
     292: "Guarida Aqua",            # Team Aqua Hideout
     294: "Caverna Abisal",          # Seafloor Cavern
     296: "Cueva Ancestral",         # Cave of Origin
+    300: "Cueva Cardumen",          # Shoal Cave (30/08/2026,
+                                    # traduccion pasada por el
+                                    # usuario)
     302: "Malvalanova",             # New Mauville
+    304: "Malvamar",                # Sea Mauville (30/08/2026,
+                                    # traduccion pasada por el
+                                    # usuario)
+    312: "Gruta Solar",             # Scorched Slab (30/08/2026,
+                                    # traduccion pasada por el
+                                    # usuario)
     314: "Guarida Magma",           # Team Magma Hideout
     316: "Pilar Celeste",           # Sky Pillar
     324: "Zona Safari",             # Safari Zone
@@ -111,8 +123,15 @@ HOENN_LOCATION_NAMES_ES = {
     330: "Isla Espejismo",          # Mirage Island
     332: "Monte Espejismo",         # Mirage Mountain
     346: "Islote Secreto",          # Secret Islet
-    350: "Costa Secreta",           # Secret Shore
-    352: "Prado Secreto",           # Secret Meadow
+    348: "Firmamento",              # Soaring in the Sky
+                                    # (30/08/2026, traduccion
+                                    # pasada por el usuario)
+
+    # Costa Secreta (350, Secret Shore) y Prado Secreto (352,
+    # Secret Meadow) sacados a proposito (30/08/2026, decision
+    # explicita del usuario) -- no son relevantes para un
+    # Nuzlocke normal, mismo criterio que EXCLUDED_LOCATION_IDS
+    # en location_catalog.py (que ya los excluye del panel).
 }
 
 

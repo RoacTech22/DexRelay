@@ -144,18 +144,21 @@ function findRowByLocation(location) {
 
 
 /* =========================================
-   UBICACIÓN DE FILAS "ESPECIAL" EN LA TABLA
-   (27/08/2026, a pedido explícito)
+   UBICACIÓN DE FILAS "ESPECIAL"/"CAPTURA EXTRA" EN LA TABLA
+   (27/08/2026, a pedido explícito; ampliado 30/08/2026 a
+   "Captura Extra" -- bug real corregido, esas filas caían
+   siempre al final en vez de ir a su ruta real)
 
    Por defecto toda fila nueva se agrega al final
    (comportamiento de siempre, sin tocar). Las filas
-   "especial" son la única excepción: se reubican
-   justo debajo de su ruta real (`anchorLocation`,
-   ver backend) o, si no tienen ninguna ruta real
-   conocida (huevo/regalo/intercambio/evento), debajo
-   de la ÚLTIMA ruta real que ya tenga algo capturado
-   -- nunca se tocan otras filas para hacerles lugar,
-   solo se reposiciona la fila nueva.
+   "especial" y las de "Captura Extra" (`entry.extraCapture`)
+   son la excepción: se reubican justo debajo de su ruta
+   real (`anchorLocation`, ver backend) o, si no tienen
+   ninguna ruta real conocida (huevo/regalo/intercambio/
+   evento, o una Captura Extra sin metLocation), debajo de
+   la ÚLTIMA ruta real que ya tenga algo capturado -- nunca
+   se tocan otras filas para hacerles lugar, solo se
+   reposiciona la fila nueva.
 
    Se llama DESPUÉS de que addRow() ya agregó la fila
    al final (comportamiento normal) -- esta función
@@ -164,7 +167,11 @@ function findRowByLocation(location) {
 
 function repositionSpecialRow(row, entry) {
 
-    if (!row || entry?.status !== "especial") {
+    const needsReposition =
+        entry?.status === "especial" ||
+        Boolean(entry?.extraCapture);
+
+    if (!row || !needsReposition) {
         return;
     }
 
