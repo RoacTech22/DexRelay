@@ -90,6 +90,33 @@ class HTTPServer:
             project_root / "panels"
         )
 
+        # Set completo de sprites (GUI v2, Bloque 3, página Pokémon
+        # -- 03/09/2026, provisto por el usuario). Carpeta APARTE
+        # de overlays/team/sprites/ a propósito -- ese set sigue
+        # sirviendo al Team Overlay y al Dashboard tal cual, sin
+        # tocarlo, para no arriesgar algo que ya funciona bien ahí.
+        # Curado a partir de ~1300 sprites con variantes (Mega/
+        # Gigantamax/regionales/etc.) -- se quedó solo con la forma
+        # base de cada especie 1-721 (rango de ORAS/Gen 6, no hace
+        # falta más) y se reescalaron a 200px máx (originales hasta
+        # 1280x1280, pesaban 350MB en total -- no tiene sentido para
+        # algo que se muestra a 96px).
+        self.pokemon_sprites_directory = (
+            project_root / "assets" / "pokemon_full"
+        )
+
+        # Retratos de los 8 líderes de gimnasio de Hoenn (GUI v2,
+        # Bloque 3, página Medallas -- 04/09/2026, provistos por el
+        # usuario). Nombrados 1.png-8.png en el mismo orden que el
+        # bitfield de badges_service.py (1=Alana/Roxanne ...
+        # 8=Plubio/Wallace) -- mismo criterio que
+        # overlays/badges/sprites/. Versión ORAS (arte oficial más
+        # reciente, no la de Ruby/Sapphire/Emerald) elegida por
+        # sobre la alternativa que mandó el usuario para cada líder.
+        self.gym_leaders_directory = (
+            project_root / "assets" / "gym_leaders"
+        )
+
         self._server: ThreadingHTTPServer | None = None
         self._thread: Thread | None = None
 
@@ -146,6 +173,8 @@ class HTTPServer:
         state = self.state
         overlay_directory = self.overlay_directory
         panel_directory = self.panel_directory
+        pokemon_sprites_directory = self.pokemon_sprites_directory
+        gym_leaders_directory = self.gym_leaders_directory
         nuzlocke_service = self.nuzlocke_service
         species_catalog = self.species_catalog
         location_catalog = self.location_catalog
@@ -182,6 +211,12 @@ class HTTPServer:
                     return
 
                 if self._serve_panel("nuzlocke"):
+                    return
+
+                if self._serve_pokemon_sprite():
+                    return
+
+                if self._serve_gym_leader_sprite():
                     return
 
                 if self.path == "/api/status":
@@ -749,6 +784,51 @@ class HTTPServer:
                     root_directory=overlay_directory,
                     relative_root=overlay_name,
                 )
+
+            def _serve_pokemon_sprite(self) -> bool:
+                """
+                Sirve /sprites/pokemon/{speciesId}.png -- set
+                completo de sprites (GUI v2, Bloque 3, página
+                Pokémon). Ruta simple de archivo directo, sin
+                index.html -- no reutiliza _serve_static_page()
+                porque acá no hace falta esa lógica de redirect,
+                solo servir un PNG puntual (404 si no existe, ver
+                _send_file()).
+                """
+
+                prefix = "/sprites/pokemon/"
+
+                if not self.path.startswith(prefix):
+                    return False
+
+                relative_path = self.path[len(prefix):]
+
+                self._send_file(
+                    pokemon_sprites_directory,
+                    relative_path,
+                    self._content_type(relative_path),
+                )
+                return True
+
+            def _serve_gym_leader_sprite(self) -> bool:
+                """
+                Sirve /sprites/gym_leaders/{n}.png (n=1-8) -- mismo
+                patrón que _serve_pokemon_sprite().
+                """
+
+                prefix = "/sprites/gym_leaders/"
+
+                if not self.path.startswith(prefix):
+                    return False
+
+                relative_path = self.path[len(prefix):]
+
+                self._send_file(
+                    gym_leaders_directory,
+                    relative_path,
+                    self._content_type(relative_path),
+                )
+                return True
 
             def _serve_panel(
                 self,
