@@ -31,6 +31,7 @@ from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
+from app.services.pokemon_detail_resolver import PokemonDetailResolver
 
 APP_VERSION = "v0.3.0"
 
@@ -105,6 +106,12 @@ class Api:
 
     def __init__(self, application) -> None:
         self.app = application
+
+        # Página Pokémon (Bloque 3) -- ver
+        # app/services/pokemon_detail_resolver.py sobre por qué
+        # esto vive acá (solo GUI) y no en Application (no lo usa
+        # ningún overlay ni el HTTP server).
+        self.pokemon_detail_resolver = PokemonDetailResolver()
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -415,6 +422,98 @@ class Api:
     # (Pokémon, Medallas, Nuzlocke, Overlays, Configuración,
     # Logs)
     # -----------------------------------------------------------
+
+    def get_pokemon_page_data(self):
+        """
+        Página Pokémon (GUI v2, Bloque 3) -- a pedido del usuario,
+        reemplaza la vista de lista simple del mockup por el
+        detalle completo (boceto: sprite, sexo, especie, tipos,
+        habilidad, stats con indicador de naturaleza,
+        movimientos) directo en cada una de las 6 tarjetas, sin
+        vista aparte.
+
+        Combina, por slot:
+        - Identidad básica (nickname/especie/nivel/HP/shiny) --
+          `state.team`, la misma lectura que ya usa el Dashboard,
+          sin memoria nueva.
+        - Detalle vía PKHeX (tipos/habilidad/naturaleza/stats/
+          movimientos) -- bajo demanda, releyendo memoria fresca
+          para cada slot (ver
+          AzaharReader.read_pokemon_raw_for_slot()) y resolviendo
+          con PokemonDetailResolver (sin caché, ver su docstring).
+
+        Un slot vacío devuelve solo `{"slot": n, "empty": True}` --
+        el detalle ni se pide.
+
+        Bug real (03/09/2026, confirmado con logs reales del
+        usuario): con Azahar/el juego cerrado, esto seguía
+        intentando releer memoria por cada uno de los 6 slots en
+        CADA poll de 2s de la página (ver POKEMON_POLL_MS en
+        app.js) -- inofensivo (ya no rompe nada gracias a los
+        fixes anteriores en read_pokemon_raw_for_slot()), pero
+        inundaba la consola con la misma línea de error una y otra
+        vez mientras el juego siguiera cerrado, y golpeaba un
+        socket que se sabe de antemano que va a fallar. Se chequea
+        `state.azahar_connected` (ya lo mantiene al día
+        Runtime.update() en cada ciclo, no hace falta otra
+        consulta) ANTES de intentar leer -- sin conexión, se
+        devuelve la identidad básica que ya se tenía (o "vacío" si
+        ni eso), sin tocar el socket para nada.
+        """
+
+        team = self.app.state.team or []
+        connected = self.app.state.azahar_connected
+        pages = []
+
+        for slot in range(1, 7):
+            basic = next(
+                (
+                    entry
+                    for entry in team
+                    if entry.get("slot") == slot
+                ),
+                None,
+            )
+
+            if not basic or basic.get("empty"):
+                pages.append({"slot": slot, "empty": True})
+                continue
+
+            if not connected:
+                entry = dict(basic)
+                entry["details"] = None
+                pages.append(entry)
+                continue
+
+            pokemon = self.app.reader.read_pokemon_raw_for_slot(
+                slot
+            )
+
+            if pokemon is None:
+                # La party dice que hay algo acá pero la lectura
+                # bajo demanda falló de forma transitoria -- se
+                # muestra la identidad básica igual (ya la
+                # tenemos de `state.team`) sin detalle, en vez de
+                # ocultar la tarjeta entera.
+                print(
+                    f"[Api] get_pokemon_page_data: lectura fallida "
+                    f"para el slot {slot} (READ_FAILED o vacío "
+                    f"inesperado)."
+                )
+                entry = dict(basic)
+                entry["details"] = None
+                pages.append(entry)
+                continue
+
+            details = self.pokemon_detail_resolver.resolve(
+                pokemon.raw_data[:232]
+            )
+
+            entry = dict(basic)
+            entry["details"] = details
+            pages.append(entry)
+
+        return pages
 
     def get_server_base_url(self):
         host = self.app.http_server.host

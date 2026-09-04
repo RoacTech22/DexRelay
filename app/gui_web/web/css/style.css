@@ -871,22 +871,30 @@ body {
   margin: 0 0 20px;
 }
 
-/* Banner de alerta del Dashboard (02/09/2026): "se perdió la
-   conexión" (rojo) o "detectamos otro juego" (ámbar, con acceso
-   directo a Reiniciar) -- ver applyDashboardAlert() en app.js.
-   Los dos colores comparten la misma estructura, solo cambia
-   --dash-alert-color vía JS. */
+/* Banner de alerta -- GLOBAL (03/09/2026: antes vivía adentro de
+   #page-dashboard, así que solo se veía en esa página; a pedido
+   del usuario, ahora es hijo directo de .content, fuera de
+   cualquier .page, y se ve en todas las secciones sin importar
+   cuál esté activa -- ver applyDashboardAlert() en app.js, que ya
+   se llama en cada ciclo de pollMain() independientemente de la
+   página visible). "se perdió la conexión" (rojo) o "detectamos
+   otro juego" (ámbar, con acceso directo a Reiniciar). Los dos
+   colores comparten la misma estructura, solo cambia
+   --dash-alert-color vía JS. max-width fijo para que se alinee
+   con el ancho de las tarjetas de abajo en vez de estirarse a los
+   1366px de .content. */
 .dash-alert {
   --dash-alert-color: var(--danger);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  max-width: 1008px;
+  margin: 0 auto 16px;
   border: 1px solid var(--dash-alert-color);
   background: color-mix(in srgb, var(--dash-alert-color) 12%, transparent);
   border-radius: var(--radius-lg);
   padding: 12px 16px;
-  margin-bottom: 16px;
   font-size: 13px;
   color: var(--text);
 }
@@ -1305,6 +1313,7 @@ body {
   font-weight: 700;
   color: var(--text-dim);
   letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .dash-card-header-icon-title svg {
@@ -1323,11 +1332,15 @@ body {
   font-size: 13px;
 }
 
+/* "Ver todo" ahora es un botón real (04/09/2026): lleva a la
+   página Pokémon (ver switchToPage() en app.js). Ya no es
+   cursor:not-allowed/opacidad baja -- eso era para cuando estaba
+   deshabilitado a propósito. */
 .dash-btn-sm {
-  cursor: not-allowed;
+  cursor: pointer;
   border: 1px solid var(--border-strong);
   background: transparent;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   border-radius: var(--radius);
   padding: 5px 12px;
   font-size: 11px;
@@ -1335,14 +1348,17 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  opacity: 0.6;
+}
+
+.dash-btn-sm:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 /* Botones reales de acción (Reiniciar/Iniciar/Detener) de las
-   tarjetas READER, RUNTIME y HTTP SERVER -- a diferencia de
-   .dash-btn-sm (todavía inactivo, "Ver todo" del equipo), estos
-   sí disparan una acción real vía Api (ver app.js,
-   initDashboardActions()). */
+   tarjetas READER, RUNTIME y HTTP SERVER -- mismo criterio visual
+   que .dash-btn-sm, que ahora también dispara una acción real
+   (ver initDashboardActions() en app.js). */
 .dash-btn-action {
   cursor: pointer;
   width: 100%;
@@ -1657,4 +1673,790 @@ body {
 .dash-overlay-actions button:hover {
   color: var(--text);
   border-color: var(--accent);
+}
+
+/* =========================================================
+   PÁGINA POKÉMON (GUI v2, Bloque 3, 03/09/2026)
+
+   A pedido del usuario, cada una de las 6 tarjetas usa
+   directamente el layout completo del boceto (sprite, sexo,
+   especie, tipos, habilidad, stats con indicador de
+   naturaleza, movimientos) -- reemplaza al mockup de lista
+   simple. Grid responsivo con auto-fill: 2 columnas en
+   ventanas anchas, 1 en angostas, sin @container dedicado --
+   a diferencia del Dashboard, acá no hace falta un layout tan
+   fino porque las tarjetas son todas del mismo tamaño y no se
+   emparejan con nada más.
+   ========================================================= */
+
+/* Mismo criterio que .dashboard-inner (03/09/2026, a pedido del
+   usuario -- "centra el contenido de la página Pokémon"): título +
+   grilla comparten un solo wrapper centrado, así se mueven juntos
+   en vez de que el título quede pegado al borde izquierdo mientras
+   la grilla de tarjetas se centra por su cuenta. Mismos anchos que
+   dashboard-inner (1008px = 496*2+16 columnas fijas). */
+.pokemon-page-inner {
+  max-width: 1222px;
+  margin: 0 auto;
+}
+
+@container (max-width: 1222px) {
+  .pokemon-page-inner {
+    max-width: 820px;
+  }
+}
+
+@container (max-width: 820px) {
+  .pokemon-page-inner {
+    max-width: 418px;
+  }
+}
+
+/* Caja "Equipo actual" (04/09/2026, a pedido del usuario) --
+   mismo criterio visual que .medals-badges-card: título + grilla
+   comparten borde/fondo, en vez de la grilla suelta directo en
+   .pokemon-page-inner. Los anchos de acá arriba (1222/820/418)
+   son 32px más que las 386px*N originales -- justo el padding de
+   esta caja (16px a cada lado) -- para que la grilla siga
+   calzando exacto adentro en cada breakpoint. */
+.pokemon-team-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 386px);
+  gap: 16px;
+}
+
+@container (max-width: 1222px) {
+  .pokemon-grid {
+    grid-template-columns: repeat(2, 386px);
+  }
+}
+
+@container (max-width: 820px) {
+  .pokemon-grid {
+    grid-template-columns: 386px;
+  }
+}
+
+.pokemon-card {
+  display: grid;
+  grid-template-rows: auto auto;
+  row-gap: 14px;
+  border: 1px solid var(--border);
+  /* bg-elevated-2 (04/09/2026, a pedido del usuario) -- antes
+     usaba el mismo bg-elevated que .pokemon-team-card (la caja
+     "Equipo actual" que la contiene), así que las 6 tarjetas se
+     mezclaban con el fondo en vez de distinguirse -- mismo
+     criterio que .medals-badge-card dentro de .medals-badges-card. */
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+
+.pokemon-card.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.pokemon-card.empty svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.35;
+}
+
+/* Grid en vez de flex (03/09/2026, a pedido del usuario -- "que
+   se vea mas simetrico") -- columna del sprite con ancho FIJO
+   (96px), la de info se lleva el resto siempre igual, en vez de
+   que el ancho de cada una dependa de su contenido. */
+.pokemon-card-top {
+  display: grid;
+  grid-template-columns: 119px 1fr;
+  column-gap: 16px;
+}
+
+.pokemon-card-sprite {
+  width: 119px;
+  height: 119px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--type-color, transparent) 14%, var(--bg-elevated-2));
+  border: 1px solid color-mix(in srgb, var(--type-color, var(--border)) 45%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.pokemon-card-sprite img {
+  width: 84px;
+  height: 84px;
+  /* object-fit: contain (03/09/2026) -- bug real: sin esto, un
+     sprite que no es cuadrado (la mayoría no lo son) se estira
+     para llenar el cuadro entero y queda deformado. "contain"
+     respeta la proporción original y dentro de esta caja de
+     96x96 siempre entra completo. */
+  object-fit: contain;
+}
+
+.pokemon-card-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pokemon-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pokemon-card-name-row span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pokemon-card-gender {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+
+.pokemon-card-gender svg {
+  width: 13px;
+  height: 13px;
+}
+
+.pokemon-card-gender.male {
+  color: var(--sapphire);
+}
+
+.pokemon-card-gender.female {
+  color: #ff6fb0;
+}
+
+.pokemon-card-species {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  margin: 2px 0 8px;
+}
+
+.pokemon-card-types {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pokemon-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--type-color, #4a5568), var(--type-dark, #2a303c));
+  border: 1px solid var(--type-dark, transparent);
+}
+
+.pokemon-type-badge .type-icon,
+.pokemon-type-badge svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.pokemon-card-ability {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12px;
+  margin-top: auto;
+}
+
+.pokemon-card-ability .ability-name {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.pokemon-card-ability .ability-desc {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* 50/50 real (03/09/2026, a pedido del usuario) -- antes
+   .pokemon-card-stats tenía un 45% fijo y los movimientos se
+   llevaban lo que sobraba (55%, asimétrico); ahora las dos mitades
+   miden exactamente lo mismo. */
+.pokemon-card-bottom {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  column-gap: 16px;
+}
+
+.pokemon-card-stats {
+  font-size: 12px;
+}
+
+.pokemon-card-stats span:last-child {
+  font-weight: 700;
+}
+
+/* Mismo estilo que el resto de los títulos de tarjeta de la app
+   (04/09/2026, a pedido del usuario -- "que todos los títulos de
+   las tarjetas tengan el mismo estilo") -- .dash-card-header-icon-title
+   pone ícono/mayúsculas/color/tamaño, esto solo agrega el margen
+   propio de este contexto (tarjeta angosta por Pokémon). */
+.pokemon-card-stats-title {
+  margin-bottom: 6px;
+}
+
+.pokemon-stat-row {
+  display: flex;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.pokemon-stat-row .stat-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Línea punteada entre el nombre del stat y su valor (04/09/2026,
+   a pedido del usuario, con una captura de referencia) -- un
+   elemento vacío que se estira (flex:1) con un borde inferior
+   punteado, en vez del hueco liso que había con
+   justify-content:space-between. */
+.pokemon-stat-dots {
+  flex: 1;
+  min-width: 8px;
+  height: 0;
+  align-self: center;
+  border-bottom: 1px dotted var(--border-strong);
+  margin: 0 6px;
+}
+
+.pokemon-stat-icon {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+
+.pokemon-stat-arrow {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* Naturaleza (03/09/2026): sin flechas, el nombre del stat que
+   sube/baja se colorea directo, en un tono pastel -- pedido
+   explícito del usuario (los primeros colores, --danger/--sapphire,
+   quedaban demasiado saturados para esto). */
+.stat-name.nature-up {
+  color: #f2a29c;
+}
+
+.stat-name.nature-down {
+  color: #9dc3e6;
+}
+
+.pokemon-card-moves {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: end;
+}
+
+.pokemon-move-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.pokemon-move-name {
+  flex: 1;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.pokemon-move-type {
+  flex: none;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: linear-gradient(160deg, var(--type-color, #4a5568), var(--type-dark, #2a303c));
+  border-left: 1px solid var(--type-dark, transparent);
+}
+
+.pokemon-move-type .type-icon,
+.pokemon-move-type svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pokemon-move-row.empty {
+  color: var(--text-dim);
+  border-style: dashed;
+}
+
+.pokemon-move-row.empty .pokemon-move-name {
+  justify-content: center;
+}
+
+/* =========================================================
+   PÁGINA MEDALLAS (GUI v2, Bloque 3, 03/09/2026 -- ajustada
+   04/09/2026: caja de líderes de gimnasio reemplaza a la leyenda
+   del valor en memoria, medallas de gimnasio ahora en su propia
+   caja con borde/fondo -- mismo criterio que el resto de las
+   tarjetas de la app -- y @container en vez de @media, igual
+   que .dashboard-inner/.pokemon-page-inner).
+   ========================================================= */
+
+/* Mismo criterio que .dashboard-inner/.pokemon-page-inner: título
+   + contenido comparten un wrapper centrado, para que se muevan
+   juntos en vez de que el título quede pegado al borde mientras
+   el contenido se acomoda por su cuenta. */
+.medals-page-inner {
+  max-width: 962px;
+  margin: 0 auto;
+}
+
+.medals-progress-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+}
+
+/* Medallas obtenidas / Valor en memoria / info -- repartidas en
+   tres columnas iguales (04/09/2026, a pedido del usuario -- antes
+   la nota de la derecha se llevaba el espacio sobrante con
+   margin-left:auto en vez de que las tres partes pesaran lo
+   mismo). Sin align-items:center en .medals-progress-card (arriba)
+   a propósito -- así cada columna ocupa el alto completo de la
+   fila (default stretch de grid) y el separador vertical de acá
+   abajo queda parejo entre las tres, en vez de medir solo el alto
+   de su propio contenido. El centrado del contenido DENTRO de
+   cada columna lo hace este flex de acá. */
+.medals-progress-col {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+}
+
+.medals-progress-col:first-child {
+  padding-left: 0;
+}
+
+.medals-progress-col:last-child {
+  padding-right: 0;
+}
+
+/* Separador sutil entre columnas (04/09/2026, a pedido del
+   usuario) -- mismo ancho (1px) que el resto de los bordes de la
+   app, ninguno más grueso que otro. */
+.medals-progress-col+.medals-progress-col {
+  border-left: 1px solid var(--border);
+}
+
+.medals-progress-note-col {
+  align-items: center;
+}
+
+/* Ícono de medalla, mucho más chico (04/09/2026, a pedido del
+   usuario) -- antes 40x40, quedaba pesado al lado del resto de
+   los textos, ahora acompaña al número sin dominar la columna. */
+.medals-progress-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.medals-progress-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.medals-progress-count,
+.medals-progress-value {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.medals-progress-value {
+  color: var(--accent);
+}
+
+.medals-progress-info small {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* Ícono de info: de 16px a 18px (mismo tamaño estándar que el
+   resto de los íconos de título de la app,
+   .dash-card-header-icon-title svg) -- a 16px se veía chico al
+   lado del texto. Ya no necesita margin-top: el centrado vertical
+   ahora lo resuelve .medals-progress-note-col con align-items:center
+   (antes flex-start, por eso se veía corrido hacia arriba). */
+.medals-info-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-dim);
+}
+
+.medals-progress-note {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.medals-main-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.medals-main-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.medals-side-col {
+  flex: none;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.medals-section-title {
+  margin: 0 0 10px;
+}
+
+/* Caja de "Medallas de gimnasio" (04/09/2026, a pedido del
+   usuario) -- antes el título + la grilla estaban sueltos,
+   directo en .medals-main-col, sin borde ni fondo propio; ahora
+   comparten caja con el mismo criterio que el resto de las
+   secciones (.medals-stats-card, .medals-overlay-card, etc). */
+.medals-badges-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.medals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 144px);
+  gap: 12px;
+}
+
+.medals-badge-card {
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius-lg);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.medals-badge-number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.medals-badge-card img {
+  width: 54px;
+  height: 54px;
+  margin-top: 6px;
+}
+
+.medals-badge-card img.pending {
+  filter: grayscale(1) brightness(0.6);
+  opacity: 0.8;
+}
+
+.medals-badge-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.medals-badge-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.medals-badge-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.medals-badge-status.on {
+  color: var(--success);
+}
+
+.medals-badge-status.on .dot {
+  background: var(--success);
+}
+
+/* Líderes de Gimnasio (04/09/2026) -- reemplaza a la leyenda del
+   valor en memoria (.medals-legend-card, ya no existe). Retrato +
+   nombre debajo, mismo criterio visual que .medals-badge-card.
+   Movida fuera de .medals-main-row (04/09/2026, a pedido del
+   usuario -- "que cubran todo el ancho del content") para que ya
+   no comparta fila con .medals-side-col (300px fijos) y pueda
+   usar el ancho completo de .medals-page-inner. */
+.medals-leaders-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+/* Una sola fila de 8 (04/09/2026, a pedido del usuario) -- antes
+   4 columnas x 2 filas. */
+.medals-leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.medals-leader-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius-lg);
+  padding: 8px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+}
+
+/* Un poco más chicos (04/09/2026, a pedido del usuario) -- antes
+   120px de alto máximo, con 8 en una sola fila ya no hace falta
+   tanto. */
+.medals-leader-card img {
+  width: 100%;
+  max-height: 84px;
+  object-fit: contain;
+}
+
+.medals-leader-card span {
+  font-weight: 700;
+  font-size: 10.5px;
+  line-height: 1.2;
+}
+
+.medals-stats-card,
+.medals-overlay-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.medals-stats-title,
+.medals-overlay-title {
+  margin-bottom: 10px;
+}
+
+.medals-stats-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  padding: 5px 0;
+  color: var(--text-secondary);
+}
+
+.medals-stats-row span:last-child {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.medals-stats-bar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-elevated-2);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.medals-stats-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.medals-overlay-sub {
+  color: var(--text-dim);
+  font-size: 11.5px;
+  margin: 0 0 10px;
+}
+
+.medals-overlay-url {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+
+.medals-overlay-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.medals-overlay-actions .dash-btn-action {
+  flex: 1;
+  position: static;
+}
+
+/* @container en vez de @media (04/09/2026, a pedido del usuario --
+   "aplica los container de las otras page aqui"), mismo criterio
+   que .dashboard-inner/.pokemon-page-inner: responde al ancho de
+   .content, no al viewport completo. */
+/* Escalón intermedio para la fila de líderes -- 8 en una sola
+   fila (default) se pone justo antes de 900px, así que acá baja
+   a 4 (2 filas) para que no queden demasiado apretados antes de
+   llegar al breakpoint principal de abajo. */
+@container (max-width: 962px) {
+  .medals-leaders-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@container (max-width: 962px) {
+
+  .medals-page-inner {
+    max-width: 646px;
+    margin: 0 auto;
+  }
+
+  .medals-main-row {
+    flex-direction: column;
+  }
+
+  .medals-side-col {
+    width: 100%;
+    flex-direction: row
+  }
+
+  .medals-grid,
+  .medals-leaders-grid {
+    grid-template-columns: repeat(4, 144px);
+  }
+
+  .medals-stats-card,
+  .medals-overlay-card {
+    width: 50%;
+  }
+}
+
+@container (max-width: 670px) {
+  .medals-progress-card {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 12px;
+  }
+
+  .medals-progress-note-col {
+    grid-column: 1 /-1;
+  }
+
+  .medals-progress-col {
+    padding: 0;
+  }
+
+  .medals-progress-col+.medals-progress-col:nth-child(2) {
+    padding: 12px;
+    border-left: 1px solid var(--border);
+    border-top: none;
+  }
+
+  .medals-progress-col+.medals-progress-col {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .medals-stats-card,
+  .medals-overlay-card {
+    width: 100%;
+  }
+
+  .medals-grid,
+  .medals-leaders-grid {
+    grid-template-columns: repeat(2, 144px);
+  }
+
+  .medals-side-col {
+    width: 100%;
+    flex-direction: column
+  }
+
+  .medals-page-inner {
+    max-width: 334px;
+    margin: 0 auto;
+  }
+
 }
