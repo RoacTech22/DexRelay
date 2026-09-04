@@ -7,6 +7,51 @@
 # versiones NO comparten process_name, así que se usa como llave
 # para elegir qué set de direcciones corresponde. Configurable en
 # config.json -> azahar.process_name.
+#
+# REQUISITO REAL DE VERSIÓN DE JUEGO (04/09/2026): las direcciones
+# de este archivo se confirmaron contra Omega Ruby CON la
+# actualización 1.4 instalada. Sin el parche (juego base tal cual
+# viene de fábrica), el mapa de memoria queda corrido y estas
+# direcciones ya no apuntan a nada válido -- se manifiesta como
+# "el equipo no carga" (Dashboard y página Pokémon vacíos) sin
+# ningún error visible, ni una lectura fallida: la dirección
+# simplemente cae en un lugar distinto de memoria. Encontrado
+# porque al usuario se le había borrado por error la actualización
+# de su copia de Omega Ruby. Alpha Sapphire no mostró este
+# síntoma, pero probablemente aplica igual si le faltara su
+# propia actualización -- no confirmado todavía, revisar si vuelve
+# a aparecer un "no carga el equipo" sin explicación.
+# REQUISITO REAL DE VERSIÓN DE JUEGO (04/09/2026): las direcciones
+# de este archivo se confirmaron contra Omega Ruby CON la
+# actualización 1.4 instalada. Sin el parche (juego base tal cual
+# viene de fábrica), el mapa de memoria queda corrido y estas
+# direcciones ya no apuntan a nada válido -- se manifiesta como
+# "el equipo no carga" (Dashboard y página Pokémon vacíos) sin
+# ningún error visible, ni una lectura fallida: la dirección
+# simplemente cae en un lugar distinto de memoria. Encontrado
+# porque al usuario se le había borrado por error la actualización
+# de su copia de Omega Ruby.
+#
+# CONFIRMADO (04/09/2026): Alpha Sapphire tiene el MISMO problema
+# al revés -- las direcciones actuales (PARTY_ORDER_ADDRESS =
+# 0x08CF71F0 y el resto de _BY_PROCESS de acá abajo) están
+# confirmadas contra el juego BASE de Alpha Sapphire, sin la
+# actualización 1.4. Con el parche puesto, no funcionan (mismo
+# síntoma: equipo vacío, sin error).
+#
+# PENDIENTE (a propósito, para otra sesión -- no urgente, el
+# usuario decidió seguir jugando la versión base de AS por ahora):
+# volver a investigar con Cheat Engine en vivo, jugando Alpha
+# Sapphire CON la actualización 1.4, las direcciones equivalentes
+# a PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS/BOX_BASE_ADDRESS/
+# CURRENT_ZONE_ID_ADDRESS para esa versión -- mismo proceso que ya
+# se hizo para Omega Ruby. Importante: el process_name (sango-2)
+# es el MISMO esté parcheado o no -- Azahar no expone la versión
+# del juego por este protocolo, así que DexRelay no puede elegir
+# solo qué set de direcciones usar si en algún momento hay que
+# soportar las dos versiones de AS a la vez (base y 1.4). Por
+# ahora no hace falta resolver eso -- alcanza con una sola versión
+# de AS confirmada, igual que ya pasa con Omega Ruby.
 PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2"
 PROCESS_NAME_OMEGA_RUBY = "sango-1"
 
