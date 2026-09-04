@@ -67,7 +67,12 @@ class CombatService:
             4,
         )
 
-        if len(pointer_before) != 4:
+        # Bug real (04/09/2026, mismo patrón que ya se encontró en
+        # azahar_reader.py y badges_service.py): memory_reader.read()
+        # puede devolver None en un fallo transitorio de socket, no
+        # solo lanzar una excepción -- len(None) tira TypeError en
+        # vez de tratarse como una lectura descartada más.
+        if pointer_before is None or len(pointer_before) != 4:
             return LECTURA_DESCARTADA
 
         base_address = struct.unpack(
@@ -83,7 +88,7 @@ class CombatService:
             2,
         )
 
-        if len(hp_data) != 2:
+        if hp_data is None or len(hp_data) != 2:
             return LECTURA_DESCARTADA
 
         pointer_after = self.memory_reader.read(
@@ -121,7 +126,8 @@ class CombatService:
             4,
         )
 
-        if len(pointer_before) != 4:
+        # Ídem read(): None es posible, no solo longitud invalida.
+        if pointer_before is None or len(pointer_before) != 4:
             return LECTURA_DESCARTADA
 
         base_address = struct.unpack(
@@ -137,7 +143,7 @@ class CombatService:
             1,
         )
 
-        if len(flag_data) != 1:
+        if flag_data is None or len(flag_data) != 1:
             return LECTURA_DESCARTADA
 
         pointer_after = self.memory_reader.read(

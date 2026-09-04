@@ -348,6 +348,17 @@ class AzaharReader:
             1
         )
 
+        # Bug real (03/09/2026, confirmado con traceback real:
+        # TypeError al cambiar de juego con la app corriendo): la
+        # intención de este fallback ya estaba (ver comentario de
+        # abajo) pero la implementación solo contemplaba que
+        # count_byte viniera con la longitud equivocada -- no que
+        # self.memory.read() directamente devuelva None (pasa
+        # cuando el socket UDP falla de forma transitoria, típico
+        # al cerrar/cambiar de emulador). len(None) tira TypeError
+        # en vez de simplemente "no es válido", así que hacía
+        # falta el chequeo explícito de None antes.
+        #
         # Si por algún motivo transitorio esta lectura falla, no
         # hay forma segura de saber cuántos slots son reales --
         # se prefiere devolver los 6 punteros tal cual (mismo
@@ -355,7 +366,7 @@ class AzaharReader:
         # vaciar de más por una lectura perdida.
         party_count = (
             count_byte[0]
-            if len(count_byte) == 1
+            if count_byte is not None and len(count_byte) == 1
             else 6
         )
 
@@ -618,6 +629,71 @@ class AzaharReader:
 
         return party
 
+    def read_pokemon_raw_for_slot(self, slot):
+        """
+        Lee y descifra el Pokemon6 COMPLETO (no el dict de
+        build_pokemon_data()) del slot indicado (1-6) de la party
+        actual -- usado por la página Pokémon de la GUI (Bloque 3)
+        para pedirle al bridge PKHeX detalles que no forman parte
+        del ciclo realtime normal (tipos, habilidad, stats de
+        combate, naturaleza, movimientos): ningún overlay ni el
+        Dashboard los necesitan, así que golpear el bridge por
+        esto en cada ciclo de 200ms de Runtime.update() sería
+        innecesario -- se piden bajo demanda, solo cuando la
+        página Pokémon está abierta (ver
+        Api.get_pokemon_page_data() en app/gui_web/api.py).
+
+        Vuelve a leer memoria en el momento (no usa
+        _last_known_party) -- para esta página, sí importa que el
+        dato esté fresco (por ejemplo, un Pokémon que acaba de
+        subir de nivel). Devuelve None si el slot está vacío o la
+        lectura falla.
+
+        Bug real (03/09/2026, confirmado con traceback real del
+        usuario cambiando de juego): a diferencia de read_party()
+        (usado por Runtime, que solo llama a esto cuando ya sabe
+        que hay conexión activa), esta página lo pide bajo demanda
+        desde la GUI sin ese chequeo previo -- si el socket UDP se
+        resetea justo en ese momento (típico al cerrar un
+        emulador o cambiar de juego), read_party_order() deja
+        pasar la excepción sin capturarla, y como esto se llama
+        una vez POR CADA uno de los 6 slots, page_data() entero
+        fallaba y la página quedaba vacía. Se captura acá (no en
+        read_party_order() en sí, para no tocar código ya
+        estable que usa el Runtime) y se trata como una lectura
+        fallida más, igual que READ_FAILED.
+        """
+
+        try:
+            pointers = self.read_party_order()
+        except OSError as error:
+            print(
+                f"[AzaharReader] read_pokemon_raw_for_slot: "
+                f"lectura UDP fallida (conexion probablemente "
+                f"reiniciandose): {error}"
+            )
+            return None
+
+        if len(pointers) != 6 or not (1 <= slot <= 6):
+            return None
+
+        pointer = pointers[slot - 1]
+
+        try:
+            pokemon = self.read_pokemon(pointer)
+        except OSError as error:
+            print(
+                f"[AzaharReader] read_pokemon_raw_for_slot: "
+                f"lectura UDP fallida (conexion probablemente "
+                f"reiniciandose): {error}"
+            )
+            return None
+
+        if pokemon is READ_FAILED or pokemon is None:
+            return None
+
+        return pokemon
+
     def read_last_caught(self):
         """
         Lee LAST_CAUGHT_ADDRESS (ver pointers.py): la dirección fija
@@ -663,7 +739,11 @@ class AzaharReader:
             4
         )
 
-        if len(data) != 4:
+        # Mismo bug real que ya se encontró en read_party_order()
+        # (03/09/2026) y el mismo fix: self.memory.read() puede
+        # devolver None (no solo lanzar una excepción), y
+        # len(None) tira TypeError en vez de "no es válido".
+        if data is None or len(data) != 4:
             return None
 
         return struct.unpack(
@@ -699,7 +779,9 @@ class AzaharReader:
             1
         )
 
-        if len(data) != 1:
+        # Ídem read_total_caught_count()/read_party_order(): data
+        # puede ser None, no solo tener la longitud equivocada.
+        if data is None or len(data) != 1:
             return None
 
         return data[0]
@@ -754,10 +836,30 @@ class AzaharReader:
             * BOX_SLOT_STRIDE
         )
 
-        data = self.memory.read(
-            box_base_address,
-            window_size
-        )
+        # Bug real (03/09/2026, confirmado con traceback real del
+        # usuario: TimeoutError que tiró abajo el hilo entero del
+        # Runtime): esta lectura, a diferencia de las demás del
+        # ciclo realtime, no tenía ninguna protección contra un
+        # fallo transitorio del socket UDP (timeout/reset típico
+        # al cerrar o cambiar de emulador) -- read_box() se llama
+        # directo desde Runtime.update(), sin ningún try/except
+        # alrededor en ese nivel tampoco, así que la excepción
+        # mataba el thread de background completo (medallas,
+        # party, combate, Nuzlocke: todo dejaba de actualizarse en
+        # silencio hasta reiniciar la app entera). Se trata igual
+        # que cualquier otra lectura fallida: lista vacía por este
+        # ciclo, se reintenta solo en el próximo.
+        try:
+            data = self.memory.read(
+                box_base_address,
+                window_size
+            )
+        except OSError as error:
+            print(
+                f"[AzaharReader] read_box: lectura UDP fallida "
+                f"(conexion probablemente reiniciandose): {error}"
+            )
+            return []
 
         if not data:
             return []

@@ -21,10 +21,18 @@ class BadgesService:
             BADGES_SIZE,
         )
 
-        if len(data) != BADGES_SIZE:
+        # Bug real (04/09/2026, mismo patrón ya encontrado en
+        # azahar_reader.py): memory_reader.read() puede devolver
+        # None en un fallo transitorio de socket, no solo lanzar
+        # una excepción -- len(None) tira TypeError en vez de un
+        # RuntimeError claro. El try/except de _run_realtime_loop()
+        # (app.py) ya evita que esto tire abajo el hilo, pero el
+        # mensaje de error quedaba inútil ("NoneType has no len()")
+        # en vez de decir qué pasó realmente.
+        if data is None or len(data) != BADGES_SIZE:
             raise RuntimeError(
                 f"Expected {BADGES_SIZE} byte for badges, "
-                f"received {len(data)}."
+                f"received {data!r}."
             )
 
         return data[0]

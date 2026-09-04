@@ -246,6 +246,27 @@ class PKHeXBridge:
             }
         )
 
+    def pokemon_details(self, decrypted_box_data):
+        """
+        Resuelve tipos, habilidad, naturaleza, stats de combate y
+        movimientos a partir de los 232 bytes YA DESCIFRADOS de un
+        Pokémon -- misma fuente que met_location() (GUI v2,
+        Bloque 3, página Pokémon).
+        """
+
+        import base64
+
+        encoded_data = base64.b64encode(
+            decrypted_box_data
+        ).decode("ascii")
+
+        return self.request(
+            {
+                "action": "pokemon_details",
+                "data": encoded_data,
+            }
+        )
+
     def stop(self):
         """
         Detiene el proceso del bridge.

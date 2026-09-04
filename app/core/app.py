@@ -307,12 +307,36 @@ class Application:
         Ciclo realtime de DexRelay (Runtime.update() cada
         refresh_ms). Corre en su propio hilo -- ver nota en
         __init__ sobre el modelo de concurrencia elegido.
+
+        Bug real y grave (03/09/2026, confirmado con traceback
+        real: un TimeoutError sin capturar en read_box() mató el
+        hilo completo -- "Exception in thread DexRelayRuntime" en
+        la consola, y a partir de ahí TODO el ciclo realtime
+        (party, medallas, combate, caja PC, Nuzlocke) dejaba de
+        actualizarse en silencio, sin ningún aviso en la GUI, hasta
+        reiniciar la aplicación entera). Cada método de lectura
+        individual va ganando su propia protección contra fallos
+        transitorios de socket a medida que aparecen (ver
+        read_box()/read_pokemon_raw_for_slot() en azahar_reader.py
+        para el mismo criterio) -- pero además de eso, ACÁ, en la
+        raíz del hilo, se agrega una red de seguridad: async que
+        aparezca un método sin esa protección todavía (los propios
+        o alguno nuevo a futuro), el hilo ya no muere -- se
+        registra el error y se sigue con el próximo ciclo, ni
+        distinto de perder una sola lectura UDP.
         """
 
         next_update = time.monotonic()
 
         while self._runtime_active:
-            self.update()
+            try:
+                self.update()
+            except Exception as error:
+                print(
+                    f"[Application] Error no capturado durante "
+                    f"el ciclo realtime (se ignora este ciclo, "
+                    f"el Runtime sigue corriendo): {error}"
+                )
 
             next_update += self.refresh_seconds
             sleep_time = next_update - time.monotonic()

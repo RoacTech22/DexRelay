@@ -13,6 +13,21 @@ using PKHeX.Core;
 // en español, consistentes entre sí.
 GameInfo.CurrentLanguage = "es";
 
+// Bug real (03/09/2026): con Types (ver TypeKey() más abajo) y
+// ahora con los NOMBRES de movimiento, GameInfo.Strings seguía
+// devolviendo texto en inglés aunque CurrentLanguage ya estuviera
+// en "es" -- no está claro si el setter de CurrentLanguage no
+// termina de refrescar GameInfo.Strings en esta versión de
+// PKHeX.Core, o si directamente el diccionario "es" embebido
+// tiene huecos para esas listas puntuales. Se fuerza
+// explícitamente GameInfo.Strings a la versión en español vía
+// GetStrings() -- si el problema era lo primero, esto lo
+// resuelve solo; si es lo segundo (huecos reales en el
+// diccionario), esto no alcanza y hay que armar una tabla propia
+// como se hizo con hoenn_locations_es.py, pero recién ahí, no
+// antes de confirmar que esto no lo resuelve.
+GameInfo.Strings = GameInfo.GetStrings("es");
+
 while (true)
 {
     string? input = Console.ReadLine();
@@ -50,6 +65,10 @@ while (true)
 
             case "location_list":
                 HandleLocationList();
+                break;
+
+            case "pokemon_details":
+                HandlePokemonDetails(root);
                 break;
 
             default:
@@ -278,6 +297,224 @@ static void HandleMetLocation(JsonElement root)
         // que ocultarlo. pk.IsEgg es la misma propiedad de PKHeX
         // que ya usa el juego para decidir eso.
         isEgg = pk.IsEgg
+    };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+// GUI v2, Bloque 3 (03/09/2026) -- página Pokémon: tipos,
+// habilidad, naturaleza, stats de combate y movimientos. Reusa
+// EXACTAMENTE el mismo pipeline que HandleMetLocation() (los 232
+// bytes ya descifrados que ya manda azahar_reader.py) -- no hizo
+// falta investigar memoria nueva para nada de esto, PKHeX calcula
+// todo a partir de especie+nivel+IVs+EVs+naturaleza, igual que lo
+// haría el propio juego.
+static void HandlePokemonDetails(JsonElement root)
+{
+    string base64Data =
+        root.GetProperty("data").GetString()
+        ?? "";
+
+    byte[] data;
+
+    try
+    {
+        data = Convert.FromBase64String(base64Data);
+    }
+    catch (FormatException)
+    {
+        WriteError("El campo 'data' no es base64 válido.");
+        return;
+    }
+
+    // 232 = tamaño de la estructura PK6 "box format" descifrada
+    // (SLOT_DATA_SIZE en pointers.py) -- mismo chequeo que ya usa
+    // HandleMetLocation().
+    if (data.Length != 232)
+    {
+        WriteError(
+            $"Se esperaban 232 bytes descifrados, se "
+            + $"recibieron {data.Length}."
+        );
+
+        return;
+    }
+
+    PK6 pk;
+
+    try
+    {
+        pk = new PK6(data);
+    }
+    catch (Exception error)
+    {
+        WriteError(
+            $"No se pudo interpretar como PK6: {error.Message}"
+        );
+
+        return;
+    }
+
+    // Stats de combate reales (Ataque/Defensa/Ataque Esp/Defensa
+    // Esp/Velocidad). El formato "box" (232 bytes) que ya leemos
+    // de memoria NO las trae calculadas -- viven en la sección de
+    // datos de party que DexRelay lee aparte (STAT_DATA_OFFSET en
+    // pointers.py), pero en vez de sumar offsets nuevos ahí (y
+    // tener que investigarlos/validarlos con Cheat Engine), se le
+    // pide a PKHeX que las calcule con la misma fórmula del juego
+    // (especie + nivel + IVs + EVs + naturaleza) --
+    // ResetPartyStats() es el mismo método que usa PKHeX
+    // internamente al cargar un Pokémon a la party, así que el
+    // resultado es idéntico al que muestra el juego.
+    pk.ResetPartyStats();
+
+    PersonalInfo personal = pk.PersonalInfo;
+
+    string TypeName(int typeId) =>
+        (typeId >= 0 && typeId < GameInfo.Strings.Types.Count)
+            ? GameInfo.Strings.Types[typeId]
+            : "";
+
+    // Clave de tipo ESTABLE para que el frontend elija color/ícono
+    // -- bug real (03/09/2026): primero se probó matchear por el
+    // nombre localizado en español (GameInfo.Strings.Types), pero
+    // esa localización no es confiable (solo "Normal" coincidía).
+    // Después se probó una tabla de IDs numéricos armada a mano
+    // (0=Normal, 1=Lucha, ...) -- pero varios tipos seguían
+    // saliendo con el color/ícono de otro tipo, señal de que esa
+    // tabla tampoco era 100% correcta. Solución definitiva: usar
+    // el nombre del propio enum MoveType de PKHeX (ToString()) --
+    // es SIEMPRE en inglés (Water, Fire, Electric...), fijo por
+    // definición del enum, no depende de ningún idioma ni de
+    // ninguna tabla escrita a mano acá. Se usa el mismo enum para
+    // tipos de especie Y de movimiento -- es el mismo concepto de
+    // "tipo" en todo PKHeX (así se comparan para calcular STAB).
+    //
+    // Bug real de compilación/runtime (03/09/2026): MoveType tiene
+    // tipo base `sbyte`, no `int` -- Enum.IsDefined exige que el
+    // valor que se le pasa sea EXACTAMENTE del tipo base del enum
+    // (o un string), si no tira
+    // "Enum underlying type and the object must be same type".
+    // Por eso se castea explícitamente a sbyte antes de preguntar.
+    string TypeKey(int typeId)
+    {
+        sbyte value = (sbyte)typeId;
+
+        return Enum.IsDefined(typeof(MoveType), value)
+            ? ((MoveType)value).ToString()
+            : "";
+    }
+
+    int type1 = personal.Type1;
+    int type2 = personal.Type2;
+
+    string abilityName =
+        (pk.Ability >= 0 && pk.Ability < GameInfo.Strings.Ability.Count)
+            ? GameInfo.Strings.Ability[pk.Ability]
+            : "";
+
+    // Naturaleza -- qué stat sube y cuál baja. Fórmula clásica
+    // (Gen 3 en adelante, sin cambios hasta hoy): con el índice
+    // 0-24 de Nature, subida = índice/5, bajada = índice%5, en
+    // el orden [Ataque, Defensa, Velocidad, Ataque Esp, Defensa
+    // Esp]. Las 5 naturalezas "neutras" (Hardy/Docile/Serious/
+    // Bashful/Quirky, índices múltiplos de 6: 0,6,12,18,24) no
+    // suben ni bajan nada -- se detecta con subida==bajada, no
+    // con una lista aparte de naturalezas neutras.
+    //
+    // A diferencia del resto del bridge (que son propiedades de
+    // PKHeX leídas tal cual), esto es una fórmula escrita a mano
+    // acá -- verificar la primera vez que se pruebe en vivo
+    // contra la pantalla de resumen del juego (el stat que sube
+    // sale en rojo, el que baja en azul).
+    int natureId = (int)pk.Nature;
+
+    string[] natureStatOrder =
+    {
+        "Ataque",
+        "Defensa",
+        "Velocidad",
+        "AtaqueEsp",
+        "DefensaEsp",
+    };
+
+    int increasedIndex = natureId / 5;
+    int decreasedIndex = natureId % 5;
+    bool neutralNature = increasedIndex == decreasedIndex;
+
+    string natureName =
+        (natureId >= 0 && natureId < GameInfo.Strings.Natures.Count)
+            ? GameInfo.Strings.Natures[natureId]
+            : "";
+
+    var moves = new List<object>();
+    ushort[] moveIds = { pk.Move1, pk.Move2, pk.Move3, pk.Move4 };
+
+    foreach (ushort moveId in moveIds)
+    {
+        // Slot de movimiento vacío (Pokémon con menos de 4
+        // movimientos aprendidos) -- se omite, no se manda un
+        // movimiento "vacío" al frontend.
+        if (moveId == 0)
+        {
+            continue;
+        }
+
+        string moveName =
+            (moveId < GameInfo.Strings.Move.Count)
+                ? GameInfo.Strings.Move[moveId]
+                : "";
+
+        byte moveTypeId = MoveInfo.GetType(moveId, pk.Context);
+
+        moves.Add(new
+        {
+            id = moveId,
+            name = moveName,
+            typeKey = TypeKey(moveTypeId),
+            type = TypeName(moveTypeId),
+        });
+    }
+
+    var response = new
+    {
+        // 0=macho, 1=hembra, 2=sin sexo -- el frontend decide el
+        // ícono, acá no se manda ningún ícono ni texto ya armado.
+        genderId = pk.Gender,
+        // Clave de tipo estable (nombre del enum en inglés, ver
+        // TypeKey() arriba) -- el frontend colorea/elige el ícono
+        // por acá, no por el nombre en español.
+        type1Key = TypeKey(type1),
+        type1 = TypeName(type1),
+        // Muchas especies no tienen segundo tipo -- PKHeX repite
+        // Type1 en Type2 para esos casos en vez de dejarlo en un
+        // valor "ninguno", así que hay que compararlos para saber
+        // si hay que mostrar la segunda insignia o no.
+        type2Key = type1 != type2 ? TypeKey(type2) : "",
+        type2 = type1 != type2 ? TypeName(type2) : "",
+        // Se manda el ID además del nombre -- pensado para cuando
+        // se conecte una fuente externa de descripciones de
+        // habilidad (pendiente, a decidir más adelante), sin tener
+        // que volver a tocar el bridge para agregar el ID en ese
+        // momento.
+        abilityId = pk.Ability,
+        abilityName,
+        natureId,
+        natureName,
+        natureIncreasedStat = neutralNature ? "" : natureStatOrder[increasedIndex],
+        natureDecreasedStat = neutralNature ? "" : natureStatOrder[decreasedIndex],
+        stats = new
+        {
+            attack = pk.Stat_ATK,
+            defense = pk.Stat_DEF,
+            spAttack = pk.Stat_SPA,
+            spDefense = pk.Stat_SPD,
+            speed = pk.Stat_SPE,
+        },
+        moves,
     };
 
     Console.WriteLine(
