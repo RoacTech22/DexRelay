@@ -105,6 +105,17 @@ class LocationResolver:
             "eggLocation": "",
             "shiny": False,
             "isEgg": False,
+            # Bug real corregido (05/09/2026) -- ver
+            # build_pokemon_data() en azahar_reader.py: se usa
+            # como respaldo cuando la lectura directa de memoria
+            # da nivel 0 (capturas que van directo a la Caja PC).
+            "level": 0,
+            # Ícono de género en el Nuzlocke Tracker (05/09/2026,
+            # a pedido del usuario) -- None = no se pudo resolver
+            # (bridge caído), 0 = macho, 1 = hembra, 2 = sin
+            # género. Mismo valor que ya expone
+            # PokemonDetailResolver para la página Pokémon.
+            "genderId": None,
         }
 
         if not nickname:
@@ -182,6 +193,11 @@ class LocationResolver:
                     False,
                 )
             ),
+            # Bug real corregido (05/09/2026) -- ver
+            # build_pokemon_data() en azahar_reader.py.
+            "level": result.get("level", 0),
+            # Ícono de género en el Nuzlocke Tracker (05/09/2026).
+            "genderId": result.get("genderId"),
         }
 
         # Se cachea si CUALQUIERA de los dos lugares quedó resuelto

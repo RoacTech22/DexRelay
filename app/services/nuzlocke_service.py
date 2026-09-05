@@ -107,7 +107,16 @@ class NuzlockeService:
         nada fuera del Nuzlocke Tracker.
 
         Devuelve el estado vacío recién guardado.
+
+        El ruleset (04/09/2026, ver get_ruleset()/save_ruleset())
+        NO se borra acá a propósito -- son las reglas de la casa
+        que el jugador eligió para este Nuzlocke, no datos de la
+        partida en sí. "Reiniciar todo" vuelve a empezar el
+        registro de capturas/muertes/rutas, no te hace elegir de
+        nuevo si jugás con dupes clause o no.
         """
+
+        previous_ruleset = self.get_ruleset()
 
         self._data = {
             "roster": [],
@@ -118,6 +127,7 @@ class NuzlockeService:
             "traded_away": [],
             "ignored_nicknames": [],
             "fossil_pending_species_ids": [],
+            "ruleset": previous_ruleset,
         }
 
         self._last_visible_nicknames = None
@@ -377,6 +387,10 @@ class NuzlockeService:
             "species": pokemon.get("species"),
             "level": pokemon.get("level"),
             "caughtAt": _now_iso(),
+            # Ícono de género en la GUI (05/09/2026, a pedido del
+            # usuario) -- ver azahar_reader.py:build_pokemon_data()
+            # sobre de dónde sale.
+            "genderId": pokemon.get("genderId"),
         }
 
         roster.append(entry)
@@ -870,6 +884,8 @@ class NuzlockeService:
                     "species": species,
                     "level": level,
                     "diedAt": _now_iso(),
+                    # Ícono de género en la GUI (05/09/2026).
+                    "genderId": entry.get("genderId"),
                 })
 
                 graveyard_nicknames.add(nickname)
@@ -1390,6 +1406,8 @@ class NuzlockeService:
             "metLocation": met_location,
             "eggLocation": egg_location,
             "caughtAt": caught_at,
+            # Ícono de género en la GUI (05/09/2026).
+            "genderId": pokemon.get("genderId"),
         })
 
     # =====================================
@@ -2079,3 +2097,77 @@ class NuzlockeService:
         self.storage.save(self._data)
 
         return encounters
+
+    # =====================================
+    # REGLAS DEL RUN (RULESET)
+    #
+    # Lista editable de reglas de la casa (dupes clause, muerte
+    # permanente, etc. -- ver DEFAULT_RULESET en
+    # nuzlocke_storage.py), GUI v2 página Nuzlocke (04/09/2026).
+    # Persiste junto al resto del run, pero conceptualmente es
+    # independiente de roster/graveyard/encounters -- no se borra
+    # con reset_all() (ver su docstring).
+    # =====================================
+
+    def get_ruleset(self) -> list[dict]:
+        """
+        Devuelve la lista actual de reglas
+        ({id, label, enabled}). Si el archivo es de antes de que
+        existiera esto, NuzlockeStorage.load() ya la completa con
+        DEFAULT_RULESET -- acá no hace falta un default aparte.
+        """
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        self._data.setdefault("ruleset", [])
+
+        return self._data["ruleset"]
+
+    def save_ruleset(self, ruleset: list[dict]) -> list[dict]:
+        """
+        Reemplaza la lista completa de reglas -- la GUI manda
+        siempre la lista entera (agregar/quitar/tildar todo se
+        resuelve del lado del frontend sobre una copia, y esto solo
+        persiste el resultado final), más simple que tener un
+        método aparte por cada tipo de edición.
+
+        Validación mínima: cada regla necesita "id" y "label" no
+        vacíos -- "enabled" se normaliza a bool, con default
+        `True` si no viene (una regla recién agregada por el
+        usuario nace activa).
+        """
+
+        cleaned: list[dict] = []
+        seen_ids: set[str] = set()
+
+        for rule in ruleset:
+            rule_id = str(rule.get("id") or "").strip()
+            label = str(rule.get("label") or "").strip()
+
+            if not rule_id or not label:
+                raise ValueError(
+                    "Cada regla necesita 'id' y 'label'."
+                )
+
+            if rule_id in seen_ids:
+                raise ValueError(
+                    f"Id de regla duplicado: {rule_id!r}."
+                )
+
+            seen_ids.add(rule_id)
+
+            cleaned.append({
+                "id": rule_id,
+                "label": label,
+                "enabled": bool(rule.get("enabled", True)),
+            })
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        self._data["ruleset"] = cleaned
+
+        self.storage.save(self._data)
+
+        return cleaned

@@ -504,6 +504,7 @@ class AzaharReader:
                 "metLocationId": 0,
                 "eggLocation": "",
                 "isEgg": False,
+                "genderId": None,
             }
 
         species_id = (
@@ -538,7 +539,18 @@ class AzaharReader:
             "nickname": nickname,
             "species": species,
             "speciesId": species_id,
-            "level": pokemon.level(),
+            # Bug real corregido (05/09/2026, reportado por el
+            # usuario): pokemon.level() lee un offset que solo
+            # existe en el bloque extra de stats que agrega
+            # read_pokemon() para la party -- read_box() no lo
+            # tiene (ver su docstring), así que para una captura
+            # que va directo a la Caja PC pokemon.level() siempre
+            # da 0. location_info["level"] (PKHeX, calculado a
+            # partir de la experiencia -- ver HandleMetLocation()
+            # en Program.cs) sirve de respaldo SOLO cuando la
+            # lectura directa da 0; en una lectura de party normal
+            # (que sí tiene el nivel real) esto no cambia nada.
+            "level": pokemon.level() or location_info.get("level", 0),
             "hp": pokemon.hp(),
             "maxHp": pokemon.max_hp(),
             "shiny": location_info["shiny"],
@@ -556,6 +568,12 @@ class AzaharReader:
             # vez de la especie real de un huevo sin nacer todavía
             # (spoiler) -- ver LocationResolver.resolve().
             "isEgg": location_info["isEgg"],
+            # Ícono de género en el Nuzlocke Tracker (05/09/2026, a
+            # pedido del usuario) -- mismo campo que location_info
+            # ya trae de PKHeX (sin golpear el bridge de nuevo), se
+            # propaga para que _register_new_capture() lo guarde
+            # en roster/graveyard/pending_encounters.
+            "genderId": location_info.get("genderId"),
         }
 
     def read_party(self):

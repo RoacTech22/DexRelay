@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
@@ -21,6 +22,47 @@ _GAME_STORAGE_SLUGS = {
     PROCESS_NAME_ALPHA_SAPPHIRE: "alpha_sapphire",
     PROCESS_NAME_OMEGA_RUBY: "omega_ruby",
 }
+
+
+# Reglas por defecto de una partida Nuzlocke nueva (GUI v2, página
+# Nuzlocke, 04/09/2026) -- editable de verdad desde la GUI
+# (agregar/quitar/tildar, ver NuzlockeService.save_ruleset()), esto
+# es solo el punto de partida la primera vez que se lee el archivo.
+# Los `id` son fijos para las reglas de este set inicial -- una
+# regla agregada a mano por el usuario después lleva un id nuevo
+# (ver Api.nuzlocke_add_ruleset_rule() en app/gui_web/api.py).
+DEFAULT_RULESET = [
+    {
+        "id": "primer_encuentro",
+        "label": "Solo el primer encuentro por ruta",
+        "enabled": True,
+    },
+    {
+        "id": "muerte_permanente",
+        "label": "Muerte permanente",
+        "enabled": True,
+    },
+    {
+        "id": "objetos_encontrados",
+        "label": "Solo objetos de curación encontrados",
+        "enabled": True,
+    },
+    {
+        "id": "nivel_maximo_lider",
+        "label": "Nivel máximo según siguiente líder",
+        "enabled": True,
+    },
+    {
+        "id": "sin_tradeos",
+        "label": "Sin tradeos",
+        "enabled": True,
+    },
+    {
+        "id": "sin_legendarios",
+        "label": "Sin legendarios (opcional)",
+        "enabled": True,
+    },
+]
 
 
 class NuzlockeStorage:
@@ -99,6 +141,13 @@ class NuzlockeStorage:
                 "encounters": [],
                 "pending_encounters": [],
                 "starter_assigned": False,
+                # copy.deepcopy -- setdefault() más abajo hace lo
+                # mismo para el caso "el archivo existe pero es de
+                # antes de que existiera ruleset". Sin la copia,
+                # todas las partidas nuevas compartirían la MISMA
+                # lista en memoria y tildar una regla en una
+                # afectaría a la otra.
+                "ruleset": copy.deepcopy(DEFAULT_RULESET),
             }
 
         with self.path.open(
@@ -112,6 +161,7 @@ class NuzlockeStorage:
         data.setdefault("encounters", [])
         data.setdefault("pending_encounters", [])
         data.setdefault("starter_assigned", False)
+        data.setdefault("ruleset", copy.deepcopy(DEFAULT_RULESET))
 
         return data
 

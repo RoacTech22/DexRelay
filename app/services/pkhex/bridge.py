@@ -267,6 +267,25 @@ class PKHeXBridge:
             }
         )
 
+    def save_info(self, save_file_path):
+        """
+        Tiempo de juego real (GUI v2, página Nuzlocke, 04/09/2026):
+        a diferencia de species()/met_location()/pokemon_details(),
+        acá no se manda ningún byte -- se manda la RUTA del archivo
+        de guardado (ya resuelta por
+        app/services/save_file_locator.py) y el bridge lo lee
+        directo del disco, porque es la misma máquina. Devuelve
+        {"ok": True, "playedHours": ..., "playedMinutes": ...,
+        "playedSeconds": ...}.
+        """
+
+        return self.request(
+            {
+                "action": "save_info",
+                "path": str(save_file_path),
+            }
+        )
+
     def stop(self):
         """
         Detiene el proceso del bridge.
