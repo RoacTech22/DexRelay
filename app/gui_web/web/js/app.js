@@ -25,9 +25,20 @@
   // Dashboard que corre siempre.
   var POKEMON_POLL_MS = 2000;
 
+  // Página Nuzlocke (GUI v2, 04/09/2026) -- mismo criterio que la
+  // página Pokémon: poll propio, más lento que el Dashboard, y
+  // solo mientras la página está realmente abierta. No golpea el
+  // bridge PKHeX directo (get_nuzlocke_page_data() lee
+  // state.nuzlocke ya calculado por Runtime), pero sí golpea el
+  // archivo de guardado en disco para el tiempo de juego
+  // (PlaytimeService ya cachea por mtime, así que esto es barato
+  // aunque se repita cada 2s).
+  var NUZLOCKE_POLL_MS = 2000;
+
   var waitingPollTimer = null;
   var mainPollTimer = null;
   var pokemonPollTimer = null;
+  var nuzlockePollTimer = null;
   var connectedSince = null;
   var uptimeTimer = null;
 
@@ -257,6 +268,7 @@
     showView("view-main");
     initSidebarNav();
     initDashboardActions();
+    initNuzlockeActions();
     startMainPoll();
   }
 
@@ -292,6 +304,12 @@
     } else {
       stopPokemonPoll();
     }
+
+    if (page === "nuzlocke") {
+      startNuzlockePoll();
+    } else {
+      stopNuzlockePoll();
+    }
   }
 
   function startPokemonPoll() {
@@ -311,6 +329,36 @@
     api()
       .get_pokemon_page_data()
       .then(renderPokemonPage);
+  }
+
+  function startNuzlockePoll() {
+    stopNuzlockePoll();
+    pollNuzlockePage();
+    nuzlockePollTimer = setInterval(pollNuzlockePage, NUZLOCKE_POLL_MS);
+
+    // Carga el catálogo de ubicaciones ya al abrir la página (no
+    // recién cuando se abre el modal de "Nuevo encuentro") para
+    // que el orden de historia esté listo lo antes posible --
+    // vuelve a pintar la tabla apenas termina de cargar, en vez de
+    // esperar al próximo poll de 2s para que se vea ordenada.
+    ensureNuzlockeCatalogs(function () {
+      if (lastNuzlockeData) {
+        renderNuzlockeEncounters(lastNuzlockeData.encounters || []);
+      }
+    });
+  }
+
+  function stopNuzlockePoll() {
+    if (nuzlockePollTimer) {
+      clearInterval(nuzlockePollTimer);
+      nuzlockePollTimer = null;
+    }
+  }
+
+  function pollNuzlockePage() {
+    api()
+      .get_nuzlocke_page_data()
+      .then(renderNuzlockePage);
   }
 
   function startMainPoll() {
@@ -624,7 +672,7 @@
 
         el.innerHTML =
           '<img src="' + spriteUrl + '" alt="' + (slot.species || "") + '" />' +
-          '<span class="dash-team-level">Nv. ' + slot.level + "</span>" +
+          '<span class="dash-team-level">Nv. ' + slot.level + genderIconHtml(slot.genderId) + "</span>" +
           (slot.shiny ? SHINY_BADGE_ICON : "");
 
         totalHp += slot.hp || 0;
@@ -752,6 +800,23 @@
   var MALE_ICON_SVG = '<svg viewBox="0 0 215.1 216.4" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M169.77,28.89l-33.23,33.23c-33.49-24.9-81.12-22.16-111.5,8.22-33.39,33.39-33.39,87.62,0,121.01,33.39,33.39,87.62,33.39,121.01,0,30.38-30.38,33.12-78,8.22-111.5l32.33-32.33c1.26-1.26,3.41-.37,3.41,1.41v24.83c0,2.21,1.79,4,4,4h17.08c2.21,0,4-1.79,4-4V4C215.1,1.78,213.29-.02,211.07,0l-69.99.65c-2.21.02-3.98,1.83-3.96,4.04l.16,17.08c.02,2.21,1.83,3.98,4.04,3.96l27.03-.25c1.79-.02,2.7,2.15,1.43,3.41ZM42.78,173.62c-23.61-23.61-23.61-61.94,0-85.54,23.61-23.61,61.94-23.61,85.54,0,23.61,23.61,23.61,61.93,0,85.54-23.61,23.61-61.94,23.61-85.54,0"/></svg>';
   var FEMALE_ICON_SVG = '<svg viewBox="0 0 169.6 249.65" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M72.37,168.69v22.29h-29.81c-2.21,0-4,1.79-4,4v16.86c0,2.21,1.79,4,4,4h29.81v29.81c0,2.21,1.79,4,4,4h16.85c2.21,0,4-1.79,4-4v-29.81h29.81c2.21,0,4-1.79,4-4v-16.86c0-2.21-1.79-4-4-4h-29.81v-22.29c41.25-6.07,72.88-41.89,72.37-84.93C169.06,39.34,133.75,2.47,89.39.12,40.51-2.46,0,36.47,0,84.8c0,42.58,31.45,77.87,72.37,83.89ZM84.8,24.85c34.03,0,61.48,28.42,59.88,62.8-1.43,30.7-26.35,55.6-57.04,57.02-34.37,1.59-62.78-25.85-62.78-59.88s26.86-59.94,59.94-59.94"/></svg>';
 
+  // Ícono de género reutilizable (05/09/2026, a pedido del
+  // usuario: "al lado del nombre de especie" en TODA la app, no
+  // solo en la página Pokémon donde ya existía). genderId: 0 =
+  // macho, 1 = hembra, 2 = sin género, null/undefined = no
+  // resuelto (bridge caído o dato viejo sin este campo) -- en
+  // estos dos últimos casos no se muestra nada, en vez de un
+  // ícono roto o "sin género" por defecto.
+  function genderIconHtml(genderId) {
+    if (genderId === 0) {
+      return '<span class="gender-icon-inline male">' + MALE_ICON_SVG + "</span>";
+    }
+    if (genderId === 1) {
+      return '<span class="gender-icon-inline female">' + FEMALE_ICON_SVG + "</span>";
+    }
+    return "";
+  }
+
   // Orden y claves tal como las devuelve
   // pokemon_detail_resolver.py (natureIncreasedStat/
   // natureDecreasedStat) -- deben coincidir exactamente con
@@ -779,6 +844,15 @@
   // (.pokemon-stat-icon), un tono vivo DISTINTO por stat a pedido del
   // usuario, no el mismo color para todos.
   var STAT_ROWS = [
+    // Bug real corregido (05/09/2026, reportado por el usuario):
+    // el comentario de renderPokemonPage ya decía "Hp va incluido
+    // en STAT_ROWS", pero la fila nunca se había agregado acá --
+    // el manejo especial de abajo (stat.key === "hp", que lee
+    // slot.hp/maxHp en vez de details.stats) estaba listo desde
+    // antes y simplemente no tenía ninguna fila que lo disparara.
+    // Mismo ícono de corazón que ya usa el Dashboard para "HP
+    // total" (index.html), para no inventar un ícono nuevo.
+    { key: "hp", label: "Hp", natureKey: null, color: "#ff5c7a", iconViewBox: "0 0 255.84 224.93", icon: "<path fill=\"currentColor\" d=\"M235.18,20.88C221.78,7.48,204.05.16,185.12.16s-36.72,7.38-50.12,20.77l-7,7-7.11-7.11C107.5,7.43,89.66,0,70.73,0S34.06,7.38,20.72,20.72C7.32,34.12-.05,51.91,0,70.84,0,89.76,7.43,107.5,20.83,120.9l101.86,101.86c1.41,1.41,3.31,2.17,5.15,2.17s3.74-.71,5.15-2.12l102.08-101.7c13.4-13.4,20.77-31.19,20.77-50.12.05-18.93-7.27-36.72-20.66-50.12Z\"/>" },
     { key: "attack", label: "Atq", natureKey: "Ataque", color: "#ff5252", iconViewBox: "0 0 207.12 207.12", icon: "<path fill=\"currentColor\" d=\"M198.2.56l-43.64,5.42c-2.67.33-4.95.44-7.02,2.41l-72.44,99.59,8.27,8.18,77.02-77.02c2.45-2.46,5.97-2.09,7.97.31,1.97,2.36,1.77,5.54-.99,7.88l-76.41,76.41,8.18,8.27,99.59-72.44c1.97-2.07,2.08-4.35,2.41-7.02l5.42-43.64c.6-4.84-3.51-8.96-8.35-8.35Z\"/><path fill=\"currentColor\" d=\"M25.31,159.53c11.25,2.72,19.51,11.06,22.29,22.24l15.53-15.47-22.31-22.31-15.51,15.54Z\"/><path fill=\"currentColor\" d=\"M23.83,170.28c-6.38-1.73-13.2.08-17.89,4.75-7.23,7.2-7.26,18.9-.06,26.14,7.19,7.24,18.89,7.28,26.14.09,4.69-4.66,6.55-11.46,4.86-17.86-1.69-6.39-6.66-11.4-13.05-13.12Z\"/><path fill=\"currentColor\" d=\"M120.08,149.96c-1.5,1.43-3.43,2.59-5.32,3.17-4.89,1.5-9.61-.06-13.27-3.33-.97-.87-1.58-1.72-2.5-2.64l-24.06-24.15-16.87-16.71c-3.83-3.79-5.71-8.6-4.04-14.09.53-1.76,1.78-3.73,3.13-5.16,3.23-3.41,3.16-8.12-.2-11.11-3.38-3.01-8.07-2.31-11.01,1.26-1.09,1.32-2.05,2.24-3.01,3.79-6.07,9.84-6.03,22.84,1.39,32.24l12.21,12.52,1.16,1.6-9.3,9.07,22.31,22.31,8.63-8.99c.69-.24,1.1-.06,1.79.62l13.01,12.63c9.02,6.96,21.35,7.24,30.88,1.86,1.99-1.13,3.28-2.24,4.93-3.66,3.5-3,4.28-7.61,1.24-11.03-2.97-3.34-7.7-3.43-11.1-.19Z\"/>" },
     { key: "spAttack", label: "Atq. Esp", natureKey: "AtaqueEsp", color: "#ab47bc", iconViewBox: "0 0 195.83 195.38", icon: "<path fill=\"currentColor\" d=\"M34.73,175.67c-14.35,13.63-24.59,23.49-31.65,18.31-3.41-2.5-4.52-9.6-.56-13.69,9.48-9.78,18.15-19.23,27.57-29.15l35.64-37.54,26.2-42.15,30.52-22.73c8.49-6.32,3.72-20.71,6.96-29.71L147.66,0l47,.91,1.17,47.97c-17.03,10.66-35.46,17.55-54.81,23.69-23.51,7.46-33.82,41.16-68.7,67.4l-37.58,35.69ZM178.75,36.15l-.35-18.92c-7.06-.56-12.31-.64-19.29.03-.19,8.46-2.08,13.87-3.64,22.59l23.27-3.7Z\"/>" },
     { key: "defense", label: "Def", natureKey: "Defensa", color: "#42a5f5", iconViewBox: "0 0 192.93 225.8", icon: "<path fill=\"currentColor\" d=\"M99.1,225.3h-6.14c-7.06-.87-13.72-3.27-19.98-7.22C33.09,194.8,3.41,152.88.5,105.33l.02-69.88c.64-3.21,2.39-4.56,5.2-5.88L91.02,1.13c3.34-.87,7.72-.83,11.05.04l85.15,28.41c2.9,1.33,4.56,2.7,5.21,5.98l-.02,69.85c-2.33,42.62-26.13,80.27-59.94,104.19-9.81,6.94-21.36,14.1-33.37,15.7ZM162.17,57.28c0-2.35-2.17-4.65-3.79-5.2l-19.36-6.59-12.23-4.07-30.33-9.64.02,162.12c5.89-1.02,10.13-3.7,14.86-6.42,18.01-11.84,32.66-28.4,41.6-48.17,5.39-11.93,9.03-24.29,9.07-37.39l.15-44.63Z\"/>" },
@@ -1049,6 +1123,845 @@
 
       container.appendChild(item);
     });
+  }
+
+  // ===================== PÁGINA NUZLOCKE (04/09/2026) =====================
+
+  // Mismas etiquetas/estados que panels/nuzlocke/app.js
+  // (NuzlockeService.VALID_ENCOUNTER_STATUSES/VALID_ORIGINS en el
+  // backend) -- se repiten acá porque esta página vive en un
+  // documento HTML separado del panel, no porque el significado
+  // haya cambiado.
+  var NZ_STATUS_LABELS = {
+    sin_intentar: "Sin Capturar",
+    capturado: "Capturado",
+    perdido: "Perdido",
+    muerto: "Muerto",
+    especial: "Especial",
+  };
+
+  var NZ_ORIGIN_LABELS = {
+    shiny: "Shiny",
+    huevo: "Huevo",
+    intercambio: "Intercambio",
+    evento: "Evento",
+    regalo: "Regalo",
+    fosil: "Fósil",
+    captura_extra: "Captura Extra",
+  };
+
+  // Ícono de tacho para el borrado directo de una fila de la
+  // tabla de encuentros (05/09/2026) -- mismo SVG que ya se usa en
+  // el botón "Eliminar ruta" (index.html), repetido acá porque
+  // esta fila se arma dinámicamente en JS.
+  var NZ_TRASH_ICON_SVG =
+    '<svg viewBox="0 0 197.55 224.53" xmlns="http://www.w3.org/2000/svg"><g>' +
+    '<path fill="currentColor" d="M196.1,38.57c-2.28-5.7-8.17-11.56-15.47-12.05l-35.76-.36-.18-9.41C143.26,7.53,135.31.09,126.56.08L71.23,0c-8.81-.01-16.89,7.4-18.36,16.73l-.18,9.42-35.76.36c-7.19.07-13,6.19-15.34,11.74-4.45,10.58.79,22.81,12.15,26.53-.4,1.94.17,3.59.3,5.29l.42,5.29.43,5.71.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.43,5.71.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.44,5.26.43,5.27.42,5.25.49,5.24c-.2,9.7,5.07,18.35,14.48,21.22.68.21,1.47.16,1.83.76h114.94c.36-.6,1.15-.55,1.83-.76,9.42-2.87,14.68-11.52,14.48-21.22l.49-5.24.42-5.25.43-5.27.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.43-5.71.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.44-5.26.43-5.71.42-5.29c.13-1.7.69-3.35.3-5.3,11.23-3.68,16.5-15.67,12.28-26.22ZM65.98,19.25c.03-2.99,2.75-6.09,6.2-6.09h53.2c3.45,0,6.17,3.1,6.2,6.09l.05,6.99h-65.71s.06-6.99.06-6.99ZM169.93,71.84l-.42,5.28-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.43,5.71-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.44,5.26-.43,5.71-.45,5.25c-.29,3.44-.37,7.18-1.04,10.12.51,3.9-1.92,6.64-6.11,7.45l-107.67-.08c-4.1,0-6.87-3.8-6.29-7.24-.68-3.1-.76-6.85-1.05-10.24l-.45-5.25-.43-5.71-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.43-5.71-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.44-5.26-.42-5.27c-.16-2.02-.74-4-.23-6.13h142.78c.51,2.12-.07,4.1-.23,6.12ZM178.16,52.57l-158.59-.05c-3.63,0-6.13-3.38-6.22-6.36-.09-3.08,2.46-6.7,6.22-6.7h158.42c3.61,0,6.14,3.45,6.21,6.3.08,3.42-2.19,6.07-6.04,6.82Z"/>' +
+    '<path fill="currentColor" d="M72.14,184.62l-.45-7.44-.43-7.46-.44-7.01-.44-7.02-.44-7.02-.44-7.02-.44-7.02-.44-7.02-.43-7.46-.44-7.01-.44-7.02-.44-7.02-.44-7.02-.44-7.08c-.25-4.07-3.85-6.73-7.77-6.13-3.81.58-5.88,3.95-5.59,7.92l.41,5.7.46,7.43.43,7.46.44,7.01.44,7.02.44,7.02.44,7.02.44,7.02.44,7.02.43,7.46.44,7.01.44,7.02.44,7.02.44,7.02.44,7.08c.25,4.07,3.85,6.73,7.77,6.13,3.82-.59,5.94-3.92,5.61-8.11l-.43-5.49Z"/>' +
+    '<path fill="currentColor" d="M138.93,78.81c-3.73-.37-7.11,2.24-7.36,6.19l-.44,7.07-.44,7.02-.44,7.02-.44,7.02-.44,7.01-.43,7.46-.44,7.02-.44,7.02-.44,7.02-.44,7.02-.44,7.02-.44,7.01-.44,7.46-.46,7.43-.41,5.69c-.3,4.12,1.97,7.58,6,7.97,3.74.36,7.16-2.2,7.4-6.37l.39-6.88.45-7.03.44-7.02.44-7.02.44-7.01.43-7.46.44-7.02.44-7.02.44-7.02.44-7.02.44-7.02.44-7.01.44-7.46.46-7.43.41-5.69c.3-4.13-1.97-7.57-6.01-7.97Z"/>' +
+    '<path fill="currentColor" d="M98.56,78.79c-2.56.08-6.31,2.06-6.31,5.42v108.66c0,3.49,3.99,5.52,6.73,5.41,2.61-.1,6.33-1.99,6.33-5.62l-.02-108.45c0-3.5-3.97-5.51-6.73-5.42Z"/>' +
+    "</g></svg>";
+
+  var nuzlockeActionsInitialized = false;
+
+  // Catálogos completos de especie/ubicación -- se piden UNA sola
+  // vez (son ~700/~90 entradas, no tiene sentido pedirlos en cada
+  // poll de 2s) y quedan en memoria mientras dure la sesión de la
+  // GUI. Se usan para: 1) el <datalist> de los modales de
+  // encuentro, 2) resolver el sprite de una fila "perdido" (que no
+  // tiene un Pokémon real capturado del que sacar el speciesId).
+  var nuzlockeSpeciesCatalog = null;
+  var nuzlockeLocationCatalog = null;
+  var nuzlockeSpeciesIdByLowerName = {};
+  var nuzlockeCatalogsLoading = false;
+
+  // Ruta/nombre (en minúsculas) -> posición en la lista ya
+  // ordenada por progresión de historia que devuelve
+  // get_location_catalog() (05/09/2026, a pedido del usuario: la
+  // tabla de "Encuentros por Ruta" debe seguir ese mismo orden,
+  // no el orden en que se registraron los encuentros). `null`
+  // hasta que el catálogo termine de cargar la primera vez.
+  var nuzlockeLocationOrderMap = null;
+
+  // Estado de la fila que se está editando en el modal de
+  // encuentro -- ELIMINADO (05/09/2026): ya no hay edición de
+  // filas existentes, el modal solo crea ("Nuevo encuentro") y
+  // cada fila se borra directo con su propio ícono de tacho (ver
+  // deleteEncounterRow()).
+
+  // Mapa nickname -> {speciesId, level} de roster+graveyard, para
+  // que la tabla de encuentros pueda mostrar sprite y nivel sin
+  // tener que volver a pedir nada -- ver renderNuzlockePage().
+  var nuzlockeRosterByNickname = {};
+
+  // Copia de trabajo del ruleset mientras el modal de edición está
+  // abierto -- se descarta si el usuario cancela, se persiste
+  // entera recién al tocar "Guardar" (ver openRulesetModal() /
+  // onSaveRulesetClicked()).
+  var nuzlockeRulesetDraft = [];
+  var nuzlockeRuleIdCounter = 0;
+
+  // Última respuesta completa de get_nuzlocke_page_data() -- los
+  // modales (editar encuentro, ¿especial?, reglas) necesitan el
+  // objeto completo de una fila/regla puntual, no solo lo que ya
+  // quedó pintado en el DOM. Se reemplaza entero en cada poll (ver
+  // renderNuzlockePage()), nunca se muta a mano.
+  var lastNuzlockeData = null;
+
+  function initNuzlockeActions() {
+    if (nuzlockeActionsInitialized) {
+      return;
+    }
+    nuzlockeActionsInitialized = true;
+
+    document.getElementById("nz-btn-new-encounter").addEventListener("click", openNewEncounterModal);
+    document.getElementById("nz-encounters-search").addEventListener("input", applyNuzlockeSearchFilter);
+    document.getElementById("nz-btn-edit-ruleset").addEventListener("click", openRulesetModal);
+    document.getElementById("nz-btn-save-encounter").addEventListener("click", onSaveEncounterClicked);
+    document.getElementById("nz-btn-save-special").addEventListener("click", onSaveSpecialClicked);
+    document.getElementById("nz-btn-save-ruleset").addEventListener("click", onSaveRulesetClicked);
+    document.getElementById("nz-btn-add-rule").addEventListener("click", onAddRuleClicked);
+    document.getElementById("nz-form-status").addEventListener("change", onEncounterStatusChanged);
+
+    document.querySelectorAll("[data-close-modal]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        closeModal(btn.dataset.closeModal);
+      });
+    });
+
+    // Clic en el fondo oscuro (fuera de la tarjeta del modal)
+    // cierra igual que el botón "X" -- patrón estándar de modal,
+    // no hace falta que el usuario apunte exacto al botón.
+    document.querySelectorAll(".nz-modal-overlay").forEach(function (overlay) {
+      overlay.addEventListener("click", function (event) {
+        if (event.target === overlay) {
+          overlay.hidden = true;
+        }
+      });
+    });
+
+    document.getElementById("nz-new-rule-input").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        onAddRuleClicked();
+      }
+    });
+  }
+
+  function openModal(id) {
+    document.getElementById(id).hidden = false;
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).hidden = true;
+  }
+
+  function escapeHtml(value) {
+    var div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+  }
+
+  function ensureNuzlockeCatalogs(callback) {
+    if (nuzlockeSpeciesCatalog && nuzlockeLocationCatalog) {
+      callback();
+      return;
+    }
+
+    if (nuzlockeCatalogsLoading) {
+      setTimeout(function () {
+        ensureNuzlockeCatalogs(callback);
+      }, 250);
+      return;
+    }
+
+    nuzlockeCatalogsLoading = true;
+
+    Promise.all([
+      api().get_species_catalog(),
+      api().get_location_catalog(),
+    ])
+      .then(function (results) {
+        nuzlockeSpeciesCatalog = results[0] || [];
+        nuzlockeLocationCatalog = results[1] || [];
+
+        nuzlockeSpeciesIdByLowerName = {};
+        nuzlockeSpeciesCatalog.forEach(function (species) {
+          nuzlockeSpeciesIdByLowerName[(species.name || "").toLowerCase()] = species.id;
+        });
+
+        populateDatalist(
+          "nz-species-options",
+          nuzlockeSpeciesCatalog.map(function (species) {
+            return species.name;
+          })
+        );
+
+        populateDatalist(
+          "nz-location-options",
+          ["Inicial"].concat(
+            nuzlockeLocationCatalog.map(function (location) {
+              return location.name;
+            })
+          )
+        );
+
+        nuzlockeLocationOrderMap = {};
+        nuzlockeLocationCatalog.forEach(function (location, index) {
+          nuzlockeLocationOrderMap[(location.name || "").toLowerCase()] = index;
+        });
+
+        nuzlockeCatalogsLoading = false;
+        callback();
+      })
+      .catch(function (error) {
+        console.error("Error cargando catálogos de Nuzlocke:", error);
+        nuzlockeCatalogsLoading = false;
+        callback();
+      });
+  }
+
+  function populateDatalist(id, values) {
+    var el = document.getElementById(id);
+    if (!el) {
+      return;
+    }
+    el.innerHTML = "";
+    values.forEach(function (value) {
+      var option = document.createElement("option");
+      option.value = value;
+      el.appendChild(option);
+    });
+  }
+
+  // 3 dígitos con cero a la izquierda (05/09/2026) -- así vienen
+  // nombrados los sprites estilo Shuffle (ver
+  // _serve_pokemon_shuffle_sprite() en http_server.py). No
+  // reutiliza pad() de arriba porque ese rellena a 2 dígitos
+  // (horas/minutos), acá hacen falta 3 (species ID hasta 802).
+  function padSpeciesId(value) {
+    return String(value).padStart(3, "0");
+  }
+
+  function speciesSpriteIdFor(entry) {
+    // Prioridad 1: el Pokémon está/estuvo realmente en el equipo
+    // (roster/graveyard) -- ahí siempre hay speciesId real, sin
+    // depender de que el catálogo ya haya cargado.
+    var known = nuzlockeRosterByNickname[entry.nickname];
+    if (known && known.speciesId) {
+      return known.speciesId;
+    }
+
+    // Prioridad 2 (filas "perdido", que nunca tuvieron un Pokémon
+    // capturado real): buscar por nombre de especie en el
+    // catálogo, si ya está cargado.
+    if (entry.species) {
+      var id = nuzlockeSpeciesIdByLowerName[entry.species.toLowerCase()];
+      if (id) {
+        return id;
+      }
+    }
+
+    return null;
+  }
+
+  function renderNuzlockePage(data) {
+    data = data || {};
+    lastNuzlockeData = data;
+
+    var roster = data.roster || [];
+    var graveyard = data.graveyard || [];
+
+    nuzlockeRosterByNickname = {};
+    roster.concat(graveyard).forEach(function (entry) {
+      if (entry.nickname) {
+        nuzlockeRosterByNickname[entry.nickname] = entry;
+      }
+    });
+
+    renderNuzlockeSummary(data.stats);
+    renderNuzlockeTeam(
+      data.team || [],
+      graveyard.map(function (entry) {
+        return entry.nickname;
+      })
+    );
+    renderNuzlockeEncounters(data.encounters || []);
+    renderNuzlockePending(data.pendingEncounters || []);
+    renderNuzlockeGraveyard(graveyard);
+    renderNuzlockeRuleset(data.ruleset || []);
+    renderNuzlockeStats(data.stats, data.playtime);
+  }
+
+  function setBarWidth(id, percent) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.style.width = Math.max(0, Math.min(100, percent || 0)) + "%";
+    }
+  }
+
+  function renderNuzlockeSummary(stats) {
+    stats = stats || {};
+
+    var alive = stats.alive || 0;
+    var dead = stats.dead || 0;
+    var encountersCount = stats.encountersCount || 0;
+    var total = alive + dead;
+
+    setText("nz-stat-alive", alive);
+    setText("nz-stat-dead", dead);
+    setText("nz-stat-encounters", encountersCount);
+
+    setBarWidth("nz-stat-alive-bar", total > 0 ? (alive / total) * 100 : 0);
+    setBarWidth("nz-stat-dead-bar", total > 0 ? (dead / total) * 100 : 0);
+
+    var denom = Math.max(total, encountersCount, 1);
+    setBarWidth("nz-stat-encounters-bar", (encountersCount / denom) * 100);
+  }
+
+  function renderNuzlockeTeam(team, graveyardNicknames) {
+    var container = document.getElementById("nz-team");
+    if (!container) {
+      return;
+    }
+    container.innerHTML = "";
+
+    var graveyardSet = {};
+    (graveyardNicknames || []).forEach(function (nickname) {
+      if (nickname) {
+        graveyardSet[nickname] = true;
+      }
+    });
+
+    for (var i = 0; i < 6; i++) {
+      var slot = team[i];
+      var el = document.createElement("div");
+      el.className = "dash-team-slot";
+
+      if (!slot || slot.empty) {
+        el.classList.add("empty");
+        el.innerHTML = EMPTY_SLOT_ICON;
+      } else {
+        var spriteUrl = spriteBaseUrl + "/overlay/team/sprites/" + slot.speciesId + ".png";
+        var isDead = (slot.hp || 0) <= 0 || !!graveyardSet[slot.nickname];
+        el.classList.toggle("dead", isDead);
+
+        el.innerHTML =
+          '<img src="' + spriteUrl + '" alt="' + (slot.species || "") + '" />' +
+          '<span class="dash-team-level">Nv. ' + slot.level + genderIconHtml(slot.genderId) + "</span>" +
+          (slot.shiny ? SHINY_BADGE_ICON : "");
+      }
+
+      container.appendChild(el);
+    }
+  }
+
+  function nuzlockeStatusLabel(entry) {
+    if (entry.status === "especial" && entry.origin) {
+      return "Especial/" + (NZ_ORIGIN_LABELS[entry.origin] || entry.origin);
+    }
+    if (entry.extraCapture) {
+      return "Captura Extra";
+    }
+    return NZ_STATUS_LABELS[entry.status] || entry.status || "—";
+  }
+
+  // Posición de orden para una fila de la tabla (05/09/2026):
+  // "Inicial" siempre primero; una ruta real usa su posición en
+  // el catálogo (progresión de historia); un pseudo-lugar
+  // "especial" con ancla conocida (huevo/intercambio/fósil
+  // reubicado bajo su ruta real) se ubica justo después de esa
+  // ruta; cualquier cosa sin match conocido (o mientras el
+  // catálogo todavía no cargó) se manda al final, en vez de
+  // desordenar lo que sí se pudo resolver.
+  function encounterSortKey(entry, fallbackIndex) {
+    if (entry.location === "Inicial") {
+      return -1;
+    }
+
+    var map = nuzlockeLocationOrderMap;
+    if (!map) {
+      return fallbackIndex;
+    }
+
+    var direct = map[(entry.location || "").toLowerCase()];
+    if (direct != null) {
+      return direct;
+    }
+
+    if (entry.anchorLocation) {
+      var anchorIdx = map[entry.anchorLocation.toLowerCase()];
+      if (anchorIdx != null) {
+        return anchorIdx + 0.5;
+      }
+    }
+
+    return 100000 + fallbackIndex;
+  }
+
+  function renderNuzlockeEncounters(encounters) {
+    var body = document.getElementById("nz-encounters-body");
+    var emptyNote = document.getElementById("nz-encounters-empty");
+    if (!body) {
+      return;
+    }
+    body.innerHTML = "";
+
+    if (!encounters.length) {
+      emptyNote.hidden = false;
+      return;
+    }
+    emptyNote.hidden = true;
+
+    var sorted = encounters
+      .map(function (entry, index) {
+        return { entry: entry, index: index };
+      })
+      .sort(function (a, b) {
+        return (
+          encounterSortKey(a.entry, a.index) -
+          encounterSortKey(b.entry, b.index)
+        );
+      })
+      .map(function (wrapped) {
+        return wrapped.entry;
+      });
+
+    sorted.forEach(function (entry, index) {
+      var row = document.createElement("tr");
+
+      var searchKey = (
+        (entry.location || "") + " " + (entry.species || "") + " " + (entry.nickname || "")
+      ).toLowerCase();
+      row.dataset.search = searchKey;
+
+      var known = nuzlockeRosterByNickname[entry.nickname];
+      var level = known && known.level != null ? known.level : null;
+      var spriteId = speciesSpriteIdFor(entry);
+
+      // A pedido del usuario (05/09/2026): sprites estilo Pokémon
+      // Shuffle SOLO en esta tabla -- el resto de la app
+      // (Dashboard, página Pokémon, overlays) sigue usando los
+      // sets de siempre, sin tocar. Nombre de archivo con 3
+      // dígitos y cero a la izquierda (ver
+      // http_server.py:_serve_pokemon_shuffle_sprite()).
+      var spriteHtml = spriteId
+        ? '<img src="' + spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(spriteId) + '.png" alt="" />'
+        : "";
+
+      var deleteCell =
+        entry.location === "Inicial"
+          ? "<td></td>"
+          : '<td><button class="nz-row-delete-btn" data-delete-location="' +
+            escapeHtml(entry.location || "") +
+            '" title="Eliminar ruta">' +
+            NZ_TRASH_ICON_SVG +
+            "</button></td>";
+
+      row.innerHTML =
+        "<td>" + (index + 1) + "</td>" +
+        "<td>" + escapeHtml(entry.location || "") + "</td>" +
+        '<td><span class="nz-row-species">' +
+          spriteHtml +
+          escapeHtml(entry.species || "—") +
+          (entry.shiny ? " ✨" : "") +
+          "</span></td>" +
+        "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
+        "<td>" + (level != null ? level : "—") + "</td>" +
+        '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
+          escapeHtml(nuzlockeStatusLabel(entry)) +
+          "</span></td>" +
+        deleteCell;
+
+      body.appendChild(row);
+    });
+
+    body.querySelectorAll("[data-delete-location]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        deleteEncounterRow(btn.dataset.deleteLocation);
+      });
+    });
+
+    applyNuzlockeSearchFilter();
+  }
+
+  function applyNuzlockeSearchFilter() {
+    var input = document.getElementById("nz-encounters-search");
+    var query = (input.value || "").trim().toLowerCase();
+
+    document.querySelectorAll("#nz-encounters-body tr").forEach(function (row) {
+      var matches = !query || (row.dataset.search || "").indexOf(query) !== -1;
+      row.classList.toggle("nz-row-hidden", !matches);
+    });
+  }
+
+  function renderNuzlockePending(pending) {
+    var card = document.getElementById("nz-pending-card");
+    var list = document.getElementById("nz-pending-list");
+    var countEl = document.getElementById("nz-pending-count");
+    if (!card || !list) {
+      return;
+    }
+
+    card.hidden = pending.length === 0;
+    setText("nz-pending-count", pending.length);
+    list.innerHTML = "";
+
+    pending.forEach(function (entry) {
+      var item = document.createElement("div");
+      item.className = "nz-pending-item";
+
+      var spriteUrl = spriteBaseUrl + "/overlay/team/sprites/" + entry.speciesId + ".png";
+      var subParts = [];
+      if (entry.metLocation) {
+        subParts.push(entry.metLocation);
+      }
+      subParts.push(entry.shiny ? "✨ Shiny" : "Sin ruta detectada");
+
+      item.innerHTML =
+        '<img src="' + spriteUrl + '" alt="" />' +
+        '<div class="nz-pending-info">' +
+          '<span class="nz-pending-name">' + escapeHtml(entry.nickname || entry.species || "") + "</span>" +
+          '<span class="nz-pending-sub">' + escapeHtml(subParts.join(" · ")) + "</span>" +
+        "</div>" +
+        '<div class="nz-pending-actions">' +
+          '<button class="dash-btn-sm" data-assign="' + escapeHtml(entry.nickname || "") + '">Asignar</button>' +
+          '<button class="dash-btn-sm" data-discard="' + escapeHtml(entry.nickname || "") + '">Descartar</button>' +
+        "</div>";
+
+      list.appendChild(item);
+    });
+
+    list.querySelectorAll("[data-assign]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        openSpecialModal(btn.dataset.assign);
+      });
+    });
+
+    list.querySelectorAll("[data-discard]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!window.confirm("¿Descartar esta captura de los encuentros por ruta? El Pokémon se queda en tu equipo igual, solo deja de contar para el tracker.")) {
+          return;
+        }
+        api()
+          .nuzlocke_discard_pending(btn.dataset.discard)
+          .then(pollNuzlockePage);
+      });
+    });
+  }
+
+  function renderNuzlockeGraveyard(graveyard) {
+    var list = document.getElementById("nz-graveyard-list");
+    var emptyNote = document.getElementById("nz-graveyard-empty");
+    if (!list) {
+      return;
+    }
+
+    setText("nz-graveyard-count", graveyard.length);
+    list.innerHTML = "";
+
+    if (!graveyard.length) {
+      emptyNote.hidden = false;
+      return;
+    }
+    emptyNote.hidden = true;
+
+    graveyard.forEach(function (entry) {
+      var item = document.createElement("div");
+      item.className = "nz-graveyard-item";
+
+      var spriteUrl = spriteBaseUrl + "/overlay/team/sprites/" + entry.speciesId + ".png";
+
+      item.innerHTML =
+        '<img src="' + spriteUrl + '" alt="" />' +
+        '<div class="nz-graveyard-info">' +
+          '<span class="nz-graveyard-name">' + escapeHtml(entry.nickname || "") + "</span>" +
+          '<span class="nz-graveyard-sub">' + escapeHtml(entry.species || "") + " · Nv. " + (entry.level != null ? entry.level : "—") + "</span>" +
+        "</div>";
+
+      list.appendChild(item);
+    });
+  }
+
+  function renderNuzlockeRuleset(ruleset) {
+    var list = document.getElementById("nz-ruleset-list");
+    if (!list) {
+      return;
+    }
+    list.innerHTML = "";
+
+    // A pedido del usuario (05/09/2026): las reglas desactivadas
+    // ya NO se muestran tachadas -- directamente no aparecen en la
+    // tarjeta (siguen existiendo y son editables desde el modal
+    // "Editar", que sí las lista a todas con su checkbox).
+    var activeRules = ruleset.filter(function (rule) {
+      return rule.enabled;
+    });
+
+    if (!activeRules.length) {
+      list.innerHTML = '<p class="nz-empty-note">Sin reglas activas.</p>';
+      return;
+    }
+
+    activeRules.forEach(function (rule) {
+      var row = document.createElement("div");
+      row.className = "nz-ruleset-row";
+      row.innerHTML =
+        '<span class="nz-ruleset-check">✓</span>' +
+        "<span>" + escapeHtml(rule.label) + "</span>";
+      list.appendChild(row);
+    });
+  }
+
+  function formatPlaytime(playtime) {
+    if (!playtime || !playtime.available) {
+      return null;
+    }
+    // A pedido del usuario (05/09/2026): sin segundos -- el dato
+    // ya es "impreciso" en tiempo real (sale del archivo de
+    // guardado, no se actualiza hasta el próximo save), así que
+    // mostrar segundos exactos da una falsa sensación de
+    // precisión.
+    return pad(playtime.hours) + ":" + pad(playtime.minutes);
+  }
+
+  function renderNuzlockeStats(stats, playtime) {
+    stats = stats || {};
+
+    setText("nz-stat-unique", stats.uniqueSpecies || 0);
+    setText("nz-stat-captures", stats.captures || 0);
+    setText("nz-stat-deaths", stats.dead || 0);
+    setText("nz-stat-survival", (stats.survivalRate || 0) + "%");
+
+    var formatted = formatPlaytime(playtime);
+    var note = document.getElementById("nz-playtime-note");
+
+    if (formatted) {
+      setText("nz-stat-playtime", formatted);
+      note.hidden = true;
+    } else {
+      setText("nz-stat-playtime", "—");
+      note.hidden = false;
+      note.textContent =
+        "El tiempo de juego sale del archivo de guardado, no de la memoria en vivo -- se actualiza recién cuando guardás la partida" +
+        (playtime && playtime.reason ? " (" + playtime.reason + ")" : ".");
+    }
+  }
+
+  // ---------- Modal: Nuevo encuentro / Editar ----------
+
+  function openNewEncounterModal() {
+    document.getElementById("nz-encounter-modal-title").textContent = "Nuevo encuentro";
+    document.getElementById("nz-form-location").value = "";
+    document.getElementById("nz-form-location").disabled = false;
+    document.getElementById("nz-form-nickname").value = "";
+    document.getElementById("nz-form-species").value = "";
+    document.getElementById("nz-form-status").value = "capturado";
+    document.getElementById("nz-form-origin").value = "shiny";
+    document.getElementById("nz-form-shiny").checked = false;
+    hideEncounterError();
+    onEncounterStatusChanged();
+
+    ensureNuzlockeCatalogs(function () {
+      openModal("nz-modal-encounter");
+    });
+  }
+
+  function onEncounterStatusChanged() {
+    var status = document.getElementById("nz-form-status").value;
+    var isEspecial = status === "especial";
+    var isLost = status === "perdido";
+
+    // A pedido del usuario (05/09/2026): "perdido" es un combate
+    // salvaje que se perdió/del que se huyó -- nunca hubo captura,
+    // así que no hay nickname que poner. El campo queda visible
+    // (por si el usuario igual quiere anotar algo) pero deja de
+    // ser obligatorio -- ver onSaveEncounterClicked(). El campo
+    // "Origen" solo aplica a "especial"; para "perdido" además se
+    // deshabilita por completo (no solo se oculta), para que quede
+    // claro que no corresponde acá.
+    document.getElementById("nz-form-origin-field").hidden = !isEspecial;
+    document.getElementById("nz-form-origin").disabled = isLost;
+
+    var nicknameInput = document.getElementById("nz-form-nickname");
+    nicknameInput.placeholder = isLost ? "Opcional para \"Perdido\"" : "";
+  }
+
+  function showEncounterError(message) {
+    var el = document.getElementById("nz-encounter-error");
+    el.textContent = message;
+    el.hidden = false;
+  }
+
+  function hideEncounterError() {
+    document.getElementById("nz-encounter-error").hidden = true;
+  }
+
+  function onSaveEncounterClicked() {
+    var location = document.getElementById("nz-form-location").value.trim();
+    var nickname = document.getElementById("nz-form-nickname").value.trim();
+    var species = document.getElementById("nz-form-species").value.trim();
+    var status = document.getElementById("nz-form-status").value;
+    var origin = status === "especial" ? document.getElementById("nz-form-origin").value : null;
+    var shiny = document.getElementById("nz-form-shiny").checked;
+
+    // "Perdido" (05/09/2026, a pedido del usuario): nunca hubo
+    // captura real, así que el nickname no es obligatorio acá --
+    // para cualquier otro estado sigue siendo requerido.
+    var isLost = status === "perdido";
+
+    if (!location || !species || (!isLost && !nickname)) {
+      showEncounterError(
+        isLost
+          ? "Ruta y especie son obligatorios."
+          : "Ruta, nickname y especie son obligatorios."
+      );
+      return;
+    }
+
+    hideEncounterError();
+
+    api()
+      .nuzlocke_save_encounter(location, nickname, species, status, origin, shiny)
+      .then(function (result) {
+        if (result && result.error) {
+          showEncounterError(result.error);
+          return;
+        }
+        closeModal("nz-modal-encounter");
+        pollNuzlockePage();
+      });
+  }
+
+  // Borrado directo de fila (05/09/2026, a pedido del usuario):
+  // reemplaza el flujo viejo de "abrir modal de edición -> botón
+  // Eliminar ruta adentro" -- ya no existe edición de una fila
+  // existente, cada fila tiene su propio ícono de tacho que borra
+  // directo (con la misma confirmación de antes). "Inicial" ni
+  // siquiera recibe el botón (ver renderNuzlockeEncounters()).
+  function deleteEncounterRow(location) {
+    if (!window.confirm('Esto borra el registro de "' + location + '" Y el Pokémon capturado ahí (roster/cementerio). No se puede deshacer. ¿Continuar?')) {
+      return;
+    }
+
+    api()
+      .nuzlocke_delete_encounter(location)
+      .then(function (result) {
+        if (result && result.error) {
+          window.alert(result.error);
+          return;
+        }
+        pollNuzlockePage();
+      });
+  }
+
+  // ---------- Modal: ¿Pokémon Especial? ----------
+
+  var nuzlockeSpecialNickname = null;
+
+  function openSpecialModal(nickname) {
+    nuzlockeSpecialNickname = nickname;
+
+    var data = (lastNuzlockeData && lastNuzlockeData.pendingEncounters) || [];
+    var match = data.find(function (item) {
+      return item.nickname === nickname;
+    });
+
+    document.getElementById("nz-special-subject").textContent = match
+      ? (match.nickname || match.species) + (match.metLocation ? " -- " + match.metLocation : "")
+      : nickname;
+
+    document.getElementById("nz-form-special-origin").value = "shiny";
+    openModal("nz-modal-special");
+  }
+
+  function onSaveSpecialClicked() {
+    if (!nuzlockeSpecialNickname) {
+      return;
+    }
+
+    var origin = document.getElementById("nz-form-special-origin").value;
+
+    api()
+      .nuzlocke_assign_special(nuzlockeSpecialNickname, origin)
+      .then(function () {
+        closeModal("nz-modal-special");
+        pollNuzlockePage();
+      });
+  }
+
+  // ---------- Modal: Editar reglas ----------
+
+  function openRulesetModal() {
+    var current = (lastNuzlockeData && lastNuzlockeData.ruleset) || [];
+
+    nuzlockeRulesetDraft = current.map(function (rule) {
+      return { id: rule.id, label: rule.label, enabled: !!rule.enabled };
+    });
+
+    renderRulesetDraft();
+    document.getElementById("nz-new-rule-input").value = "";
+    openModal("nz-modal-ruleset");
+  }
+
+  function renderRulesetDraft() {
+    var list = document.getElementById("nz-ruleset-edit-list");
+    list.innerHTML = "";
+
+    nuzlockeRulesetDraft.forEach(function (rule, index) {
+      var row = document.createElement("div");
+      row.className = "nz-ruleset-edit-row";
+
+      row.innerHTML =
+        '<input type="checkbox" ' + (rule.enabled ? "checked" : "") + " />" +
+        '<input type="text" value="' + escapeHtml(rule.label) + '" />' +
+        '<button class="nz-ruleset-remove-btn" title="Quitar"><svg class="nz-close-icon" viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z"/></svg></button>';
+
+      row.querySelector('input[type="checkbox"]').addEventListener("change", function (event) {
+        nuzlockeRulesetDraft[index].enabled = event.target.checked;
+      });
+
+      row.querySelector('input[type="text"]').addEventListener("input", function (event) {
+        nuzlockeRulesetDraft[index].label = event.target.value;
+      });
+
+      row.querySelector(".nz-ruleset-remove-btn").addEventListener("click", function () {
+        nuzlockeRulesetDraft.splice(index, 1);
+        renderRulesetDraft();
+      });
+
+      list.appendChild(row);
+    });
+  }
+
+  function onAddRuleClicked() {
+    var input = document.getElementById("nz-new-rule-input");
+    var label = input.value.trim();
+    if (!label) {
+      return;
+    }
+
+    nuzlockeRuleIdCounter += 1;
+    nuzlockeRulesetDraft.push({
+      id: "custom_" + Date.now() + "_" + nuzlockeRuleIdCounter,
+      label: label,
+      enabled: true,
+    });
+
+    input.value = "";
+    renderRulesetDraft();
+  }
+
+  function onSaveRulesetClicked() {
+    api()
+      .nuzlocke_save_ruleset(nuzlockeRulesetDraft)
+      .then(function (result) {
+        if (result && result.error) {
+          window.alert(result.error);
+          return;
+        }
+        closeModal("nz-modal-ruleset");
+        pollNuzlockePage();
+      });
   }
 
   function setDot(id, on) {

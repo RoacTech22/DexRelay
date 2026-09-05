@@ -385,7 +385,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   font-size: 12px;
   font-weight: 700;
   color: var(--accent);
@@ -399,8 +399,8 @@ body {
    que el degradado sea uno solo parejo en todo el ícono y no se
    corte forma por forma. */
 .waiting-icon {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 82px;
   filter: drop-shadow(0 0 4px rgba(45, 212, 220, .35)) drop-shadow(0 0 1.5px rgba(14, 116, 144, .5));
 }
 
@@ -632,11 +632,11 @@ body {
 
 .connected-illustration {
   width: min(360px, 100%);
-  margin: 0 auto 8px;
+  margin: 0 auto 16px;
 }
 
 .connected-illustration svg {
-  width: 75%;
+  width: 45%;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -1348,6 +1348,15 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  /* Bug real corregido (05/09/2026): sin esto, un botón con un
+     ícono adentro (ej. "Eliminar ruta") podía terminar un pelo
+     más alto que uno de puro texto (ej. "Cancelar") porque el
+     line-height por defecto del navegador no es igual al alto del
+     ícono -- display:inline-flex + line-height:1 fuerza la MISMA
+     altura sin importar si el botón tiene ícono o no. */
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .dash-btn-sm:hover {
@@ -1411,7 +1420,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   background: var(--bg-elevated-2);
   border-radius: var(--radius);
   padding: 8px 4px;
@@ -1427,6 +1436,7 @@ body {
   font-size: 10.5px;
   color: var(--text-secondary);
 }
+
 
 /* Slot vacío: pokeball atenuada en vez del texto "Vacío" -- ver
    renderDashTeam() en app.js. justify-content:center para que
@@ -1845,6 +1855,31 @@ body {
 }
 
 .pokemon-card-gender.female {
+  color: #ff6fb0;
+}
+
+/* Ícono de género genérico (05/09/2026) -- misma paleta que
+   .pokemon-card-gender de arriba, pero reutilizable en cualquier
+   lugar de la app que muestre un nombre de especie (Nuzlocke
+   Tracker: tabla de encuentros, pendientes, cementerio). */
+.gender-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: -1px;
+  margin-left: 4px;
+  flex: none;
+}
+
+.gender-icon-inline svg {
+  width: 11px;
+  height: 11px;
+}
+
+.gender-icon-inline.male {
+  color: var(--sapphire);
+}
+
+.gender-icon-inline.female {
   color: #ff6fb0;
 }
 
@@ -2459,4 +2494,769 @@ body {
     margin: 0 auto;
   }
 
+}
+
+/* =========================================================
+   PÁGINA NUZLOCKE (GUI v2, 04/09/2026)
+
+   Mismo criterio de wrapper centrado + @container que
+   .dashboard-inner/.pokemon-page-inner/.medals-page-inner --
+   pero acá, a diferencia de esas tres, los anchos de abajo NO
+   fueron ajustados a mano contra la app real corriendo (esas
+   sí, ver comentarios de cada una) -- son un punto de partida
+   razonable con CSS Grid/auto-fit, pensado para que el usuario
+   los afine a mano después de verlo en vivo, mismo proceso que
+   ya se usó con el resto de las páginas.
+========================================================= */
+
+.nz-page-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---------- Resumen (3 tarjetas) ---------- */
+
+.nz-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 16px 0;
+}
+
+@container (max-width: 820px) {
+  .nz-summary-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nz-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+}
+
+.nz-summary-icon {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nz-summary-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nz-summary-icon-alive {
+  color: var(--success);
+}
+
+.nz-summary-icon-dead {
+  color: var(--danger);
+}
+
+.nz-summary-icon-encounters {
+  color: var(--accent);
+}
+
+.nz-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nz-summary-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.nz-summary-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.nz-summary-bar-track {
+  margin-top: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.nz-summary-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.nz-bar-alive {
+  background: var(--success);
+}
+
+.nz-bar-dead {
+  background: var(--danger);
+}
+
+.nz-bar-encounters {
+  background: var(--accent);
+}
+
+/* ---------- Layout principal: tabla a la izquierda, tarjetas a la derecha ---------- */
+
+.nz-main-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
+}
+
+@container (max-width: 900px) {
+  .nz-main-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nz-main-col,
+.nz-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ---------- Equipo actual (reutiliza el sprite/estilo de dash-team-slot) ---------- */
+
+.nz-team {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+@container (max-width: 640px) {
+  .nz-team {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- Tabla de encuentros ---------- */
+
+.nz-encounters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nz-search-input {
+  width: 100%;
+  margin: 12px 0 4px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.nz-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.nz-table-wrap {
+  overflow-x: auto;
+}
+
+.nz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.nz-table th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.nz-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.nz-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.nz-table tbody tr.nz-row-hidden {
+  display: none;
+}
+
+.nz-row-species {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nz-row-species img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.nz-row-delete-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nz-row-delete-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.nz-row-delete-btn:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.nz-empty-note {
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 16px 4px;
+  text-align: center;
+}
+
+/* Píldora de estado -- mismos colores que el resto de la app
+   (--success/--danger/--warning/--accent) para que "Capturado",
+   "Muerto", etc. se lean de un vistazo, igual criterio que
+   dash-badge-label. */
+.nz-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.nz-status-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.nz-status-capturado {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--success);
+}
+
+.nz-status-especial {
+  background: rgba(45, 212, 220, 0.12);
+  color: var(--accent);
+}
+
+.nz-status-perdido {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+}
+
+.nz-status-muerto {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+.nz-status-sin_intentar {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+}
+
+/* ---------- Capturas pendientes ---------- */
+
+.nz-count-pill {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #06181a;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nz-count-pill-danger {
+  background: var(--danger);
+  color: #2a0a0a;
+}
+
+.nz-pending-list,
+.nz-graveyard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nz-pending-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-pending-item img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.nz-pending-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.nz-pending-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nz-pending-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.nz-pending-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.nz-pending-actions button {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* ---------- Cementerio ---------- */
+
+.nz-graveyard-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-graveyard-item img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: grayscale(1);
+  opacity: 0.8;
+}
+
+.nz-graveyard-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Bug real corregido (05/09/2026, reportado por el usuario):
+     faltaba esto -- sin flex-column, el nickname y la especie
+     (dos <span> inline) quedaban pegados en la misma línea en vez
+     de apilados, a diferencia de .nz-pending-info que sí lo
+     tenía. */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nz-graveyard-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nz-graveyard-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ---------- Reglas activas ---------- */
+
+.nz-ruleset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nz-ruleset-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.nz-ruleset-row.disabled {
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+
+.nz-ruleset-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+}
+
+.nz-ruleset-row:not(.disabled) .nz-ruleset-check {
+  background: var(--success);
+  border-color: var(--success);
+  color: #06180a;
+}
+
+/* ---------- Estadísticas generales ---------- */
+
+.nz-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.nz-stats-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-stats-cell-wide {
+  grid-column: span 2;
+}
+
+.nz-stats-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.nz-stats-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.nz-playtime-note {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   MODALES (nuevo encuentro / especial / reglas)
+========================================================= */
+
+.nz-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 13, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.nz-modal-overlay[hidden] {
+  display: none;
+}
+
+.nz-modal {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.nz-modal-narrow {
+  width: 360px;
+}
+
+.nz-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nz-modal-header h3 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.nz-modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nz-modal-close:hover {
+  color: var(--text);
+}
+
+/* Ícono "add" reutilizado como "×" (05/09/2026, a pedido del
+   usuario) -- es un "+" de base, rotado 45° se lee como una
+   cruz de cierre/quitar sin necesitar un ícono aparte. Usado en
+   los 3 botones de cerrar modal y en el de quitar una regla. */
+.nz-close-icon {
+  width: 14px;
+  height: 14px;
+  transform: rotate(45deg);
+}
+
+/* Ícono dentro de un botón con texto (+ Nuevo encuentro, Agregar,
+   Eliminar ruta) -- alineado con la línea de texto, sin rotar. */
+.nz-btn-icon {
+  width: 11px;
+  height: 11px;
+  vertical-align: -1px;
+  margin-right: 4px;
+}
+
+.nz-modal-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nz-modal-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.nz-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* Bug real corregido (05/09/2026) -- mismo patrón ya documentado
+   con .dash-alert: display:flex en la regla de arriba pisa el
+   atributo `hidden` del navegador (misma especificidad, pero la
+   hoja de estilos del autor siempre gana contra la del user
+   agent). Sin esto, el campo "Origen" quedaba visible siempre,
+   sin importar el estado elegido en el modal. */
+.nz-field[hidden] {
+  display: none;
+}
+
+.nz-field input[type="text"],
+.nz-field select {
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.nz-field input:focus,
+.nz-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.nz-field-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.nz-field-checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.nz-form-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin: 0;
+}
+
+.nz-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+}
+
+.nz-modal-footer-right {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.nz-btn-danger-ghost {
+  /* Bug real corregido (05/09/2026, reportado por el usuario):
+     tamaño distinto al de "Cancelar" (.dash-btn-sm) en el mismo
+     footer -- se alinean padding/font-size/weight/mayúsculas acá
+     para que ambos botones midan lo mismo, solo cambia el color.
+     Segunda vuelta del mismo bug (el usuario confirmó que seguía
+     pasando): faltaba display:inline-flex + line-height:1, igual
+     que se agregó en .dash-btn-sm -- sin eso, el ícono de tacho
+     adentro de este botón lo hacía un pelo más alto que
+     "Cancelar". */
+  cursor: pointer;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: transparent;
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.nz-btn-danger-ghost:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.nz-ruleset-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.nz-ruleset-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-ruleset-edit-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.nz-ruleset-edit-row input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  padding: 4px;
+}
+
+.nz-ruleset-edit-row input[type="text"]:focus {
+  outline: none;
+}
+
+.nz-ruleset-remove-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nz-ruleset-remove-btn:hover {
+  color: var(--danger);
+}
+
+.nz-ruleset-add-row {
+  display: flex;
+  gap: 8px;
+}
+
+.nz-ruleset-add-row input {
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  font-size: 13px;
 }
