@@ -1,8 +1,9 @@
 html,
 body {
 
-    width: max-content;
-    min-width: max-content;
+    width: 376px;
+    min-width: 376px;
+    height: 270px;
 
     margin: 0;
     padding: 0;
@@ -72,6 +73,49 @@ body {
    aparece un Pokemon nuevo en graveyard -- las
    muertes son permanentes, asi que nunca hace
    falta quitar ni reordenar nada, solo agregar.
+
+   ANCHO FIJO (05/09/2026, corregido 05/09/2026):
+   antes tenia `width: max-content; max-width:
+   640px;`, un resabio de cuando este overlay
+   todavia no tenia un tamano fijo pensado para
+   OBS. Con el body ya fijo a 376px, ese
+   max-width de 640 hacia que las lapidas NUNCA
+   pasaran a una segunda fila dentro del ancho
+   real (recien envolvian a los 640px) -- en vez
+   de eso se cortaban horizontalmente contra el
+   overflow:hidden del body, silenciosamente.
+   Ahora el ancho es fijo en 340px (376 menos
+   los 18px de padding a cada lado), que es el
+   que de verdad importa para el wrap: a ese
+   ancho entran 4 lapidas por fila (medido con
+   Chromium headless, no a ojo).
+
+   ALTO (aumentado de 177 a 270px, 05/09/2026,
+   a pedido del usuario): a 177px solo entraba
+   la barra de stats + una fila de lapidas. 270px
+   fue medido igual, con Chromium headless
+   renderizando la barra de stats + 2 filas
+   completas (8 lapidas) -- cubre el caso pedido
+   ("por lo menos dos filas"). Con la fuente Teko
+   real (no disponible en el entorno donde se
+   midio, sin acceso a Google Fonts) el numero
+   podria variar unos pixeles de mas o de menos;
+   si al verlo en vivo sobra o falta un poco de
+   aire, es cuestion de ajustar este numero a
+   mano, no de rehacer el calculo.
+
+   LIMITACION QUE SIGUE VIGENTE: a partir de la
+   3ra fila (mas de 8 caidos), esas lapidas
+   quedan fuera del recorte de OBS (el Browser
+   Source solo captura los 376x270 configurados,
+   sin importar cuanto mida la pagina realmente)
+   -- no es un bug de CSS, es consecuencia
+   directa de fijar un tamano chico a proposito.
+   Si hace falta ver todo el cementerio en
+   pantalla mas alla de 8 caidos, agrandar el
+   alto del Browser Source en OBS a mano segun
+   avance la partida, o pedir un rediseno con
+   scroll/paginado en una sesion futura.
 ========================================= */
 
 #graveyard {
@@ -79,8 +123,7 @@ body {
     flex-wrap: wrap;
     gap: 10px;
 
-    width: max-content;
-    max-width: 640px;
+    width: 340px;
 
     padding: 4px 18px 14px;
 

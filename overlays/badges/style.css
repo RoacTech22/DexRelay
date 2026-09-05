@@ -3,7 +3,7 @@ body {
 
     width: max-content;
     min-width: max-content;
-    height: 80px;
+    height: 100px;
 
     margin: 0;
     padding: 0;
@@ -19,7 +19,7 @@ body {
     gap: 30px;
 
     width: max-content;
-    height: 80px;
+    height: 100px;
 
     padding: 10px 15px;
 
@@ -80,8 +80,7 @@ body {
 
     opacity: 1;
 
-    filter:
-        drop-shadow(0 0 2px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 8px rgba(255, 245, 200, 0.85)) drop-shadow(0 0 16px rgba(255, 225, 140, 0.55));
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 2px rgba(209, 209, 209, 0.55)) drop-shadow(0 0 2px rgba(185, 185, 185, 0.3));
 }
 
 /* =========================================
