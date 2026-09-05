@@ -10,6 +10,7 @@ from app.services.location_catalog import LocationCatalog
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
 from app.services.species_catalog import SpeciesCatalog
+from app.services.team_overlay_settings import TeamOverlaySettings
 
 
 class Application:
@@ -49,6 +50,14 @@ class Application:
             NuzlockeStorage.for_game(process_name)
         )
 
+        # Editor del Team Overlay (GUI v2, página Overlays,
+        # 05/09/2026) -- instancia única, mismo criterio que
+        # nuzlocke_service: Api la usa directo en memoria (el
+        # editor de la GUI no depende de que el HTTP server esté
+        # corriendo) y HTTPServer la expone de solo lectura al
+        # overlay real vía /api/team-overlay-settings.
+        self.team_overlay_settings = TeamOverlaySettings()
+
         self.runtime = Runtime(
             self.reader,
             self.state,
@@ -85,6 +94,7 @@ class Application:
             nuzlocke_service=self.nuzlocke_service,
             species_catalog=SpeciesCatalog(),
             location_catalog=LocationCatalog(),
+            team_overlay_settings=self.team_overlay_settings,
         )
 
         # Runtime (Runtime.update() en su propio hilo) y HTTPServer

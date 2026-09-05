@@ -4,7 +4,7 @@ import json
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from threading import Thread
+from threading import Lock, Thread
 
 from app.core import paths
 from app.core.state import ApplicationState
@@ -60,6 +60,7 @@ class HTTPServer:
         nuzlocke_service: NuzlockeService | None = None,
         species_catalog: SpeciesCatalog | None = None,
         location_catalog: LocationCatalog | None = None,
+        team_overlay_settings: "TeamOverlaySettings | None" = None,
     ) -> None:
         self.state = state
         self.host = host
@@ -67,6 +68,7 @@ class HTTPServer:
         self.nuzlocke_service = nuzlocke_service
         self.species_catalog = species_catalog
         self.location_catalog = location_catalog
+        self.team_overlay_settings = team_overlay_settings
 
         # Modo desarrollo: raíz del proyecto (igual que antes). En
         # un build empaquetado: la carpeta del .exe, donde
@@ -134,11 +136,50 @@ class HTTPServer:
         self._server: ThreadingHTTPServer | None = None
         self._thread: Thread | None = None
 
+        # Contador de conexiones activas (GUI v2, página Overlays,
+        # 05/09/2026) -- cada socket TCP abierto por un cliente
+        # (Browser Source de OBS con un overlay, o el panel web
+        # abierto a mano) incrementa este contador al conectar y lo
+        # decrementa al cerrar, vía Handler.setup()/finish() más
+        # abajo. Con HTTP/1.1 keep-alive (ver protocol_version en
+        # el Handler), una pestaña de overlay abierta mantiene su
+        # conexión viva entre polls en vez de abrir una nueva cada
+        # vez, así que este número refleja clientes realmente
+        # conectados ahora mismo, no peticiones por segundo. Lock
+        # porque cada conexión corre en su propio hilo
+        # (ThreadingHTTPServer).
+        self._active_connections = 0
+        self._active_connections_lock = Lock()
+
+    def _increment_connections(self) -> None:
+        with self._active_connections_lock:
+            self._active_connections += 1
+
+    def _decrement_connections(self) -> None:
+        with self._active_connections_lock:
+            self._active_connections = max(0, self._active_connections - 1)
+
+    def get_active_connections(self) -> int:
+        """Clientes con una conexión TCP abierta ahora mismo (0 si el servidor está detenido)."""
+
+        if self._server is None:
+            return 0
+
+        with self._active_connections_lock:
+            return self._active_connections
+
     def start(self) -> None:
         """Inicia el servidor HTTP en un hilo separado."""
 
         if self._server is not None:
             return
+
+        # Reiniciar el contador: si el servidor se detuvo con
+        # conexiones abiertas (finish() no llegó a correr para
+        # todas, ej. cierre abrupto), no debe arrastrar un número
+        # inflado a la sesión nueva.
+        with self._active_connections_lock:
+            self._active_connections = 0
 
         server = _QuietThreadingHTTPServer(
             (self.host, self.port),
@@ -193,6 +234,8 @@ class HTTPServer:
         nuzlocke_service = self.nuzlocke_service
         species_catalog = self.species_catalog
         location_catalog = self.location_catalog
+        team_overlay_settings = self.team_overlay_settings
+        http_server_ref = self
 
         class Handler(BaseHTTPRequestHandler):
 
@@ -207,6 +250,22 @@ class HTTPServer:
             # conexión al mismo tiempo, y las últimas peticiones
             # se quedan esperando un slot libre indefinidamente.
             protocol_version = "HTTP/1.1"
+
+            def setup(self):
+                super().setup()
+                http_server_ref._increment_connections()
+
+            def finish(self):
+                # try/finally: si super().finish() lanza (mismo tipo
+                # de desconexión de cliente a medio camino que ya
+                # maneja _QuietThreadingHTTPServer.handle_error()),
+                # el contador igual tiene que bajar -- si no, una
+                # conexión cortada abruptamente queda contada para
+                # siempre como "activa".
+                try:
+                    super().finish()
+                finally:
+                    http_server_ref._decrement_connections()
 
             def do_GET(self):
                 if self.path == "/":
@@ -254,6 +313,18 @@ class HTTPServer:
                 if self.path == "/api/team":
                     self._send_json(
                         state.team,
+                        200,
+                    )
+                    return
+
+                if self.path == "/api/team-overlay-settings":
+                    settings = (
+                        team_overlay_settings.get()
+                        if team_overlay_settings is not None
+                        else {}
+                    )
+                    self._send_json(
+                        settings,
                         200,
                     )
                     return
@@ -402,10 +473,41 @@ class HTTPServer:
                     self._handle_reset_all()
                     return
 
+                if self.path == "/api/team-overlay-settings":
+                    self._handle_save_team_overlay_settings()
+                    return
+
                 self._send_text(
                     "Not Found",
                     404,
                 )
+
+            def _handle_save_team_overlay_settings(self):
+
+                if team_overlay_settings is None:
+                    self._send_json(
+                        {
+                            "error": (
+                                "Servicio de preferencias del "
+                                "overlay no disponible."
+                            )
+                        },
+                        503,
+                    )
+                    return
+
+                payload = self._read_json_body()
+
+                if payload is None:
+                    self._send_json(
+                        {"error": "JSON inválido."},
+                        400,
+                    )
+                    return
+
+                data = team_overlay_settings.update(payload)
+
+                self._send_json(data, 200)
 
             def _handle_reset_all(self):
 

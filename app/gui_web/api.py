@@ -185,6 +185,29 @@ class Api:
             "ui", "bg_welcome.jpg", mime="image/jpeg"
         )
 
+    # Miniaturas reales de cada overlay (página Overlays, GUI v2,
+    # 05/09/2026) -- capturas provistas por el usuario, recortadas
+    # al contenido real (sin el margen blanco de la captura
+    # original). Mismo criterio que el logo/fondo de arriba: data
+    # URI vía _asset_data_uri(), no dependen de que el HTTP server
+    # esté corriendo (a diferencia de los sprites de /overlay/team/
+    # sprites/, que sí).
+    _OVERLAY_PREVIEW_FILES = {
+        "team": "overlay_preview_team.png",
+        "badges": "overlay_preview_badges.png",
+        "nuzlocke": "overlay_preview_nuzlocke.png",
+    }
+
+    def get_overlay_preview_data_uri(self, overlay_id: str):
+        filename = self._OVERLAY_PREVIEW_FILES.get(overlay_id)
+
+        if filename is None:
+            return None
+
+        return self._asset_data_uri(
+            "ui", filename, mime="image/png"
+        )
+
     @staticmethod
     def _asset_data_uri(*parts: str, mime: str):
         """
@@ -369,6 +392,12 @@ class Api:
                 "host": self.app.http_server.host,
                 "port": self.app.http_server.port,
                 "base_url": self.get_server_base_url(),
+                # Página Overlays (GUI v2, 05/09/2026): conexiones
+                # TCP abiertas ahora mismo contra el HTTP server
+                # (ver HTTPServer.get_active_connections()) -- 0 si
+                # el servidor está detenido, no un placeholder
+                # inventado.
+                "clients": self.app.http_server.get_active_connections(),
             },
             "team": state.team or [],
             "badges": badges,
@@ -431,6 +460,22 @@ class Api:
     def stop_http_server(self):
         self.app.stop_http_server()
         return True
+
+    # -----------------------------------------------------------
+    # Editor del Team Overlay (GUI v2, página Overlays,
+    # 05/09/2026) -- lee/escribe directo sobre la instancia
+    # compartida (self.app.team_overlay_settings), sin pasar por
+    # HTTP, así el editor funciona aunque el HTTP server esté
+    # detenido. El overlay real (corriendo en un navegador/OBS
+    # aparte) solo tiene la vía HTTP
+    # (GET/POST /api/team-overlay-settings, ver http_server.py).
+    # -----------------------------------------------------------
+
+    def get_team_overlay_settings(self):
+        return self.app.team_overlay_settings.get()
+
+    def save_team_overlay_settings(self, settings):
+        return self.app.team_overlay_settings.update(settings)
 
     # -----------------------------------------------------------
     # Shell principal -- se completa en los próximos bloques
