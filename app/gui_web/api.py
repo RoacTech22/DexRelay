@@ -31,7 +31,10 @@ from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
+from app.services.location_catalog import LocationCatalog
+from app.services.playtime_service import PlaytimeService
 from app.services.pokemon_detail_resolver import PokemonDetailResolver
+from app.services.species_catalog import SpeciesCatalog
 
 APP_VERSION = "v0.3.0"
 
@@ -112,6 +115,18 @@ class Api:
         # esto vive acá (solo GUI) y no en Application (no lo usa
         # ningún overlay ni el HTTP server).
         self.pokemon_detail_resolver = PokemonDetailResolver()
+
+        # Página Nuzlocke (GUI v2, 04/09/2026) -- mismo criterio
+        # que pokemon_detail_resolver: instancias propias, solo
+        # para la GUI. species_catalog/location_catalog ya existen
+        # también dentro de HTTPServer (para /api/species,
+        # /api/locations que usa panels/nuzlocke/) -- se duplica la
+        # instancia acá en vez de compartirla para no tener que
+        # tocar Application/HTTPServer, mismo patrón que ya se usó
+        # con PokemonDetailResolver.
+        self.species_catalog = SpeciesCatalog()
+        self.location_catalog = LocationCatalog()
+        self.playtime_service = PlaytimeService()
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -514,6 +529,183 @@ class Api:
             pages.append(entry)
 
         return pages
+
+    # -----------------------------------------------------------
+    # Página Nuzlocke (GUI v2, 04/09/2026) -- reemplaza el
+    # placeholder "Próximamente". A diferencia del panel de
+    # siempre (panels/nuzlocke/, que sigue existiendo intacto para
+    # quien lo abra directo en el navegador), esta página vive
+    # dentro de la app con el mismo estilo visual del resto de la
+    # GUI -- pedido explícito del usuario de no depender de un
+    # panel aparte.
+    #
+    # Todo lo que lee esto viene de `self.app.nuzlocke_service`
+    # directo (la MISMA instancia que usa Runtime cada 200ms y que
+    # usaba HTTPServer para panels/nuzlocke/) -- no hay una copia
+    # de datos aparte para la GUI, así que un cambio hecho acá se
+    # refleja también si alguien tiene el panel viejo abierto al
+    # mismo tiempo, y viceversa.
+    # -----------------------------------------------------------
+
+    def get_nuzlocke_page_data(self):
+        """
+        Todo lo que necesita la página Nuzlocke en una sola
+        llamada: resumen, equipo actual (mismo dato que ya lee el
+        Dashboard, sin memoria nueva), encuentros, pendientes,
+        cementerio, reglas del run, y tiempo de juego real (ver
+        PlaytimeService -- viene del archivo de guardado en disco,
+        no de la memoria en vivo, así que puede tardar en
+        reflejar una sesión larga sin guardar).
+
+        El catálogo de especies/ubicaciones NO viaja acá (son
+        ~700/~90 entradas, pesado para pedir en cada poll) -- se
+        piden aparte, una sola vez, cuando se abre el modal de
+        "Nuevo encuentro"/edición (ver get_species_catalog() /
+        get_location_catalog()).
+        """
+
+        nuzlocke = self.app.state.nuzlocke or {}
+
+        roster = nuzlocke.get("roster", [])
+        graveyard = nuzlocke.get("graveyard", [])
+        encounters = nuzlocke.get("encounters", [])
+        pending = nuzlocke.get("pending_encounters", [])
+
+        alive_count = len(roster)
+        dead_count = len(graveyard)
+        total_count = alive_count + dead_count
+
+        unique_species = {
+            entry.get("species")
+            for entry in (roster + graveyard)
+            if entry.get("species")
+        }
+
+        survival_rate = (
+            round((alive_count / total_count) * 100, 1)
+            if total_count > 0
+            else 0
+        )
+
+        stats = {
+            "alive": alive_count,
+            "dead": dead_count,
+            "encountersCount": len(encounters),
+            "uniqueSpecies": len(unique_species),
+            "captures": total_count,
+            "survivalRate": survival_rate,
+        }
+
+        return {
+            "team": self.app.state.team or [],
+            "roster": roster,
+            "graveyard": graveyard,
+            "encounters": encounters,
+            "pendingEncounters": pending,
+            "ruleset": self.app.nuzlocke_service.get_ruleset(),
+            "playtime": self.playtime_service.get_playtime(
+                self.app.reader.process_name
+            ),
+            "stats": stats,
+        }
+
+    def get_species_catalog(self):
+        """Lista completa {id, name} -- se pide una sola vez, se cachea en JS."""
+
+        return self.species_catalog.list_all()
+
+    def get_location_catalog(self):
+        """Lista completa {id, name} -- se pide una sola vez, se cachea en JS."""
+
+        return self.location_catalog.list_all()
+
+    def nuzlocke_save_encounter(
+        self,
+        location,
+        nickname,
+        species,
+        status,
+        origin=None,
+        shiny=None,
+    ):
+        """
+        "Nuevo encuentro" / editar una fila existente a mano.
+        Delega entero en NuzlockeService.save_encounter() -- ver su
+        docstring para el significado de cada campo. Devuelve la
+        lista de encuentros actualizada, o {"error": str(e)} si la
+        validación del servicio falla (estado/origen inválido) --
+        el frontend lo muestra tal cual en vez de romper la
+        página.
+        """
+
+        try:
+            return self.app.nuzlocke_service.save_encounter(
+                location,
+                nickname,
+                species,
+                status,
+                origin=origin,
+                shiny=shiny,
+            )
+        except ValueError as error:
+            return {"error": str(error)}
+
+    def nuzlocke_delete_encounter(self, location):
+        """
+        Botón de borrar una fila. "Inicial" está protegida por el
+        propio servicio (ValueError) -- se devuelve como
+        {"error": ...} en vez de dejar que la excepción rompa el
+        puente JS<->Python.
+        """
+
+        try:
+            return self.app.nuzlocke_service.delete_encounter(
+                location
+            )
+        except ValueError as error:
+            return {"error": str(error)}
+
+    def nuzlocke_discard_pending(self, nickname):
+        try:
+            return self.app.nuzlocke_service.discard_pending_encounter(
+                nickname
+            )
+        except ValueError as error:
+            return {"error": str(error)}
+
+    def nuzlocke_assign_special(self, nickname, origin):
+        """
+        "¿Pokémon Especial?" -- asigna un origen a una captura
+        pendiente (shiny/huevo/intercambio/evento/regalo/fosil/
+        captura_extra, ver NuzlockeService.VALID_ORIGINS +
+        assign_special_origin()). Devuelve
+        {"encounters": [...], "pendingEncounters": [...]}
+        actualizados.
+        """
+
+        try:
+            result = self.app.nuzlocke_service.assign_special_origin(
+                nickname, origin
+            )
+        except ValueError as error:
+            return {"error": str(error)}
+
+        return {
+            "encounters": result["encounters"],
+            "pendingEncounters": result["pending_encounters"],
+        }
+
+    def nuzlocke_reset_all(self):
+        return self.app.nuzlocke_service.reset_all()
+
+    def nuzlocke_get_ruleset(self):
+        return self.app.nuzlocke_service.get_ruleset()
+
+    def nuzlocke_save_ruleset(self, ruleset):
+        try:
+            return self.app.nuzlocke_service.save_ruleset(ruleset)
+        except ValueError as error:
+            return {"error": str(error)}
 
     def get_server_base_url(self):
         host = self.app.http_server.host
