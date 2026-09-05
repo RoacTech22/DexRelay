@@ -1,9 +1,9 @@
 html,
 body {
 
-    width: max-content;
-    min-width: max-content;
-    height: 195px;
+    width: 1170px;
+    min-width: 1170px;
+    height: 210px;
 
     margin: 0;
     padding: 0;
@@ -18,12 +18,37 @@ body {
     align-items: flex-start;
     gap: 54px;
 
-    width: max-content;
-    height: 195px;
+    width: 1170px;
+    height: 210px;
 
     padding: 5px 15px 10px;
 
     background: transparent;
+}
+
+/* =========================================
+   EDITOR DEL TEAM OVERLAY -- PREFERENCIAS
+   (GUI v2, pagina Overlays, 05/09/2026)
+
+   #team.hide-* las aplica app.js segun lo que
+   devuelva /api/team-overlay-settings. No se
+   usa `hidden` (atributo HTML) porque son
+   varios elementos repetidos (uno por slot),
+   no un contenedor unico -- una clase en el
+   padre + selector descendiente alcanza sin
+   tocar cada slot a mano.
+========================================= */
+
+#team.hide-hp .hp-container {
+    display: none;
+}
+
+#team.hide-level .level {
+    display: none;
+}
+
+#team.hide-nickname .nickname {
+    display: none;
 }
 
 .slot {

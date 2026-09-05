@@ -2,6 +2,33 @@ const API_URL = "/api/team";
 const COMBAT_API_URL = "/api/combat";
 const NUZLOCKE_API_URL = "/api/nuzlocke";
 
+// Editor del Team Overlay (GUI v2, pagina Overlays, 05/09/2026):
+// que elementos mostrar (barra de HP, nivel, nickname) y que set
+// de sprites usar. Se leen de /api/team-overlay-settings, que
+// TeamOverlaySettings (backend) ya resuelve con sus valores por
+// defecto -- este overlay nunca decide un default propio, solo
+// aplica lo que el servidor le mande.
+const SETTINGS_API_URL = "/api/team-overlay-settings";
+const SETTINGS_POLL_MS = 1500;
+
+// Los tres sets ya existen en el proyecto para otras paginas --
+// "team" es el de siempre (bordes blancos/glow, sprites/ relativo
+// a este mismo overlay), "pokemon" es el de la pagina Pokemon de
+// la GUI, "shuffle" es el de la tabla de Encuentros por Ruta del
+// Nuzlocke Tracker. basePath ya incluye la barra final.
+const SPRITE_SETS = {
+    team: { basePath: "sprites/", pad: false },
+    pokemon: { basePath: "/sprites/pokemon/", pad: false },
+    shuffle: { basePath: "/sprites/pokemon_shuffle/", pad: true }
+};
+
+let displaySettings = {
+    show_hp: true,
+    show_level: true,
+    show_nickname: true,
+    sprite_set: "team"
+};
+
 const teamElement =
     document.getElementById("team");
 
@@ -604,10 +631,17 @@ function renderSlot(
                 ? 0
                 : Number(pokemon.speciesId);
 
+        // La tabla de tamanos de getSpriteSize() esta calibrada
+        // a mano para el set "team" (algunos sprites de ese pack
+        // tienen mas/menos margen transparente que otros) -- los
+        // sets "pokemon" y "shuffle" ya vienen curados con un
+        // tamano mas uniforme, asi que para esos se usa siempre
+        // la escala neutra en vez de esa tabla especifica de otro
+        // pack.
         const spriteSize =
-            getSpriteSize(
-                displaySpeciesId
-            );
+            displaySettings.sprite_set === "team"
+                ? getSpriteSize(displaySpeciesId)
+                : "sprite-normal";
 
 
         const shinyClass =
@@ -774,6 +808,29 @@ function renderSlot(
    imagen rota hasta el próximo refresh manual.
 ========================================= */
 
+function buildSpriteUrl(
+    speciesId,
+    retryAttempt = 0
+) {
+
+    const set =
+        SPRITE_SETS[displaySettings.sprite_set] ||
+        SPRITE_SETS.team;
+
+    const idPart =
+        set.pad
+            ? String(speciesId).padStart(3, "0")
+            : speciesId;
+
+    const suffix =
+        retryAttempt > 0
+            ? `?retry=${retryAttempt}`
+            : "";
+
+    return `${set.basePath}${idPart}.png${suffix}`;
+}
+
+
 function loadSpriteWithRetry(
     img,
     speciesId,
@@ -800,7 +857,7 @@ function loadSpriteWithRetry(
         setTimeout(() => {
 
             img.src =
-                `sprites/${speciesId}.png?retry=${attempt + 1}`;
+                buildSpriteUrl(speciesId, attempt + 1);
 
             loadSpriteWithRetry(
                 img,
@@ -812,7 +869,7 @@ function loadSpriteWithRetry(
     };
 
     img.src =
-        `sprites/${speciesId}.png`;
+        buildSpriteUrl(speciesId);
 }
 
 
@@ -892,12 +949,102 @@ function escapeHTML(value) {
 
 
 /* =========================================
+   EDITOR DEL TEAM OVERLAY -- PREFERENCIAS
+   (GUI v2, pagina Overlays, 05/09/2026)
+
+   Poll propio, mas lento que el de /api/team
+   (no hace falta leerlo cada 200ms, estos
+   valores casi nunca cambian) -- aplica clases
+   en el contenedor #team para mostrar/ocultar
+   HP/nivel/nickname (ver reglas
+   #team.hide-* en style.css) y, si el set de
+   sprites elegido cambio, fuerza un rebuild
+   completo de los 6 slots (limpiando
+   previousTeam) para que el proximo loadTeam()
+   recargue todos los sprites con el set nuevo.
+========================================= */
+
+async function loadDisplaySettings() {
+
+    try {
+
+        const response =
+            await fetch(
+                SETTINGS_API_URL,
+                { cache: "no-store" }
+            );
+
+        if (!response.ok) {
+            return;
+        }
+
+        const settings =
+            await response.json();
+
+        const spriteSetChanged =
+            settings.sprite_set &&
+            settings.sprite_set !== displaySettings.sprite_set;
+
+        displaySettings = {
+            show_hp: settings.show_hp !== false,
+            show_level: settings.show_level !== false,
+            show_nickname: settings.show_nickname !== false,
+            sprite_set: settings.sprite_set || "team"
+        };
+
+        teamElement.classList.toggle(
+            "hide-hp",
+            !displaySettings.show_hp
+        );
+
+        teamElement.classList.toggle(
+            "hide-level",
+            !displaySettings.show_level
+        );
+
+        teamElement.classList.toggle(
+            "hide-nickname",
+            !displaySettings.show_nickname
+        );
+
+        if (spriteSetChanged) {
+
+            previousTeam = [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ];
+        }
+
+    } catch (error) {
+
+        // Mismo criterio que loadTeam(): un fetch fallido
+        // aislado no debe romper nada, se reintenta solo en el
+        // proximo ciclo.
+        console.error(
+            "No se pudieron leer las preferencias del overlay:",
+            error
+        );
+    }
+}
+
+
+/* =========================================
    INICIO
 ========================================= */
 
 loadTeam();
+loadDisplaySettings();
 
 setInterval(
     loadTeam,
     200
+);
+
+setInterval(
+    loadDisplaySettings,
+    SETTINGS_POLL_MS
 );
