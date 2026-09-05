@@ -1067,8 +1067,166 @@
         </div>
 
         <div id="page-overlays" class="page">
+          <div class="overlays-page-inner">
           <h1>Overlays</h1>
-          <p class="page-subtitle">Próximamente (Bloque 4).</p>
+          <p class="page-subtitle">Gestiona y accede a tus overlays en tiempo real.</p>
+
+          <div class="ov-card ov-card-list">
+            <div class="dash-card-header-icon-title ov-section-title">
+              <svg viewBox="0 0 205.8 179.45" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor"
+                  d="M4.58,57.26h0s40.95,10.46,40.95,10.46l40.84,10.44,7.72,1.97,3.54.69,13.41,3.17c1.04.25,2.1.37,3.16.37.9,0,1.8-.1,2.68-.28.91-.18,1.79-.46,2.64-.82-.74.3-1.48.49-2.2.61l43.77-20.81.17.04,14.32-6.93,24.22-11.73c4.08-1.97,6.4-6.09,5.93-10.49-.48-4.45-3.69-8.02-8.16-9.1L95.32.31c-2.5-.6-5.15-.32-7.46.8L7.14,40.18c-4.08,1.97-6.4,6.09-5.93,10.49.28,2.61,1.5,4.91,3.37,6.59ZM93.15,15.21l88.65,21.28-54.19,26.24-12.73,6.16-14.08-2.74-23.39-5.53-11.63-2.75-40.61-9.75L93.15,15.21Z" />
+                <path fill="currentColor"
+                  d="M196.42,71.53l-22.94-5.51-21.56,10.25,28.72,6.9-55.84,27.03-12.15,5.88-33.67-8.08-8.87-2.13h-.03s-46.08-11.07-46.08-11.07l32.9-15.93-22.53-5.76-28.38,13.74c-4.08,1.97-6.4,6.09-5.93,10.49.28,2.57,1.46,4.84,3.27,6.51l43.85,11.21,47.31,12.09-25.31-6.08h-.02s28.29,6.98,28.29,6.98l11.35,2.8c1.16.29,2.34.43,3.52.43.05,0,.11,0,.16,0,1.87.1,3.76-.27,5.45-1.09l12.11-5.86,7.12-3.45h.03s1.15-.57,1.15-.57l20.11-9.74,40.19-19.46c1.6-.77,2.93-1.88,3.92-3.21,1.54-2.05,2.29-4.61,2-7.28-.48-4.45-3.69-8.02-8.17-9.1Z" />
+                <path fill="currentColor"
+                  d="M196.42,119.68l-26.46-6.35-20.72,10.45,31.41,7.54-67.99,32.92-88.65-21.28,34.55-16.73-22.53-5.76-30.04,14.54c-4.08,1.97-6.4,6.09-5.93,10.49.48,4.45,3.69,8.02,8.17,9.1l102.25,24.55c.86.21,1.73.31,2.61.31,1.67,0,3.33-.37,4.85-1.11l80.71-39.08c4.08-1.97,6.4-6.09,5.93-10.49-.48-4.45-3.69-8.02-8.17-9.1Z" />
+              </svg>
+              <span>Overlays disponibles</span>
+            </div>
+            <div id="ov-overlay-list" class="ov-overlay-list"></div>
+          </div>
+
+          <div class="ov-card ov-httpserver-card">
+            <span class="ov-httpserver-icon">
+              <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor"
+                  d="M121.42.02c-.22,0-.45-.02-.67-.02-.08,0-.16,0-.24,0-.17,0-.34,0-.51,0C53.83,0,0,53.83,0,120s53.83,120,120,120,120-53.83,120-120S186.94.79,121.42.02ZM120.75,220.22c-8.48,0-17.74-10.31-24.78-27.58-3.38-8.29-6.12-17.76-8.17-28.03,17.71-1.94,40.1-2.55,65.76.7-2.04,10-4.73,19.23-8.03,27.33-7.04,17.27-16.3,27.58-24.78,27.58ZM120.56,15.01c.19,0,.38,0,.57,0,8.38.3,17.47,10.55,24.4,27.57,3.59,8.8,6.46,18.92,8.55,29.93-26.06,3.42-48.82,2.85-66.83.9,2.1-11.35,5.03-21.78,8.71-30.82,6.99-17.14,16.16-27.42,24.59-27.57ZM85.38,149.79c-1.31-10.26-2-21.07-2-32.17,0-10.09.57-19.94,1.66-29.36,9.39,1.04,19.99,1.72,31.63,1.72s25.47-.75,39.69-2.64c1.16,9.69,1.76,19.85,1.76,30.27,0,11.36-.72,22.42-2.1,32.89-27.59-3.55-51.66-2.85-70.64-.72ZM171.18,85.02c13.73-2.5,28.17-6.07,43.18-11.04,6.81,13.91,10.64,29.52,10.64,46.02s-3.48,30.66-9.71,44.06c-15.47-5.13-30.34-8.77-44.45-11.29,1.49-11.23,2.28-23.06,2.28-35.16,0-11.19-.67-22.14-1.94-32.6ZM206.62,60.72c-13.08,4.18-25.7,7.26-37.73,9.46-2.29-12.19-5.47-23.44-9.47-33.26-2.72-6.67-5.75-12.5-9.05-17.43,23.1,7,42.86,21.76,56.24,41.23ZM91.51,18.93c-3.44,5.05-6.61,11.07-9.43,17.99-4.13,10.13-7.38,21.8-9.68,34.43-17.69-2.97-31.21-7.16-39.37-10.12,13.74-20.26,34.36-35.49,58.48-42.3ZM25.42,74.43c8.58,3.27,23.97,8.3,44.78,11.77-1.18,10.1-1.81,20.65-1.81,31.42,0,11.78.74,23.29,2.15,34.25-22.1,3.72-37.93,9.18-45.79,12.28-6.25-13.43-9.75-28.39-9.75-44.15s3.74-31.78,10.42-45.57ZM32.12,177.39c7.64-2.88,21.75-7.49,40.8-10.72,2.26,11.56,5.34,22.25,9.16,31.63,4.03,9.89,8.75,17.92,13.99,23.94-26.63-6.23-49.39-22.63-63.95-44.85ZM145.84,221.78c5.08-5.97,9.66-13.85,13.58-23.48,3.72-9.13,6.73-19.51,8.97-30.73,12.55,2.24,25.75,5.44,39.46,9.85-14.22,21.68-36.23,37.8-62.02,44.36Z" />
+              </svg>
+            </span>
+            <div class="ov-httpserver-info">
+              <span class="ov-httpserver-title">HTTP Server</span>
+              <span class="ov-httpserver-sub">Estado actual del servidor web</span>
+            </div>
+            <div class="ov-httpserver-stats">
+              <div class="ov-httpserver-stat">
+                <span>Estado</span>
+                <span class="ov-stat-value"><span id="ov-dot-server" class="dash-status-dot"></span><span id="ov-server-status">Detenido</span></span>
+              </div>
+              <div class="ov-httpserver-stat">
+                <span>Dirección</span>
+                <span id="ov-server-address" class="ov-stat-value">—</span>
+              </div>
+              <div class="ov-httpserver-stat">
+                <span>Clientes conectados</span>
+                <span id="ov-server-clients" class="ov-stat-value">—</span>
+              </div>
+            </div>
+            <button id="ov-btn-server-toggle" class="dash-btn-action ov-httpserver-btn" data-running="false">Iniciar</button>
+          </div>
+
+          <div class="ov-bottom-row">
+            <div class="ov-card ov-howto-card">
+              <div class="dash-card-header-icon-title ov-section-title">
+                <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="currentColor"
+                    d="M120,240C53.83,240,0,186.17,0,120S53.83,0,120,0s120,53.83,120,120-53.83,120-120,120ZM120,15C62.1,15,15,62.1,15,120s47.1,105,105,105,105-47.1,105-105S177.9,15,120,15Z" />
+                  <path fill="currentColor"
+                    d="M124.04,183.51h-5.83c-2.26,0-4.08-1.75-4.08-3.9v-79.43c0-2.15,1.83-3.9,4.08-3.9h5.83c2.26,0,4.08,1.75,4.08,3.9v79.43c0,2.15-1.83,3.9-4.08,3.9Z" />
+                  <path fill="currentColor"
+                    d="M124.04,82.5h-5.83c-2.26,0-4.08-1.73-4.08-3.87v-6.68c0-2.14,1.83-3.87,4.08-3.87h5.83c2.26,0,4.08,1.73,4.08,3.87v6.68c0,2.14-1.83,3.87-4.08,3.87Z" />
+                </svg>
+                <span>Cómo usar los overlays</span>
+              </div>
+              <div class="ov-howto-steps">
+                <div class="ov-howto-step">
+                  <span class="ov-step-num">1</span>
+                  <p>Copia la URL del overlay que quieras usar.</p>
+                </div>
+                <div class="ov-howto-step">
+                  <span class="ov-step-num">2</span>
+                  <p>Agrega una fuente de navegador en OBS Studio.</p>
+                </div>
+                <div class="ov-howto-step">
+                  <span class="ov-step-num">3</span>
+                  <p>Pega la URL en la fuente del navegador.</p>
+                </div>
+                <div class="ov-howto-step">
+                  <span class="ov-step-num">4</span>
+                  <p>Ajusta el tamaño y posición a tu gusto.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="ov-card ov-note-card">
+              <div class="dash-card-header-icon-title ov-section-title">
+                <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="currentColor"
+                    d="M120,240C53.83,240,0,186.17,0,120S53.83,0,120,0s120,53.83,120,120-53.83,120-120,120ZM120,15C62.1,15,15,62.1,15,120s47.1,105,105,105,105-47.1,105-105S177.9,15,120,15Z" />
+                  <path fill="currentColor"
+                    d="M124.04,183.51h-5.83c-2.26,0-4.08-1.75-4.08-3.9v-79.43c0-2.15,1.83-3.9,4.08-3.9h5.83c2.26,0,4.08,1.75,4.08,3.9v79.43c0,2.15-1.83,3.9-4.08,3.9Z" />
+                  <path fill="currentColor"
+                    d="M124.04,82.5h-5.83c-2.26,0-4.08-1.73-4.08-3.87v-6.68c0-2.14,1.83-3.87,4.08-3.87h5.83c2.26,0,4.08,1.73,4.08,3.87v6.68c0,2.14-1.83,3.87-4.08,3.87Z" />
+                </svg>
+                <span>Nota</span>
+              </div>
+              <p class="ov-note-text">Asegúrate de que el servidor esté activo para que los overlays funcionen correctamente.</p>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <div id="ov-modal-preview" class="nz-modal-overlay" hidden>
+          <div class="nz-modal nz-modal-wide">
+            <div class="nz-modal-header">
+              <h3 id="ov-preview-title">Vista previa</h3>
+              <button class="nz-modal-close" data-close-modal="ov-modal-preview"><svg class="nz-close-icon" viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z"/></svg></button>
+            </div>
+            <div class="nz-modal-body ov-preview-body">
+              <div class="ov-preview-frame-wrap">
+                <iframe id="ov-preview-iframe" class="ov-preview-iframe" src="" title="Vista previa del overlay"></iframe>
+              </div>
+              <p class="ov-preview-hint">Vista en vivo del overlay real, con los datos que está leyendo DexRelay ahora mismo.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="ov-modal-team-editor" class="nz-modal-overlay" hidden>
+          <div class="nz-modal nz-modal-wide">
+            <div class="nz-modal-header">
+              <h3>Editar Team Overlay</h3>
+              <button class="nz-modal-close" data-close-modal="ov-modal-team-editor"><svg class="nz-close-icon" viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z"/></svg></button>
+            </div>
+            <div class="nz-modal-body ov-preview-body">
+              <div class="ov-preview-frame-wrap">
+                <iframe id="ov-editor-iframe" class="ov-preview-iframe" src="" title="Vista previa del Team Overlay"></iframe>
+              </div>
+
+              <div class="ov-editor-options">
+                <div class="ov-editor-group">
+                  <label class="ov-editor-check">
+                    <input type="checkbox" id="ov-editor-show-hp" />
+                    <span>Mostrar barra de vida</span>
+                  </label>
+                  <label class="ov-editor-check">
+                    <input type="checkbox" id="ov-editor-show-level" />
+                    <span>Mostrar nivel</span>
+                  </label>
+                  <label class="ov-editor-check">
+                    <input type="checkbox" id="ov-editor-show-nickname" />
+                    <span>Mostrar nickname</span>
+                  </label>
+                </div>
+
+                <div class="ov-editor-group ov-editor-sprite-group">
+                  <label class="ov-editor-group-title">Sprite</label>
+                  <label class="ov-editor-radio">
+                    <input type="radio" name="ov-editor-sprite-set" value="team" />
+                    <span>Scarlet &amp; Violet</span>
+                  </label>
+                  <label class="ov-editor-radio">
+                    <input type="radio" name="ov-editor-sprite-set" value="pokemon" />
+                    <span>Artworks Sugimori</span>
+                  </label>
+                  <label class="ov-editor-radio">
+                    <input type="radio" name="ov-editor-sprite-set" value="shuffle" />
+                    <span>Shuffle Estáticos</span>
+                  </label>
+                </div>
+              </div>
+
+              <p class="ov-preview-hint">Los cambios se aplican al instante y se guardan solos -- la vista previa de arriba puede tardar hasta 1-2 segundos en reflejarlos.</p>
+            </div>
+          </div>
         </div>
 
         <div id="page-configuracion" class="page">

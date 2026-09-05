@@ -269,6 +269,7 @@
     initSidebarNav();
     initDashboardActions();
     initNuzlockeActions();
+    initOverlaysActions();
     startMainPoll();
   }
 
@@ -450,6 +451,11 @@
     // llamada extra a Python, badges_service.py ya es la fuente de
     // verdad y ya viaja acá en cada ciclo.
     renderMedallasPage(data.badges, data.http_server && data.http_server.base_url);
+
+    // Overlays (Bloque 4, 05/09/2026): mismo criterio -- reusa
+    // data.http_server/data.http_running de este mismo poll, no
+    // pide nada nuevo a Python.
+    renderOverlaysPage(data);
   }
 
   function setToggleButton(id, running) {
@@ -531,6 +537,19 @@
     if (serverBtn) {
       serverBtn.addEventListener("click", function () {
         var action = serverBtn.dataset.running === "true" ? "stop_http_server" : "start_http_server";
+        api()[action]().then(pollMain);
+      });
+    }
+
+    // Mismo botón que el de la tarjeta HTTP SERVER del Dashboard,
+    // pero en la página Overlays (05/09/2026) -- data-running lo
+    // mantiene al día setToggleButton() en cada ciclo de
+    // pollMain() igual que el de arriba, así que la acción a
+    // disparar se decide de la misma forma.
+    var ovServerBtn = document.getElementById("ov-btn-server-toggle");
+    if (ovServerBtn) {
+      ovServerBtn.addEventListener("click", function () {
+        var action = ovServerBtn.dataset.running === "true" ? "stop_http_server" : "start_http_server";
         api()[action]().then(pollMain);
       });
     }
@@ -1089,9 +1108,45 @@
   }
 
   var OVERLAY_DEFS = [
-    { name: "Team", path: "/overlay/team" },
-    { name: "Badges", path: "/overlay/badges" },
-    { name: "Nuzlocke", path: "/overlay/nuzlocke" },
+    {
+      id: "team",
+      name: "Team Overlay",
+      path: "/overlay/team",
+      desc: "Muestra tu equipo actual",
+      width: 1170,
+      height: 210,
+      editable: true,
+      icon:
+        '<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" ' +
+        'd="M239.76,112.5C235.87,49.81,183.65,0,120,0S4.13,49.81.24,112.5h-.24v15h.24c3.89,62.69,56.11,112.5,119.76,112.5s115.87-49.81,119.76-112.5h.24v-15h-.24ZM120,15c55.37,0,100.87,43.09,104.74,97.5h-65.55c-3.5-17.88-19.3-31.41-38.19-31.41s-34.68,13.53-38.19,31.41H15.26C19.13,58.09,64.63,15,120,15ZM121,96.09c13.19,0,23.91,10.73,23.91,23.91s-10.73,23.91-23.91,23.91-23.91-10.73-23.91-23.91,10.73-23.91,23.91-23.91ZM120,225c-55.37,0-100.87-43.09-104.74-97.5h67.55c3.5,17.88,19.3,31.41,38.19,31.41s34.68-13.53,38.19-31.41h65.55c-3.86,54.41-49.36,97.5-104.74,97.5Z" /></svg>',
+    },
+    {
+      id: "badges",
+      name: "Badges Overlay",
+      path: "/overlay/badges",
+      desc: "Muestra tus medallas obtenidas",
+      width: 656,
+      height: 100,
+      icon:
+        '<svg viewBox="0 0 145.1 220.23" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="12">' +
+        '<path d="M59.44,6.3l-50.39-.3c-2.28-.01-3.76,2.4-2.71,4.42l32.99,63.56c1.19,2.3,4.53,2.14,5.5-.26l21.98-54.43c.33-.82.29-1.74-.12-2.53l-4.58-8.83c-.52-1-1.55-1.63-2.67-1.63Z" />' +
+        '<path d="M94.33,12.62c-1.24,0-2.35.75-2.81,1.89l-29.37,73.01c-.97,2.4,1.19,4.23,3.77,4,4.81-.42,12.52-.81,18.12-.28,7.38.7,11.48,2.54,17.98,5.49,1.58.72,3.44,0,4.09-1.6L139.01,14.3c.31-.77-.25-1.62-1.09-1.62l-43.59-.07Z" />' +
+        '<path d="M73.34,185.86c-8.78,0-16.19-5.33-18.55-12.62h-30.45c2.62,23.03,23.99,40.99,49.98,40.99s47.36-17.96,49.98-40.99h-32.4c-2.36,7.3-9.77,12.62-18.55,12.62Z" />' +
+        '<path d="M73.34,142.07c8.95,0,16.48,5.62,18.69,13.26h32.26c-2.62-23.37-23.99-41.6-49.98-41.6s-47.36,18.23-49.98,41.6h30.32c2.2-7.63,9.73-13.26,18.69-13.26Z" /></g></svg>',
+    },
+    {
+      id: "nuzlocke",
+      name: "Nuzlocke Overlay",
+      path: "/overlay/nuzlocke",
+      desc: "Tracker Nuzlocke con cementerio y estadísticas",
+      width: 376,
+      height: 177,
+      icon:
+        '<svg viewBox="0 0 203.71 233.8" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">' +
+        '<ellipse cx="99.19" cy="193.57" rx="45.58" ry="15.45" /><circle cx="100.76" cy="63.67" r="20.8" />' +
+        '<path d="M126.28,160.34l28.1-53.6c2.44-3.89,12.15-22.38,12.87-39.98.7-17.04-5.58-33.37-17.68-45.98C136.89,7.57,119.1,0,100.76,0,64.88,0,35.67,29.1,34.27,66.25c-.6,15.89,10.36,36.52,12.98,40.69l28.06,53.52c-26.73,2.28-48.93,8.27-62.26,16.89h-.11s-2.04,1.46-2.04,1.46c-9.01,6.52-10.9,13.25-10.9,17.75,0,24.44,51.24,37.23,101.86,37.23,45.76,0,82.74-9.16,95.79-23.51l.26.03,2.21-3.11c2.39-3.37,3.6-6.95,3.6-10.65,0-20.86-37.45-32.87-77.43-36.23ZM58.29,100.07c-2.05-3.08-11.47-21.6-11.02-33.33,1.13-30.13,24.63-53.74,53.5-53.74,14.82,0,29.19,6.12,39.43,16.78,9.63,10.03,14.63,22.97,14.07,36.44-.56,13.77-8.77,30.41-10.92,33.64l-.19.28-41.97,80.05-10.54-18.49-32.01-61.07-.35-.58ZM81.89,173.01l6.54,12.47-49.6-5.34c11.86-3.59,26.7-6.08,43.07-7.13ZM101.86,220.8c-24.81,0-48.05-3.09-65.43-8.69-16.18-5.21-23.42-11.56-23.42-15.54,0-1.68,1.27-3.67,3.63-5.73l160.33,18.03c-14.78,6.68-41.03,11.94-75.1,11.94ZM112.53,188.07l7.47-15.16c20.04,1.27,38.24,4.65,51.6,9.61,13.97,5.18,19.01,10.73,19.11,13.96l-78.18-8.41Z" /></g>' +
+        '<path fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="13" d="M160.76,66.5c1.36-33.11-26.86-60-60-60s-58.75,26.88-60,60c-.52,13.9,9.83,33.75,12.11,37.18l45.23,86.28c1.12,2.14,4.19,2.14,5.31,0l45.33-86.48c2.28-3.42,11.36-21.25,12-36.98Z" /></svg>',
+    },
   ];
 
   function renderDashOverlays(baseUrl) {
@@ -1122,6 +1177,263 @@
       });
 
       container.appendChild(item);
+    });
+  }
+
+  // ===================== PÁGINA OVERLAYS (Bloque 4, 05/09/2026) =====================
+
+  var ovOverlaysBuilt = false;
+
+  function renderOverlaysPage(data) {
+    if (!data.http_server) {
+      return;
+    }
+
+    var baseUrl = data.http_server.base_url;
+    var running = !!data.http_running;
+
+    if (!ovOverlaysBuilt) {
+      buildOverlaysList(baseUrl);
+      ovOverlaysBuilt = true;
+    }
+
+    OVERLAY_DEFS.forEach(function (overlay) {
+      var url = baseUrl + overlay.path;
+      var urlInput = document.getElementById("ov-url-" + overlay.id);
+      if (urlInput && urlInput.value !== url) {
+        urlInput.value = url;
+      }
+
+      var thumb = document.getElementById("ov-thumb-" + overlay.id);
+      if (thumb) {
+        thumb.classList.toggle("is-unavailable", !running);
+      }
+
+      var statusRow = document.getElementById("ov-status-row-" + overlay.id);
+      var statusText = document.getElementById("ov-status-text-" + overlay.id);
+      if (statusRow && statusText) {
+        statusRow.classList.toggle("on", running);
+        statusText.textContent = running ? "Disponible" : "No disponible";
+      }
+      setDashDot("ov-dot-" + overlay.id, running);
+    });
+
+    // Tarjeta HTTP SERVER de esta página -- mismos campos que la
+    // tarjeta del Dashboard (data.http_running/data.http_server),
+    // acá nada más se repite la lectura, no se pide nada nuevo.
+    setDashDot("ov-dot-server", running);
+    setDashStatus("ov-server-status", running, "Activo", "Detenido");
+    setToggleButton("ov-btn-server-toggle", running);
+    setText(
+      "ov-server-address",
+      "http://" + data.http_server.host + ":" + data.http_server.port
+    );
+    setText(
+      "ov-server-clients",
+      running ? String(data.http_server.clients || 0) : "—"
+    );
+  }
+
+  function buildOverlaysList(baseUrl) {
+    var container = document.getElementById("ov-overlay-list");
+    if (!container) {
+      return;
+    }
+    container.innerHTML = "";
+
+    OVERLAY_DEFS.forEach(function (overlay) {
+      var url = baseUrl + overlay.path;
+
+      var item = document.createElement("div");
+      item.className = "ov-overlay-item";
+      item.innerHTML =
+        '<div id="ov-thumb-' + overlay.id + '" class="ov-overlay-thumb"><img id="ov-thumb-img-' + overlay.id + '" class="ov-overlay-thumb-img" alt="' + overlay.name + '" /></div>' +
+        '<div class="ov-overlay-details">' +
+        '<div class="ov-overlay-name">' + overlay.name + "</div>" +
+        '<div class="ov-overlay-desc">' + overlay.desc + "</div>" +
+        '<div id="ov-status-row-' + overlay.id + '" class="ov-overlay-status-row">' +
+        '<span id="ov-dot-' + overlay.id + '" class="dash-status-dot"></span>' +
+        '<span id="ov-status-text-' + overlay.id + '">No disponible</span>' +
+        '<span class="ov-tag">HTML</span><span class="ov-tag">' + overlay.width + "x" + overlay.height + "</span>" +
+        "</div>" +
+        "</div>" +
+        '<div class="ov-overlay-url-col">' +
+        "<label>URL</label>" +
+        '<div class="ov-overlay-url-row">' +
+        '<input id="ov-url-' + overlay.id + '" class="ov-overlay-url-input" type="text" readonly value="' + url + '" />' +
+        '<button class="ov-icon-btn" data-action="copy" title="Copiar URL"><svg viewBox="0 0 210 240" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M170,60h-30V25c0-13.81-11.19-25-25-25H25C11.19,0,0,11.19,0,25v120c0,13.81,11.19,25,25,25h30v30c0,13.81,11.19,25,25,25h90c13.81,0,25-11.19,25-25v-115c0-13.81-11.19-25-25-25ZM25,150c-2.76,0-5-2.24-5-5V25c0-2.76,2.24-5,5-5h90c2.76,0,5,2.24,5,5v35h-45c-13.81,0-25,11.19-25,25v70h-25ZM175,200c0,2.76-2.24,5-5,5h-90c-2.76,0-5-2.24-5-5v-115c0-2.76,2.24-5,5-5h90c2.76,0,5,2.24,5,5v115Z"/></svg></button>' +
+        "</div>" +
+        '<div class="ov-overlay-actions-row">' +
+        '<button class="dash-btn-action" data-action="open">Abrir overlay</button>' +
+        '<button class="dash-btn-sm" data-action="preview">Vista previa</button>' +
+        (overlay.editable ? '<button class="dash-btn-sm" data-action="edit">Editar</button>' : "") +
+        "</div>" +
+        "</div>";
+
+      item.querySelector('[data-action="copy"]').addEventListener("click", function () {
+        navigator.clipboard.writeText(document.getElementById("ov-url-" + overlay.id).value);
+      });
+      item.querySelector('[data-action="open"]').addEventListener("click", function () {
+        api().open_external(document.getElementById("ov-url-" + overlay.id).value);
+      });
+      item.querySelector('[data-action="preview"]').addEventListener("click", function () {
+        openOverlayPreview(overlay, document.getElementById("ov-url-" + overlay.id).value);
+      });
+
+      var editBtn = item.querySelector('[data-action="edit"]');
+      if (editBtn) {
+        editBtn.addEventListener("click", function () {
+          openTeamEditor(overlay, document.getElementById("ov-url-" + overlay.id).value);
+        });
+      }
+
+      container.appendChild(item);
+
+      // Miniatura real -- se pide una sola vez acá (no en cada
+      // poll, la captura no cambia) vía el bridge de pywebview, no
+      // por HTTP -- así se ve incluso con el servidor detenido,
+      // mismo criterio que el logo/fondo de la pantalla Bienvenida
+      // (ver api.py, _asset_data_uri()).
+      api()
+        .get_overlay_preview_data_uri(overlay.id)
+        .then(function (dataUri) {
+          if (!dataUri) {
+            return;
+          }
+          var img = document.getElementById("ov-thumb-img-" + overlay.id);
+          if (img) {
+            img.src = dataUri;
+          }
+        });
+    });
+  }
+
+  // La miniatura de la lista NUNCA abre una conexión real (ver
+  // comentario de .ov-overlay-thumb en style.css) -- "Vista
+  // previa" es la única vía, y a propósito: setear/limpiar el
+  // `src` acá mismo (no dejarlo fijo en el HTML) es lo que hace
+  // que la conexión exista solo mientras el modal está abierto,
+  // así "Clientes conectados" (HTTPServer.get_active_connections())
+  // sigue siendo un número real y no uno inflado por mirar esta
+  // página.
+  //
+  // El frame se muestra al tamaño REAL del overlay (overlay.width
+  // x overlay.height, ver OVERLAY_DEFS) -- ya no hay un 16:9/
+  // 1920x1080 de referencia único para escalar: cada overlay tiene
+  // su propia resolución pensada para OBS (05/09/2026).
+  function openOverlayPreview(overlay, url) {
+    document.getElementById("ov-preview-title").textContent = "Vista previa — " + overlay.name;
+
+    var wrap = document.querySelector("#ov-modal-preview .ov-preview-frame-wrap");
+    if (wrap) {
+      wrap.style.width = overlay.width + "px";
+      wrap.style.height = overlay.height + "px";
+    }
+
+    document.getElementById("ov-preview-iframe").src = url;
+    openModal("ov-modal-preview");
+  }
+
+  function closeOverlayPreview() {
+    closeModal("ov-modal-preview");
+    document.getElementById("ov-preview-iframe").src = "";
+  }
+
+  function initOverlaysActions() {
+    var closeBtn = document.querySelector('[data-close-modal="ov-modal-preview"]');
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeOverlayPreview);
+    }
+
+    var overlayBg = document.getElementById("ov-modal-preview");
+    if (overlayBg) {
+      overlayBg.addEventListener("click", function (event) {
+        if (event.target === overlayBg) {
+          closeOverlayPreview();
+        }
+      });
+    }
+
+    // Editor del Team Overlay (05/09/2026) -- mismo patrón de
+    // cierre que el modal de "Vista previa" de arriba (limpiar el
+    // `src` del iframe al cerrar, no solo ocultar el modal).
+    var editorCloseBtn = document.querySelector('[data-close-modal="ov-modal-team-editor"]');
+    if (editorCloseBtn) {
+      editorCloseBtn.addEventListener("click", closeTeamEditor);
+    }
+
+    var editorBg = document.getElementById("ov-modal-team-editor");
+    if (editorBg) {
+      editorBg.addEventListener("click", function (event) {
+        if (event.target === editorBg) {
+          closeTeamEditor();
+        }
+      });
+    }
+
+    // Los 3 checkboxes y el radio de sprite se bindean UNA sola
+    // vez acá (el modal es HTML estático, no se reconstruye en
+    // cada poll) -- cada cambio guarda de inmediato vía
+    // save_team_overlay_settings() (bridge directo, no HTTP,
+    // ver api.py), sin botón "Guardar" aparte: la vista previa de
+    // arriba ya refleja el cambio sola en su próximo poll de
+    // 1.5s (overlays/team/app.js).
+    ["ov-editor-show-hp", "ov-editor-show-level", "ov-editor-show-nickname"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", onTeamEditorSettingChanged);
+      }
+    });
+
+    document.querySelectorAll('input[name="ov-editor-sprite-set"]').forEach(function (el) {
+      el.addEventListener("change", onTeamEditorSettingChanged);
+    });
+  }
+
+  // La vista previa de este modal es la MISMA idea que "Vista
+  // previa" (sección de arriba): el iframe solo conecta mientras
+  // el modal está abierto, así que abrir el editor también cuenta
+  // como una conexión real en "Clientes conectados" mientras dure.
+  function openTeamEditor(overlay, url) {
+    var wrap = document.querySelector("#ov-modal-team-editor .ov-preview-frame-wrap");
+    if (wrap) {
+      wrap.style.width = overlay.width + "px";
+      wrap.style.height = overlay.height + "px";
+    }
+
+    api()
+      .get_team_overlay_settings()
+      .then(function (settings) {
+        document.getElementById("ov-editor-show-hp").checked = settings.show_hp !== false;
+        document.getElementById("ov-editor-show-level").checked = settings.show_level !== false;
+        document.getElementById("ov-editor-show-nickname").checked = settings.show_nickname !== false;
+
+        var spriteSet = settings.sprite_set || "team";
+        var radio = document.querySelector(
+          'input[name="ov-editor-sprite-set"][value="' + spriteSet + '"]'
+        );
+        if (radio) {
+          radio.checked = true;
+        }
+      });
+
+    document.getElementById("ov-editor-iframe").src = url;
+    openModal("ov-modal-team-editor");
+  }
+
+  function closeTeamEditor() {
+    closeModal("ov-modal-team-editor");
+    document.getElementById("ov-editor-iframe").src = "";
+  }
+
+  function onTeamEditorSettingChanged() {
+    var spriteRadio = document.querySelector('input[name="ov-editor-sprite-set"]:checked');
+
+    api().save_team_overlay_settings({
+      show_hp: document.getElementById("ov-editor-show-hp").checked,
+      show_level: document.getElementById("ov-editor-show-level").checked,
+      show_nickname: document.getElementById("ov-editor-show-nickname").checked,
+      sprite_set: spriteRadio ? spriteRadio.value : "team",
     });
   }
 

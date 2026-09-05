@@ -2497,6 +2497,469 @@ body {
 }
 
 /* =========================================================
+   PÁGINA OVERLAYS (GUI v2, Bloque 4, 05/09/2026)
+
+   Mismo criterio de wrapper centrado + @container que el resto
+   de las páginas (.dashboard-inner, .pokemon-page-inner, etc.).
+   Ancho de referencia: 1008px, igual que Dashboard/Nuzlocke, para
+   que el título quede alineado con el resto de la app al navegar
+   entre páginas.
+========================================================= */
+
+.overlays-page-inner {
+  max-width: 1008px;
+  margin: 0 auto;
+}
+
+.ov-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.ov-section-title {
+  margin-bottom: 14px;
+}
+
+/* ---- Lista de overlays disponibles ---- */
+
+.ov-overlay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ov-overlay-item {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+
+/* Miniatura -- captura real de cada overlay (provista por el
+   usuario, 05/09/2026), no un ícono genérico. Fondo blanco a
+   propósito: las capturas vienen con fondo blanco opaco (no
+   transparente), así que un fondo oscuro dejaría un recuadro
+   blanco feo alrededor -- blanco acá hace que se vea integrada.
+   Sigue sin ser una conexión real (ver comentario de "Vista
+   previa" más abajo): es una imagen estática, cero costo de
+   "Clientes conectados". */
+.ov-overlay-thumb {
+  flex: none;
+  width: 168px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.ov-overlay-thumb-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.ov-overlay-thumb.is-unavailable .ov-overlay-thumb-img {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.ov-overlay-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ov-overlay-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ov-overlay-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ov-overlay-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ov-overlay-status-row.on {
+  color: var(--success);
+}
+
+.ov-tag {
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+  margin-left: 6px;
+}
+
+.ov-overlay-url-col {
+  flex: none;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ov-overlay-url-col label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+}
+
+.ov-overlay-url-row {
+  display: flex;
+  gap: 6px;
+}
+
+.ov-overlay-url-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  font-size: 11.5px;
+  font-family: inherit;
+}
+
+.ov-overlay-url-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ov-icon-btn {
+  flex: none;
+  cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ov-icon-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ov-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.ov-overlay-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ov-overlay-actions-row .dash-btn-action {
+  margin-top: 0;
+  flex: 1;
+}
+
+.ov-overlay-actions-row .dash-btn-sm {
+  flex: none;
+}
+
+/* ---- Tarjeta HTTP SERVER ---- */
+
+.ov-httpserver-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.ov-httpserver-icon {
+  flex: none;
+  display: flex;
+  color: var(--accent);
+}
+
+.ov-httpserver-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.ov-httpserver-info {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+
+.ov-httpserver-title {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.ov-httpserver-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.ov-httpserver-stats {
+  flex: 1;
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.ov-httpserver-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 700;
+}
+
+.ov-stat-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.ov-httpserver-btn {
+  flex: none;
+  width: auto;
+  margin-top: 0;
+  padding: 8px 18px;
+}
+
+/* ---- Fila inferior: Cómo usar / Nota ---- */
+
+.ov-bottom-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+}
+
+.ov-howto-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.ov-howto-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ov-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.ov-howto-step p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ov-note-card {
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-elevated));
+}
+
+.ov-note-text {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ---- Modal de vista previa (reusa .nz-modal-overlay/.nz-modal,
+   ver sección Nuzlocke -- es el mismo componente genérico de
+   modal, no uno nuevo) ----
+
+   05/09/2026: cada overlay tiene su propia resolución nativa
+   (team 1170x210, badges 656x100, nuzlocke 376x177 -- ya no
+   1920x1080 para los tres por igual), así que ni el modal ni el
+   iframe pueden tener un tamaño fijo único. En vez de escalar con
+   `transform` (que necesitaba un solo 16:9 de referencia),
+   ov-preview-frame-wrap ahora toma su width/height REAL en px
+   desde JS (openOverlayPreview(), un inline style por overlay) y
+   el iframe se renderiza 1:1 adentro -- son resoluciones chicas
+   (máximo 1170px de ancho), no hace falta encoger nada. El modal
+   se ajusta solo (fit-content) al tamaño que el overlay
+   necesite, en vez de forzar siempre los mismos 960px. */
+
+.nz-modal.nz-modal-wide {
+  width: fit-content;
+}
+
+.ov-preview-frame-wrap {
+  /* width/height reales los pone JS por overlay (inline style);
+     estos son solo un placeholder razonable antes de esa
+     asignación. */
+  width: 960px;
+  height: 200px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #05070c;
+  border: 1px solid var(--border);
+}
+
+.ov-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.ov-preview-hint {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+/* ---- Editor del Team Overlay (05/09/2026): reusa el mismo
+   modal/iframe genéricos que "Vista previa" -- .ov-preview-body
+   es flex-column, así que las opciones de abajo caen naturalmente
+   debajo del frame sin agregar wrapper nuevo. ---- */
+
+.ov-editor-options {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.ov-editor-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ov-editor-group-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.ov-editor-check,
+.ov-editor-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ov-editor-check input,
+.ov-editor-radio input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+@container (max-width: 900px) {
+  .overlays-page-inner {
+    max-width: 700px;
+  }
+
+  .ov-overlay-item {
+    flex-wrap: wrap;
+  }
+
+  .ov-overlay-url-col {
+    width: 100%;
+  }
+
+  .ov-bottom-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ov-howto-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container (max-width: 560px) {
+  .overlays-page-inner {
+    max-width: 380px;
+  }
+
+  .ov-overlay-thumb {
+    width: 100%;
+  }
+
+  .ov-httpserver-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ov-httpserver-btn {
+    width: 100%;
+  }
+
+  .ov-howto-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
    PÁGINA NUZLOCKE (GUI v2, 04/09/2026)
 
    Mismo criterio de wrapper centrado + @container que
