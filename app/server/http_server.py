@@ -117,6 +117,20 @@ class HTTPServer:
             project_root / "assets" / "gym_leaders"
         )
 
+        # Sprites estilo Pokémon Shuffle (05/09/2026, provistos por
+        # el usuario) -- SOLO para la tabla "Encuentros por Ruta"
+        # de la página Nuzlocke de la GUI, a pedido explícito
+        # ("solo en esa sección"). Carpeta y ruta aparte de
+        # assets/pokemon_full/ y overlays/team/sprites/ a
+        # propósito, mismo criterio que esas dos: no tocar un set
+        # que ya funciona bien en otro lado. Curado de un pack de
+        # ~1300 con variantes (mega/regionales/etc.) a solo las
+        # formas base (nombre "NNN.png", 3 dígitos, sin sufijo) --
+        # 801 sprites, IDs 001-802.
+        self.pokemon_shuffle_sprites_directory = (
+            project_root / "assets" / "pokemon_shuffle"
+        )
+
         self._server: ThreadingHTTPServer | None = None
         self._thread: Thread | None = None
 
@@ -175,6 +189,7 @@ class HTTPServer:
         panel_directory = self.panel_directory
         pokemon_sprites_directory = self.pokemon_sprites_directory
         gym_leaders_directory = self.gym_leaders_directory
+        pokemon_shuffle_sprites_directory = self.pokemon_shuffle_sprites_directory
         nuzlocke_service = self.nuzlocke_service
         species_catalog = self.species_catalog
         location_catalog = self.location_catalog
@@ -217,6 +232,9 @@ class HTTPServer:
                     return
 
                 if self._serve_gym_leader_sprite():
+                    return
+
+                if self._serve_pokemon_shuffle_sprite():
                     return
 
                 if self.path == "/api/status":
@@ -825,6 +843,31 @@ class HTTPServer:
 
                 self._send_file(
                     gym_leaders_directory,
+                    relative_path,
+                    self._content_type(relative_path),
+                )
+                return True
+
+            def _serve_pokemon_shuffle_sprite(self) -> bool:
+                """
+                Sirve /sprites/pokemon_shuffle/{NNN}.png -- mismo
+                patrón que _serve_pokemon_sprite(), pero para el set
+                estilo Shuffle usado SOLO en la tabla "Encuentros
+                por Ruta" del Nuzlocke Tracker (05/09/2026). El
+                nombre de archivo va con 3 dígitos con cero a la
+                izquierda (ej. "025.png") -- el frontend arma la URL
+                así, no hace falta normalizar acá.
+                """
+
+                prefix = "/sprites/pokemon_shuffle/"
+
+                if not self.path.startswith(prefix):
+                    return False
+
+                relative_path = self.path[len(prefix):]
+
+                self._send_file(
+                    pokemon_shuffle_sprites_directory,
                     relative_path,
                     self._content_type(relative_path),
                 )
