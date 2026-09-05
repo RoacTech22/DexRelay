@@ -71,6 +71,10 @@ while (true)
                 HandlePokemonDetails(root);
                 break;
 
+            case "save_info":
+                HandleSaveInfo(root);
+                break;
+
             default:
                 WriteError(
                     $"Acción no soportada: {action}"
@@ -289,6 +293,29 @@ static void HandleMetLocation(JsonElement root)
         eggLocationName,
         version = pk.Version.ToString(),
         shiny = pk.IsShiny,
+        // Bug real corregido (05/09/2026, reportado por el
+        // usuario): una captura que va directo a la Caja PC no
+        // trae nivel en los 232 bytes crudos que lee
+        // read_box() -- ese formato no incluye el bloque extra de
+        // stats que sí tiene una lectura de party
+        // (app/readers/azahar_reader.py:build_pokemon_data()), así
+        // que pokemon.level() del lado Python daba 0 para esos
+        // casos. CurrentLevel es la misma propiedad que usa
+        // pokemon_details (página Pokémon) -- PKHeX lo calcula
+        // solo a partir de la experiencia y la curva de
+        // crecimiento de la especie, ya presentes en estos mismos
+        // 232 bytes, así que sirve como respaldo confiable sin
+        // memoria nueva. build_pokemon_data() lo usa solo cuando
+        // pokemon.level() da 0 (Caja PC) -- no reemplaza el nivel
+        // ya correcto de una lectura de party.
+        level = pk.CurrentLevel,
+        // Ícono de género en la tabla de encuentros/pendientes/
+        // cementerio del Nuzlocke Tracker (05/09/2026) -- misma
+        // propiedad que ya usa pokemon_details (página Pokémon)
+        // para esto, reutilizada acá sin golpear el bridge de
+        // nuevo porque esta llamada ya tiene el PK6 completo en
+        // memoria.
+        genderId = pk.Gender,
         // 29/08/2026, a pedido del usuario: el overlay del equipo
         // mostraba el sprite de la especie REAL de un huevo sin
         // nacer todavía (spoiler) -- species_id ya venía resuelto
@@ -515,6 +542,77 @@ static void HandlePokemonDetails(JsonElement root)
             speed = pk.Stat_SPE,
         },
         moves,
+    };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+// GUI v2, página Nuzlocke (04/09/2026) -- tiempo de juego real
+// para la tarjeta de estadísticas. A diferencia de todas las
+// demás acciones de este bridge, acá NO se manda ningún byte por
+// stdin -- se manda la RUTA del archivo de guardado
+// (app/services/save_file_locator.py ya la resolvió del lado de
+// Python) y el bridge lo lee directo del disco. Motivo: el
+// archivo de guardado real de Gen 6 pesa varios cientos de KB,
+// mandarlo como base64 por una sola línea de stdin (como sí se
+// hace con los 232 bytes de un Pokémon) infla el payload ~33% y
+// no aporta nada -- el bridge corre en la misma máquina y ya
+// tiene acceso directo al archivo.
+static void HandleSaveInfo(JsonElement root)
+{
+    string path =
+        root.GetProperty("path").GetString()
+        ?? "";
+
+    // BUG REAL corregido (04/09/2026, reportado por el usuario
+    // con el error de compilación exacto): esta versión de
+    // PKHeX.Core (26.7.7) ya NO tiene
+    // SaveUtil.GetVariantSAV(byte[]) -- esa era la API vieja
+    // (todavía aparece en varios ejemplos/documentación externa
+    // desactualizada). La API actual carga directo desde una
+    // ruta con SaveUtil.GetSaveFile(path), que además evita tener
+    // que leer los bytes a mano acá.
+    SaveFile? sav;
+
+    try
+    {
+        sav = SaveUtil.GetSaveFile(path);
+    }
+    catch (Exception error)
+    {
+        WriteError(
+            $"No se pudo leer el archivo de guardado: "
+            + $"{error.Message}"
+        );
+
+        return;
+    }
+
+    if (sav is null)
+    {
+        WriteError(
+            "El archivo no fue reconocido como un "
+            + "guardado válido de PKHeX."
+        );
+
+        return;
+    }
+
+    // PlayedHours/Minutes/Seconds son las mismas propiedades que
+    // PKHeX muestra en su pestaña "Trainer Info" -- exactamente
+    // el contador que el juego lleva en pantalla de inicio. Si
+    // esta versión de PKHeX.Core usa otro nombre de propiedad acá,
+    // esto no compila -- avisar el error de compilación exacto
+    // para ajustarlo, no adivinar un nombre alternativo.
+    var response = new
+    {
+        ok = true,
+        playedHours = sav.PlayedHours,
+        playedMinutes = sav.PlayedMinutes,
+        playedSeconds = sav.PlayedSeconds,
     };
 
     Console.WriteLine(
