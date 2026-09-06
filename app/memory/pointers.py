@@ -305,6 +305,50 @@ def get_box_base_address(process_name):
     )
 
 
+# Cantidad total de cajas en ORAS (estandar del juego, 31 cajas de
+# 30 slots cada una). Al igual que BOX_SLOT_COUNT, es el numero
+# estandar del juego -- no algo que haya hecho falta medir.
+BOX_COUNT = 31
+
+# Tamaño en bytes de una caja completa (30 slots * 232 bytes cada
+# uno) -- usado para calcular donde empieza cada caja siguiente,
+# asumiendo que son contiguas (ver get_box_address() mas abajo).
+BOX_BLOCK_SIZE = BOX_SLOT_COUNT * BOX_SLOT_STRIDE
+
+
+def get_box_address(process_name, box_index):
+    """Direccion base de la caja `box_index` (1 = Caja 1, 2 = Caja
+    2, etc.), para el `process_name` dado.
+
+    CONFIRMADO EMPIRICAMENTE (06/09/2026,
+    tools/probes/party/observar_cajas_pc_contiguas.py) que la Caja 2
+    vive exactamente en BOX_BASE_ADDRESS + BOX_BLOCK_SIZE, sin
+    padding entre cajas -- mismo patron que ya se habia confirmado
+    para los SLOTS dentro de la Caja 1 (sin padding entre ellos,
+    BOX_SLOT_STRIDE == SLOT_DATA_SIZE exacto). La confirmacion real:
+    con un Mudkip apodado "Daron" depositado a mano en la Caja 2
+    real del usuario, aparecio exactamente en esa direccion
+    calculada -- mismo nivel de confirmacion (un salto real,
+    Pokemon reconocible) que el que ya se acepto en su momento para
+    validar BOX_SLOT_STRIDE dentro de la Caja 1.
+
+    Las Cajas 3-31 NO se probaron una por una todavia -- se asume
+    que el patron de contigüidad se mantiene igual (mismo array
+    compacto, sin padding, para las 31 cajas completas) por ser la
+    hipotesis mas simple y ya validada en el primer salto, pero
+    sigue siendo una EXTRAPOLACION no verificada slot por slot mas
+    alla de la Caja 2. Si en el futuro aparece algun dato raro en
+    una caja especifica (3+), es el primer lugar a sospechar.
+
+    `box_index` es 1-based (Caja 1 = box_index 1), para que coincida
+    con la numeracion que ve el usuario en el juego.
+    """
+
+    base = get_box_base_address(process_name)
+
+    return base + (box_index - 1) * BOX_BLOCK_SIZE
+
+
 # ============================================================
 # ZONA/RUTA ACTUAL DEL JUGADOR
 # ============================================================
