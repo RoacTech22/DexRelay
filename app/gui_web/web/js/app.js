@@ -276,6 +276,7 @@
 
     showView("view-main");
     initSidebarNav();
+    initTabs();
     initDashboardActions();
     initNuzlockeActions();
     initOverlaysActions();
@@ -336,6 +337,93 @@
     } else {
       stopLogsPoll();
     }
+  }
+
+  // ---------- Componente genérico: pestañas de página (06/09/2026,
+  // roadmap Fase A pieza de base) ----------
+  //
+  // Este componente NO sabe nada de Nuzlocke ni de Pokémon en
+  // particular -- primer uso real va a ser la reorganización en
+  // pestañas de esas dos páginas (roadmap secciones 3.3 y 5.3),
+  // pero se resuelve acá UNA sola vez para que ninguna de las dos
+  // termine con su propio sistema de tabs que se comporte distinto.
+  //
+  // Distinto de switchToPage() de más arriba: eso cambia de PÁGINA
+  // completa (sidebar). Esto es un nivel más adentro -- subrutas
+  // DENTRO de una página que ya está activa. Por eso no reutiliza
+  // ".nav-item"/".page": mismo motivo que llevó a un estilo visual
+  // distinto en el CSS (ver style.css, sección homónima) -- que el
+  // usuario nunca confunda "cambié de página" con "cambié de
+  // pestaña interna" porque se ven iguales.
+  //
+  // Marcado esperado en el HTML (ver ejemplo real cuando se cablee
+  // en Nuzlocke/Pokémon):
+  //
+  //   <div class="tabs-bar" data-tabs-group="ID">
+  //     <button class="tab-btn active" data-tab="uno">Uno</button>
+  //     <button class="tab-btn" data-tab="dos">Dos</button>
+  //   </div>
+  //   <div data-tabs-panels="ID">
+  //     <div class="tab-panel active" data-tab-panel="uno">...</div>
+  //     <div class="tab-panel" data-tab-panel="dos">...</div>
+  //   </div>
+  //
+  // "ID" (data-tabs-group / data-tabs-panels) tiene que coincidir
+  // entre la tira de botones y su contenedor de paneles -- así
+  // pueden convivir varios grupos de pestañas independientes en la
+  // misma página sin pisarse (ej. Nuzlocke y Pokémon, cada una con
+  // el suyo).
+  //
+  // Al cambiar de pestaña, dispara un evento "dexrelay:tabchange"
+  // sobre el contenedor de paneles (detail.group / detail.tab) --
+  // así cada página reacciona a su manera (pedir datos bajo
+  // demanda, arrancar/parar un poll propio de esa sub-vista) sin
+  // que este componente tenga que conocer esa lógica. Mismo
+  // espíritu que ya usa switchToPage() con el poll de Pokémon/
+  // Nuzlocke, un nivel más adentro.
+  function initTabs() {
+    document
+      .querySelectorAll(".tabs-bar[data-tabs-group]")
+      .forEach(function (bar) {
+        var group = bar.dataset.tabsGroup;
+
+        bar.querySelectorAll(".tab-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            switchTab(group, btn.dataset.tab);
+          });
+        });
+      });
+  }
+
+  function switchTab(group, tab) {
+    var bar = document.querySelector(
+      '.tabs-bar[data-tabs-group="' + group + '"]'
+    );
+    var panelsContainer = document.querySelector(
+      '[data-tabs-panels="' + group + '"]'
+    );
+
+    // Silencioso si el grupo no existe -- mismo criterio que el
+    // resto de la GUI ante marcado incompleto, no tiene sentido
+    // tirar una excepción por un data-tabs-group mal tipeado en
+    // vez de simplemente no hacer nada.
+    if (!bar || !panelsContainer) {
+      return;
+    }
+
+    bar.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+
+    panelsContainer.querySelectorAll(".tab-panel").forEach(function (panel) {
+      panel.classList.toggle("active", panel.dataset.tabPanel === tab);
+    });
+
+    panelsContainer.dispatchEvent(
+      new CustomEvent("dexrelay:tabchange", {
+        detail: { group: group, tab: tab },
+      })
+    );
   }
 
   function startPokemonPoll() {

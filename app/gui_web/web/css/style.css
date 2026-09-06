@@ -945,6 +945,74 @@ body {
   max-width: 560px;
 }
 
+/* ===================== COMPONENTE GENÉRICO: PESTAÑAS DE PÁGINA ===================== */
+
+/* Pestañas/subrutas DENTRO de una página que ya está activa
+   (06/09/2026, roadmap Fase A pieza de base) -- primer uso real va
+   a ser Nuzlocke (Resumen/Seguimiento/Cementerio/Líderes) y Pokémon
+   (General/Equipo/Caja), pero el componente en sí no sabe nada de
+   ninguna de las dos (ver initTabs()/switchTab() en app.js).
+
+   Deliberadamente DISTINTO al estilo de .nav-item (más arriba, el
+   sidebar que cambia de PÁGINA completa): acá es una tira
+   horizontal con un subrayado de acento abajo del ítem activo, en
+   vez de fondo + borde a la izquierda. Mismo criterio de "la
+   estructura visual es información" -- si se viera igual al
+   sidebar, el usuario podría confundir un cambio de pestaña interna
+   con haber cambiado de página entera. */
+.tabs-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 10px 16px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.tab-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+}
+
+.tab-btn:hover {
+  color: var(--text);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+}
+
+.tab-btn.active::after {
+  background: var(--accent);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
 /* ===================== DASHBOARD (Bloque 2) ===================== */
 
 /* Envuelve TODO el contenido del Dashboard (título, subtítulo,
