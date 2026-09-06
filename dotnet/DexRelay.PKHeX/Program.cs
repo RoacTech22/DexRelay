@@ -75,6 +75,14 @@ while (true)
                 HandleSaveInfo(root);
                 break;
 
+            case "species_details":
+                HandleSpeciesDetails(root);
+                break;
+
+            case "move_details":
+                HandleMoveDetails(root);
+                break;
+
             default:
                 WriteError(
                     $"Acción no soportada: {action}"
@@ -626,6 +634,272 @@ static void WriteError(string message)
     var response = new
     {
         error = message
+    };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+// GUI v2, roadmap 06/09/2026 sección 4.2 -- modal "Pokédex" de
+// detalle de especie (tipo, habilidades, stats base, evolución).
+// A diferencia de pokemon_details/met_location, esto NO recibe los
+// 232 bytes de un Pokémon puntual -- es dato de la ESPECIE, no del
+// individuo, así que se pide por speciesId directo y se puede
+// cachear del lado Python por especie (mismo patrón que
+// SpeciesCatalog/species_cache.json ya usa para nombres, no hace
+// falta pedirlo de nuevo en cada poll).
+//
+// NOTA IMPORTANTE para quien retome esto: escrito el 06/09/2026 sin
+// poder compilar en el momento (sesión sin entorno .NET a mano) --
+// los nombres de API de acá salen de inspeccionar los identificadores
+// reales dentro del PKHeX.Core.dll ya publicado (PersonalTable.AO,
+// GetFormEntry, EvolutionTree.GetEvolutionTree, Forward,
+// GetEvolutionsAndPreEvolutions, EvolutionMethod.Method/Level/
+// Argument/Species todos CONFIRMADOS presentes en el ensamblado),
+// pero la FORMA exacta de encadenar esas llamadas (qué parámetros
+// exactos pide cada una) es la mejor lectura posible sin compilar.
+// Mismo criterio ya documentado en otros lugares de este archivo
+// (ej. el bug de SaveUtil.GetVariantSAV): correr `dotnet publish`
+// primero, y si algo de esto no compila, mandar el error EXACTO
+// para ajustar la firma real -- no volver a adivinar a ciegas.
+static void HandleSpeciesDetails(JsonElement root)
+{
+    int speciesId =
+        root.GetProperty("id").GetInt32();
+
+    if (
+        speciesId < 1 ||
+        speciesId >= GameInfo.Strings.Species.Count
+    )
+    {
+        WriteError(
+            $"Species ID fuera de rango: {speciesId}"
+        );
+
+        return;
+    }
+
+    string speciesName = GameInfo.Strings.Species[speciesId];
+
+    // BUG REAL DE COMPILACIÓN corregido (06/09/2026, primer intento
+    // de `dotnet build` real): GetFormEntry pide `ushort`, no
+    // `int` -- especiesId llega como int desde el JSON de entrada.
+    var info = PersonalTable.AO.GetFormEntry((ushort)speciesId, 0);
+
+    string ResolveTypeName(int typeId) =>
+        (typeId >= 0 && typeId < GameInfo.Strings.Types.Count)
+            ? GameInfo.Strings.Types[typeId]
+            : "";
+
+    // Misma técnica ya usada en HandlePokemonDetails() para tener
+    // una clave de tipo ESTABLE (nombre del enum en inglés) en vez
+    // de depender de la localización -- ver el comentario largo
+    // junto a TypeKey() más arriba para el porqué completo.
+    string ResolveTypeKey(int typeId)
+    {
+        sbyte value = (sbyte)typeId;
+
+        return Enum.IsDefined(typeof(MoveType), value)
+            ? ((MoveType)value).ToString()
+            : "";
+    }
+
+    int type1 = info.Type1;
+    int type2 = info.Type2;
+
+    string AbilityName(int abilityId) =>
+        (abilityId >= 0 && abilityId < GameInfo.Strings.Ability.Count)
+            ? GameInfo.Strings.Ability[abilityId]
+            : "";
+
+    int ability1 = info.Ability1;
+    int ability2 = info.Ability2;
+    int abilityHidden = info.AbilityH;
+
+    // Árbol de evolución de Gen 6 -- Forward da, para cada especie,
+    // a qué evoluciona (no de dónde viene). EvolutionMethod trae el
+    // método (subida de nivel/piedra/intercambio/felicidad/etc.),
+    // el nivel si aplica, un "argumento" (ej. qué piedra/qué
+    // objeto) y la especie resultante.
+    var evolutions = new List<object>();
+
+    var tree = EvolutionTree.GetEvolutionTree(EntityContext.Gen6);
+
+    // BUG REAL DE COMPILACIÓN corregido (06/09/2026): dos cosas
+    // salieron mal en el primer intento.
+    //   1) GetEvolutions() pedía ushort, no int (mismo motivo que
+    //      GetFormEntry() más arriba).
+    //   2) MÁS IMPORTANTE: GetEvolutions() NO devuelve
+    //      EvolutionMethod (que traería nivel/objeto/método) --
+    //      el compilador reveló que en realidad devuelve tuplas
+    //      (ushort Species, byte Form), o sea el resultado YA
+    //      resuelto sin el detalle de CÓMO se llega ahí. Eso no
+    //      alcanza para lo que pide el roadmap (nivel/piedra/
+    //      trade/felicidad).
+    //
+    //      GetForward() (confirmado que existe en el ensamblado,
+    //      mismo tipo de búsqueda por identificador que el resto
+    //      de este archivo) es la SIGUIENTE mejor conjetura --
+    //      nombre simétrico a GetEvolutions() pero specificamente
+    //      del lado "Forward" -- razonable que sea la que sí
+    //      devuelve el detalle completo (EvolutionMethod[]).
+    //      CONFIRMADO en el segundo intento de compilación: sí
+    //      devuelve EvolutionMethod (ver fix de .Span más abajo).
+    var forwardEvolutions = tree.Forward.GetForward((ushort)speciesId, 0);
+
+    // BUG REAL DE COMPILACIÓN corregido (06/09/2026, segundo
+    // intento): GetForward() confirmado que SÍ devuelve
+    // EvolutionMethod (con nivel/objeto/método, lo que hacía
+    // falta) -- pero como `ReadOnlyMemory<EvolutionMethod>`, no
+    // como algo directamente iterable con foreach. `.Span` expone
+    // un `ReadOnlySpan<EvolutionMethod>`, que sí soporta foreach.
+    foreach (EvolutionMethod evo in forwardEvolutions.Span)
+    {
+        int toSpeciesId = evo.Species;
+
+        string toSpeciesName =
+            (toSpeciesId >= 0 && toSpeciesId < GameInfo.Strings.Species.Count)
+                ? GameInfo.Strings.Species[toSpeciesId]
+                : "";
+
+        evolutions.Add(new
+        {
+            toSpeciesId,
+            toSpeciesName,
+            // Clave del método EN INGLÉS (nombre del enum
+            // EvolutionType, ej. "LevelUp"/"UseItem"/"Trade"/
+            // "LevelUpHappiness") -- mismo criterio de siempre:
+            // clave estable para que el FRONTEND traduzca a texto
+            // legible en español, no una traducción armada acá a
+            // ciegas sin ver los valores reales del enum en vivo.
+            methodKey = evo.Method.ToString(),
+            level = evo.Level,
+            argument = evo.Argument,
+        });
+    }
+
+    var response = new
+    {
+        id = speciesId,
+        name = speciesName,
+        type1Key = ResolveTypeKey(type1),
+        type1 = ResolveTypeName(type1),
+        type2Key = type1 != type2 ? ResolveTypeKey(type2) : "",
+        type2 = type1 != type2 ? ResolveTypeName(type2) : "",
+        baseStats = new
+        {
+            hp = info.HP,
+            attack = info.ATK,
+            defense = info.DEF,
+            spAttack = info.SPA,
+            spDefense = info.SPD,
+            speed = info.SPE,
+        },
+        ability1Id = ability1,
+        ability1Name = AbilityName(ability1),
+        // Ability2 == 0 en muchas especies (sin segunda habilidad
+        // normal) -- se manda igual el id/nombre tal cual, el
+        // frontend decide si mostrar o no el slot vacío (mismo
+        // criterio que ya se usa con type2 en pokemon_details).
+        ability2Id = ability2,
+        ability2Name = AbilityName(ability2),
+        abilityHiddenId = abilityHidden,
+        abilityHiddenName = AbilityName(abilityHidden),
+        evolutions,
+    };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+// GUI v2, roadmap 06/09/2026 sección 4.1 -- modal de movimiento
+// (click en una fila de movimiento). Devuelve lo que SÍ está
+// confirmado disponible en PKHeX.Core: nombre, tipo (ya se usa este
+// mismo mecanismo en pokemon_details) y PP base.
+//
+// LO QUE FALTA A PROPÓSITO -- potencia, precisión y categoría
+// (físico/especial/estado) NO se mandan acá. Investigado a fondo
+// el 06/09/2026 inspeccionando directamente los identificadores
+// dentro de PKHeX.Core.dll (sin poder compilar código de prueba en
+// esa sesión): NINGÚN identificador "Power"/"BasePower" existe en
+// todo el ensamblado (18 MB), y tampoco hay ningún recurso embebido
+// tipo tabla de movimientos con esos datos (sí hay para
+// evoluciones/movimientos por nivel/movimientos por huevo, pero NO
+// para potencia/precisión). Conclusión: a diferencia de lo que
+// asumía el roadmap ("muy probablemente ya está en PKHeX.Core"),
+// potencia/precisión (y probablemente categoría, con evidencia más
+// débil) NO están disponibles acá -- PKHeX no los necesita para su
+// propio trabajo de edición/legalidad de saves. Van a necesitar el
+// mismo tratamiento que ya se venía discutiendo solo para las
+// DESCRIPCIONES de movimiento/habilidad (pregunta abierta #1 del
+// roadmap, sección 6): dataset propio curado a mano, o alguna
+// fuente externa -- ya no es una decisión aparte y más chica, hay
+// que resolverla para poder cerrar el modal completo de 4.1.
+static void HandleMoveDetails(JsonElement root)
+{
+    int moveId =
+        root.GetProperty("id").GetInt32();
+
+    if (
+        moveId < 1 ||
+        moveId >= GameInfo.Strings.Move.Count
+    )
+    {
+        WriteError(
+            $"Move ID fuera de rango: {moveId}"
+        );
+
+        return;
+    }
+
+    string moveName = GameInfo.Strings.Move[moveId];
+
+    // Mismo contexto Gen6 que ya usa pokemon_details vía pk.Context
+    // -- acá no hay un PK6 puntual del cual sacarlo (se pide por
+    // moveId directo, no por Pokémon), así que se fija explícito.
+    EntityContext context = EntityContext.Gen6;
+
+    byte moveTypeId = MoveInfo.GetType((ushort)moveId, context);
+
+    string ResolveTypeName(int typeId) =>
+        (typeId >= 0 && typeId < GameInfo.Strings.Types.Count)
+            ? GameInfo.Strings.Types[typeId]
+            : "";
+
+    string ResolveTypeKey(int typeId)
+    {
+        sbyte value = (sbyte)typeId;
+
+        return Enum.IsDefined(typeof(MoveType), value)
+            ? ((MoveType)value).ToString()
+            : "";
+    }
+
+    // BUG REAL DE COMPILACIÓN corregido (06/09/2026): a diferencia
+    // de MoveInfo.GetType() (que sí compiló con el orden
+    // (moveId, context) desde el primer intento -- ver
+    // HandlePokemonDetails más arriba, código ya probado), el
+    // compilador confirmó que GetPP() pide el orden AL REVÉS:
+    // (context, moveId). No hay que asumir que dos métodos de la
+    // misma clase comparten orden de parámetros solo porque se
+    // ven parecidos.
+    byte basePP = MoveInfo.GetPP(context, (ushort)moveId);
+
+    var response = new
+    {
+        id = moveId,
+        name = moveName,
+        typeKey = ResolveTypeKey(moveTypeId),
+        type = ResolveTypeName(moveTypeId),
+        basePP,
+        // Deliberadamente ausentes -- ver comentario largo arriba
+        // de HandleMoveDetails(): potencia/precisión/categoría no
+        // están disponibles en PKHeX.Core, pendiente de decisión
+        // (roadmap sección 6, pregunta 1, alcance ampliado).
     };
 
     Console.WriteLine(

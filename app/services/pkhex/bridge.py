@@ -286,6 +286,44 @@ class PKHeXBridge:
             }
         )
 
+    def species_details(self, species_id):
+        """
+        GUI v2, roadmap 06/09/2026 sección 4.2 -- modal "Pokédex"
+        de detalle de especie. A diferencia de species() (que solo
+        da el nombre), esto pide tipo/habilidades/stats
+        base/evolución -- dato de la ESPECIE, no de un Pokémon
+        puntual, así que se puede cachear del lado Python por
+        species_id (mismo patrón que species_cache.json).
+
+        NOTA: acción nueva del lado C# (HandleSpeciesDetails,
+        Program.cs) escrita sin poder compilar en esa sesión -- ver
+        el comentario largo ahí antes de asumir que ya está
+        probada en vivo.
+        """
+
+        return self.request(
+            {
+                "action": "species_details",
+                "id": species_id,
+            }
+        )
+
+    def move_details(self, move_id):
+        """
+        GUI v2, roadmap 06/09/2026 sección 4.1 -- modal de
+        movimiento. Devuelve nombre/tipo/PP base -- NO potencia/
+        precisión/categoría, confirmado que PKHeX.Core no las
+        expone (ver comentario largo en HandleMoveDetails(),
+        Program.cs).
+        """
+
+        return self.request(
+            {
+                "action": "move_details",
+                "id": move_id,
+            }
+        )
+
     def stop(self):
         """
         Detiene el proceso del bridge.
