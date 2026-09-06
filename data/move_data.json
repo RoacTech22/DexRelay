@@ -1,0 +1,4687 @@
+{
+  "1": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "2": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "3": {
+    "power": 15,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "4": {
+    "power": 18,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "5": {
+    "power": 80,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "6": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "7": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "8": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "9": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "10": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "11": {
+    "power": 55,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "12": {
+    "power": null,
+    "accuracy": 30,
+    "categoryKey": "Physical"
+  },
+  "13": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "14": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "15": {
+    "power": 50,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "16": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "17": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "18": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "19": {
+    "power": 90,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "20": {
+    "power": 15,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "21": {
+    "power": 80,
+    "accuracy": 75,
+    "categoryKey": "Physical"
+  },
+  "22": {
+    "power": 35,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "23": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "24": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "25": {
+    "power": 120,
+    "accuracy": 75,
+    "categoryKey": "Physical"
+  },
+  "26": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "27": {
+    "power": 60,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "28": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "29": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "30": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "31": {
+    "power": 15,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "32": {
+    "power": null,
+    "accuracy": 30,
+    "categoryKey": "Physical"
+  },
+  "33": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "34": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "35": {
+    "power": 15,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "36": {
+    "power": 90,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "37": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "38": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "39": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "40": {
+    "power": 15,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "41": {
+    "power": 25,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "42": {
+    "power": 14,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "43": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "44": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "45": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "46": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "47": {
+    "power": null,
+    "accuracy": 55,
+    "categoryKey": "Status"
+  },
+  "48": {
+    "power": null,
+    "accuracy": 55,
+    "categoryKey": "Status"
+  },
+  "49": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "50": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "51": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "52": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "53": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "54": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "55": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "56": {
+    "power": 120,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "57": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "58": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "59": {
+    "power": 120,
+    "accuracy": 70,
+    "categoryKey": "Special"
+  },
+  "60": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "61": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "62": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "63": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "64": {
+    "power": 35,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "65": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "66": {
+    "power": 80,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "67": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "68": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "69": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "70": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "71": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "72": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "73": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "74": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "75": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "76": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "77": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "78": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "79": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "80": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "81": {
+    "power": null,
+    "accuracy": 95,
+    "categoryKey": "Status"
+  },
+  "82": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "83": {
+    "power": 35,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "84": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "85": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "86": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "87": {
+    "power": 120,
+    "accuracy": 70,
+    "categoryKey": "Special"
+  },
+  "88": {
+    "power": 50,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "89": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "90": {
+    "power": null,
+    "accuracy": 30,
+    "categoryKey": "Physical"
+  },
+  "91": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "92": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "93": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "94": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "95": {
+    "power": null,
+    "accuracy": 60,
+    "categoryKey": "Status"
+  },
+  "96": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "97": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "98": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "99": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "100": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "101": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "102": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "103": {
+    "power": null,
+    "accuracy": 85,
+    "categoryKey": "Status"
+  },
+  "104": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "105": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "106": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "107": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "108": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "109": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "110": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "111": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "112": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "113": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "114": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "115": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "116": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "117": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "118": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "119": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "120": {
+    "power": 200,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "121": {
+    "power": 100,
+    "accuracy": 75,
+    "categoryKey": "Physical"
+  },
+  "122": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "123": {
+    "power": 20,
+    "accuracy": 70,
+    "categoryKey": "Special"
+  },
+  "124": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "125": {
+    "power": 65,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "126": {
+    "power": 120,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "127": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "128": {
+    "power": 35,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "129": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "130": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "131": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "132": {
+    "power": 10,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "133": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "134": {
+    "power": null,
+    "accuracy": 80,
+    "categoryKey": "Status"
+  },
+  "135": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "136": {
+    "power": 130,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "137": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "138": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "139": {
+    "power": null,
+    "accuracy": 80,
+    "categoryKey": "Status"
+  },
+  "140": {
+    "power": 15,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "141": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "142": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "143": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "144": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "145": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "146": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "147": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "148": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "149": {
+    "power": null,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "150": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "151": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "152": {
+    "power": 90,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "153": {
+    "power": 250,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "154": {
+    "power": 18,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "155": {
+    "power": 50,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "156": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "157": {
+    "power": 75,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "158": {
+    "power": 80,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "159": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "160": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "161": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "162": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "163": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "164": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "165": {
+    "power": 50,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "166": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "167": {
+    "power": 10,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "168": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "169": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "170": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "171": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "172": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "173": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "174": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "175": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "176": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "177": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "178": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "179": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "180": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "181": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "182": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "183": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "184": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "185": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "186": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "187": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "188": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "189": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "190": {
+    "power": 65,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "191": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "192": {
+    "power": 120,
+    "accuracy": 50,
+    "categoryKey": "Special"
+  },
+  "193": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "194": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "195": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "196": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "197": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "198": {
+    "power": 25,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "199": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "200": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "201": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "202": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "203": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "204": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "205": {
+    "power": 30,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "206": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "207": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "208": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "209": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "210": {
+    "power": 20,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "211": {
+    "power": 70,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "212": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "213": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "214": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "215": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "216": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "217": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "218": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "219": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "220": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "221": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "222": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "223": {
+    "power": 100,
+    "accuracy": 50,
+    "categoryKey": "Physical"
+  },
+  "224": {
+    "power": 120,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "225": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "226": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "227": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "228": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "229": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "230": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "231": {
+    "power": 100,
+    "accuracy": 75,
+    "categoryKey": "Physical"
+  },
+  "232": {
+    "power": 50,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "233": {
+    "power": 70,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "234": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "235": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "236": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "237": {
+    "power": 1,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "238": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "239": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "240": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "241": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "242": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "243": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "244": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "245": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "246": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "247": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "248": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "249": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "250": {
+    "power": 35,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "251": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "252": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "253": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "254": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "255": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "256": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "257": {
+    "power": 100,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "258": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "259": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "260": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "261": {
+    "power": null,
+    "accuracy": 75,
+    "categoryKey": "Status"
+  },
+  "262": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "263": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "264": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "265": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "266": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "267": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "268": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "269": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "270": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "271": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "272": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "273": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "274": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "275": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "276": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "277": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "278": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "279": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "280": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "281": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "282": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "283": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "284": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "285": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "286": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "287": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "288": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "289": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "290": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "291": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "292": {
+    "power": 15,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "293": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "294": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "295": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "296": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "297": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "298": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "299": {
+    "power": 85,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "300": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "301": {
+    "power": 30,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "302": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "303": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "304": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "305": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "306": {
+    "power": 75,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "307": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "308": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "309": {
+    "power": 100,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "310": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "311": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "312": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "313": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "314": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "315": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "316": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "317": {
+    "power": 50,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "318": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "319": {
+    "power": null,
+    "accuracy": 85,
+    "categoryKey": "Status"
+  },
+  "320": {
+    "power": null,
+    "accuracy": 55,
+    "categoryKey": "Status"
+  },
+  "321": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "322": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "323": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "324": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "325": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "326": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "327": {
+    "power": 85,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "328": {
+    "power": 35,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "329": {
+    "power": null,
+    "accuracy": 30,
+    "categoryKey": "Special"
+  },
+  "330": {
+    "power": 95,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "331": {
+    "power": 25,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "332": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "333": {
+    "power": 25,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "334": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "335": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "336": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "337": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "338": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "339": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "340": {
+    "power": 85,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "341": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "342": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "343": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "344": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "345": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "346": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "347": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "348": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "349": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "350": {
+    "power": 25,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "351": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "352": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "353": {
+    "power": 140,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "354": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "355": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "356": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "357": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "358": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "359": {
+    "power": 100,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "360": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "361": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "362": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "363": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "364": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "365": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "366": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "367": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "368": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "369": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "370": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "371": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "372": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "373": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "374": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "375": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "376": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "377": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "378": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "379": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "380": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "381": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "382": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "383": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "384": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "385": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "386": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "387": {
+    "power": 140,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "388": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "389": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "390": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "391": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "392": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "393": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "394": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "395": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "396": {
+    "power": 90,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "397": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "398": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "399": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "400": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "401": {
+    "power": 90,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "402": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "403": {
+    "power": 75,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "404": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "405": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "406": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "407": {
+    "power": 100,
+    "accuracy": 75,
+    "categoryKey": "Physical"
+  },
+  "408": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "409": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "410": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "411": {
+    "power": 120,
+    "accuracy": 70,
+    "categoryKey": "Special"
+  },
+  "412": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "413": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "414": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "415": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "416": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "417": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "418": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "419": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "420": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "421": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "422": {
+    "power": 65,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "423": {
+    "power": 65,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "424": {
+    "power": 65,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "425": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "426": {
+    "power": 65,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "427": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "428": {
+    "power": 80,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "429": {
+    "power": 65,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "430": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "431": {
+    "power": 90,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "432": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "433": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "434": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "435": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "436": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "437": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "438": {
+    "power": 120,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "439": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "440": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "441": {
+    "power": 120,
+    "accuracy": 70,
+    "categoryKey": "Physical"
+  },
+  "442": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "443": {
+    "power": 60,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "444": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "445": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "446": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "447": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "448": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "449": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "450": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "451": {
+    "power": 50,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "452": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "453": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "454": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "455": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "456": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "457": {
+    "power": 150,
+    "accuracy": 80,
+    "categoryKey": "Physical"
+  },
+  "458": {
+    "power": 35,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "459": {
+    "power": 150,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "460": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "461": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "462": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "463": {
+    "power": 120,
+    "accuracy": 75,
+    "categoryKey": "Special"
+  },
+  "464": {
+    "power": null,
+    "accuracy": 80,
+    "categoryKey": "Status"
+  },
+  "465": {
+    "power": 120,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "466": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "467": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "468": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "469": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "470": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "471": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "472": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "473": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "474": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "475": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "476": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "477": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "478": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "479": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "480": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "481": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "482": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "483": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "484": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "485": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "486": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "487": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "488": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "489": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "490": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "491": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "492": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "493": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "494": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "495": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "496": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "497": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "498": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "499": {
+    "power": 50,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "500": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "501": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "502": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "503": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "504": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "505": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "506": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "507": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "508": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "509": {
+    "power": 60,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "510": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "511": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "512": {
+    "power": 55,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "513": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "514": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "515": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "516": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "517": {
+    "power": 100,
+    "accuracy": 50,
+    "categoryKey": "Special"
+  },
+  "518": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "519": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "520": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "521": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "522": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "523": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "524": {
+    "power": 40,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "525": {
+    "power": 60,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "526": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "527": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "528": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "529": {
+    "power": 80,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "530": {
+    "power": 40,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "531": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "532": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "533": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "534": {
+    "power": 75,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "535": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "536": {
+    "power": 65,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "537": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "538": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "539": {
+    "power": 85,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "540": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "541": {
+    "power": 25,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "542": {
+    "power": 120,
+    "accuracy": 70,
+    "categoryKey": "Special"
+  },
+  "543": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "544": {
+    "power": 50,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "545": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "546": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "547": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "548": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "549": {
+    "power": 65,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "550": {
+    "power": 130,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "551": {
+    "power": 130,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "552": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "553": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "554": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "555": {
+    "power": 55,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "556": {
+    "power": 85,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "557": {
+    "power": 180,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "558": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "559": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "560": {
+    "power": 80,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "561": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "562": {
+    "power": 120,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "563": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "564": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "565": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "566": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "567": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "568": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "569": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "570": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "571": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "572": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "573": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "574": {
+    "power": 40,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "575": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "576": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "577": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "578": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "579": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "580": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "581": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "582": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "583": {
+    "power": 90,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "584": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "585": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "586": {
+    "power": 140,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "587": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "588": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "589": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "590": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "591": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "592": {
+    "power": 110,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "593": {
+    "power": 80,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "594": {
+    "power": 15,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "595": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "596": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "597": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "598": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "599": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "600": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "601": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "602": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "603": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "604": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "605": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "606": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "607": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "608": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "609": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "610": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "611": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "612": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "613": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "614": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "615": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "616": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "617": {
+    "power": 140,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "618": {
+    "power": 110,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "619": {
+    "power": 120,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "620": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "621": {
+    "power": 100,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "622": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "623": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "624": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "625": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "626": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "627": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "628": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "629": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "630": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "631": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "632": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "633": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "634": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "635": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "636": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "637": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "638": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "639": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "640": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "641": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "642": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "643": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "644": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "645": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "646": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "647": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "648": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "649": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "650": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "651": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "652": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "653": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "654": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "655": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "656": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "657": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "658": {
+    "power": 210,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "659": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "660": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "661": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "662": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "663": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "664": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "665": {
+    "power": 100,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "666": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "667": {
+    "power": 95,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "668": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "669": {
+    "power": 125,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "670": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "671": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "672": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "673": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "674": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "675": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "676": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "677": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "678": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "679": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "680": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "681": {
+    "power": 20,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "682": {
+    "power": 130,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "683": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "684": {
+    "power": 70,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "685": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "686": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "687": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "688": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "689": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "690": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "691": {
+    "power": 110,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "692": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "693": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "694": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "695": {
+    "power": 180,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "696": {
+    "power": 180,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "697": {
+    "power": 195,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "698": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "699": {
+    "power": 195,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "700": {
+    "power": 175,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "701": {
+    "power": 210,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "702": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "703": {
+    "power": 185,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "704": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "705": {
+    "power": 130,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "706": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "707": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "708": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "709": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "710": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "711": {
+    "power": 160,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "712": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "713": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "714": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "715": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "716": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "717": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "718": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "719": {
+    "power": 195,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "720": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "721": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "722": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "723": {
+    "power": 200,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "724": {
+    "power": 200,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "725": {
+    "power": 200,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "726": {
+    "power": 190,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "727": {
+    "power": 190,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "728": {
+    "power": 185,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "729": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "730": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "731": {
+    "power": 90,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "732": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Special"
+  },
+  "733": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "734": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "735": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "736": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "737": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "738": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "739": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "740": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "741": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "742": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "743": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "744": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "745": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "746": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "747": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "748": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "749": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "750": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "751": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "752": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "753": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "754": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "755": {
+    "power": 85,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "756": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "757": {
+    "power": 100,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "758": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "759": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "760": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "761": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "762": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "763": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "764": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "765": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "766": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "767": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "768": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "769": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "770": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "771": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "772": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "773": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "774": {
+    "power": 10,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "775": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "776": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "777": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "778": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "779": {
+    "power": 35,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "780": {
+    "power": 120,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "781": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "782": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "783": {
+    "power": 110,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "784": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "785": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "786": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "787": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "788": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "789": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "790": {
+    "power": 90,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "791": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "792": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "793": {
+    "power": 80,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "794": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "795": {
+    "power": 160,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "796": {
+    "power": 140,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "797": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "798": {
+    "power": 130,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "799": {
+    "power": 25,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "800": {
+    "power": 120,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "801": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "802": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "803": {
+    "power": 55,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "804": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "805": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "806": {
+    "power": 70,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "807": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "808": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "809": {
+    "power": 110,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "810": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "811": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "812": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "813": {
+    "power": 20,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "814": {
+    "power": 40,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "815": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "816": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "817": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "818": {
+    "power": 25,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "819": {
+    "power": 80,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "820": {
+    "power": 150,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "821": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "822": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "823": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "824": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "825": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "826": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "827": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "828": {
+    "power": 70,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "829": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "830": {
+    "power": 65,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "831": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "832": {
+    "power": 70,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "833": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "834": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "835": {
+    "power": 150,
+    "accuracy": 95,
+    "categoryKey": "Special"
+  },
+  "836": {
+    "power": 100,
+    "accuracy": 85,
+    "categoryKey": "Physical"
+  },
+  "837": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "838": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "839": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "840": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "841": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "842": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "843": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "844": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "845": {
+    "power": 65,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "846": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "847": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "848": {
+    "power": 100,
+    "accuracy": 80,
+    "categoryKey": "Special"
+  },
+  "849": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "850": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "851": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "852": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "853": {
+    "power": 120,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "854": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "855": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "856": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "857": {
+    "power": 60,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "858": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "859": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "860": {
+    "power": 20,
+    "accuracy": 90,
+    "categoryKey": "Physical"
+  },
+  "861": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "862": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "863": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "864": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "865": {
+    "power": 30,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "866": {
+    "power": 30,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "867": {
+    "power": 0,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "868": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "869": {
+    "power": 85,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "870": {
+    "power": 70,
+    "accuracy": null,
+    "categoryKey": "Physical"
+  },
+  "871": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "872": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "873": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "874": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "875": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "876": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "877": {
+    "power": 1,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "878": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "879": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "880": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "881": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "882": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "883": {
+    "power": 0,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "884": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "885": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "886": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "887": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "888": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "889": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "890": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "891": {
+    "power": 90,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "892": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "893": {
+    "power": 160,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "894": {
+    "power": 1,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "895": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "896": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "897": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "898": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "899": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "900": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "901": {
+    "power": 140,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "902": {
+    "power": 80,
+    "accuracy": 90,
+    "categoryKey": "Special"
+  },
+  "903": {
+    "power": 60,
+    "accuracy": 85,
+    "categoryKey": "Special"
+  },
+  "904": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "905": {
+    "power": 130,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "906": {
+    "power": 120,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "907": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "908": {
+    "power": 0,
+    "accuracy": 0,
+    "categoryKey": "Status"
+  },
+  "909": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "910": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "911": {
+    "power": 50,
+    "accuracy": 0,
+    "categoryKey": "Special"
+  },
+  "912": {
+    "power": 0,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "913": {
+    "power": 0,
+    "accuracy": 0,
+    "categoryKey": "Status"
+  },
+  "914": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "915": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "916": {
+    "power": 100,
+    "accuracy": 95,
+    "categoryKey": "Physical"
+  },
+  "917": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "918": {
+    "power": 65,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "919": {
+    "power": 100,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10001": {
+    "power": 55,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "10002": {
+    "power": 80,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "10003": {
+    "power": 40,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "10004": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10005": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Physical"
+  },
+  "10006": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10007": {
+    "power": 120,
+    "accuracy": 60,
+    "categoryKey": "Physical"
+  },
+  "10008": {
+    "power": 75,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10009": {
+    "power": 70,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10010": {
+    "power": 95,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10011": {
+    "power": 50,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10012": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "10013": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Special"
+  },
+  "10014": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "10015": {
+    "power": null,
+    "accuracy": 100,
+    "categoryKey": "Status"
+  },
+  "10016": {
+    "power": null,
+    "accuracy": 90,
+    "categoryKey": "Status"
+  },
+  "10017": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  },
+  "10018": {
+    "power": null,
+    "accuracy": null,
+    "categoryKey": "Status"
+  }
+}
