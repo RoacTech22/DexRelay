@@ -17,6 +17,21 @@ if sys.stdout is None:
 if sys.stderr is None:
     sys.stderr = open(os.devnull, "w")
 
+# Página Logs de la GUI v2 (Bloque 5, 06/09/2026): instala la
+# captura de stdout/stderr a un buffer en memoria (ver
+# app/core/log_capture.py) ANTES de importar Application -- así
+# queda ningún `print()` real afuera del buffer, ni siquiera los
+# que puedan disparar módulos importados más abajo durante su
+# propia inicialización. Reemplaza, para la GUI v2, al mismo rol
+# que cumplía `_StreamToLogWidget` en la GUI Tkinter vieja
+# (app/gui/main_window.py) -- ahí se instalaba recién al construir
+# la ventana principal porque el destino era un widget Tkinter que
+# todavía no existía; acá el destino es un buffer en memoria que sí
+# puede existir desde el arranque mismo del proceso.
+from app.core import log_capture
+
+log_capture.install()
+
 from app.core.app import Application
 
 # GUI v2 (pywebview), reemplaza a la Tkinter/ttkbootstrap

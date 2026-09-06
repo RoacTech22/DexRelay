@@ -35,10 +35,19 @@
   // aunque se repita cada 2s).
   var NUZLOCKE_POLL_MS = 2000;
 
+  // Página Logs (Bloque 5, 06/09/2026) -- mismo criterio de poll
+  // propio, solo mientras la página está abierta. Más rápido que
+  // Pokémon/Nuzlocke (1s en vez de 2s) porque es un buffer en
+  // memoria (log_capture.LogBuffer) -- pedirlo entero no toca
+  // disco ni el bridge PKHeX, es barato.
+  var LOGS_POLL_MS = 1000;
+
   var waitingPollTimer = null;
   var mainPollTimer = null;
   var pokemonPollTimer = null;
   var nuzlockePollTimer = null;
+  var logsPollTimer = null;
+  var logsAllEntries = [];
   var connectedSince = null;
   var uptimeTimer = null;
 
@@ -270,6 +279,8 @@
     initDashboardActions();
     initNuzlockeActions();
     initOverlaysActions();
+    initConfiguracionActions();
+    initLogsActions();
     startMainPoll();
   }
 
@@ -310,6 +321,20 @@
       startNuzlockePoll();
     } else {
       stopNuzlockePoll();
+    }
+
+    // Configuración no tiene poll -- son valores de config.json,
+    // no datos en vivo. Se piden de nuevo cada vez que se entra a
+    // la página (barato, una sola llamada) para reflejar un guardado
+    // hecho en otra pestaña/instancia, en vez de cachear en JS.
+    if (page === "configuracion") {
+      loadConfiguracionPage();
+    }
+
+    if (page === "logs") {
+      startLogsPoll();
+    } else {
+      stopLogsPoll();
     }
   }
 
@@ -1435,6 +1460,211 @@
       show_nickname: document.getElementById("ov-editor-show-nickname").checked,
       sprite_set: spriteRadio ? spriteRadio.value : "team",
     });
+  }
+
+  // ===================== PÁGINA CONFIGURACIÓN (Bloque 5, 05/09/2026) =====================
+  //
+  // Sin poll -- get_settings_page_data() se pide una sola vez cada
+  // vez que se entra a la página (ver switchToPage()), no cada
+  // 200ms como el Dashboard: son valores de config.json, no datos
+  // en vivo del juego.
+
+  var cfgLinksBound = false;
+
+  function initConfiguracionActions() {
+    document.getElementById("cfg-btn-save").addEventListener("click", onSaveConnectionSettingsClicked);
+    document.getElementById("cfg-btn-reset").addEventListener("click", onResetConnectionSettingsClicked);
+    document.getElementById("cfg-btn-clear-cache").addEventListener("click", onClearCacheClicked);
+  }
+
+  function loadConfiguracionPage() {
+    api()
+      .get_settings_page_data()
+      .then(function (data) {
+        document.getElementById("cfg-host").value = data.server.host;
+        document.getElementById("cfg-port").value = data.server.port;
+        document.getElementById("cfg-refresh").value = data.realtime.refresh_ms;
+        document.getElementById("cfg-app-version").textContent = data.appVersion;
+
+        setCfgStatus("cfg-connection-status", "", null);
+        setCfgStatus("cfg-cache-status", "", null);
+
+        // Los links de "Acerca de" se bindean una sola vez -- el
+        // destino (repo real) no cambia entre pedidos, así que no
+        // hace falta re-atarlos en cada entrada a la página.
+        if (!cfgLinksBound) {
+          cfgLinksBound = true;
+
+          document.getElementById("cfg-link-github").addEventListener("click", function (event) {
+            event.preventDefault();
+            api().open_external(data.githubUrl);
+          });
+
+          document.getElementById("cfg-link-issues").addEventListener("click", function (event) {
+            event.preventDefault();
+            api().open_external(data.issuesUrl);
+          });
+        }
+      });
+  }
+
+  function setCfgStatus(elementId, message, kind) {
+    var el = document.getElementById(elementId);
+    el.textContent = message;
+    el.classList.remove("success", "error");
+    if (kind) {
+      el.classList.add(kind);
+    }
+  }
+
+  function onSaveConnectionSettingsClicked() {
+    var host = document.getElementById("cfg-host").value;
+    var port = document.getElementById("cfg-port").value;
+    var refreshMs = document.getElementById("cfg-refresh").value;
+
+    api()
+      .save_connection_settings(host, port, refreshMs)
+      .then(function (result) {
+        if (result && result.error) {
+          setCfgStatus("cfg-connection-status", result.error, "error");
+          return;
+        }
+
+        setCfgStatus(
+          "cfg-connection-status",
+          "Guardado. Reiniciá DexRelay para que tome efecto.",
+          "success"
+        );
+      });
+  }
+
+  function onResetConnectionSettingsClicked() {
+    api()
+      .reset_connection_settings()
+      .then(function (defaults) {
+        document.getElementById("cfg-host").value = defaults.host;
+        document.getElementById("cfg-port").value = defaults.port;
+        document.getElementById("cfg-refresh").value = defaults.refresh_ms;
+
+        setCfgStatus(
+          "cfg-connection-status",
+          "Restablecido a los valores por defecto. Reiniciá DexRelay para que tome efecto.",
+          "success"
+        );
+      });
+  }
+
+  function onClearCacheClicked() {
+    api()
+      .clear_data_cache()
+      .then(function (result) {
+        var cleared = (result && result.cleared) || [];
+
+        if (cleared.length === 0) {
+          setCfgStatus(
+            "cfg-cache-status",
+            "No había caché en disco para borrar.",
+            null
+          );
+          return;
+        }
+
+        setCfgStatus(
+          "cfg-cache-status",
+          "Caché borrada (" + cleared.join(", ") + "). Se regenera sola la próxima vez que haga falta.",
+          "success"
+        );
+      });
+  }
+
+  // ===================== PÁGINA LOGS (Bloque 5, 06/09/2026) =====================
+  //
+  // Buffer real de stdout/stderr (ver app/core/log_capture.py) --
+  // sin Nivel/Fuente por línea, sin filtro por fecha, sin gráfico
+  // de niveles. Lo único "calculado" acá es el filtro de texto
+  // (client-side, sobre lo que ya se pidió) y qué línea es stderr
+  // (coloreada distinto) -- todo lo demás es el dato tal cual
+  // viene de Python.
+
+  function initLogsActions() {
+    document.getElementById("logs-search").addEventListener("input", renderLogsList);
+    document.getElementById("logs-btn-clear").addEventListener("click", onClearLogsClicked);
+  }
+
+  function startLogsPoll() {
+    stopLogsPoll();
+    pollLogsPage();
+    logsPollTimer = setInterval(pollLogsPage, LOGS_POLL_MS);
+  }
+
+  function stopLogsPoll() {
+    if (logsPollTimer) {
+      clearInterval(logsPollTimer);
+      logsPollTimer = null;
+    }
+  }
+
+  function pollLogsPage() {
+    api()
+      .get_logs()
+      .then(function (entries) {
+        logsAllEntries = entries;
+        renderLogsList();
+      });
+  }
+
+  function renderLogsList() {
+    var listEl = document.getElementById("logs-list");
+    var emptyEl = document.getElementById("logs-empty");
+    var countEl = document.getElementById("logs-count");
+    var query = document.getElementById("logs-search").value.trim().toLowerCase();
+
+    var filtered = !query
+      ? logsAllEntries
+      : logsAllEntries.filter(function (entry) {
+          return entry.text.toLowerCase().indexOf(query) !== -1;
+        });
+
+    countEl.textContent =
+      query && filtered.length !== logsAllEntries.length
+        ? filtered.length + " / " + logsAllEntries.length + " líneas"
+        : logsAllEntries.length + (logsAllEntries.length === 1 ? " línea" : " líneas");
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = "";
+      listEl.appendChild(emptyEl);
+      emptyEl.textContent = query
+        ? "Ninguna línea coincide con la búsqueda."
+        : "Todavía no hay nada en el buffer de logs.";
+      return;
+    }
+
+    var html = "";
+
+    filtered.forEach(function (entry) {
+      var lineClass = entry.stream === "stderr" ? "log-line log-line-stderr" : "log-line";
+
+      html +=
+        '<div class="' + lineClass + '">' +
+        '<span class="log-time">' + escapeHtml(entry.time) + "</span>" +
+        '<span class="log-text">' + escapeHtml(entry.text) + "</span>" +
+        "</div>";
+    });
+
+    listEl.innerHTML = html;
+
+    var autoScroll = document.getElementById("logs-autoscroll").checked;
+    if (autoScroll) {
+      listEl.scrollTop = listEl.scrollHeight;
+    }
+  }
+
+  function onClearLogsClicked() {
+    api()
+      .clear_logs()
+      .then(function () {
+        pollLogsPage();
+      });
   }
 
   // ===================== PÁGINA NUZLOCKE (04/09/2026) =====================
