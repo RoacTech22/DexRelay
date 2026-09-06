@@ -38,3 +38,18 @@ releases/
 # Datos y config locales (no versionar - se generan/editan en runtime)
 config.json
 data/*.json
+
+# EXCEPCIÓN (06/09/2026): move_data.json NO es dato de runtime del
+# usuario (como nuzlocke.json/badges.json) -- es un dataset estático
+# curado offline una sola vez (tools/data_curation/build_move_data.py,
+# potencia/precisión/categoría de movimientos, PKHeX.Core no los
+# trae). Se versiona igual que assets/gym_leaders o cualquier otro
+# dato público fijo del juego.
+!data/move_data.json
+
+# EXCEPCIÓN (06/09/2026, misma sesión): mismo criterio para los
+# equipos de líderes de gimnasio y la tabla de efectividad de tipos
+# -- datos públicos fijos del juego, curados a mano una sola vez,
+# no algo que se genere ni se edite en runtime.
+!data/gym_leaders.json
+!data/type_chart.json
