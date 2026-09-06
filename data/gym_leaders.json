@@ -1,0 +1,301 @@
+{
+  "_source": {
+    "note": "Curado a mano el 06/09/2026 (roadmap seccion 3.1). Contenido cruzado entre pokemondb.net/omega-ruby-alpha-sapphire y dittobase.com/omega-ruby-alpha-sapphire (coinciden exactos en especie/nivel/tipo). Movimientos sacados de dittobase.com (paginas individuales de cada lider).",
+    "confirmedFindings": [
+      "Los equipos de los 8 lideres son IDENTICOS entre Alpha Sapphire y Omega Ruby -- ninguna de las dos fuentes los diferencia por version (a diferencia de lo que asumia el roadmap). Solo hay UNA tabla, no una por juego.",
+      "Ningun lider lleva objeto -- esperable en Gen 6, los objetos en Pokemon rivales recien se vuelven comunes en el Alto Mando/postgame. El campo 'item' queda en null para los 8, no es un dato sin curar.",
+      "Nombres de movimiento en ingles (nombre oficial tal cual aparece en el juego) -- pendiente resolver traduccion al espanol via el mismo mecanismo que ya usa el bridge PKHeX (GameInfo.Strings.Move en 'es') cuando se cablee la pestana Lideres real (Fase B)."
+    ]
+  },
+  "leaders": [
+    {
+      "order": 1,
+      "name": "Roxanne",
+      "typeKey": "Rock",
+      "badgeName": "Stone Badge",
+      "gymLocation": "Rustboro City",
+      "team": [
+        {
+          "speciesId": 74,
+          "species": "Geodude",
+          "level": 12,
+          "typeKeys": ["Rock", "Ground"],
+          "moves": ["Tackle", "Defense Curl", "Rock Tomb"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 299,
+          "species": "Nosepass",
+          "level": 14,
+          "typeKeys": ["Rock"],
+          "moves": ["Tackle", "Harden", "Rock Tomb"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Brawly",
+      "typeKey": "Fighting",
+      "badgeName": "Knuckle Badge",
+      "gymLocation": "Dewford Town",
+      "team": [
+        {
+          "speciesId": 66,
+          "species": "Machop",
+          "level": 14,
+          "typeKeys": ["Fighting"],
+          "moves": ["Leer", "Karate Chop", "Seismic Toss", "Bulk Up"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 296,
+          "species": "Makuhita",
+          "level": 16,
+          "typeKeys": ["Fighting"],
+          "moves": ["Arm Thrust", "Knock Off", "Sand Attack", "Bulk Up"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Wattson",
+      "typeKey": "Electric",
+      "badgeName": "Dynamo Badge",
+      "gymLocation": "Mauville City",
+      "team": [
+        {
+          "speciesId": 81,
+          "species": "Magnemite",
+          "level": 19,
+          "typeKeys": ["Electric", "Steel"],
+          "moves": ["Thunder Wave", "Tackle", "Volt Switch"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 100,
+          "species": "Voltorb",
+          "level": 19,
+          "typeKeys": ["Electric"],
+          "moves": ["Rollout", "Charge", "Volt Switch"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 82,
+          "species": "Magneton",
+          "level": 21,
+          "typeKeys": ["Electric", "Steel"],
+          "moves": ["Supersonic", "Magnet Bomb", "Volt Switch"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Flannery",
+      "typeKey": "Fire",
+      "badgeName": "Heat Badge",
+      "gymLocation": "Lavaridge Town",
+      "team": [
+        {
+          "speciesId": 218,
+          "species": "Slugma",
+          "level": 26,
+          "typeKeys": ["Fire"],
+          "moves": ["Overheat", "Rock Throw", "Light Screen", "Sunny Day"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 322,
+          "species": "Numel",
+          "level": 26,
+          "typeKeys": ["Fire", "Ground"],
+          "moves": ["Earth Power", "Lava Plume", "Amnesia", "Sunny Day"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 324,
+          "species": "Torkoal",
+          "level": 28,
+          "typeKeys": ["Fire"],
+          "moves": ["Overheat", "Body Slam", "Curse", "Sunny Day"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Norman",
+      "typeKey": "Normal",
+      "badgeName": "Balance Badge",
+      "gymLocation": "Petalburg City",
+      "team": [
+        {
+          "speciesId": 289,
+          "species": "Slaking",
+          "level": 28,
+          "typeKeys": ["Normal"],
+          "moves": ["Encore", "Retaliate", "Yawn", "Feint Attack"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 288,
+          "species": "Vigoroth",
+          "level": 28,
+          "typeKeys": ["Normal"],
+          "moves": ["Fury Swipes", "Feint Attack", "Retaliate", "Encore"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 289,
+          "species": "Slaking",
+          "level": 30,
+          "typeKeys": ["Normal"],
+          "moves": ["Chip Away", "Swagger", "Retaliate", "Feint Attack"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Winona",
+      "typeKey": "Flying",
+      "badgeName": "Feather Badge",
+      "gymLocation": "Fortree City",
+      "team": [
+        {
+          "speciesId": 277,
+          "species": "Swellow",
+          "level": 33,
+          "typeKeys": ["Normal", "Flying"],
+          "moves": ["Quick Attack", "Aerial Ace", "Double Team", "Endeavor"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 279,
+          "species": "Pelipper",
+          "level": 33,
+          "typeKeys": ["Water", "Flying"],
+          "moves": ["Water Pulse", "Roost", "Protect", "Aerial Ace"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 227,
+          "species": "Skarmory",
+          "level": 33,
+          "typeKeys": ["Steel", "Flying"],
+          "moves": ["Sand Attack", "Air Cutter", "Steel Wing", "Aerial Ace"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 334,
+          "species": "Altaria",
+          "level": 35,
+          "typeKeys": ["Dragon", "Flying"],
+          "moves": ["Earthquake", "Dragon Breath", "Cotton Guard", "Roost"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "Tate & Liza",
+      "typeKey": "Psychic",
+      "badgeName": "Mind Badge",
+      "gymLocation": "Mossdeep City",
+      "isDoubleBattle": true,
+      "team": [
+        {
+          "speciesId": 337,
+          "species": "Lunatone",
+          "level": 45,
+          "typeKeys": ["Rock", "Psychic"],
+          "moves": ["Light Screen", "Psychic", "Hypnosis", "Calm Mind"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 338,
+          "species": "Solrock",
+          "level": 45,
+          "typeKeys": ["Rock", "Psychic"],
+          "moves": ["Sunny Day", "Rock Slide", "Psychic", "Solar Beam"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Wallace",
+      "typeKey": "Water",
+      "badgeName": "Rain Badge",
+      "gymLocation": "Sootopolis City",
+      "team": [
+        {
+          "speciesId": 370,
+          "species": "Luvdisc",
+          "level": 44,
+          "typeKeys": ["Water"],
+          "moves": ["Water Pulse", "Attract", "Sweet Kiss", "Draining Kiss"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 340,
+          "species": "Whiscash",
+          "level": 44,
+          "typeKeys": ["Water", "Ground"],
+          "moves": ["Mud Sport", "Waterfall", "Zen Headbutt", "Earthquake"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 364,
+          "species": "Sealeo",
+          "level": 44,
+          "typeKeys": ["Ice", "Water"],
+          "moves": ["Encore", "Body Slam", "Aurora Beam", "Waterfall"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 119,
+          "species": "Seaking",
+          "level": 44,
+          "typeKeys": ["Water"],
+          "moves": ["Aqua Ring", "Rain Dance", "Waterfall", "Horn Drill"],
+          "item": null,
+          "isAce": false
+        },
+        {
+          "speciesId": 350,
+          "species": "Milotic",
+          "level": 46,
+          "typeKeys": ["Water"],
+          "moves": ["Hydro Pump", "Disarming Voice", "Recover", "Ice Beam"],
+          "item": null,
+          "isAce": true
+        }
+      ]
+    }
+  ]
+}
