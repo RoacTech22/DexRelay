@@ -3303,6 +3303,32 @@ body {
   margin: 0 auto;
 }
 
+/* Botón "Reiniciar partida" (06/09/2026) -- header propio en vez
+   de colgarlo de una de las tarjetas de abajo, porque es una
+   acción de PÁGINA completa (borra roster/cementerio/encuentros
+   enteros vía Api.nuzlocke_reset_all(), no algo de una sola
+   tarjeta), y porque siendo tan destructiva conviene que quede
+   visualmente separada del resto de los botones de acción normal
+   (editar/nuevo encuentro), no mezclada entre ellos. */
+.nz-page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dash-btn-sm-danger {
+  flex: none;
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border-strong));
+}
+
+.dash-btn-sm-danger:hover {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
 /* ---------- Resumen (3 tarjetas) ---------- */
 
 .nz-summary-row {
@@ -3950,6 +3976,10 @@ body {
   display: flex;
   gap: 8px;
   margin-left: auto;
+}
+
+.nz-modal-footer-right .dash-btn-action {
+  margin-top: 0px;
 }
 
 .nz-btn-danger-ghost {

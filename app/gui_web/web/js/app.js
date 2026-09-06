@@ -1764,6 +1764,7 @@
     document.getElementById("nz-btn-save-ruleset").addEventListener("click", onSaveRulesetClicked);
     document.getElementById("nz-btn-add-rule").addEventListener("click", onAddRuleClicked);
     document.getElementById("nz-form-status").addEventListener("change", onEncounterStatusChanged);
+    document.getElementById("nz-btn-reset-run").addEventListener("click", onResetRunClicked);
 
     document.querySelectorAll("[data-close-modal]").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -2370,6 +2371,31 @@
           return;
         }
         closeModal("nz-modal-encounter");
+        pollNuzlockePage();
+      });
+  }
+
+  // Botón "Reiniciar partida" del header de la página (06/09/2026,
+  // se nos había pasado por alto -- el backend, Api.nuzlocke_reset_all()
+  // -> NuzlockeService.reset_all(), ya existía de antes para un panel
+  // viejo, ver app/server/http_server.py -- acá solo faltaba
+  // conectarlo a un botón real de la GUI v2). Mensaje del confirm
+  // detalla EXACTO lo que borra/conserva, calcado del docstring real
+  // de reset_all(): roster/cementerio/encuentros/pendientes se
+  // vacían, el ruleset (las reglas de la casa que el jugador eligió)
+  // NO se toca.
+  function onResetRunClicked() {
+    if (
+      !window.confirm(
+        "Esto borra TODO el progreso de este Nuzlocke (equipo, cementerio, encuentros y capturas pendientes) para volver a empezar de cero. Las reglas de la partida no se borran. No se puede deshacer. ¿Continuar?"
+      )
+    ) {
+      return;
+    }
+
+    api()
+      .nuzlocke_reset_all()
+      .then(function () {
         pollNuzlockePage();
       });
   }
