@@ -34,7 +34,9 @@ from app.core.version import get_app_version as resolve_app_version
 from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
+    RARE_CANDY_ITEM_ID,
 )
+from app.services.bag_service import BagService, BagWriteError
 from app.services.gym_leaders import GymLeaderCatalog
 from app.services.location_catalog import LocationCatalog
 from app.services.playtime_service import PlaytimeService
@@ -1105,3 +1107,52 @@ class Api:
 
         webbrowser.open(url)
         return True
+
+    # -----------------------------------------------------------
+    # Página Herramientas (07/09/2026) -- primera función de
+    # ESCRITURA de memoria de DexRelay (todo lo demás en la app es
+    # solo lectura). Ver Documento Maestro de esta sesión y
+    # app/memory/pointers.py (sección "BOLSA DE ITEMS") para el
+    # detalle completo de cómo se confirmó la dirección/estructura.
+    # La lógica real vive en BagService, compartida con
+    # tools/probes/memory/escribir_item_bolsa.py -- acá solo se
+    # traduce el resultado a algo que el frontend pueda mostrar.
+    # -----------------------------------------------------------
+
+    def get_herramientas_page_data(self):
+        """
+        Estado inicial de la página: si Azahar está conectado (la
+        página deshabilita el botón y muestra un aviso si no).
+        Confirmada en vivo contra las dos versiones (Alpha Sapphire
+        y Omega Ruby, 07/09/2026) -- no hace falta avisar sobre
+        versión distinta como al principio.
+        """
+
+        state = self.app.state
+
+        return {
+            "connected": bool(state.azahar_connected),
+        }
+
+    def add_rare_candy(self, cantidad):
+        """
+        Agrega Caramelo Raro (item_id=50, confirmado contra la
+        tabla oficial de índices de Bulbapedia para Generación VI)
+        a la bolsa. Devuelve `{"ok": True, "new_quantity": N}` o
+        `{"error": "mensaje"}` -- nunca lanza una excepción hacia
+        el frontend, BagWriteError ya viene con un mensaje legible.
+        """
+
+        try:
+            cantidad = int(cantidad)
+        except (TypeError, ValueError):
+            return {"error": "Cantidad inválida."}
+
+        try:
+            result = BagService(self.app.reader).add_medicine_item(
+                RARE_CANDY_ITEM_ID, cantidad
+            )
+        except BagWriteError as error:
+            return {"error": str(error)}
+
+        return {"ok": True, "new_quantity": result["new_quantity"]}
