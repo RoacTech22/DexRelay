@@ -451,3 +451,139 @@ def get_current_zone_id_address(process_name):
             PROCESS_NAME_ALPHA_SAPPHIRE
         ],
     )
+
+
+# ============================================================
+# BOLSA DE ITEMS (escritura de memoria -- Caramelo Raro y otros)
+# ============================================================
+
+# Confirmado empíricamente el 07/09/2026 (ver
+# tools/probes/memory/buscar_bolsa_items.py y
+# confirmar_bolsa_items.py, documentado en el Documento Maestro de
+# esa sesión): en memoria viva la bolsa es UN SOLO array de
+# casilleros de 4 bytes (u16 item_id LE + u16 cantidad LE), con
+# TODOS los items de TODOS los bolsillos mezclados sin ningún orden
+# por categoría -- la separación por bolsillo (Objetos/MTs/Bayas/
+# etc) pasa solo al mostrarla en el juego, filtrando por rango de
+# item_id, no en cómo se guarda en RAM.
+#
+# Candidatos validados EN VIVO por el usuario (cambio real
+# reproducido en el juego, no solo "forma plausible"):
+#   - Alpha Sapphire: item_id=2 (Ultra Ball) en 0x08C6AC84 bajó de
+#     23 a 22 al tirar una.
+#   - Omega Ruby: item_id=4 (Poké Ball) en 0x08C6EC70 bajó de 4 a 3
+#     al tirar una.
+#
+# Multi-version (07/09/2026, mismo patrón ya visto con
+# PARTY_ORDER_ADDRESS/BOX_BASE_ADDRESS/CURRENT_ZONE_ID_ADDRESS): la
+# dirección NO coincide entre versiones -- pero a diferencia de esas
+# otras direcciones, acá el desplazamiento entre AS y OR resultó ser
+# una constante EXACTA (0x3FF0) tanto para el inicio como para el
+# final del tramo confirmado por auto-detección
+# (confirmar_bolsa_items.py: 740 casilleros / 2960 bytes en las DOS
+# versiones, mismo tamaño exacto) -- fuerte señal de que es
+# literalmente la misma estructura, corrida en memoria por ese
+# offset fijo.
+_BAG_START_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6AC80,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6EC70,
+}
+_BAG_END_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B810,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6F800,
+}
+
+BAG_START_ADDRESS = _BAG_START_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
+BAG_END_ADDRESS = _BAG_END_ADDRESS_BY_PROCESS[
+    PROCESS_NAME_ALPHA_SAPPHIRE
+]
+BAG_SLOT_SIZE = 4
+
+# Stack máximo real de un item en ORAS.
+BAG_MAX_QUANTITY = 999
+
+# Confirmado contra la tabla oficial de índices de Bulbapedia
+# ("List of items by index number in Generation VI", la misma tabla
+# de índices que usa ORAS) -- no es un valor supuesto de memoria.
+RARE_CANDY_ITEM_ID = 50
+
+
+def get_bag_start_address(process_name):
+    """Idem get_party_order_address(), para BAG_START_ADDRESS."""
+
+    return _BAG_START_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _BAG_START_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
+
+
+def get_bag_end_address(process_name):
+    """Idem get_party_order_address(), para BAG_END_ADDRESS."""
+
+    return _BAG_END_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _BAG_END_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
+
+
+# ============================================================
+# BOLSILLO DE MEDICINA (Caramelo Raro pertenece aca)
+# ============================================================
+
+# CONFIRMADO (07/09/2026): al agregar Caramelo Raro en CUALQUIER
+# casillero vacio del tramo grande de la bolsa (BAG_START/END), el
+# juego lo mostraba en el bolsillo "Objetos" en vez de "Medicina" --
+# y por estar en el bolsillo equivocado, usarlo no descontaba la
+# cantidad (el menu de Objetos no tiene la logica de "usar sobre un
+# Pokemon"). Esto reviso la hipotesis anterior de "una sola lista
+# unificada sin separacion real": en realidad SI hay bolsillos
+# separados (bloques contiguos de capacidad fija, uno detras del
+# otro sin relleno, mismo patron de contiguidad ya visto en Cajas
+# PC/orden de party) -- la posicion importa.
+#
+# Confirmado que Rare Candy/Caramelo Raro pertenece al bolsillo de
+# Medicina en esta generacion contra la categoria oficial de
+# Bulbapedia ("Category:Medicine_Pocket", que lista Rare Candy
+# explicitamente junto a Revive/Zinc/Potion/etc) -- no es una
+# suposicion de DexRelay, es la clasificacion real del juego.
+#
+# Anclaje validado EN VIVO (Alpha Sapphire): item_id=28 (Revivir) en
+# 0x08C6B5F0 bajo de 6 a 5 al tirar uno. El dump alrededor mostro el
+# bolsillo completo arrancando ahi mismo (racha de (0,0) justo antes,
+# 5 items reales seguidos: Revivir/Zinc/Carbos/Cura Paralisis/Eter,
+# racha de (0,0) despues).
+#
+# Omega Ruby: direccion calculada sumando el offset constante
+# 0x3FF0 ya confirmado entre versiones para el inicio/fin del tramo
+# completo de la bolsa (mismo desplazamiento exacto medido con
+# BAG_START_ADDRESS y BAG_END_ADDRESS) -- inicialmente una
+# prediccion, CONFIRMADA en vivo el mismo dia: el usuario agrego
+# Caramelo Raro con esta direccion contra un save real de Omega
+# Ruby y el juego lo mostro y conto correctamente dentro del
+# bolsillo de Medicina (a diferencia del bug original, que lo
+# mandaba a "Objetos").
+_MEDICINE_POCKET_START_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B5F0,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6B5F0 + 0x3FF0,
+}
+
+# Cuantos casilleros escanear hacia adelante desde el inicio del
+# bolsillo de Medicina al buscar lugar para un item nuevo. Generoso
+# respecto a los 5 items reales que se vieron en el dump (deja
+# margen para que el jugador tenga muchos mas items de Medicina sin
+# que la busqueda se quede corta), pero acotado -- no tan grande
+# como para arriesgarse a cruzar al bolsillo siguiente si Medicina
+# estuviera cerca de su limite real (que todavia no se confirmo con
+# precision, ver dump_pocket_medicina.py).
+MEDICINE_POCKET_SCAN_SLOTS = 100
+
+
+def get_medicine_pocket_start_address(process_name):
+    """Idem get_party_order_address(), para el bolsillo de Medicina."""
+
+    return _MEDICINE_POCKET_START_BY_PROCESS.get(
+        process_name,
+        _MEDICINE_POCKET_START_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
