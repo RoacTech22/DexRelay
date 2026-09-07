@@ -26,6 +26,8 @@ import base64
 import time
 import webbrowser
 
+import webview
+
 from app.core import paths
 from app.core import log_capture
 from app.core.version import get_app_version as resolve_app_version
@@ -33,6 +35,7 @@ from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
+from app.services.gym_leaders import GymLeaderCatalog
 from app.services.location_catalog import LocationCatalog
 from app.services.playtime_service import PlaytimeService
 from app.services.pokemon_detail_resolver import PokemonDetailResolver
@@ -155,6 +158,11 @@ class Api:
         self.species_catalog = SpeciesCatalog()
         self.location_catalog = LocationCatalog()
         self.playtime_service = PlaytimeService()
+
+        # Pestaña Líderes del Nuzlocke (Fase B, roadmap 3.1/3.2) --
+        # dataset estático curado en Fase A, no necesita el bridge
+        # PKHeX ni memoria en vivo (ver docstring del módulo).
+        self.gym_leader_catalog = GymLeaderCatalog()
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -669,6 +677,20 @@ class Api:
             "survivalRate": survival_rate,
         }
 
+        # Pestaña Líderes + tarjeta "líder siguiente" de Seguimiento
+        # (Fase B, roadmap 3.1/3.2/3.3) -- ver
+        # _gym_leaders_with_earned(), compartido con
+        # get_leader_team_window_data() (misma cuenta, no
+        # duplicada).
+        gym_leaders = self._gym_leaders_with_earned()
+
+        # None si ya se obtuvieron las 8 medallas -- el frontend lo
+        # trata como "sin líder pendiente" en vez de romper.
+        next_leader = next(
+            (leader for leader in gym_leaders if not leader["earned"]),
+            None,
+        )
+
         return {
             "team": self.app.state.team or [],
             "roster": roster,
@@ -680,7 +702,109 @@ class Api:
                 self.app.reader.process_name
             ),
             "stats": stats,
+            "gymLeaders": gym_leaders,
+            "nextLeader": next_leader,
         }
+
+    def _gym_leaders_with_earned(self):
+        """
+        Los 8 líderes del catálogo (`GymLeaderCatalog.list_all()`)
+        con `earned` (bool) agregado, cruzando `leader.order`
+        contra el bitfield de medallas actual. `badges` se
+        normaliza con el mismo placeholder honesto que
+        `get_dashboard_data()` -- todavía puede no haber ninguna
+        lectura exitosa en esta sesión (recién conectando).
+
+        Compartido entre `get_nuzlocke_page_data()` (pestaña
+        Líderes + tarjeta "líder siguiente") y
+        `get_leader_team_window_data()` (ventana nativa de detalle
+        de equipo, Fase B 06/09/2026) -- un solo lugar calcula
+        `earned`, nadie más lo recalcula por su cuenta.
+        """
+
+        badges = self.app.state.badges
+
+        if not isinstance(badges, dict):
+            badges = {"value": 0, "count": 0, "badges": [False] * 8}
+
+        badge_flags = badges.get("badges") or [False] * 8
+
+        gym_leaders = []
+
+        for leader in self.gym_leader_catalog.list_all():
+            index = (leader.get("order") or 0) - 1
+            earned = 0 <= index < len(badge_flags) and bool(
+                badge_flags[index]
+            )
+            gym_leaders.append({**leader, "earned": earned})
+
+        return gym_leaders
+
+    # -----------------------------------------------------------
+    # Ventana nativa: detalle de equipo de un líder (Fase B,
+    # 06/09/2026, a pedido del usuario -- reemplaza al modal
+    # movible original). A diferencia de un modal HTML, esto abre
+    # una ventana de sistema operativo real vía
+    # `webview.create_window()`: se pueden abrir varias a la vez
+    # (una por líder) y cada una se puede mover fuera de los
+    # límites de la ventana principal. Vive en su propia página
+    # standalone (`leader_team_window.html`/`leader_team_window.js`),
+    # que NO comparte el bundle de `app.js` ni el poll de 2s de la
+    # página Nuzlocke -- pide su dato una sola vez al abrir.
+    # -----------------------------------------------------------
+
+    def open_leader_team_window(self, order):
+        """
+        Crea la ventana nueva. El título ya viene resuelto acá
+        (nombre en español del líder) para que la barra de tareas/
+        título de la ventana sea legible desde el primer instante,
+        en vez de mostrar un genérico "Cargando..." hasta que la
+        página termine de pedir sus propios datos.
+        """
+
+        leader = self._resolve_leader_for_window(order)
+
+        if leader:
+            leader_name = leader.get("nameEs") or leader.get("name") or "líder"
+        else:
+            leader_name = "líder"
+
+        title = "Equipo de " + leader_name
+
+        window_path = (
+            paths.base_dir() / "app" / "gui_web" / "web" / "leader_team_window.html"
+        )
+
+        webview.create_window(
+            title,
+            url=str(window_path) + "?order=" + str(order),
+            js_api=self,
+            width=880,
+            height=640,
+            min_size=(480, 360),
+            background_color="#0a0e18",
+        )
+
+    def get_leader_team_window_data(self, order):
+        """
+        Datos para `leader_team_window.html` -- se pide una sola
+        vez al abrir la ventana (ver docstring de la sección de
+        arriba), no en un poll continuo como el resto de la GUI.
+        """
+
+        return self._resolve_leader_for_window(order)
+
+    def _resolve_leader_for_window(self, order):
+        try:
+            order = int(order)
+        except (TypeError, ValueError):
+            return None
+
+        for leader in self._gym_leaders_with_earned():
+            if leader.get("order") == order:
+                return leader
+
+        return None
 
     def get_species_catalog(self):
         """Lista completa {id, name} -- se pide una sola vez, se cachea en JS."""
