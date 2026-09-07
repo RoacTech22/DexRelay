@@ -19,19 +19,34 @@
           "speciesId": 74,
           "species": "Geodude",
           "level": 12,
-          "typeKeys": ["Rock", "Ground"],
-          "moves": ["Tackle", "Defense Curl", "Rock Tomb"],
+          "typeKeys": [
+            "Rock",
+            "Ground"
+          ],
+          "moves": [
+            "Tackle",
+            "Defense Curl",
+            "Rock Tomb"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Sturdy"
         },
         {
           "speciesId": 299,
           "species": "Nosepass",
           "level": 14,
-          "typeKeys": ["Rock"],
-          "moves": ["Tackle", "Harden", "Rock Tomb"],
+          "typeKeys": [
+            "Rock"
+          ],
+          "moves": [
+            "Tackle",
+            "Harden",
+            "Rock Tomb"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Magnet Pull"
         }
       ]
     },
@@ -46,19 +61,35 @@
           "speciesId": 66,
           "species": "Machop",
           "level": 14,
-          "typeKeys": ["Fighting"],
-          "moves": ["Leer", "Karate Chop", "Seismic Toss", "Bulk Up"],
+          "typeKeys": [
+            "Fighting"
+          ],
+          "moves": [
+            "Leer",
+            "Karate Chop",
+            "Seismic Toss",
+            "Bulk Up"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Guts"
         },
         {
           "speciesId": 296,
           "species": "Makuhita",
           "level": 16,
-          "typeKeys": ["Fighting"],
-          "moves": ["Arm Thrust", "Knock Off", "Sand Attack", "Bulk Up"],
+          "typeKeys": [
+            "Fighting"
+          ],
+          "moves": [
+            "Arm Thrust",
+            "Knock Off",
+            "Sand Attack",
+            "Bulk Up"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Guts"
         }
       ]
     },
@@ -73,28 +104,51 @@
           "speciesId": 81,
           "species": "Magnemite",
           "level": 19,
-          "typeKeys": ["Electric", "Steel"],
-          "moves": ["Thunder Wave", "Tackle", "Volt Switch"],
+          "typeKeys": [
+            "Electric",
+            "Steel"
+          ],
+          "moves": [
+            "Thunder Wave",
+            "Tackle",
+            "Volt Switch"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Sturdy"
         },
         {
           "speciesId": 100,
           "species": "Voltorb",
           "level": 19,
-          "typeKeys": ["Electric"],
-          "moves": ["Rollout", "Charge", "Volt Switch"],
+          "typeKeys": [
+            "Electric"
+          ],
+          "moves": [
+            "Rollout",
+            "Charge",
+            "Volt Switch"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Soundproof"
         },
         {
           "speciesId": 82,
           "species": "Magneton",
           "level": 21,
-          "typeKeys": ["Electric", "Steel"],
-          "moves": ["Supersonic", "Magnet Bomb", "Volt Switch"],
+          "typeKeys": [
+            "Electric",
+            "Steel"
+          ],
+          "moves": [
+            "Supersonic",
+            "Magnet Bomb",
+            "Volt Switch"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Sturdy"
         }
       ]
     },
@@ -109,28 +163,53 @@
           "speciesId": 218,
           "species": "Slugma",
           "level": 26,
-          "typeKeys": ["Fire"],
-          "moves": ["Overheat", "Rock Throw", "Light Screen", "Sunny Day"],
+          "typeKeys": [
+            "Fire"
+          ],
+          "moves": [
+            "Overheat",
+            "Rock Throw",
+            "Light Screen",
+            "Sunny Day"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Flame Body"
         },
         {
           "speciesId": 322,
           "species": "Numel",
           "level": 26,
-          "typeKeys": ["Fire", "Ground"],
-          "moves": ["Earth Power", "Lava Plume", "Amnesia", "Sunny Day"],
+          "typeKeys": [
+            "Fire",
+            "Ground"
+          ],
+          "moves": [
+            "Earth Power",
+            "Lava Plume",
+            "Amnesia",
+            "Sunny Day"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Simple"
         },
         {
           "speciesId": 324,
           "species": "Torkoal",
           "level": 28,
-          "typeKeys": ["Fire"],
-          "moves": ["Overheat", "Body Slam", "Curse", "Sunny Day"],
+          "typeKeys": [
+            "Fire"
+          ],
+          "moves": [
+            "Overheat",
+            "Body Slam",
+            "Curse",
+            "Sunny Day"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "White Smoke"
         }
       ]
     },
@@ -145,28 +224,52 @@
           "speciesId": 289,
           "species": "Slaking",
           "level": 28,
-          "typeKeys": ["Normal"],
-          "moves": ["Encore", "Retaliate", "Yawn", "Feint Attack"],
+          "typeKeys": [
+            "Normal"
+          ],
+          "moves": [
+            "Encore",
+            "Retaliate",
+            "Yawn",
+            "Feint Attack"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Truant"
         },
         {
           "speciesId": 288,
           "species": "Vigoroth",
           "level": 28,
-          "typeKeys": ["Normal"],
-          "moves": ["Fury Swipes", "Feint Attack", "Retaliate", "Encore"],
+          "typeKeys": [
+            "Normal"
+          ],
+          "moves": [
+            "Fury Swipes",
+            "Feint Attack",
+            "Retaliate",
+            "Encore"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Vital Spirit"
         },
         {
           "speciesId": 289,
           "species": "Slaking",
           "level": 30,
-          "typeKeys": ["Normal"],
-          "moves": ["Chip Away", "Swagger", "Retaliate", "Feint Attack"],
+          "typeKeys": [
+            "Normal"
+          ],
+          "moves": [
+            "Chip Away",
+            "Swagger",
+            "Retaliate",
+            "Feint Attack"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Truant"
         }
       ]
     },
@@ -181,37 +284,73 @@
           "speciesId": 277,
           "species": "Swellow",
           "level": 33,
-          "typeKeys": ["Normal", "Flying"],
-          "moves": ["Quick Attack", "Aerial Ace", "Double Team", "Endeavor"],
+          "typeKeys": [
+            "Normal",
+            "Flying"
+          ],
+          "moves": [
+            "Quick Attack",
+            "Aerial Ace",
+            "Double Team",
+            "Endeavor"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Guts"
         },
         {
           "speciesId": 279,
           "species": "Pelipper",
           "level": 33,
-          "typeKeys": ["Water", "Flying"],
-          "moves": ["Water Pulse", "Roost", "Protect", "Aerial Ace"],
+          "typeKeys": [
+            "Water",
+            "Flying"
+          ],
+          "moves": [
+            "Water Pulse",
+            "Roost",
+            "Protect",
+            "Aerial Ace"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Keen Eye"
         },
         {
           "speciesId": 227,
           "species": "Skarmory",
           "level": 33,
-          "typeKeys": ["Steel", "Flying"],
-          "moves": ["Sand Attack", "Air Cutter", "Steel Wing", "Aerial Ace"],
+          "typeKeys": [
+            "Steel",
+            "Flying"
+          ],
+          "moves": [
+            "Sand Attack",
+            "Air Cutter",
+            "Steel Wing",
+            "Aerial Ace"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Keen Eye"
         },
         {
           "speciesId": 334,
           "species": "Altaria",
           "level": 35,
-          "typeKeys": ["Dragon", "Flying"],
-          "moves": ["Earthquake", "Dragon Breath", "Cotton Guard", "Roost"],
+          "typeKeys": [
+            "Dragon",
+            "Flying"
+          ],
+          "moves": [
+            "Earthquake",
+            "Dragon Breath",
+            "Cotton Guard",
+            "Roost"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Natural Cure"
         }
       ]
     },
@@ -227,19 +366,37 @@
           "speciesId": 337,
           "species": "Lunatone",
           "level": 45,
-          "typeKeys": ["Rock", "Psychic"],
-          "moves": ["Light Screen", "Psychic", "Hypnosis", "Calm Mind"],
+          "typeKeys": [
+            "Rock",
+            "Psychic"
+          ],
+          "moves": [
+            "Light Screen",
+            "Psychic",
+            "Hypnosis",
+            "Calm Mind"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Levitate"
         },
         {
           "speciesId": 338,
           "species": "Solrock",
           "level": 45,
-          "typeKeys": ["Rock", "Psychic"],
-          "moves": ["Sunny Day", "Rock Slide", "Psychic", "Solar Beam"],
+          "typeKeys": [
+            "Rock",
+            "Psychic"
+          ],
+          "moves": [
+            "Sunny Day",
+            "Rock Slide",
+            "Psychic",
+            "Solar Beam"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Levitate"
         }
       ]
     },
@@ -254,46 +411,88 @@
           "speciesId": 370,
           "species": "Luvdisc",
           "level": 44,
-          "typeKeys": ["Water"],
-          "moves": ["Water Pulse", "Attract", "Sweet Kiss", "Draining Kiss"],
+          "typeKeys": [
+            "Water"
+          ],
+          "moves": [
+            "Water Pulse",
+            "Attract",
+            "Sweet Kiss",
+            "Draining Kiss"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Swift Swim"
         },
         {
           "speciesId": 340,
           "species": "Whiscash",
           "level": 44,
-          "typeKeys": ["Water", "Ground"],
-          "moves": ["Mud Sport", "Waterfall", "Zen Headbutt", "Earthquake"],
+          "typeKeys": [
+            "Water",
+            "Ground"
+          ],
+          "moves": [
+            "Mud Sport",
+            "Waterfall",
+            "Zen Headbutt",
+            "Earthquake"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Oblivious"
         },
         {
           "speciesId": 364,
           "species": "Sealeo",
           "level": 44,
-          "typeKeys": ["Ice", "Water"],
-          "moves": ["Encore", "Body Slam", "Aurora Beam", "Waterfall"],
+          "typeKeys": [
+            "Ice",
+            "Water"
+          ],
+          "moves": [
+            "Encore",
+            "Body Slam",
+            "Aurora Beam",
+            "Waterfall"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Thick Fat"
         },
         {
           "speciesId": 119,
           "species": "Seaking",
           "level": 44,
-          "typeKeys": ["Water"],
-          "moves": ["Aqua Ring", "Rain Dance", "Waterfall", "Horn Drill"],
+          "typeKeys": [
+            "Water"
+          ],
+          "moves": [
+            "Aqua Ring",
+            "Rain Dance",
+            "Waterfall",
+            "Horn Drill"
+          ],
           "item": null,
-          "isAce": false
+          "isAce": false,
+          "ability": "Swift Swim"
         },
         {
           "speciesId": 350,
           "species": "Milotic",
           "level": 46,
-          "typeKeys": ["Water"],
-          "moves": ["Hydro Pump", "Disarming Voice", "Recover", "Ice Beam"],
+          "typeKeys": [
+            "Water"
+          ],
+          "moves": [
+            "Hydro Pump",
+            "Disarming Voice",
+            "Recover",
+            "Ice Beam"
+          ],
           "item": null,
-          "isAce": true
+          "isAce": true,
+          "ability": "Marvel Scale"
         }
       ]
     }
