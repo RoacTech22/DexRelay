@@ -458,6 +458,7 @@
     ensureNuzlockeCatalogs(function () {
       if (lastNuzlockeData) {
         renderNuzlockeEncounters(lastNuzlockeData.encounters || []);
+        renderNuzlockeSummaryEncounters(lastNuzlockeData.encounters || []);
       }
     });
   }
@@ -879,6 +880,91 @@
   // ninguna tabla escrita a mano (ver Program.cs, TypeKey()).
   var TYPE_ICON_VIEWBOX = "0 0 76.71 76.71";
 
+  // Traducción al español de los movimientos que aparecen en los
+  // equipos de líderes de gimnasio (06/09/2026, a pedido del
+  // usuario -- pendiente heredado de Fase A/Fase B: el dataset
+  // curado en data/gym_leaders.json trae los nombres en inglés tal
+  // cual los dan pokemondb.net/dittobase.com, las fuentes usadas
+  // para curarlo). Cubre SOLO los 64 movimientos que realmente
+  // aparecen en los 8 equipos -- no la lista completa de
+  // movimientos del juego, que son casi 1000 y no hace falta acá.
+  // Nombre oficial España (mismo criterio que ya se usó para los
+  // nombres de los líderes -- Alana/Petra/etc. son la localización
+  // España, no la de Hispanoamérica, que a veces difiere). Si
+  // algún nombre no coincide con lo que se ve en el juego real,
+  // avisar para corregirlo -- mismo criterio que la corrección de
+  // Alana/Petra intercambiadas.
+  var MOVE_NAME_ES = {
+    "Aerial Ace": "Golpe Aéreo",
+    "Air Cutter": "Corte Aéreo",
+    "Amnesia": "Amnesia",
+    "Aqua Ring": "Anillo Hídrico",
+    "Arm Thrust": "Golpe Brazo",
+    "Attract": "Atracción",
+    "Aurora Beam": "Rayo Aurora",
+    "Body Slam": "Golpe Cuerpo",
+    "Bulk Up": "Corpulencia",
+    "Calm Mind": "Paz Mental",
+    "Charge": "Carga",
+    "Chip Away": "Erosión",
+    "Cotton Guard": "Guardia Algodón",
+    "Curse": "Maldición",
+    "Defense Curl": "Rizo Defensa",
+    "Disarming Voice": "Voz Cautivadora",
+    "Double Team": "Doble Equipo",
+    "Dragon Breath": "Dragoaliento",
+    "Draining Kiss": "Beso Drenaje",
+    "Earth Power": "Tierra Viva",
+    "Earthquake": "Terremoto",
+    "Encore": "Otra Vez",
+    "Endeavor": "Esfuerzo",
+    "Feint Attack": "Finta",
+    "Fury Swipes": "Golpes Furia",
+    "Harden": "Fortaleza",
+    "Horn Drill": "Perforador",
+    "Hydro Pump": "Hidrobomba",
+    "Hypnosis": "Hipnosis",
+    "Ice Beam": "Rayo Hielo",
+    "Karate Chop": "Golpe Kárate",
+    "Knock Off": "Desarme",
+    "Lava Plume": "Humareda",
+    "Leer": "Malicioso",
+    "Light Screen": "Pantalla de Luz",
+    "Magnet Bomb": "Bomba Magnética",
+    "Mud Sport": "Chapoteo Lodo",
+    "Overheat": "Sofoco",
+    "Protect": "Protección",
+    "Psychic": "Psíquico",
+    "Quick Attack": "Ataque Rápido",
+    "Rain Dance": "Danza Lluvia",
+    "Recover": "Recuperación",
+    "Retaliate": "Represalia",
+    "Rock Slide": "Avalancha",
+    "Rock Throw": "Lanzarrocas",
+    "Rock Tomb": "Tumba Rocas",
+    "Rollout": "Rodar",
+    "Roost": "Respiro",
+    "Sand Attack": "Ataque Arena",
+    "Seismic Toss": "Sísmico",
+    "Solar Beam": "Rayo Solar",
+    "Steel Wing": "Ala de Acero",
+    "Sunny Day": "Día Soleado",
+    "Supersonic": "Supersónico",
+    "Swagger": "Contoneo",
+    "Sweet Kiss": "Beso Dulce",
+    "Tackle": "Placaje",
+    "Thunder Wave": "Onda Trueno",
+    "Volt Switch": "Cambio de Voltios",
+    "Water Pulse": "Hidropulso",
+    "Waterfall": "Cascada",
+    "Yawn": "Bostezo",
+    "Zen Headbutt": "Golpe Cabeza Zen",
+  };
+
+  function translateMoveName(name) {
+    return MOVE_NAME_ES[name] || name;
+  }
+
   var TYPE_INFO = {
     "Normal": { label: "Normal", color: "#9fa19f", colorDark: "#4f504f", colorLight: "#cfd0cf", glyph: "<path d=\"M63.81 26.43c3.12-4.29 2.43-10.33-1.69-13.79-4-3.36-9.82-3.11-13.54.39-3.18-1.21-6.63-1.88-10.23-1.88s-7.05.67-10.23 1.88c-3.71-3.5-9.53-3.74-13.54-.39-4.13 3.46-4.81 9.49-1.69 13.79-2.17 4.05-3.4 8.67-3.4 13.58 0 15.91 12.95 28.86 28.86 28.86s28.86-12.95 28.86-28.86c0-4.91-1.23-9.53-3.4-13.58zM38.35 60.87c-11.5 0-20.86-9.36-20.86-20.86s9.36-20.86 20.86-20.86 20.86 9.36 20.86 20.86-9.36 20.86-20.86 20.86z\" fill=\"#fff\"/>" },
     "Fire": { label: "Fuego", color: "#e62829", colorDark: "#731414", colorLight: "#f29394", glyph: "<path d=\"M55.78 38.1c-5.32-5.15-3.66-9.14-1.21-11.26 0 0-6.53-.79-8.85 4.53-2.33 5.32 2.16 8.06 2.16 8.06s-6.48-2.58-4.66-8.9c1.61-5.56 4.57-8.48 3.24-14.38-1.5-6.67-10.97-9.49-15.55-7.74 3.2 1.08 5.51 4.09 5.51 7.66 0 4.16-3.29 6.92-7.71 11.39-5.11 5.15-10.32 10.97-10.32 20.31 0 10.78 6.65 17.45 14.62 19.87-4.04-1.93-12.45-7.99-11.4-19.65 1.1-12.3 12.89-20.7 12.89-20.7s-2.54 4.26-1.43 11.16c.62 3.88 3.4 8.65 6.05 10.72 3.72 2.91 8.64 5.93 7.93 11.45-.67 5.18-7.55 7.5-11.02 7.71 1.58.26 3.19.37 4.78.32 11.81 0 20.58-8.78 20.58-18.12 0-7.39-3.54-10.43-5.62-12.43z\" fill=\"#fff\"/>" },
@@ -984,12 +1070,12 @@
     // antes y simplemente no tenía ninguna fila que lo disparara.
     // Mismo ícono de corazón que ya usa el Dashboard para "HP
     // total" (index.html), para no inventar un ícono nuevo.
-    { key: "hp", label: "Hp", natureKey: null, color: "#ff5c7a", iconViewBox: "0 0 255.84 224.93", icon: "<path fill=\"currentColor\" d=\"M235.18,20.88C221.78,7.48,204.05.16,185.12.16s-36.72,7.38-50.12,20.77l-7,7-7.11-7.11C107.5,7.43,89.66,0,70.73,0S34.06,7.38,20.72,20.72C7.32,34.12-.05,51.91,0,70.84,0,89.76,7.43,107.5,20.83,120.9l101.86,101.86c1.41,1.41,3.31,2.17,5.15,2.17s3.74-.71,5.15-2.12l102.08-101.7c13.4-13.4,20.77-31.19,20.77-50.12.05-18.93-7.27-36.72-20.66-50.12Z\"/>" },
-    { key: "attack", label: "Atq", natureKey: "Ataque", color: "#ff5252", iconViewBox: "0 0 207.12 207.12", icon: "<path fill=\"currentColor\" d=\"M198.2.56l-43.64,5.42c-2.67.33-4.95.44-7.02,2.41l-72.44,99.59,8.27,8.18,77.02-77.02c2.45-2.46,5.97-2.09,7.97.31,1.97,2.36,1.77,5.54-.99,7.88l-76.41,76.41,8.18,8.27,99.59-72.44c1.97-2.07,2.08-4.35,2.41-7.02l5.42-43.64c.6-4.84-3.51-8.96-8.35-8.35Z\"/><path fill=\"currentColor\" d=\"M25.31,159.53c11.25,2.72,19.51,11.06,22.29,22.24l15.53-15.47-22.31-22.31-15.51,15.54Z\"/><path fill=\"currentColor\" d=\"M23.83,170.28c-6.38-1.73-13.2.08-17.89,4.75-7.23,7.2-7.26,18.9-.06,26.14,7.19,7.24,18.89,7.28,26.14.09,4.69-4.66,6.55-11.46,4.86-17.86-1.69-6.39-6.66-11.4-13.05-13.12Z\"/><path fill=\"currentColor\" d=\"M120.08,149.96c-1.5,1.43-3.43,2.59-5.32,3.17-4.89,1.5-9.61-.06-13.27-3.33-.97-.87-1.58-1.72-2.5-2.64l-24.06-24.15-16.87-16.71c-3.83-3.79-5.71-8.6-4.04-14.09.53-1.76,1.78-3.73,3.13-5.16,3.23-3.41,3.16-8.12-.2-11.11-3.38-3.01-8.07-2.31-11.01,1.26-1.09,1.32-2.05,2.24-3.01,3.79-6.07,9.84-6.03,22.84,1.39,32.24l12.21,12.52,1.16,1.6-9.3,9.07,22.31,22.31,8.63-8.99c.69-.24,1.1-.06,1.79.62l13.01,12.63c9.02,6.96,21.35,7.24,30.88,1.86,1.99-1.13,3.28-2.24,4.93-3.66,3.5-3,4.28-7.61,1.24-11.03-2.97-3.34-7.7-3.43-11.1-.19Z\"/>" },
-    { key: "spAttack", label: "Atq. Esp", natureKey: "AtaqueEsp", color: "#ab47bc", iconViewBox: "0 0 195.83 195.38", icon: "<path fill=\"currentColor\" d=\"M34.73,175.67c-14.35,13.63-24.59,23.49-31.65,18.31-3.41-2.5-4.52-9.6-.56-13.69,9.48-9.78,18.15-19.23,27.57-29.15l35.64-37.54,26.2-42.15,30.52-22.73c8.49-6.32,3.72-20.71,6.96-29.71L147.66,0l47,.91,1.17,47.97c-17.03,10.66-35.46,17.55-54.81,23.69-23.51,7.46-33.82,41.16-68.7,67.4l-37.58,35.69ZM178.75,36.15l-.35-18.92c-7.06-.56-12.31-.64-19.29.03-.19,8.46-2.08,13.87-3.64,22.59l23.27-3.7Z\"/>" },
-    { key: "defense", label: "Def", natureKey: "Defensa", color: "#42a5f5", iconViewBox: "0 0 192.93 225.8", icon: "<path fill=\"currentColor\" d=\"M99.1,225.3h-6.14c-7.06-.87-13.72-3.27-19.98-7.22C33.09,194.8,3.41,152.88.5,105.33l.02-69.88c.64-3.21,2.39-4.56,5.2-5.88L91.02,1.13c3.34-.87,7.72-.83,11.05.04l85.15,28.41c2.9,1.33,4.56,2.7,5.21,5.98l-.02,69.85c-2.33,42.62-26.13,80.27-59.94,104.19-9.81,6.94-21.36,14.1-33.37,15.7ZM162.17,57.28c0-2.35-2.17-4.65-3.79-5.2l-19.36-6.59-12.23-4.07-30.33-9.64.02,162.12c5.89-1.02,10.13-3.7,14.86-6.42,18.01-11.84,32.66-28.4,41.6-48.17,5.39-11.93,9.03-24.29,9.07-37.39l.15-44.63Z\"/>" },
-    { key: "spDefense", label: "Def. Esp", natureKey: "DefensaEsp", color: "#26c6da", iconViewBox: "0 0 199.94 236.21", icon: "<path fill=\"currentColor\" d=\"M102.28,236.21h-4.61c-17.8-6.1-34.17-15.54-48.66-27.83l-5-4.69c-1.87-1.76-3.31-3.25-5.09-5.12C16.02,174.51,2.48,143.41.01,110.14V36.66c-.01-2.27,2.9-4.7,4.86-5.36L97.75.32c1.85-.62,3.66-.27,5.46.33l91.85,30.65c1.97.66,4.88,3.09,4.88,5.36v73.48c-4.45,58.62-42.56,107.36-97.67,126.08ZM151.1,186.32c19.4-21.06,30.84-47.93,33.14-76.63l.14-65.56-84.41-28.12L15.56,44.13l.14,65.56c2.25,28.69,13.78,55.55,33.12,76.63,2.53,2.98,4.87,5.39,7.91,7.87,12.45,11.55,27.1,20.22,43.28,26.04,19.44-7.03,37.27-18.62,51.08-33.92Z\"/><path fill=\"currentColor\" d=\"M103.76,202.41c-2.9,1.33-4.74,1.28-7.33.1-37.81-17.21-63.55-53.84-65.65-95.45l-.32-6.42v-39.49c0-3.58,2.33-6.72,5.65-7.82l61.48-20.5c1.71-.57,3.09-.56,4.8,0l61.14,20.36c3.46,1.15,5.98,4.15,5.98,7.97v39.88s-.31,5.56-.31,5.56c-2.28,41.64-27.51,78.39-65.42,95.81ZM153.55,106.08c-.56-2.14.33-3.42.33-5.03v-34.65s-46.03-15.31-46.03-15.31l-.23,40.25c-.02,4.2-5.17,6.83-8.76,6.46-3.1-1-6.56-3.04-6.57-6.48l-.2-40.12c-2.69,1.07-5.32,1.72-8.09,2.64l-37.98,12.7v34.97c.53,1.77.59,3.27.4,5.17,2.13,31.2,19.03,59.38,45.68,75.85l.17-32.06c.02-3.99,4.31-6.89,7.88-6.79s7.51,2.92,7.53,6.79l.17,32.06c26.77-16.56,43.75-44.89,45.71-76.45Z\"/>" },
-    { key: "speed", label: "Vel", natureKey: "Velocidad", color: "#ffca28", iconViewBox: "0 0 204.4 176.93", icon: "<path fill=\"currentColor\" d=\"M194.5.04L188.89,0c-.66,0-1.12.29-1.18.77-.35-.41-.71-.74-1.06-.74-32.9-.02-69.74,3.25-102.52,13.16-16.69,5.05-33.45,13.24-48.95,22.39-9.95,5.87-22.54,13.33-31.25,21.26-3.78,3.44-4.75,4.37-3.22,10.43,5.49,21.01,9.67,42.4,12.82,64.04.39,2.71.55,5.46.5,8.21l-.23,11.13c-.47,8.4-3.01,16.35-6.31,23.7l.23,2.58h.62c4.93-6,13.77-22.09,15.77-29.43l3.37-12.35c.41-1.51.84-3.11.95-4.62l.9-12.55c.16-1.73.02-12.89.05-16.89l-.04-.21c0-7.86-1.09-12.16-2.53-20.54l14.88-11.75c11.15-8.8,22.83-15.53,35.53-20.46l13.64-5.3c25.28-9.03,50.65-15.87,76.45-22.58,11.65-3.03,21.82-3.78,31.85-12.49,1.93-1.68,3.21-4.35,5.26-5.48V.04h-9.9Z\"/><path fill=\"currentColor\" d=\"M173.61,27.72c-1.78-1.24-5.85-1.25-7.33-.04l-11.45,1.54c-33.23,6.51-79.82,22.8-108.41,43.65-5.24,3.82-10.36,7.68-14.33,13.27-.99,2.15-.07,5.32-.04,8.07l.5,6.4c.04,3.03.08,5.23.36,8.98l26.04-19.29c4.65-3.45,9.07-5.43,14.6-10.03,2.77-2.3,6.92-3,9.41-5.74,2.13-2.34,4.36-2.56,6.76-3.99,11.54-6.84,23.09-12.74,35.27-17.76l15.25-6.29,21.91-10.08c4.5-2.07,12.11-6.05,12.48-7.62.08-.34-.7-1.06-1.02-1.06Z\"/><path fill=\"currentColor\" d=\"M120.45,62.96c-9.37,4.01-18.03,8.33-27.01,13.76-20.37,12.3-39.76,25.87-59,40.52-.37,7.82-1.38,14.84-2.67,22.54l72.44-54.74,3.76-2.86,17.68-12.99c3.2-2.35,6.44-4.18,9.36-7.66-1.9-3.62-9.02-.93-14.55,1.44Z\"/><path fill=\"currentColor\" d=\"M88.71,104.52c-9.15,5.81-17.25,12.65-25.98,19.4l-32.35,25c-1.75,8.14-4.42,15.26-8.71,22.39,2.11.34,3.32-1.65,4.86-3l21.45-18.92,23.31-19.98,16.16-12.89c2.95-2.36,5.67-4.48,8.52-6.98l4.28-3.77c2.68-2.36,6.43-6.29,6.14-8.11-6.7.57-12.17,3.37-17.68,6.86Z\"/>" },
+    { key: "hp", label: "HP", natureKey: null, color: "#ff5c7a", iconViewBox: "0 0 255.84 224.93", icon: "<path fill=\"currentColor\" d=\"M235.18,20.88C221.78,7.48,204.05.16,185.12.16s-36.72,7.38-50.12,20.77l-7,7-7.11-7.11C107.5,7.43,89.66,0,70.73,0S34.06,7.38,20.72,20.72C7.32,34.12-.05,51.91,0,70.84,0,89.76,7.43,107.5,20.83,120.9l101.86,101.86c1.41,1.41,3.31,2.17,5.15,2.17s3.74-.71,5.15-2.12l102.08-101.7c13.4-13.4,20.77-31.19,20.77-50.12.05-18.93-7.27-36.72-20.66-50.12Z\"/>" },
+    { key: "attack", label: "ATK", natureKey: "Ataque", color: "#ff5252", iconViewBox: "0 0 207.12 207.12", icon: "<path fill=\"currentColor\" d=\"M198.2.56l-43.64,5.42c-2.67.33-4.95.44-7.02,2.41l-72.44,99.59,8.27,8.18,77.02-77.02c2.45-2.46,5.97-2.09,7.97.31,1.97,2.36,1.77,5.54-.99,7.88l-76.41,76.41,8.18,8.27,99.59-72.44c1.97-2.07,2.08-4.35,2.41-7.02l5.42-43.64c.6-4.84-3.51-8.96-8.35-8.35Z\"/><path fill=\"currentColor\" d=\"M25.31,159.53c11.25,2.72,19.51,11.06,22.29,22.24l15.53-15.47-22.31-22.31-15.51,15.54Z\"/><path fill=\"currentColor\" d=\"M23.83,170.28c-6.38-1.73-13.2.08-17.89,4.75-7.23,7.2-7.26,18.9-.06,26.14,7.19,7.24,18.89,7.28,26.14.09,4.69-4.66,6.55-11.46,4.86-17.86-1.69-6.39-6.66-11.4-13.05-13.12Z\"/><path fill=\"currentColor\" d=\"M120.08,149.96c-1.5,1.43-3.43,2.59-5.32,3.17-4.89,1.5-9.61-.06-13.27-3.33-.97-.87-1.58-1.72-2.5-2.64l-24.06-24.15-16.87-16.71c-3.83-3.79-5.71-8.6-4.04-14.09.53-1.76,1.78-3.73,3.13-5.16,3.23-3.41,3.16-8.12-.2-11.11-3.38-3.01-8.07-2.31-11.01,1.26-1.09,1.32-2.05,2.24-3.01,3.79-6.07,9.84-6.03,22.84,1.39,32.24l12.21,12.52,1.16,1.6-9.3,9.07,22.31,22.31,8.63-8.99c.69-.24,1.1-.06,1.79.62l13.01,12.63c9.02,6.96,21.35,7.24,30.88,1.86,1.99-1.13,3.28-2.24,4.93-3.66,3.5-3,4.28-7.61,1.24-11.03-2.97-3.34-7.7-3.43-11.1-.19Z\"/>" },
+    { key: "spAttack", label: "SPA", natureKey: "AtaqueEsp", color: "#ab47bc", iconViewBox: "0 0 195.83 195.38", icon: "<path fill=\"currentColor\" d=\"M34.73,175.67c-14.35,13.63-24.59,23.49-31.65,18.31-3.41-2.5-4.52-9.6-.56-13.69,9.48-9.78,18.15-19.23,27.57-29.15l35.64-37.54,26.2-42.15,30.52-22.73c8.49-6.32,3.72-20.71,6.96-29.71L147.66,0l47,.91,1.17,47.97c-17.03,10.66-35.46,17.55-54.81,23.69-23.51,7.46-33.82,41.16-68.7,67.4l-37.58,35.69ZM178.75,36.15l-.35-18.92c-7.06-.56-12.31-.64-19.29.03-.19,8.46-2.08,13.87-3.64,22.59l23.27-3.7Z\"/>" },
+    { key: "defense", label: "DEF", natureKey: "Defensa", color: "#42a5f5", iconViewBox: "0 0 192.93 225.8", icon: "<path fill=\"currentColor\" d=\"M99.1,225.3h-6.14c-7.06-.87-13.72-3.27-19.98-7.22C33.09,194.8,3.41,152.88.5,105.33l.02-69.88c.64-3.21,2.39-4.56,5.2-5.88L91.02,1.13c3.34-.87,7.72-.83,11.05.04l85.15,28.41c2.9,1.33,4.56,2.7,5.21,5.98l-.02,69.85c-2.33,42.62-26.13,80.27-59.94,104.19-9.81,6.94-21.36,14.1-33.37,15.7ZM162.17,57.28c0-2.35-2.17-4.65-3.79-5.2l-19.36-6.59-12.23-4.07-30.33-9.64.02,162.12c5.89-1.02,10.13-3.7,14.86-6.42,18.01-11.84,32.66-28.4,41.6-48.17,5.39-11.93,9.03-24.29,9.07-37.39l.15-44.63Z\"/>" },
+    { key: "spDefense", label: "SPD", natureKey: "DefensaEsp", color: "#26c6da", iconViewBox: "0 0 199.94 236.21", icon: "<path fill=\"currentColor\" d=\"M102.28,236.21h-4.61c-17.8-6.1-34.17-15.54-48.66-27.83l-5-4.69c-1.87-1.76-3.31-3.25-5.09-5.12C16.02,174.51,2.48,143.41.01,110.14V36.66c-.01-2.27,2.9-4.7,4.86-5.36L97.75.32c1.85-.62,3.66-.27,5.46.33l91.85,30.65c1.97.66,4.88,3.09,4.88,5.36v73.48c-4.45,58.62-42.56,107.36-97.67,126.08ZM151.1,186.32c19.4-21.06,30.84-47.93,33.14-76.63l.14-65.56-84.41-28.12L15.56,44.13l.14,65.56c2.25,28.69,13.78,55.55,33.12,76.63,2.53,2.98,4.87,5.39,7.91,7.87,12.45,11.55,27.1,20.22,43.28,26.04,19.44-7.03,37.27-18.62,51.08-33.92Z\"/><path fill=\"currentColor\" d=\"M103.76,202.41c-2.9,1.33-4.74,1.28-7.33.1-37.81-17.21-63.55-53.84-65.65-95.45l-.32-6.42v-39.49c0-3.58,2.33-6.72,5.65-7.82l61.48-20.5c1.71-.57,3.09-.56,4.8,0l61.14,20.36c3.46,1.15,5.98,4.15,5.98,7.97v39.88s-.31,5.56-.31,5.56c-2.28,41.64-27.51,78.39-65.42,95.81ZM153.55,106.08c-.56-2.14.33-3.42.33-5.03v-34.65s-46.03-15.31-46.03-15.31l-.23,40.25c-.02,4.2-5.17,6.83-8.76,6.46-3.1-1-6.56-3.04-6.57-6.48l-.2-40.12c-2.69,1.07-5.32,1.72-8.09,2.64l-37.98,12.7v34.97c.53,1.77.59,3.27.4,5.17,2.13,31.2,19.03,59.38,45.68,75.85l.17-32.06c.02-3.99,4.31-6.89,7.88-6.79s7.51,2.92,7.53,6.79l.17,32.06c26.77-16.56,43.75-44.89,45.71-76.45Z\"/>" },
+    { key: "speed", label: "SPE", natureKey: "Velocidad", color: "#ffca28", iconViewBox: "0 0 204.4 176.93", icon: "<path fill=\"currentColor\" d=\"M194.5.04L188.89,0c-.66,0-1.12.29-1.18.77-.35-.41-.71-.74-1.06-.74-32.9-.02-69.74,3.25-102.52,13.16-16.69,5.05-33.45,13.24-48.95,22.39-9.95,5.87-22.54,13.33-31.25,21.26-3.78,3.44-4.75,4.37-3.22,10.43,5.49,21.01,9.67,42.4,12.82,64.04.39,2.71.55,5.46.5,8.21l-.23,11.13c-.47,8.4-3.01,16.35-6.31,23.7l.23,2.58h.62c4.93-6,13.77-22.09,15.77-29.43l3.37-12.35c.41-1.51.84-3.11.95-4.62l.9-12.55c.16-1.73.02-12.89.05-16.89l-.04-.21c0-7.86-1.09-12.16-2.53-20.54l14.88-11.75c11.15-8.8,22.83-15.53,35.53-20.46l13.64-5.3c25.28-9.03,50.65-15.87,76.45-22.58,11.65-3.03,21.82-3.78,31.85-12.49,1.93-1.68,3.21-4.35,5.26-5.48V.04h-9.9Z\"/><path fill=\"currentColor\" d=\"M173.61,27.72c-1.78-1.24-5.85-1.25-7.33-.04l-11.45,1.54c-33.23,6.51-79.82,22.8-108.41,43.65-5.24,3.82-10.36,7.68-14.33,13.27-.99,2.15-.07,5.32-.04,8.07l.5,6.4c.04,3.03.08,5.23.36,8.98l26.04-19.29c4.65-3.45,9.07-5.43,14.6-10.03,2.77-2.3,6.92-3,9.41-5.74,2.13-2.34,4.36-2.56,6.76-3.99,11.54-6.84,23.09-12.74,35.27-17.76l15.25-6.29,21.91-10.08c4.5-2.07,12.11-6.05,12.48-7.62.08-.34-.7-1.06-1.02-1.06Z\"/><path fill=\"currentColor\" d=\"M120.45,62.96c-9.37,4.01-18.03,8.33-27.01,13.76-20.37,12.3-39.76,25.87-59,40.52-.37,7.82-1.38,14.84-2.67,22.54l72.44-54.74,3.76-2.86,17.68-12.99c3.2-2.35,6.44-4.18,9.36-7.66-1.9-3.62-9.02-.93-14.55,1.44Z\"/><path fill=\"currentColor\" d=\"M88.71,104.52c-9.15,5.81-17.25,12.65-25.98,19.4l-32.35,25c-1.75,8.14-4.42,15.26-8.71,22.39,2.11.34,3.32-1.65,4.86-3l21.45-18.92,23.31-19.98,16.16-12.89c2.95-2.36,5.67-4.48,8.52-6.98l4.28-3.77c2.68-2.36,6.43-6.29,6.14-8.11-6.7.57-12.17,3.37-17.68,6.86Z\"/>" },
   ];
 
   function renderPokemonPage(pages) {
@@ -1854,6 +1940,53 @@
     document.getElementById("nz-form-status").addEventListener("change", onEncounterStatusChanged);
     document.getElementById("nz-btn-reset-run").addEventListener("click", onResetRunClicked);
 
+    // Botón "Ver equipo completo" de la tarjeta de líder siguiente
+    // (Seguimiento) -> pestaña Líderes. Se simula un clic sobre el
+    // propio botón de la pestaña en vez de llamar a switchTab()
+    // directo -- ese helper vive dentro del componente genérico de
+    // pestañas (ver initTabs() más arriba) y no está expuesto
+    // fuera de su clausura a propósito, mismo criterio de que el
+    // componente no sabe nada de Nuzlocke/Pokémon y viceversa.
+    var verLiderBtn = document.getElementById("nz-btn-ver-lider");
+    if (verLiderBtn) {
+      verLiderBtn.addEventListener("click", function () {
+        var tabBtn = document.querySelector(
+          '.tabs-bar[data-tabs-group="nuzlocke"] .tab-btn[data-tab="lideres"]'
+        );
+        if (tabBtn) {
+          tabBtn.click();
+        }
+      });
+    }
+
+    // Botón "Detalle de equipo" de la tarjeta de líder siguiente
+    // (Seguimiento) -> abre la ventana nativa de detalle de equipo
+    // (ver openLeaderTeamWindow() más abajo) para el líder
+    // siguiente puntual.
+    var verDetalleLiderBtn = document.getElementById("nz-btn-ver-detalle-lider");
+    if (verDetalleLiderBtn) {
+      verDetalleLiderBtn.addEventListener("click", function () {
+        if (lastNuzlockeData && lastNuzlockeData.nextLeader) {
+          openLeaderTeamWindow(lastNuzlockeData.nextLeader.order);
+        }
+      });
+    }
+
+    // Delegación de eventos para "Detalle de equipo" de cada
+    // tarjeta de la pestaña Líderes -- las tarjetas se recrean
+    // enteras en cada poll (ver renderNuzlockeLeaders()), así que
+    // el listener va en el contenedor fijo, no en cada botón.
+    var leadersListEl = document.getElementById("nz-leaders-list");
+    if (leadersListEl) {
+      leadersListEl.addEventListener("click", function (event) {
+        var btn = event.target.closest(".nz-leader-detail-btn");
+        if (!btn) {
+          return;
+        }
+        openLeaderTeamWindow(Number(btn.dataset.order));
+      });
+    }
+
     document.querySelectorAll("[data-close-modal]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         closeModal(btn.dataset.closeModal);
@@ -2017,10 +2150,13 @@
       })
     );
     renderNuzlockeEncounters(data.encounters || []);
+    renderNuzlockeSummaryEncounters(data.encounters || []);
     renderNuzlockePending(data.pendingEncounters || []);
     renderNuzlockeGraveyard(graveyard);
     renderNuzlockeRuleset(data.ruleset || []);
-    renderNuzlockeStats(data.stats, data.playtime);
+    renderNuzlockeStats(data.stats, data.playtime, data.nextLeader || null);
+    renderNuzlockeNextLeader(data.nextLeader || null);
+    renderNuzlockeLeaders(data.gymLeaders || []);
   }
 
   function setBarWidth(id, percent) {
@@ -2129,19 +2265,152 @@
     return 100000 + fallbackIndex;
   }
 
-  function renderNuzlockeEncounters(encounters) {
-    var body = document.getElementById("nz-encounters-body");
-    var emptyNote = document.getElementById("nz-encounters-empty");
+  // ---------- Tabla "Encuentros por Ruta": todas las rutas, no solo las registradas ----------
+  // A pedido del usuario (06/09/2026): la tabla de Seguimiento debe
+  // mostrar TODAS las rutas del catálogo (con y sin captura), no
+  // solo las que ya tienen un encuentro guardado. Se arma una fila
+  // "placeholder" (sin_intentar, sin Pokémon) para cada ubicación
+  // del catálogo que todavía no tiene un encuentro real -- el
+  // encuentro real, si existe, siempre tiene prioridad sobre el
+  // placeholder de esa misma ruta.
+  function buildFullRouteEncounters(encounters) {
+    if (!nuzlockeLocationCatalog) {
+      // Catálogo todavía no cargó -- se muestra lo que hay
+      // (comportamiento de antes de este cambio) en vez de nada;
+      // ensureNuzlockeCatalogs() ya dispara un re-render apenas
+      // termine de cargar (ver startNuzlockePoll()).
+      return encounters;
+    }
+
+    function placeholderFor(locationName) {
+      return {
+        location: locationName,
+        species: null,
+        nickname: null,
+        level: null,
+        status: "sin_intentar",
+        isPlaceholder: true,
+      };
+    }
+
+    var byLocation = {};
+    encounters.forEach(function (entry) {
+      var key = (entry.location || "").toLowerCase();
+      if (!byLocation[key]) {
+        byLocation[key] = entry;
+      }
+    });
+
+    var result = [];
+    var seen = {};
+
+    // "Inicial" siempre primero (mismo criterio que
+    // encounterSortKey()), con o sin encuentro registrado.
+    result.push(byLocation["inicial"] || placeholderFor("Inicial"));
+    seen["inicial"] = true;
+
+    nuzlockeLocationCatalog.forEach(function (location) {
+      var key = (location.name || "").toLowerCase();
+      if (seen[key]) {
+        return;
+      }
+      seen[key] = true;
+      result.push(byLocation[key] || placeholderFor(location.name));
+    });
+
+    // Cualquier encuentro registrado en una ubicación que no está
+    // en el catálogo (ruta especial ancla, o algo tipeado a mano)
+    // se agrega al final en vez de perderse.
+    encounters.forEach(function (entry) {
+      var key = (entry.location || "").toLowerCase();
+      if (!seen[key]) {
+        seen[key] = true;
+        result.push(entry);
+      }
+    });
+
+    return result;
+  }
+
+  function buildEncounterRow(entry, displayIndex, options) {
+    var row = document.createElement("tr");
+
+    var searchKey = (
+      (entry.location || "") + " " + (entry.species || "") + " " + (entry.nickname || "")
+    ).toLowerCase();
+    row.dataset.search = searchKey;
+
+    var known = nuzlockeRosterByNickname[entry.nickname];
+    var level =
+      known && known.level != null
+        ? known.level
+        : entry.level != null
+        ? entry.level
+        : null;
+    var spriteId = speciesSpriteIdFor(entry);
+
+    // A pedido del usuario (05/09/2026): sprites estilo Pokémon
+    // Shuffle SOLO en esta tabla -- el resto de la app
+    // (Dashboard, página Pokémon, overlays) sigue usando los
+    // sets de siempre, sin tocar. Nombre de archivo con 3
+    // dígitos y cero a la izquierda (ver
+    // http_server.py:_serve_pokemon_shuffle_sprite()).
+    var spriteHtml = spriteId
+      ? '<img src="' + spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(spriteId) + '.png" alt="" />'
+      : "";
+
+    var deleteCell = "";
+    if (options.showDelete) {
+      deleteCell =
+        entry.location === "Inicial" || entry.isPlaceholder
+          ? "<td></td>"
+          : '<td><button class="nz-row-delete-btn" data-delete-location="' +
+            escapeHtml(entry.location || "") +
+            '" title="Eliminar ruta">' +
+            NZ_TRASH_ICON_SVG +
+            "</button></td>";
+    }
+
+    row.innerHTML =
+      "<td>" + (displayIndex + 1) + "</td>" +
+      "<td>" + escapeHtml(entry.location || "") + "</td>" +
+      '<td><span class="nz-row-species">' +
+        spriteHtml +
+        escapeHtml(entry.species || "—") +
+        (entry.shiny ? " ✨" : "") +
+        "</span></td>" +
+      "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
+      "<td>" + (level != null ? level : "—") + "</td>" +
+      '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
+        escapeHtml(nuzlockeStatusLabel(entry)) +
+        "</span></td>" +
+      deleteCell;
+
+    return row;
+  }
+
+  // Renderizador compartido entre la tabla completa/interactiva de
+  // Seguimiento (`options.showDelete=true`, con buscador) y la
+  // versión de solo lectura de Resumen (sin buscador ni botón de
+  // borrado) -- mismo armado de fila, distinto `bodyId`/`options`.
+  function renderEncountersTable(bodyId, emptyNoteId, encounters, options) {
+    options = options || {};
+    var body = document.getElementById(bodyId);
+    var emptyNote = document.getElementById(emptyNoteId);
     if (!body) {
       return;
     }
     body.innerHTML = "";
 
     if (!encounters.length) {
-      emptyNote.hidden = false;
+      if (emptyNote) {
+        emptyNote.hidden = false;
+      }
       return;
     }
-    emptyNote.hidden = true;
+    if (emptyNote) {
+      emptyNote.hidden = true;
+    }
 
     var sorted = encounters
       .map(function (entry, index) {
@@ -2158,61 +2427,43 @@
       });
 
     sorted.forEach(function (entry, index) {
-      var row = document.createElement("tr");
-
-      var searchKey = (
-        (entry.location || "") + " " + (entry.species || "") + " " + (entry.nickname || "")
-      ).toLowerCase();
-      row.dataset.search = searchKey;
-
-      var known = nuzlockeRosterByNickname[entry.nickname];
-      var level = known && known.level != null ? known.level : null;
-      var spriteId = speciesSpriteIdFor(entry);
-
-      // A pedido del usuario (05/09/2026): sprites estilo Pokémon
-      // Shuffle SOLO en esta tabla -- el resto de la app
-      // (Dashboard, página Pokémon, overlays) sigue usando los
-      // sets de siempre, sin tocar. Nombre de archivo con 3
-      // dígitos y cero a la izquierda (ver
-      // http_server.py:_serve_pokemon_shuffle_sprite()).
-      var spriteHtml = spriteId
-        ? '<img src="' + spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(spriteId) + '.png" alt="" />'
-        : "";
-
-      var deleteCell =
-        entry.location === "Inicial"
-          ? "<td></td>"
-          : '<td><button class="nz-row-delete-btn" data-delete-location="' +
-            escapeHtml(entry.location || "") +
-            '" title="Eliminar ruta">' +
-            NZ_TRASH_ICON_SVG +
-            "</button></td>";
-
-      row.innerHTML =
-        "<td>" + (index + 1) + "</td>" +
-        "<td>" + escapeHtml(entry.location || "") + "</td>" +
-        '<td><span class="nz-row-species">' +
-          spriteHtml +
-          escapeHtml(entry.species || "—") +
-          (entry.shiny ? " ✨" : "") +
-          "</span></td>" +
-        "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
-        "<td>" + (level != null ? level : "—") + "</td>" +
-        '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
-          escapeHtml(nuzlockeStatusLabel(entry)) +
-          "</span></td>" +
-        deleteCell;
-
-      body.appendChild(row);
+      body.appendChild(buildEncounterRow(entry, index, options));
     });
 
-    body.querySelectorAll("[data-delete-location]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        deleteEncounterRow(btn.dataset.deleteLocation);
+    if (options.showDelete) {
+      body.querySelectorAll("[data-delete-location]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          deleteEncounterRow(btn.dataset.deleteLocation);
+        });
       });
-    });
+    }
 
-    applyNuzlockeSearchFilter();
+    if (options.applySearch) {
+      applyNuzlockeSearchFilter();
+    }
+  }
+
+  function renderNuzlockeEncounters(encounters) {
+    renderEncountersTable(
+      "nz-encounters-body",
+      "nz-encounters-empty",
+      buildFullRouteEncounters(encounters || []),
+      { showDelete: true, applySearch: true }
+    );
+  }
+
+  // Versión de solo lectura para Resumen (06/09/2026, a pedido del
+  // usuario): SIN mezclar con el catálogo completo de rutas --
+  // solo lo que ya se registró de verdad, sin buscador ni botón de
+  // borrado. La tabla completa con todas las rutas (con y sin
+  // captura) vive en Seguimiento (ver renderNuzlockeEncounters()).
+  function renderNuzlockeSummaryEncounters(encounters) {
+    renderEncountersTable(
+      "nz-encounters-resumen-body",
+      "nz-encounters-resumen-empty",
+      encounters || [],
+      { showDelete: false, applySearch: false }
+    );
   }
 
   function applyNuzlockeSearchFilter() {
@@ -2355,13 +2606,22 @@
     return pad(playtime.hours) + ":" + pad(playtime.minutes);
   }
 
-  function renderNuzlockeStats(stats, playtime) {
+  function renderNuzlockeStats(stats, playtime, nextLeader) {
     stats = stats || {};
 
     setText("nz-stat-unique", stats.uniqueSpecies || 0);
     setText("nz-stat-captures", stats.captures || 0);
     setText("nz-stat-deaths", stats.dead || 0);
     setText("nz-stat-survival", (stats.survivalRate || 0) + "%");
+
+    // Level cap (Fase B, roadmap 3.2) -- mismo valor que la
+    // tarjeta "Líder siguiente" de Seguimiento, a pedido del
+    // usuario también visible acá junto al resto de estadísticas.
+    // "—" si ya se obtuvieron las 8 medallas (nextLeader es null).
+    setText(
+      "nz-stat-levelcap",
+      nextLeader ? "Nv. " + nextLeader.levelCap : "—"
+    );
 
     var formatted = formatPlaytime(playtime);
     var note = document.getElementById("nz-playtime-note");
@@ -2376,6 +2636,180 @@
         "El tiempo de juego sale del archivo de guardado, no de la memoria en vivo -- se actualiza recién cuando guardás la partida" +
         (playtime && playtime.reason ? " (" + playtime.reason + ")" : ".");
     }
+  }
+
+  // ---------- Pestaña Seguimiento: tarjeta compacta "líder siguiente" (Fase B) ----------
+  // Datos ya resueltos enteros por Api.get_nuzlocke_page_data()
+  // (ver GymLeaderCatalog, app/services/gym_leaders.py) -- acá solo
+  // se arma el HTML, sin ningún cálculo (badges/level cap ya
+  // vienen calculados desde Python).
+  function renderNuzlockeNextLeader(nextLeader) {
+    var body = document.getElementById("nz-next-leader-body");
+    var btn = document.getElementById("nz-btn-ver-lider");
+    var detailBtn = document.getElementById("nz-btn-ver-detalle-lider");
+
+    if (!body) {
+      return;
+    }
+
+    if (!nextLeader) {
+      // Las 8 medallas ya están obtenidas -- no queda "líder
+      // siguiente" que mostrar, no es un error ni un dato faltante.
+      body.innerHTML = '<p class="nz-empty-note">¡Ya obtuviste las 8 medallas!</p>';
+      if (btn) {
+        btn.hidden = true;
+      }
+      if (detailBtn) {
+        detailBtn.hidden = true;
+      }
+      return;
+    }
+
+    if (btn) {
+      btn.hidden = false;
+    }
+    if (detailBtn) {
+      detailBtn.hidden = false;
+    }
+
+    var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + nextLeader.portraitIndex + ".png";
+
+    var teamHtml = (nextLeader.team || []).map(function (mon) {
+      var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
+      return (
+        '<div class="nz-next-leader-mon">' +
+          '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
+          "<span>Nv. " + mon.level + "</span>" +
+        "</div>"
+      );
+    }).join("");
+
+    body.innerHTML =
+      '<img class="nz-next-leader-portrait" src="' + portraitUrl + '" alt="" />' +
+      '<div class="nz-next-leader-info">' +
+        '<span class="nz-next-leader-name">' + escapeHtml(nextLeader.nameEs || nextLeader.name || "") + "</span>" +
+        '<span class="nz-next-leader-badge">' + escapeHtml(nextLeader.badgeNameEs || nextLeader.badgeName || "") + "</span>" +
+        '<span class="nz-next-leader-location">' + escapeHtml(nextLeader.gymLocationEs || nextLeader.gymLocation || "") + "</span>" +
+      "</div>" +
+      '<div class="nz-next-leader-team">' + teamHtml + "</div>" +
+      '<div class="nz-next-leader-cap">' +
+        '<span class="nz-next-leader-cap-value">Nv. ' + nextLeader.levelCap + "</span>" +
+        // "Lvl Cap" (06/09/2026, a pedido del usuario -- antes
+        // decía "Nivel máximo").
+        '<span class="nz-next-leader-cap-label">Lvl Cap</span>' +
+      "</div>";
+  }
+
+  // ---------- Pestaña Líderes: detalle completo de los 8 equipos (Fase B) ----------
+  // Mismo dato que la tarjeta compacta de arriba (data.gymLeaders),
+  // pero acá SÍ entran tipos y movimientos -- ver roadmap 3.3
+  // ("con el detalle grande que en Seguimiento se muestra
+  // resumido"). `leader.earned` ya viene calculado desde Python
+  // cruzando el orden del líder contra el bitfield de medallas.
+  function renderNuzlockeLeaders(leaders) {
+    var container = document.getElementById("nz-leaders-list");
+    if (!container) {
+      return;
+    }
+    container.innerHTML = "";
+
+    (leaders || []).forEach(function (leader) {
+      var card = document.createElement("div");
+      card.className = "nz-leader-card" + (leader.earned ? " earned" : "");
+
+      var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + leader.portraitIndex + ".png";
+
+      var teamHtml = (leader.team || []).map(function (mon) {
+        var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
+
+        var typesHtml = (mon.typeKeys || []).map(function (typeKey) {
+          var info = typeInfo(typeKey);
+          return (
+            '<span class="nz-leader-mon-type" style="' + typeStyleVars(typeKey) + '" title="' + (info ? info.label : "") + '">' +
+              typeIconSvg(typeKey, 12) +
+            "</span>"
+          );
+        }).join("");
+
+        // Movimientos apilados (06/09/2026, a pedido del usuario:
+        // antes iban unidos con " · " en una sola línea) -- cada
+        // uno en su propia fila dentro de .nz-leader-mon-moves
+        // (ver style.css, ahora flex-column en vez de texto plano).
+        var movesHtml = (mon.moves || []).map(function (name) {
+          return '<span class="nz-leader-mon-move-line">' + escapeHtml(translateMoveName(name)) + "</span>";
+        }).join("");
+
+        return (
+          '<div class="nz-leader-mon' + (mon.isAce ? " ace" : "") + '">' +
+            '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
+            '<div class="nz-leader-mon-info">' +
+              '<span class="nz-leader-mon-name">' + escapeHtml(mon.species || "") +
+                (mon.isAce ? ' <span class="nz-leader-ace-tag">Ace</span>' : "") +
+              "</span>" +
+              '<span class="nz-leader-mon-level">Nv. ' + mon.level + "</span>" +
+              '<span class="nz-leader-mon-types">' + typesHtml + "</span>" +
+              // Habilidad (06/09/2026): ahora curada en
+              // data/gym_leaders.json (investigada contra
+              // Bulbapedia + un playthrough completo de ORAS,
+              // ver GYM_ABILITY_NAMES_ES en gym_leaders.py) -- ya
+              // no es "No disponible" a diferencia de Naturaleza/
+              // IVs/EVs, que sí son imposibles de saber sin el
+              // save real del entrenador rival.
+              '<span class="nz-leader-mon-ability">Habilidad: <em>' + escapeHtml(mon.abilityEs || mon.ability || "—") + "</em></span>" +
+              (movesHtml ? '<div class="nz-leader-mon-moves">' + movesHtml + "</div>" : "") +
+            "</div>" +
+          "</div>"
+        );
+      }).join("");
+
+      card.innerHTML =
+        '<div class="nz-leader-header">' +
+          '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" />' +
+          '<div class="nz-leader-info">' +
+            '<span class="nz-leader-name">' + escapeHtml(leader.nameEs || leader.name || "") + "</span>" +
+            '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>" +
+            '<span class="nz-leader-location">' + escapeHtml(leader.gymLocationEs || leader.gymLocation || "") + "</span>" +
+          "</div>" +
+          '<div class="nz-leader-header-actions">' +
+            '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
+              (leader.earned ? "Obtenida" : "Pendiente") +
+            "</span>" +
+            // Botón de solo ícono + tooltip (06/09/2026, mismo
+            // tratamiento que "Detalle de equipo" de la tarjeta de
+            // líder siguiente en Seguimiento -- ver .dash-icon-btn/
+            // [data-tooltip] en style.css) -- reemplaza al botón de
+            // texto que antes iba en una fila aparte al pie de la
+            // tarjeta.
+            '<button class="dash-icon-btn nz-leader-detail-btn" data-order="' + leader.order + '" data-tooltip="Detalle de equipo" aria-label="Detalle de equipo">' +
+              '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9,2v2H5v16h14V4h-4v-2H9ZM7,6h10v12H7V6ZM9,8v2h6v-2h-6ZM9,11v2h6v-2h-6ZM9,14v2h4v-2h-4Z" /></svg>' +
+            "</button>" +
+          "</div>" +
+        "</div>" +
+        '<div class="nz-leader-cap-row">' +
+          "<span>Nivel máximo permitido</span>" +
+          '<span class="nz-leader-cap-value">Nv. ' + leader.levelCap + "</span>" +
+        "</div>" +
+        '<div class="nz-leader-team">' + teamHtml + "</div>";
+
+      container.appendChild(card);
+    });
+  }
+
+  // ---------- Ventana nativa: detalle de equipo de un líder (Fase B, 06/09/2026) ----------
+  // Reemplaza al modal movible original -- a pedido del usuario,
+  // esto ahora abre una ventana de pywebview de verdad
+  // (webview.create_window(), ver Api.open_leader_team_window()
+  // en api.py) en vez de un <div> superpuesto: se pueden abrir
+  // varias a la vez (una por líder) y cada una se puede mover
+  // fuera de los límites de la ventana principal, cosa que un
+  // modal HTML nunca puede hacer. Toda la lógica de armado de las
+  // tarjetas por Pokémon vive en leader_team_window.js, que corre
+  // dentro de esa ventana nueva -- acá solo se dispara la apertura.
+  function openLeaderTeamWindow(order) {
+    if (!order) {
+      return;
+    }
+    api().open_leader_team_window(order);
   }
 
   // ---------- Modal: Nuevo encuentro / Editar ----------
