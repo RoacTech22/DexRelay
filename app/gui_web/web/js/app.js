@@ -280,6 +280,7 @@
     initDashboardActions();
     initNuzlockeActions();
     initOverlaysActions();
+    initHerramientasActions();
     initConfiguracionActions();
     initLogsActions();
     startMainPoll();
@@ -328,6 +329,10 @@
     // no datos en vivo. Se piden de nuevo cada vez que se entra a
     // la página (barato, una sola llamada) para reflejar un guardado
     // hecho en otra pestaña/instancia, en vez de cachear en JS.
+    if (page === "herramientas") {
+      loadHerramientasPage();
+    }
+
     if (page === "configuracion") {
       loadConfiguracionPage();
     }
@@ -1644,6 +1649,73 @@
   // en vivo del juego.
 
   var cfgLinksBound = false;
+
+  // ===================== PÁGINA HERRAMIENTAS (07/09/2026) =====================
+  //
+  // Primera función de ESCRITURA de memoria de la GUI -- todo lo
+  // demás en DexRelay es solo lectura. Sin poll propio (igual que
+  // Configuración): se pide el estado de conexión una vez al
+  // entrar a la página, no todo el tiempo.
+
+  function initHerramientasActions() {
+    document
+      .getElementById("herr-btn-add-candy")
+      .addEventListener("click", onAddRareCandyClicked);
+  }
+
+  function loadHerramientasPage() {
+    api()
+      .get_herramientas_page_data()
+      .then(function (data) {
+        var note = document.getElementById("herr-connection-note");
+        var button = document.getElementById("herr-btn-add-candy");
+
+        setCfgStatus("herr-candy-status", "", null);
+
+        if (!data.connected) {
+          note.hidden = false;
+          note.textContent =
+            "Azahar no está conectado -- conectate desde el Dashboard antes de usar esta herramienta.";
+          note.classList.add("error");
+          button.disabled = true;
+          return;
+        }
+
+        button.disabled = false;
+        note.classList.remove("error");
+        note.hidden = true;
+      });
+  }
+
+  function onAddRareCandyClicked() {
+    var cantidadInput = document.getElementById("herr-candy-cantidad");
+    var cantidad = parseInt(cantidadInput.value, 10);
+
+    if (!cantidad || cantidad < 1) {
+      setCfgStatus("herr-candy-status", "Ingresá una cantidad válida.", "error");
+      return;
+    }
+
+    var button = document.getElementById("herr-btn-add-candy");
+    button.disabled = true;
+
+    api()
+      .add_rare_candy(cantidad)
+      .then(function (result) {
+        button.disabled = false;
+
+        if (result && result.error) {
+          setCfgStatus("herr-candy-status", result.error, "error");
+          return;
+        }
+
+        setCfgStatus(
+          "herr-candy-status",
+          "Listo. Ahora tenés " + result.new_quantity + " Caramelo(s) Raro(s) en la bolsa. Confirmalo abriendo la bolsa en el juego.",
+          "success"
+        );
+      });
+  }
 
   function initConfiguracionActions() {
     document.getElementById("cfg-btn-save").addEventListener("click", onSaveConnectionSettingsClicked);

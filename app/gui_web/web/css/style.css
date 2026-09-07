@@ -3006,6 +3006,42 @@ body {
   padding: 8px 18px;
 }
 
+/* ---------- Página Herramientas (07/09/2026) ---------- */
+/* .cfg-field input[type="text"] no cubre el <input type="number">
+   de esta página -- se agrega la misma regla acá en vez de tocar
+   el selector original, para no afectar los campos de texto de
+   Configuración que ya dependen de ese selector tal cual está. */
+.cfg-field input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.cfg-field input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Un solo campo (cantidad) -- el grid de 3 columnas de
+   Configuración dejaría dos columnas vacías acá. */
+.herr-field-grid {
+  grid-template-columns: minmax(160px, 220px);
+}
+
+/* Mismo tratamiento que .cfg-inline-note, con el ícono en color de
+   advertencia -- esta página escribe memoria real, a diferencia
+   del resto de DexRelay (solo lectura), y ese contraste de color
+   ayuda a que no se confunda con un aviso informativo cualquiera. */
+.herr-warning-note .cfg-note-icon {
+  color: var(--warning);
+}
+
 .cfg-bottom-row {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
