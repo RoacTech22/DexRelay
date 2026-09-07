@@ -6,7 +6,7 @@
   --border-strong: rgba(255, 255, 255, 0.14);
   --text: #e8ecf1;
   --text-secondary: #c4cddd;
-  --text-dim: #5c6579;
+  --text-dim: #c1ceeb;
   --accent: #2dd4dc;
   --accent-strong: #22d3ee;
   --success: #22c55e;
@@ -1013,6 +1013,10 @@ body {
   display: block;
 }
 
+[data-tab-panel="seguimiento"] {
+  min-width: 640px;
+}
+
 /* ===================== DASHBOARD (Bloque 2) ===================== */
 
 /* Envuelve TODO el contenido del Dashboard (título, subtítulo,
@@ -1373,6 +1377,10 @@ body {
   margin-bottom: 14px;
 }
 
+[data-tab-panel="seguimiento"] .dash-card-header {
+  justify-content: start;
+}
+
 .dash-card-header-icon-title {
   display: flex;
   align-items: center;
@@ -1384,11 +1392,20 @@ body {
   text-transform: uppercase;
 }
 
+
 .dash-card-header-icon-title svg {
   width: 18px;
   height: 18px;
   color: var(--accent);
   flex: none;
+}
+
+[data-tab-panel="seguimiento"] .dash-card-header-icon-title {
+  margin-right: auto;
+}
+
+[data-tab-panel="seguimiento"] #nz-btn-ver-detalle-lider {
+  margin-right: 8px;
 }
 
 /* .dash-card-header-value: valor "X/8" que iba arriba a la
@@ -3367,7 +3384,7 @@ body {
 ========================================================= */
 
 .nz-page-inner {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -3401,12 +3418,21 @@ body {
 
 .nz-summary-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin: 16px 0;
 }
 
-@container (max-width: 820px) {
+/* 4 tarjetas (06/09/2026, se sumó el level cap) -- a partir de
+   acá se acomodan en 2x2 antes de pasar a una sola columna, en
+   vez de saltar directo de 4 a 1 como pasaba con 3. */
+@container (max-width: 980px) {
+  .nz-summary-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container (max-width: 520px) {
   .nz-summary-row {
     grid-template-columns: 1fr;
   }
@@ -3448,6 +3474,10 @@ body {
 
 .nz-summary-icon-encounters {
   color: var(--accent);
+}
+
+.nz-summary-icon-levelcap {
+  color: var(--warning);
 }
 
 .nz-summary-info {
@@ -3507,6 +3537,10 @@ body {
   align-items: start;
 }
 
+[data-tab-panel="seguimiento"] .nz-main-row {
+  grid-template-columns: 1fr;
+}
+
 @container (max-width: 900px) {
   .nz-main-row {
     grid-template-columns: 1fr;
@@ -3519,6 +3553,10 @@ body {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+
+[data-tab-panel="seguimiento"] .nz-side-col {
+  order: -1;
 }
 
 /* ---------- Equipo actual (reutiliza el sprite/estilo de dash-team-slot) ---------- */
@@ -3762,6 +3800,18 @@ body {
   padding: 4px 8px;
 }
 
+/* ---------- Cementerio (pestaña propia, 06/09/2026 Fase B) ----------
+   En su propia pestaña la lista ya no comparte columna angosta con
+   Reglas/Estadísticas (esa era la queja original del roadmap, "hoy
+   comparte columna con Reglas activas y queda chico") -- acá tiene
+   ancho completo, así que en vez de una sola columna vertical se
+   arma una grilla de varias columnas cuando entran. */
+.nz-graveyard-card-full .nz-graveyard-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+
 /* ---------- Cementerio ---------- */
 
 .nz-graveyard-item {
@@ -3882,6 +3932,659 @@ body {
   margin-top: 8px;
   font-size: 11px;
   color: var(--text-dim);
+}
+
+/* ---------- Botón de solo ícono + tooltip genérico (06/09/2026) ----------
+   A pedido del usuario: los botones "Detalle de equipo"/"Otros
+   líderes" pasan de texto a solo ícono, con el texto que tenían
+   apareciendo como tooltip al pasar el mouse -- reutilizable en
+   cualquier otro botón de la app que en el futuro necesite lo
+   mismo, no quedó atado a estos dos casos. */
+.dash-icon-btn {
+  cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-icon-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dash-icon-btn:hover,
+.dash-icon-btn:focus-visible {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+}
+
+/* ---------- Tarjeta "líder siguiente" (pestaña Seguimiento, Fase B) ----------
+   Rediseño 06/09/2026 a pedido del usuario: pasa de vivir en la
+   columna lateral a ocupar el ancho completo de la fila, siempre
+   primera, por encima de la tabla de encuentros -- .nz-next-leader-card
+   ahora es hermana directa de .nz-main-row en el HTML (ver
+   index.html), no una hija de .nz-side-col. Adentro, todo el
+   contenido (retrato/info/equipo/level cap) va en una sola fila
+   horizontal en vez del layout de dos filas de antes. */
+
+.nz-next-leader-body {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nz-next-leader-portrait {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  flex: none;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-next-leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 1 190px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.nz-next-leader-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.nz-next-leader-badge,
+.nz-next-leader-location {
+  font-size: 11px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nz-next-leader-team {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.nz-next-leader-mon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+  min-width: 46px;
+  flex: none;
+}
+
+.nz-next-leader-mon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.nz-next-leader-mon span {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* "Lvl Cap" (06/09/2026, renombrado de "Nivel máximo" a pedido
+   del usuario) -- último elemento de la fila, ancho fijo para que
+   no se mueva aunque el nombre del equipo/insignia cambie de
+   largo. */
+.nz-next-leader-cap {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.nz-next-leader-cap-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.nz-next-leader-cap-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Pestaña Líderes: detalle completo de los 8 equipos (Fase B) ----------
+   Grilla de tarjetas grandes, una por líder -- ver
+   renderNuzlockeLeaders() en app.js. Reusa las variables de color
+   por tipo (--type-color/--type-dark/--type-light) que ya arma
+   typeStyleVars() para la página Pokémon (mismo criterio: un solo
+   lugar resuelve la paleta EP por tipo, todo lo demás la consume). */
+
+.nz-leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.nz-leader-card {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  opacity: 0.72;
+}
+
+.nz-leader-card.earned {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+}
+
+.nz-leader-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.nz-leader-portrait {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nz-leader-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.nz-leader-badge,
+.nz-leader-location {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.nz-leader-status-pill {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--bg-elevated-2);
+  color: var(--text-dim);
+}
+
+/* Agrupa la etiqueta de estado (Obtenida/Pendiente) con el botón
+   de "Detalle de equipo" (06/09/2026, a pedido del usuario: "a
+   lado de la etiqueta pendiente") -- reemplaza a .nz-leader-actions,
+   que era una fila aparte al pie de la tarjeta. */
+.nz-leader-header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nz-leader-status-pill.earned {
+  background: color-mix(in srgb, var(--success) 25%, transparent);
+  color: var(--success);
+}
+
+.nz-leader-cap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--bg-elevated-2);
+  margin-bottom: 10px;
+}
+
+.nz-leader-cap-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Grilla de 3 columnas (06/09/2026, a pedido del usuario -- antes
+   era una columna vertical con los Pokémon apilados uno debajo
+   del otro). Se acomodan solos a menos de 3 por fila si el equipo
+   tiene menos de 3 Pokémon (auto-fit no estira una sola tarjeta a
+   todo el ancho). */
+.nz-leader-team {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@container (max-width: 480px) {
+  .nz-leader-team {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tarjeta cuadrada por Pokémon -- contenido centrado en columna
+   (sprite arriba, info abajo) en vez de la fila horizontal de
+   antes, para que funcione bien en un cupo angosto de 1/3 del
+   ancho de la tarjeta del líder. */
+.nz-leader-mon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+}
+
+.nz-leader-mon.ace {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated-2));
+}
+
+.nz-leader-mon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.nz-leader-mon-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+}
+
+.nz-leader-mon-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nz-leader-ace-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+
+.nz-leader-mon-level {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.nz-leader-mon-types {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.nz-leader-mon-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--type-color, var(--bg-elevated-2));
+  border: 1px solid var(--type-dark, var(--border));
+}
+
+/* Movimientos apilados (06/09/2026, a pedido del usuario): cada
+   uno en su propia línea en vez de un texto corrido separado por
+   " · ". */
+.nz-leader-mon-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.nz-leader-mon-move-line {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Habilidad del Pokémon del líder (06/09/2026) -- siempre "No
+   disponible" (ver renderNuzlockeLeaders() en app.js), el <em>
+   se distingue en cursiva/atenuado para que se lea como una nota
+   honesta, no como un dato real más de la fila. */
+.nz-leader-mon-ability {
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.nz-leader-mon-ability em {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ---------- Ventana standalone: detalle de equipo de un líder (Fase B, 06/09/2026) ----------
+   Reemplaza al modal movible original -- el usuario pidió que
+   fuera una ventana de sistema operativo real en vez de un modal
+   HTML, para poder abrir varias a la vez (una por líder) y mover
+   cada una fuera de los límites de la ventana principal. Esta
+   sección solo tiene el CSS de las tarjetas por Pokémon
+   (leader_team_window.html/js la cargan junto con el resto de
+   style.css); el layout de página (título, contenedor) vive en el
+   <style> inline de leader_team_window.html, que es tan chico que
+   no ameritaba su propia hoja de estilos aparte. */
+
+/* Tarjetas de ancho FIJO 336px (06/09/2026, a pedido del usuario)
+   -- con "auto-fill" y un valor fijo (no minmax) en vez de %, la
+   grilla calcula sola cuántas columnas de 336px entran en el ancho
+   disponible: 1 si la ventana es angosta, 2 si entra el doble, 3+
+   si hay lugar -- sin necesidad de escribir un breakpoint por
+   cada caso a mano, el propio Grid hace el cálculo al redimensionar
+   la ventana. justify-content:center para que sobre espacio a los
+   costados en vez de estirar las tarjetas cuando entra una sola
+   columna con lugar de sobra. */
+.nz-leader-window-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 336px);
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Tarjeta por Pokémon (06/09/2026, ajuste a pedido del usuario tras
+   una primera vuelta que reorganizaba de más: "solo copies el
+   estilo... la estructura y cómo van ubicados los elementos
+   dejalo como estaban, como la imagen que subí"). Estructura
+   original (columna izquierda: retrato/nombre/tipos/Naturaleza/
+   Habilidad/Objeto; columna derecha: stats arriba, movimientos
+   abajo con separador), pero el ESTILO de tipos/movimientos/íconos
+   de stat reusa los componentes de la página Pokémon
+   (.pokemon-type-badge/.pokemon-move-row/.pokemon-move-type/
+   .pokemon-stat-icon, definidos más arriba en este archivo) en vez
+   de una versión propia. Naturaleza/Habilidad/Objeto van sin la
+   caja con borde de .pokemon-card-ability -- texto plano, como
+   estaban antes. Todo comprimido (fuentes/paddings chicos, a
+   pedido del usuario) sin perder la estructura original. */
+.mondetail-card {
+  display: flex;
+  gap: 10px;
+  width: 336px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+}
+
+/* Border-right que separa visualmente la columna izquierda de la
+   derecha (06/09/2026, a pedido del usuario). */
+.mondetail-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  flex: 0 0 90px;
+  border-right: 1px solid var(--border);
+  padding-right: 10px;
+}
+
+/* Mismo fondo/borde que .pokemon-card-sprite de la página Pokémon
+   (06/09/2026, a pedido del usuario) -- color-mix con el tipo del
+   Pokémon en vez de un color sólido. position:relative para poder
+   sobreponer la etiqueta "Ace" adentro (ver .mondetail-ace-badge). */
+.mondetail-sprite-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--type-color, transparent) 14%, var(--bg-elevated-2));
+  border: 1px solid color-mix(in srgb, var(--type-color, var(--border)) 45%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.mondetail-sprite {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+
+/* "Ace" sobrepuesto en la esquina superior derecha del cuadro del
+   sprite (06/09/2026, a pedido del usuario) -- antes iba como
+   texto al lado del nombre. */
+.mondetail-ace-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 7px;
+  padding: 1px 4px;
+  line-height: 1.3;
+  margin-left: 0;
+  background: var(--bg-elevated);
+}
+
+.mondetail-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.mondetail-types {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+}
+
+/* Insignia de tipo solo-ícono (06/09/2026, a pedido del usuario:
+   "quitemosle el texto... dejemosle solo el ícono con su color
+   respectivo para que entren dos en una fila") -- mismo círculo de
+   color de .pokemon-type-badge, sin el padding pensado para
+   icono+texto. */
+.mondetail-type-icon-only {
+  padding: 4px;
+  gap: 0;
+}
+
+.mondetail-left .pokemon-type-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Naturaleza/Habilidad/Objeto: texto plano sin caja/borde (a
+   pedido del usuario, "dejalos como estaba antes"). */
+.mondetail-info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.mondetail-info-row strong {
+  color: var(--text);
+  font-weight: 700;
+  margin-right: 3px;
+}
+
+.mondetail-info-row em {
+  font-style: italic;
+}
+
+.mondetail-right {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mondetail-stats {
+  flex: 1 1 auto;
+}
+
+.mondetail-stats-header {
+  display: grid;
+  grid-template-columns: 66px 1fr 40px 40px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text);
+  padding-bottom: 4px;
+}
+
+.mondetail-stats-header span:not(:first-child) {
+  text-align: right;
+}
+
+.mondetail-stats-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: 66px 1fr;
+  min-height: 76px;
+}
+
+.mondetail-stats-labels {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mondetail-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Mismo ícono/color por stat que .pokemon-stat-icon de la página
+   Pokémon (ver STAT_ROWS en leader_team_window.js) -- solo se
+   ajusta el tamaño acá para la versión comprimida. */
+.mondetail-stat-row .pokemon-stat-icon {
+  width: 9px;
+  height: 9px;
+  flex: none;
+}
+
+/* Único aviso para todo el bloque de stats -- Total/IV/EV de un
+   Pokémon rival nunca se pueden confirmar (a diferencia de
+   Naturaleza/Habilidad/Objeto, que sí pueden curarse). */
+.mondetail-na-overlay {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.mondetail-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+/* Movimientos: 2 columnas x 2 filas (06/09/2026, a pedido del
+   usuario), con el mismo .pokemon-move-row/.pokemon-move-type que
+   la página Pokémon -- ahora con el tipo REAL de cada movimiento
+   (moveTypeKeys, ver gym_leaders.py). */
+.mondetail-moves-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.mondetail-moves-grid .pokemon-move-row {
+  font-size: 9px;
+}
+
+.mondetail-moves-grid .pokemon-move-name {
+  padding: 3px 5px;
+}
+
+.mondetail-moves-grid .pokemon-move-type {
+  width: 20px;
+  padding: 2px;
+}
+
+.mondetail-moves-grid .pokemon-move-type svg {
+  width: 12px;
+  height: 12px;
 }
 
 /* =========================================================
