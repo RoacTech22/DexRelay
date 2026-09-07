@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Equipo de líder</title>
+  <!-- Reusa el mismo style.css de la ventana principal (variables
+       de color, .nz-mon-card-* de la Fase B, .pokemon-type-badge,
+       etc.) -- esta ventana no tiene sidebar ni shell propio, es
+       standalone (06/09/2026, a pedido del usuario: "que fuera una
+       ventana" en vez de un modal, para poder abrir varias a la
+       vez y moverlas fuera de los límites de la ventana
+       principal). Ver AppWindow/Api.open_leader_team_window() en
+       Python -- cada botón "Detalle de equipo" abre una instancia
+       nueva de esta página como ventana nativa de pywebview. -->
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* El body de style.css trae overflow:hidden pensado para el
+       shell de la app principal (que maneja su propio scroll
+       interno por sección) -- acá sí hace falta que la ventana
+       entera pueda scrollear si el equipo tiene varios Pokémon. */
+    html, body {
+      overflow: auto;
+    }
+
+    #leader-window-root {
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .leader-window-title {
+      font-family: "Space Grotesk", "Inter", sans-serif;
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+
+    .leader-window-subtitle {
+      color: var(--text-dim);
+      font-size: 12.5px;
+      margin: 0 0 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="leader-window-root">
+    <h1 id="leader-window-title" class="leader-window-title">Cargando…</h1>
+    <p id="leader-window-subtitle" class="leader-window-subtitle"></p>
+    <div id="leader-window-cards" class="nz-leader-window-cards"></div>
+  </div>
+  <script src="js/leader_team_window.js"></script>
+</body>
+</html>
