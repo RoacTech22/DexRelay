@@ -17,7 +17,8 @@ from app.memory.pointers import (
     BOX_BASE_ADDRESS,
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
-    get_box_base_address,
+    BOX_BLOCK_SIZE,
+    get_box_address,
     CURRENT_ZONE_ID_ADDRESS,
     get_current_zone_id_address,
     PROCESS_NAME_ALPHA_SAPPHIRE,
@@ -481,17 +482,30 @@ class AzaharReader:
     def build_pokemon_data(
         self,
         slot,
-        pokemon
+        pokemon,
+        box_index=None
     ):
         """
         Convierte Pokemon6 en el formato
         de datos utilizado por DexRelay.
+
+        `box_index` (08/09/2026, roadmap 5.2/5.3) es opcional --
+        `None` para los slots de party (llamado desde
+        read_party()/read_pokemon_raw_for_slot(), donde no hay
+        concepto de "caja"), o el número de caja 1-based cuando el
+        origen es una Caja PC (ver _parse_box_slots() más abajo).
+        Se propaga en el dict de salida para que la pestaña
+        "General"/"Caja" de la página Pokémon (Api.get_boxes_
+        overview()/get_box_page_data() en api.py) pueda agrupar
+        los slots devueltos por lote (ej. read_boxes_range()) sin
+        tener que adivinar de qué caja salió cada uno.
         """
 
         if pokemon is None:
 
             return {
                 "slot": slot,
+                "boxIndex": box_index,
                 "empty": True,
                 "nickname": "",
                 "species": "",
@@ -533,24 +547,36 @@ class AzaharReader:
             )
         )
 
+        # Bug real corregido (05/09/2026, reformulado 07/09/2026):
+        # pokemon.level() lee un offset que solo existe en el
+        # bloque extra de stats que agrega read_pokemon() para la
+        # party -- read_box() no lo tiene (ver su docstring), así
+        # que para una captura que va directo a la Caja PC
+        # pokemon.level() siempre da 0.
+        #
+        # El respaldo (PKHeX, CurrentLevel calculado a partir de
+        # la experiencia) YA NO sale de location_info -- ver el
+        # docstring de LocationResolver.resolve_current_level()
+        # para el bug real que corrigió sacarlo de ahí (nivel
+        # congelado para siempre en cuanto se cacheaba la
+        # resolución de lugar de encuentro). Se pide fresco, sin
+        # caché, cada vez que hace falta -- solo pasa para slots
+        # de Caja PC, la party siempre tiene el nivel real directo.
+        level = pokemon.level()
+
+        if not level:
+            level = self.location_resolver.resolve_current_level(
+                pokemon.raw_data[:232]
+            )
+
         return {
             "slot": slot,
+            "boxIndex": box_index,
             "empty": species_id == 0,
             "nickname": nickname,
             "species": species,
             "speciesId": species_id,
-            # Bug real corregido (05/09/2026, reportado por el
-            # usuario): pokemon.level() lee un offset que solo
-            # existe en el bloque extra de stats que agrega
-            # read_pokemon() para la party -- read_box() no lo
-            # tiene (ver su docstring), así que para una captura
-            # que va directo a la Caja PC pokemon.level() siempre
-            # da 0. location_info["level"] (PKHeX, calculado a
-            # partir de la experiencia -- ver HandleMetLocation()
-            # en Program.cs) sirve de respaldo SOLO cuando la
-            # lectura directa da 0; en una lectura de party normal
-            # (que sí tiene el nivel real) esto no cambia nada.
-            "level": pokemon.level() or location_info.get("level", 0),
+            "level": level,
             "hp": pokemon.hp(),
             "maxHp": pokemon.max_hp(),
             "shiny": location_info["shiny"],
@@ -804,13 +830,20 @@ class AzaharReader:
 
         return data[0]
 
-    def read_box(self):
+    def read_box(self, box_index=1):
         """
-        Escanea la Caja PC (Caja 1) completa: BOX_SLOT_COUNT slots
-        de BOX_SLOT_STRIDE bytes cada uno, a partir de
-        BOX_BASE_ADDRESS (ver pointers.py -- confirmado
-        empíricamente el 26-27/08/2026 escaneando por checksum
-        válido, estable entre reinicios de Azahar).
+        Escanea UNA caja PC completa (por defecto la Caja 1):
+        BOX_SLOT_COUNT slots de BOX_SLOT_STRIDE bytes cada uno, a
+        partir de get_box_address(process_name, box_index) -- ver
+        pointers.py para el detalle de qué cajas están confirmadas
+        empíricamente hoy (1-7, ver Documento Maestro 07/09/2026).
+
+        `box_index` es 1-based, igual que get_box_address() y que la
+        numeración que ve el usuario en el juego (07/09/2026,
+        extendido desde la versión original que solo leía la Caja 1
+        -- pensado para que la futura pestaña "Caja" de la página
+        Pokémon pueda pedir cualquiera de las 7 sueltas, una por
+        vez, sin cargar las demás).
 
         A diferencia de la party, la Caja PC es un array compacto
         y persistente -- no hay tabla de punteros ni buffer
@@ -827,10 +860,9 @@ class AzaharReader:
         directo con el chunk de SLOT_DATA_SIZE, sin leer STAT_DATA
         como hace read_pokemon()/_read_pokemon_at_address().
         build_pokemon_data() sigue funcionando igual sobre este
-        resultado, solo que level/hp/maxHp quedan en 0 para estas
-        entradas -- no afecta al Nuzlocke Tracker, que de una
-        captura en la caja solo necesita nickname/especie/
-        ubicación/shiny.
+        resultado -- el nivel real se resuelve aparte vía
+        LocationResolver.resolve_current_level() cuando hace falta
+        (ver su docstring).
 
         Devuelve una lista con SOLO los slots ocupados (checksum
         válido) en el mismo formato que build_pokemon_data(). Los
@@ -840,13 +872,29 @@ class AzaharReader:
         Lista vacía si la lectura de memoria falló por completo.
         """
 
-        # Multi-version (30/08/2026): BOX_BASE_ADDRESS NO es la
-        # misma entre Alpha Sapphire y Omega Ruby (confirmado --
-        # ver get_box_base_address() en pointers.py). Se elige
-        # segun self.process_name, mismo criterio que ya usa
-        # read_party_order().
-        box_base_address = get_box_base_address(
-            self.process_name
+        data = self.read_box_raw(box_index)
+
+        if data is None:
+            return []
+
+        return self._parse_box_slots(data, box_index)
+
+    def read_box_raw(self, box_index=1):
+        """
+        Lee el bloque crudo COMPLETO de una caja (BOX_SLOT_COUNT
+        slots de BOX_SLOT_STRIDE bytes cada uno) SIN parsear --
+        extraído de read_box() (08/09/2026, roadmap 5.2/5.3) para
+        reusar la misma lectura de memoria en read_box_slot_raw(),
+        sin duplicar el manejo de dirección/tamaño/errores.
+
+        Devuelve los bytes crudos (aún sin descifrar -- eso lo hace
+        Pokemon6 más adelante) o `None` si la lectura falló o vino
+        incompleta.
+        """
+
+        box_base_address = get_box_address(
+            self.process_name,
+            box_index,
         )
 
         window_size = (
@@ -874,8 +922,128 @@ class AzaharReader:
             )
         except OSError as error:
             print(
-                f"[AzaharReader] read_box: lectura UDP fallida "
+                f"[AzaharReader] read_box_raw: lectura UDP fallida "
                 f"(conexion probablemente reiniciandose): {error}"
+            )
+            return None
+
+        if not data:
+            return None
+
+        if len(data) != window_size:
+            return None
+
+        return data
+
+    def read_box_slot_raw(self, box_index, slot):
+        """
+        Lee y descifra el Pokemon6 completo de UN slot puntual de
+        UNA caja (232 bytes "box format") -- roadmap 5.3, pestaña
+        "Caja" de la página Pokémon: mismo motivo que
+        read_pokemon_raw_for_slot() para la party (golpear el
+        bridge PKHeX para tipos/habilidad/naturaleza/stats de
+        combate/movimientos es demasiado para pedirlo de las 30
+        cajas x 31 en cada poll de fondo -- se pide bajo demanda,
+        solo del slot puntual que el usuario abre).
+
+        A diferencia de read_box()/read_box_raw() (que traen la
+        caja ENTERA), esto solo golpea la memoria por el slot que
+        hace falta -- no tiene sentido traer los 30 slots para
+        resolver el detalle de uno solo.
+
+        `box_index`/`slot` son 1-based, igual que get_box_address()
+        y el "slot" que devuelve build_pokemon_data(). Devuelve los
+        232 bytes ya descifrados, o `None` si la lectura falló, el
+        slot está fuera de rango, o el slot está vacío/con checksum
+        inválido.
+        """
+
+        if not (1 <= slot <= BOX_SLOT_COUNT):
+            return None
+
+        box_base_address = get_box_address(
+            self.process_name,
+            box_index,
+        )
+
+        slot_address = (
+            box_base_address
+            + (slot - 1) * BOX_SLOT_STRIDE
+        )
+
+        try:
+            chunk = self.memory.read(
+                slot_address,
+                SLOT_DATA_SIZE
+            )
+        except OSError as error:
+            print(
+                f"[AzaharReader] read_box_slot_raw: lectura UDP "
+                f"fallida (conexion probablemente "
+                f"reiniciandose): {error}"
+            )
+            return None
+
+        if not chunk or len(chunk) != SLOT_DATA_SIZE:
+            return None
+
+        pokemon = Pokemon6(chunk)
+
+        if not pokemon.raw_data:
+            return None
+
+        return pokemon.raw_data[:232]
+
+    def read_boxes_range(self, start_box_index=1, box_count=7):
+        """
+        Escanea VARIAS cajas PC contiguas de una sola vez -- una
+        sola lectura UDP en vez de `box_count` llamadas separadas
+        (07/09/2026, agregado para el Nuzlocke Tracker: antes solo
+        se escaneaba la Caja 1 para detectar capturas nuevas, así
+        que una captura depositada directo en la Caja 2+ -- algo
+        que pasa apenas se llena la Caja 1 -- nunca se registraba).
+
+        Aprovecha que las cajas están confirmadas contiguas sin
+        padding (ver get_box_address() en pointers.py): pedir de
+        una sola vez el bloque completo de `box_count` cajas es
+        exactamente tan válido como leerlas una por una, pero con
+        una sola ida y vuelta UDP en vez de varias por ciclo.
+
+        `start_box_index`/`box_count` son 1-based, igual que
+        get_box_address() -- el default (1, 7) cubre las 7 cajas
+        que trae el juego habilitadas de fábrica (ver Documento
+        Maestro 07/09/2026: comprar más es opcional, no todos los
+        Nuzlocke lo necesitan, así que no tiene sentido escanear
+        más allá de esto por defecto).
+
+        Devuelve una lista combinada de SOLO los slots ocupados de
+        TODAS las cajas leídas, mismo formato que read_box() --
+        quien la use no necesita saber de qué caja puntual salió
+        cada Pokémon (el Nuzlocke Tracker identifica por nickname,
+        no por ubicación de caja). Lista vacía si la lectura falló
+        por completo.
+        """
+
+        box_base_address = get_box_address(
+            self.process_name,
+            start_box_index,
+        )
+
+        window_size = (
+            box_count
+            * BOX_BLOCK_SIZE
+        )
+
+        try:
+            data = self.memory.read(
+                box_base_address,
+                window_size
+            )
+        except OSError as error:
+            print(
+                f"[AzaharReader] read_boxes_range: lectura UDP "
+                f"fallida (conexion probablemente "
+                f"reiniciandose): {error}"
             )
             return []
 
@@ -884,6 +1052,41 @@ class AzaharReader:
 
         if len(data) != window_size:
             return []
+
+        occupied = []
+
+        for box_offset in range(box_count):
+
+            box_start = box_offset * BOX_BLOCK_SIZE
+
+            box_chunk = data[
+                box_start:
+                box_start + BOX_BLOCK_SIZE
+            ]
+
+            occupied.extend(
+                self._parse_box_slots(
+                    box_chunk,
+                    start_box_index + box_offset,
+                )
+            )
+
+        return occupied
+
+    def _parse_box_slots(self, data, box_index):
+        """
+        Parsea el bloque crudo de UNA caja (BOX_SLOT_COUNT slots de
+        BOX_SLOT_STRIDE bytes) ya leído de memoria, y devuelve solo
+        los slots ocupados en formato build_pokemon_data() (07/09/2026,
+        extraído de read_box() para compartirlo también con
+        read_boxes_range() -- misma lógica de parseo, no reimplementada
+        aparte).
+
+        `box_index` solo se usa para loguear/depurar si hiciera
+        falta a futuro -- el "slot" que lleva build_pokemon_data()
+        sigue siendo el número de slot DENTRO de la caja (1-30), no
+        un índice global, mismo criterio que ya usaba read_box().
+        """
 
         occupied = []
 
@@ -911,8 +1114,10 @@ class AzaharReader:
             occupied.append(
                 self.build_pokemon_data(
                     slot_index + 1,
-                    pokemon
+                    pokemon,
+                    box_index
                 )
             )
 
         return occupied
+

@@ -1821,10 +1821,185 @@ body {
   padding: 16px;
 }
 
+.pokemon-team-card + .pokemon-team-card {
+  margin-top: 16px;
+}
+
+/* Pestaña "General" de la página Pokémon (08/09/2026, roadmap
+   5.1/5.2) -- resumen mínimo (sprite + nivel) del equipo y de las
+   31 Cajas PC, sin el detalle completo que sí tiene "Equipo"/
+   "Caja" (eso implicaría golpear el bridge PKHeX 31*30 veces solo
+   para dibujar un resumen). */
+.pkm-general-mini-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pkm-general-boxes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.pkm-general-box-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pkm-general-box-row:last-child {
+  border-bottom: none;
+}
+
+.pkm-general-box-label {
+  flex: none;
+  width: 64px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.pkm-general-box-mons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pkm-general-box-empty {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.pkm-mini-mon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 48px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.pkm-mini-mon:hover {
+  border-color: var(--accent);
+}
+
+.pkm-mini-mon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Ícono de respaldo (08/09/2026, bug real corregido -- "muestra la
+   típica imagen de elemento no encontrado"): si el sprite de una
+   especie puntual no existe en el set /sprites/pokemon/ (404), se
+   ve el ícono roto genérico del navegador en vez de algo prolijo.
+   onerror en el <img> (ver pkmMiniMonHtml() en app.js) lo oculta y
+   muestra este ícono de pokebola en su lugar -- mismo tamaño que
+   el sprite que reemplaza, oculto por defecto. */
+.pkm-mini-mon-fallback {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-dim);
+}
+
+.pkm-mini-mon-fallback svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pkm-mini-mon span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+/* Celda de caja vacía (08/09/2026, a pedido del usuario: "en la
+   pestaña general las celdas de la caja donde no hay pokemon...
+   remplaza por el icono de la pokeball") -- mismo tamaño/forma que
+   .pkm-mini-mon, pero sin hover/click (no hay nada que abrir) y
+   con el ícono de pokebola siempre visible en vez de un sprite. */
+.pkm-mini-mon-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 48px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: var(--bg-elevated-2);
+  border: 1px dashed var(--border);
+}
+
+.pkm-mini-mon-empty svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-dim);
+}
+
+/* Pestaña "Caja" (08/09/2026, roadmap 5.1/5.3) -- selector de las
+   31 cajas como tira de pastillas numeradas, mismo criterio visual
+   que .pkm-box-selector-btn.active para marcar la elegida (igual
+   que .tab-btn.active de más arriba, pero un nivel más adentro, no
+   reutiliza esas clases a propósito para no confundir "cambié de
+   pestaña" con "cambié de caja"). */
+.pkm-box-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.pkm-box-selector-btn {
+  min-width: 32px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pkm-box-selector-btn:hover {
+  color: var(--text);
+}
+
+.pkm-box-selector-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .pokemon-grid {
   display: grid;
   grid-template-columns: repeat(3, 386px);
   gap: 16px;
+  /* Bug real corregido (08/09/2026, reportado por el usuario: "a
+     lo que despliego una tarjeta se desforma la tarjeta de al
+     lado") -- por defecto, CSS Grid estira todos los items de una
+     fila a la misma altura (align-items: stretch, el valor
+     inicial). Con tarjetas colapsables de alturas distintas, eso
+     obligaba a la tarjeta más corta a estirarse para igualar a la
+     que el usuario acababa de desplegar, y como .pokemon-card usa
+     grid-template-rows: auto auto por dentro (no fr), ese espacio
+     de sobra se repartía de forma rara entre sus propias filas en
+     vez de quedar como aire abajo. align-items: start dice que
+     cada tarjeta ocupe solo el alto de su propio contenido. */
+  align-items: start;
 }
 
 @container (max-width: 1222px) {
@@ -1972,6 +2147,13 @@ body {
   color: var(--text-secondary);
   font-size: 12.5px;
   margin: 2px 0 8px;
+  cursor: pointer;
+}
+
+.pokemon-card-species:hover {
+  color: var(--text);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 
 .pokemon-card-types {
@@ -2020,14 +2202,54 @@ body {
   font-size: 11px;
 }
 
+/* Desplegable de detalle (08/09/2026, a pedido del usuario: "que
+   solo esté visible la primera fila... y la segunda con un botón
+   se pueda desplegar") -- stats + movimientos arrancan ocultos,
+   .pokemon-card-toggle los muestra/oculta (ver
+   handlePokemonGridClick() en app.js, que alterna la clase
+   "expanded" en .pokemon-card). */
+.pokemon-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pokemon-card-toggle:hover {
+  color: var(--text);
+}
+
+.pokemon-card-toggle-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s ease;
+}
+
+.pokemon-card.expanded .pokemon-card-toggle-icon {
+  transform: rotate(180deg);
+}
+
 /* 50/50 real (03/09/2026, a pedido del usuario) -- antes
    .pokemon-card-stats tenía un 45% fijo y los movimientos se
    llevaban lo que sobraba (55%, asimétrico); ahora las dos mitades
    miden exactamente lo mismo. */
 .pokemon-card-bottom {
-  display: grid;
+  display: none;
   grid-template-columns: 120px 1fr;
   column-gap: 16px;
+}
+
+.pokemon-card.expanded .pokemon-card-bottom {
+  display: grid;
 }
 
 .pokemon-card-stats {
@@ -4304,6 +4526,15 @@ body {
   color: var(--text);
 }
 
+.nz-leader-mon-name[data-species-id] {
+  cursor: pointer;
+}
+
+.nz-leader-mon-name[data-species-id]:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
 .nz-leader-ace-tag {
   font-size: 9px;
   font-weight: 700;
@@ -4476,6 +4707,19 @@ body {
   line-height: 1.3;
 }
 
+/* Clickeable (08/09/2026, a pedido del usuario: "extiende el modal
+   de pokedex a los pokes de los lideres de gimnasio") -- abre el
+   mismo modal Pokédex que ya usan las tarjetas de Equipo/Caja de
+   la página Pokémon, ver openSpeciesModal() en leader_team_window.js. */
+.mondetail-name[data-species-id] {
+  cursor: pointer;
+}
+
+.mondetail-name[data-species-id]:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
 .mondetail-types {
   display: flex;
   flex-wrap: wrap;
@@ -4641,6 +4885,24 @@ body {
   display: none;
 }
 
+/* Bug real corregido (08/09/2026, reportado por el usuario:
+   "estando dentro del modal de la pokedex cuando hago clic en una
+   habilidad el modal de info se abre atras del modal pokedex"):
+   todos los modales comparten el mismo z-index (200) y el mismo
+   componente genérico -- entre elementos con igual z-index, el
+   que aparece DESPUÉS en el DOM pinta encima, sin importar cuál se
+   abrió último. #pkm-modal-ability/#pkm-modal-move están antes que
+   #pkm-modal-species en el HTML, así que al abrirse "por encima"
+   del modal de especie (único caso real de un modal abriendo a
+   otro modal en este proyecto) quedaban tapados. Se les da un
+   z-index más alto en vez de reordenar el HTML -- más simple y
+   más a prueba de que alguien mueva ese márkup de lugar a futuro.
+   */
+.nz-modal-overlay#pkm-modal-ability,
+.nz-modal-overlay#pkm-modal-move {
+  z-index: 210;
+}
+
 .nz-modal {
   width: 420px;
   max-width: calc(100vw - 32px);
@@ -4709,6 +4971,597 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* Modales de movimiento/habilidad (roadmap 07/09/2026, sección
+   4.1) -- reusan .nz-modal-overlay/.nz-modal/.nz-modal-narrow tal
+   cual, solo agregan estas clases puntuales para el contenido de
+   adentro. */
+.pkm-modal-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pkm-modal-category-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated-2);
+}
+
+.pkm-modal-stats-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pkm-modal-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+}
+
+.pkm-modal-stat-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pkm-modal-stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pkm-modal-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* Botón Pokédex de la tarjeta de equipo (08/09/2026, a pedido
+   del usuario): ya no vive inline junto al texto de especie --
+   ahora es un botón aparte dentro de .pokemon-card-title-row que
+   se estira (align-items: stretch) para ocupar visualmente las
+   dos filas (nombre + especie) del bloque de texto de al lado.
+   Turquesa (var(--accent)) para que se distinga del resto de
+   íconos, que son grises/--text-dim. */
+.pokemon-card-title-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pokemon-card-title-text {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pkm-dex-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 34px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.pkm-dex-btn:hover {
+  color: var(--accent-strong);
+}
+
+.pkm-dex-btn svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Modal Pokédex de especie (roadmap 4.2, 07/09/2026 -- rediseño
+   exacto al mockup provisto por el usuario). Íconos usados acá
+   (regla/balanza/etiqueta/engranaje/estrella/gráfico/etc.) son
+   GENÉRICOS a propósito -- el usuario va a reemplazarlos por unos
+   a medida más adelante, no hace falta invertir en dibujarlos
+   bien ahora. */
+.pkm-species-modal {
+  width: 900px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+
+.pkm-species-modal-brand {
+  font-weight: 700;
+}
+
+.pkm-species-modal-brand-sep {
+  color: var(--text-dim);
+  font-weight: 400;
+  margin: 0 8px;
+}
+
+.pkm-species-modal-body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.pkm-species-modal-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-elevated-2);
+  border-right: 1px solid var(--border);
+  padding: 18px;
+}
+
+.pkm-species-modal-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+}
+
+.pkm-species-dexnum {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.pkm-species-artwork-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.pkm-species-artwork-ring {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  object-fit: contain;
+  opacity: 0.4;
+}
+
+.pkm-species-modal-brand-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  vertical-align: -4px;
+  margin-right: 6px;
+}
+
+.pkm-species-artwork {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.pkm-species-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pkm-species-name-row h2 {
+  margin: 0;
+  font-size: 24px;
+  font-family: "Space Grotesk", "Inter", sans-serif;
+}
+
+.pkm-species-type-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pkm-species-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.pkm-species-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+
+.pkm-species-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+}
+
+.pkm-species-info-row-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.pkm-species-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pkm-species-info-cell:first-child {
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+}
+
+.pkm-species-info-cell-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pkm-species-info-cell .pkm-species-info-value {
+  text-align: left;
+  font-size: 14px;
+}
+
+.pkm-species-info-row+.pkm-species-info-row {
+  border-top: 1px solid var(--border);
+}
+
+.pkm-species-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.pkm-species-info-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pkm-species-info-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.pkm-species-info-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+/* Fila "Habilidades" con dos valores apilados (08/09/2026, a
+   pedido del usuario -- antes solo se mostraba la habilidad 1
+   acá; ver también la sección duplicada eliminada del panel
+   derecho, `pkm-species-modal-abilities`). */
+.pkm-species-info-value-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Valores de habilidad clickeables (heredan el data-ability-id
+   que antes solo tenían las filas de la sección duplicada de la
+   derecha) -- abren el modal de descripción de habilidad, ver
+   initSpeciesModalActions() en app.js. */
+.pkm-species-info-value[data-ability-id] {
+  cursor: pointer;
+}
+
+.pkm-species-info-value[data-ability-id]:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.pkm-species-section {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+}
+
+.pkm-species-section-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.pkm-species-section-header {
+  margin-bottom: 10px;
+}
+
+.pkm-species-header-danger svg {
+  color: var(--danger);
+}
+
+.pkm-species-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pkm-species-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.pkm-species-stat-card-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.pkm-species-stat-card-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pkm-species-stat-bar-track {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.pkm-species-stat-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.pkm-species-abilities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pkm-species-ability-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 4px 4px 4px 12px;
+  border-radius: 8px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+}
+
+.pkm-species-ability-row[data-ability-id] {
+  cursor: pointer;
+}
+
+.pkm-species-ability-row[data-ability-id]:hover .pkm-species-ability-name {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.pkm-species-ability-name {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pkm-species-ability-tag {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0 14px;
+}
+
+.pkm-species-ability-tag.hidden {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #06222a;
+}
+
+.pkm-species-evolution-chain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.pkm-species-evolution-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+  border: 1px solid var(--border);
+  min-width: 84px;
+  cursor: pointer;
+}
+
+.pkm-species-evolution-stage.current {
+  border-color: var(--accent, #22d3ee);
+}
+
+.pkm-species-evolution-stage img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.pkm-species-evolution-stage-name {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.pkm-species-evolution-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.pkm-species-evolution-connector-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.pkm-species-evolution-arrow {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--text-dim);
+}
+
+/* Ramificación de evolución (08/09/2026, bug real corregido --
+   Wurmple: Silcoon/Cascoon -> Beautifly/Dustox no se mostraban
+   ambas ramas, solo la primera). Cuando una etapa tiene más de una
+   evolución posible, en vez de seguir la fila horizontal, se abre
+   este bloque vertical con una fila por rama -- cada fila es a su
+   vez una mini cadena horizontal (conector + siguiente etapa +
+   ...). */
+.pkm-species-evolution-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pkm-species-evolution-branch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pkm-species-evolution-item-sprite {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.pkm-species-type-effect-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
+/* Movimiento/habilidad clickeables en la página Pokémon
+   (07/09/2026) -- mismo cursor que cualquier otro control
+   interactivo, sin cambiar el layout existente. Subrayado
+   punteado en el NOMBRE al pasar el mouse (07/09/2026, a pedido
+   del usuario: "que se diferencie que es un enlace clickeable" --
+   antes solo cambiaba el fondo de toda la fila, señal débil) --
+   mismo estilo de subrayado que ya usa .ability-name para
+   consistencia entre los dos tipos de enlace nuevo. */
+.pokemon-move-row[data-move-id],
+.pokemon-move-row[data-move-name] {
+  cursor: pointer;
+}
+
+.pokemon-move-row[data-move-id]:hover,
+.pokemon-move-row[data-move-name]:hover {
+  background: var(--bg-elevated-2);
+}
+
+.pokemon-move-row[data-move-id]:hover .pokemon-move-name,
+.pokemon-move-row[data-move-name]:hover .pokemon-move-name {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  color: var(--text);
+}
+
+.ability-name[data-ability-id],
+.ability-name[data-ability-name] {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+/* Pestaña Líderes del Nuzlocke Tracker (07/09/2026) -- mismos
+   movimiento/habilidad clickeables, distinto marcado porque esta
+   pestaña usa su propio layout (.nz-leader-mon-*) en vez de
+   .pokemon-move-row/.ability-name. */
+.nz-leader-mon-move-line[data-move-name] {
+  cursor: pointer;
+}
+
+.nz-leader-mon-move-line[data-move-name]:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  color: var(--text);
+}
+
+.nz-leader-mon-ability[data-ability-name] {
+  cursor: pointer;
+}
+
+.nz-leader-mon-ability[data-ability-name] em {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 
 .nz-modal-subtitle {

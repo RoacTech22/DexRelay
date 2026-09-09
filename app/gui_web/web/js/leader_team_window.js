@@ -30,6 +30,14 @@
 
   var TYPE_ICON_VIEWBOX = "0 0 76.71 76.71";
 
+  // Base URL del HTTPServer, resuelta una vez en init() (08/09/2026,
+  // agregado junto con el modal Pokédex de especie -- antes el
+  // baseUrl solo se pasaba como parámetro a render()/
+  // buildMonCardHtml(), pero openSpeciesModal() necesita poder
+  // armar URLs de sprite en cualquier momento, no solo durante el
+  // render inicial).
+  var spriteBaseUrl = "";
+
   // Mismo TYPE_INFO que app.js, con los glifos incluidos (06/09/2026
   // -- antes esta copia no los tenía porque el modal viejo no
   // reusaba .pokemon-type-badge/.pokemon-move-type; ahora que la
@@ -191,12 +199,20 @@
     // es un dato único y bien documentado en toda fuente Pokémon,
     // no como los nombres de líderes/ciudades, así que no hacía
     // falta dejarlo "No disponible" -- solo faltaba curarlo).
+    //
+    // Clickeable (07/09/2026, a pedido del usuario: "en donde haya
+    // una habilidad o movimiento se debería poder acceder a su
+    // información") -- data-move-name lleva el nombre en INGLÉS
+    // (mon.moves[index], sin traducir) porque
+    // get_move_modal_data_by_name() normaliza contra el identifier
+    // real de PokéAPI, que está en inglés -- ver
+    // MoveDescriptionCatalog.get_id_by_name().
     var moveTypeKeys = mon.moveTypeKeys || [];
     var movesHtml = (mon.moves || []).length
       ? mon.moves.map(function (name, index) {
           var moveType = moveTypeKeys[index];
           return (
-            '<div class="pokemon-move-row">' +
+            '<div class="pokemon-move-row" data-move-name="' + escapeHtml(name) + '">' +
               '<span class="pokemon-move-name">' + escapeHtml(translateMoveName(name)) + "</span>" +
               '<span class="pokemon-move-type" style="' + typeStyleVars(moveType) + '">' + typeIconSvg(moveType, 16) + "</span>" +
             "</div>"
@@ -225,13 +241,18 @@
             '<img class="mondetail-sprite" src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
             (mon.isAce ? '<span class="nz-leader-ace-tag mondetail-ace-badge">Ace</span>' : "") +
           "</div>" +
-          '<div class="mondetail-name">' +
+          '<div class="mondetail-name" data-species-id="' + mon.speciesId + '" title="Ver Pokédex de la especie">' +
             escapeHtml(mon.species || "") + " - Nv." + mon.level +
           "</div>" +
           '<div class="mondetail-types">' + typesHtml + "</div>" +
           '<div class="mondetail-info-rows">' +
             '<div class="mondetail-info-row"><strong>Naturaleza:</strong> <em>NN</em></div>' +
-            '<div class="mondetail-info-row"><strong>Habilidad:</strong> ' + escapeHtml(mon.abilityEs || mon.ability || "—") + "</div>" +
+            '<div class="mondetail-info-row"><strong>Habilidad:</strong> ' +
+              (mon.ability
+                ? '<span class="ability-name" data-ability-name="' + escapeHtml(mon.ability) + '">' +
+                  escapeHtml(mon.abilityEs || mon.ability) + "</span>"
+                : "—") +
+            "</div>" +
             '<div class="mondetail-info-row"><strong>Objeto:</strong> ' + itemText + "</div>" +
           "</div>" +
         "</div>" +
@@ -275,10 +296,429 @@
       .join("");
   }
 
+  // ===================== MODALES DE MOVIMIENTO / HABILIDAD (07/09/2026) =====================
+  // Mismo mecanismo que app.js (página Pokémon), extendido acá a
+  // pedido del usuario ("en donde haya una habilidad o movimiento
+  // se debería poder acceder a su información") -- esta ventana es
+  // standalone (no comparte JS con app.js), así que necesita su
+  // propia copia chica de openModal/closeModal y del wiring de
+  // cierre, mismo criterio ya usado para
+  // typeInfo/typeStyleVars/typeIconSvg/escapeHtml más arriba.
+
+  var MOVE_CATEGORY_LABELS = {
+    Physical: "Físico",
+    Special: "Especial",
+    Status: "Estado",
+  };
+
+  function openModal(id) {
+    document.getElementById(id).hidden = false;
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).hidden = true;
+  }
+
+  function initModalActions() {
+    document.querySelectorAll("[data-close-modal]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        closeModal(btn.dataset.closeModal);
+      });
+    });
+
+    document.querySelectorAll(".nz-modal-overlay").forEach(function (overlay) {
+      overlay.addEventListener("click", function (event) {
+        if (event.target === overlay) {
+          overlay.hidden = true;
+        }
+      });
+    });
+
+    // Delegación sobre el contenedor de tarjetas -- se reconstruye
+    // entero cada vez que llega un dato nuevo (render(), una sola
+    // vez al abrir esta ventana), mismo criterio que
+    // initPokemonPageActions() en app.js.
+    var cardsEl = document.getElementById("leader-window-cards");
+    cardsEl.addEventListener("click", function (event) {
+      // Pokédex de especie (08/09/2026, a pedido del usuario:
+      // "extiende el modal de pokedex a los pokes de los lideres
+      // de gimnasio").
+      var speciesEl = event.target.closest(".mondetail-name[data-species-id]");
+      if (speciesEl) {
+        openSpeciesModal(Number(speciesEl.dataset.speciesId));
+        return;
+      }
+
+      var moveRow = event.target.closest(".pokemon-move-row[data-move-name]");
+      if (moveRow) {
+        openMoveModal(moveRow.dataset.moveName);
+        return;
+      }
+
+      var abilityEl = event.target.closest(".ability-name[data-ability-name]");
+      if (abilityEl) {
+        openAbilityModal(abilityEl.dataset.abilityName, abilityEl.textContent);
+      }
+    });
+  }
+
+  function openMoveModal(moveName) {
+    document.getElementById("pkm-move-modal-title").textContent = "Cargando...";
+    document.getElementById("pkm-move-modal-type").textContent = "";
+    document.getElementById("pkm-move-modal-type").style.cssText = "";
+    document.getElementById("pkm-move-modal-category").textContent = "";
+    document.getElementById("pkm-move-modal-power").textContent = "—";
+    document.getElementById("pkm-move-modal-accuracy").textContent = "—";
+    document.getElementById("pkm-move-modal-pp").textContent = "—";
+    document.getElementById("pkm-move-modal-description").textContent = "";
+
+    openModal("pkm-modal-move");
+
+    window.pywebview.api.get_move_modal_data_by_name(moveName).then(function (data) {
+      if (!data || data.error) {
+        document.getElementById("pkm-move-modal-title").textContent = "No se pudo cargar";
+        document.getElementById("pkm-move-modal-description").textContent =
+          "No se pudo obtener el detalle de este movimiento.";
+        return;
+      }
+
+      document.getElementById("pkm-move-modal-title").textContent = data.name || "—";
+
+      var typeEl = document.getElementById("pkm-move-modal-type");
+      var ti = typeInfo(data.typeKey);
+      typeEl.style.cssText = typeStyleVars(data.typeKey);
+      typeEl.innerHTML = typeIconSvg(data.typeKey, 14) + "<span>" + (ti ? ti.label : data.type || "") + "</span>";
+
+      document.getElementById("pkm-move-modal-category").textContent =
+        MOVE_CATEGORY_LABELS[data.categoryKey] || data.categoryKey || "—";
+
+      document.getElementById("pkm-move-modal-power").textContent =
+        data.power != null ? data.power : "—";
+      document.getElementById("pkm-move-modal-accuracy").textContent =
+        data.accuracy != null ? data.accuracy + "%" : "—";
+      document.getElementById("pkm-move-modal-pp").textContent =
+        data.basePP != null ? data.basePP : "—";
+
+      document.getElementById("pkm-move-modal-description").textContent =
+        data.descriptionEs || "Descripción no disponible.";
+    });
+  }
+
+  function openAbilityModal(abilityName, displayedText) {
+    document.getElementById("pkm-ability-modal-title").textContent = displayedText || "Cargando...";
+    document.getElementById("pkm-ability-modal-description").textContent = "";
+
+    openModal("pkm-modal-ability");
+
+    window.pywebview.api.get_ability_modal_data_by_name(abilityName).then(function (data) {
+      document.getElementById("pkm-ability-modal-description").textContent =
+        (data && data.descriptionEs) || "Descripción no disponible.";
+    });
+  }
+
+  // ===================== MODAL POKÉDEX DE ESPECIE (08/09/2026) =====================
+  // Extendido acá a pedido del usuario ("extiende el modal de
+  // pokedex a los pokes de los lideres de gimnasio") -- copiado de
+  // openSpeciesModal()/initSpeciesModalActions() en app.js (página
+  // Pokémon), adaptado al criterio de este archivo standalone: usa
+  // window.pywebview.api.* directo (sin el wrapper api() de
+  // app.js) y spriteBaseUrl en vez de la variable homónima que
+  // vive en la clausura de app.js. Las habilidades del panel
+  // izquierdo del modal de especie tienen ID numérico real (vienen
+  // del bridge PKHeX, no del dataset curado de gym_leaders.json),
+  // así que usan get_ability_modal_data(id) -- openAbilityModalById()
+  // más abajo, DISTINTA de openAbilityModal(name, texto) de arriba
+  // (esa es para la habilidad de la propia tarjeta del líder, que
+  // sí viene por nombre).
+
+  var BASE_STAT_BAR_COLORS = {
+    hp: "#22c55e",
+    attack: "#ef4444",
+    defense: "#f59e0b",
+    spAttack: "#3b82f6",
+    spDefense: "#a855f7",
+    speed: "#22d3ee",
+  };
+
+  var BASE_STAT_BAR_MAX = 255;
+
+  function formatMultiplier(multiplier) {
+    if (multiplier === 0) { return "0×"; }
+    if (multiplier === 0.25) { return "¼×"; }
+    if (multiplier === 0.5) { return "½×"; }
+    return multiplier + "×";
+  }
+
+  function renderTypeEffectGrid(containerId, entries) {
+    var container = document.getElementById(containerId);
+
+    if (!entries || !entries.length) {
+      container.innerHTML = '<span class="pkm-modal-stat-label">Ninguna</span>';
+      return;
+    }
+
+    container.innerHTML = entries.map(function (entry) {
+      var info = typeInfo(entry.typeKey);
+      return (
+        '<span class="pokemon-type-badge" style="' + typeStyleVars(entry.typeKey) + '">' +
+        typeIconSvg(entry.typeKey, 14) +
+        "<span>" + (info ? info.label : entry.typeKey) + " " + formatMultiplier(entry.multiplier) + "</span>" +
+        "</span>"
+      );
+    }).join("");
+  }
+
+  function openAbilityModalById(abilityId, abilityName) {
+    document.getElementById("pkm-ability-modal-title").textContent = abilityName || "Cargando...";
+    document.getElementById("pkm-ability-modal-description").textContent = "";
+
+    openModal("pkm-modal-ability");
+
+    window.pywebview.api.get_ability_modal_data(abilityId).then(function (data) {
+      document.getElementById("pkm-ability-modal-description").textContent =
+        (data && data.descriptionEs) || "Descripción no disponible.";
+    });
+  }
+
+  function openSpeciesModal(speciesId) {
+    document.getElementById("pkm-species-modal-name").textContent = "Cargando...";
+    document.getElementById("pkm-species-modal-dexnum").textContent = "";
+    document.getElementById("pkm-species-modal-artwork").src = "";
+    document.getElementById("pkm-species-modal-gender").innerHTML = "";
+    document.getElementById("pkm-species-modal-types").innerHTML = "";
+    document.getElementById("pkm-species-modal-description").textContent = "";
+    document.getElementById("pkm-species-modal-height").textContent = "—";
+    document.getElementById("pkm-species-modal-weight").textContent = "—";
+    document.getElementById("pkm-species-modal-genus").textContent = "—";
+    document.getElementById("pkm-species-modal-ability1").textContent = "—";
+    document.getElementById("pkm-species-modal-ability1").removeAttribute("data-ability-id");
+    var ability2ResetEl = document.getElementById("pkm-species-modal-ability2");
+    ability2ResetEl.textContent = "";
+    ability2ResetEl.hidden = true;
+    ability2ResetEl.removeAttribute("data-ability-id");
+    document.getElementById("pkm-species-modal-abilityhidden").textContent = "—";
+    document.getElementById("pkm-species-modal-abilityhidden").removeAttribute("data-ability-id");
+    document.getElementById("pkm-species-modal-stats").innerHTML = "";
+    document.getElementById("pkm-species-modal-evolutions").innerHTML = "";
+    document.getElementById("pkm-species-modal-weaknesses").innerHTML = "";
+    document.getElementById("pkm-species-modal-resistances").innerHTML = "";
+    document.getElementById("pkm-species-modal-immunities").innerHTML = "";
+
+    openModal("pkm-modal-species");
+
+    window.pywebview.api.get_species_modal_data(speciesId).then(function (data) {
+      if (!data || data.error) {
+        document.getElementById("pkm-species-modal-name").textContent = "No se pudo cargar";
+        return;
+      }
+
+      document.getElementById("pkm-species-modal-name").textContent = data.name || "—";
+      document.getElementById("pkm-species-modal-dexnum").textContent = "#" + String(speciesId).padStart(3, "0");
+      document.getElementById("pkm-species-modal-artwork").src =
+        spriteBaseUrl + "/sprites/species_artwork/" + speciesId + ".png";
+
+      var typesHtml = "";
+      if (data.type1Key) {
+        var t1 = typeInfo(data.type1Key);
+        typesHtml += '<span class="pokemon-type-badge" style="' + typeStyleVars(data.type1Key) + '">' +
+          typeIconSvg(data.type1Key, 14) + "<span>" + (t1 ? t1.label : "") + "</span></span>";
+      }
+      if (data.type2Key) {
+        var t2 = typeInfo(data.type2Key);
+        typesHtml += '<span class="pokemon-type-badge" style="' + typeStyleVars(data.type2Key) + '">' +
+          typeIconSvg(data.type2Key, 14) + "<span>" + (t2 ? t2.label : "") + "</span></span>";
+      }
+      document.getElementById("pkm-species-modal-types").innerHTML = typesHtml;
+
+      document.getElementById("pkm-species-modal-description").textContent =
+        data.description || "Descripción no disponible.";
+
+      document.getElementById("pkm-species-modal-height").textContent =
+        data.heightM != null ? data.heightM + " m" : "—";
+      document.getElementById("pkm-species-modal-weight").textContent =
+        data.weightKg != null ? data.weightKg + " kg" : "—";
+      document.getElementById("pkm-species-modal-genus").textContent = data.genus || "—";
+
+      var ability1El = document.getElementById("pkm-species-modal-ability1");
+      ability1El.textContent = data.ability1Name || "—";
+      if (data.ability1Id != null) {
+        ability1El.dataset.abilityId = data.ability1Id;
+        ability1El.dataset.abilityName = data.ability1Name || "";
+      } else {
+        delete ability1El.dataset.abilityId;
+        delete ability1El.dataset.abilityName;
+      }
+
+      var ability2El = document.getElementById("pkm-species-modal-ability2");
+      var hasAbility2 = data.ability2Id != null && data.ability2Id !== data.ability1Id;
+      ability2El.hidden = !hasAbility2;
+      if (hasAbility2) {
+        ability2El.textContent = data.ability2Name || "—";
+        ability2El.dataset.abilityId = data.ability2Id;
+        ability2El.dataset.abilityName = data.ability2Name || "";
+      } else {
+        ability2El.textContent = "";
+        delete ability2El.dataset.abilityId;
+        delete ability2El.dataset.abilityName;
+      }
+
+      var abilityHiddenEl = document.getElementById("pkm-species-modal-abilityhidden");
+      abilityHiddenEl.textContent = data.abilityHiddenName || "—";
+      if (data.abilityHiddenId != null) {
+        abilityHiddenEl.dataset.abilityId = data.abilityHiddenId;
+        abilityHiddenEl.dataset.abilityName = data.abilityHiddenName || "";
+      } else {
+        delete abilityHiddenEl.dataset.abilityId;
+        delete abilityHiddenEl.dataset.abilityName;
+      }
+
+      var stats = data.baseStats || {};
+      var statsOrder = [
+        { key: "hp", label: "HP" }, { key: "attack", label: "ATK" }, { key: "spAttack", label: "SPA" }, { key: "defense", label: "DEF" }, { key: "spDefense", label: "SPD" }, { key: "speed", label: "SPE" },
+      ];
+      document.getElementById("pkm-species-modal-stats").innerHTML = statsOrder.map(function (s) {
+        var value = stats[s.key] != null ? stats[s.key] : 0;
+        var barPercent = Math.min(100, (value / BASE_STAT_BAR_MAX) * 100);
+        var barColor = BASE_STAT_BAR_COLORS[s.key];
+        return (
+          '<div class="pkm-species-stat-card">' +
+          '<span class="pkm-species-stat-card-value">' + (stats[s.key] != null ? stats[s.key] : "—") + "</span>" +
+          '<span class="pkm-species-stat-card-label">' + s.label + "</span>" +
+          '<div class="pkm-species-stat-bar-track"><div class="pkm-species-stat-bar-fill" style="width:' + barPercent + "%;background:" + barColor + ';"></div></div>' +
+          "</div>"
+        );
+      }).join("");
+
+      var evolutionData = data.evolutionChain || null;
+      var ancestors = (evolutionData && evolutionData.ancestors) || [];
+      var currentNode = evolutionData && evolutionData.current;
+
+      function stageHtml(stage) {
+        var stageSpriteUrl = spriteBaseUrl + "/sprites/pokemon/" + stage.speciesId + ".png";
+        return (
+          '<div class="pkm-species-evolution-stage' + (stage.isCurrent ? " current" : "") + '" data-species-id="' + stage.speciesId + '">' +
+          '<img src="' + stageSpriteUrl + '" alt="" />' +
+          '<span class="pkm-species-evolution-stage-name">' + escapeHtml(stage.name || "—") + "</span>" +
+          "</div>"
+        );
+      }
+
+      function connectorHtml(transition) {
+        if (!transition) {
+          return (
+            '<span class="pkm-species-evolution-connector">' +
+            '<svg class="pkm-species-evolution-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<line x1="4" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+            '<polyline points="13,7 18,12 13,17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            "</span>"
+          );
+        }
+
+        var innerHtml;
+
+        if (transition.level != null && transition.level > 0) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">Nv. ' + transition.level + "</span>";
+        } else if (transition.itemId != null) {
+          innerHtml = '<img class="pkm-species-evolution-item-sprite" src="' + spriteBaseUrl + "/sprites/items/" + transition.itemId + '.png" alt="" onerror="this.style.display=\'none\'" />';
+        } else if (transition.moveName) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.moveName) + "</span>";
+        } else if (transition.teammateName) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.teammateName) + "</span>";
+        } else if (transition.conditionLabel) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.conditionLabel) + "</span>";
+        } else {
+          innerHtml =
+            '<svg class="pkm-species-evolution-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<line x1="4" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+            '<polyline points="13,7 18,12 13,17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        }
+
+        return (
+          '<span class="pkm-species-evolution-connector" title="' + escapeHtml(transition.description || "") + '">' +
+          innerHtml +
+          "</span>"
+        );
+      }
+
+      function renderForwardNode(node) {
+        var html = stageHtml(node);
+        var children = node.children || [];
+
+        if (children.length === 0) {
+          return html;
+        }
+
+        if (children.length === 1) {
+          html += connectorHtml(children[0].transition) + renderForwardNode(children[0].node);
+          return html;
+        }
+
+        var branchesHtml = children.map(function (child) {
+          return (
+            '<div class="pkm-species-evolution-branch-row">' +
+            connectorHtml(child.transition) + renderForwardNode(child.node) +
+            "</div>"
+          );
+        }).join("");
+
+        html += '<div class="pkm-species-evolution-branches">' + branchesHtml + "</div>";
+        return html;
+      }
+
+      var stagesHtml = "";
+
+      ancestors.forEach(function (ancestor) {
+        stagesHtml += stageHtml(ancestor) + connectorHtml(ancestor.transitionToNext);
+      });
+
+      if (currentNode) {
+        stagesHtml += renderForwardNode(currentNode);
+      }
+
+      var hasChain = ancestors.length > 0 || (currentNode && currentNode.children && currentNode.children.length > 0);
+
+      document.getElementById("pkm-species-modal-evolutions").innerHTML =
+        hasChain ? stagesHtml : '<span class="pkm-modal-stat-label">No evoluciona</span>';
+
+      renderTypeEffectGrid("pkm-species-modal-weaknesses", data.weaknesses);
+      renderTypeEffectGrid("pkm-species-modal-resistances", data.resistances);
+      renderTypeEffectGrid("pkm-species-modal-immunities", data.immunities);
+    });
+  }
+
+  function initSpeciesModalActions() {
+    var modalBody = document.getElementById("pkm-modal-species");
+    if (!modalBody) {
+      return;
+    }
+
+    modalBody.addEventListener("click", function (event) {
+      var abilityRow = event.target.closest(
+        ".pkm-species-ability-row[data-ability-id], .pkm-species-info-value[data-ability-id]"
+      );
+      if (abilityRow) {
+        openAbilityModalById(
+          Number(abilityRow.dataset.abilityId),
+          abilityRow.dataset.abilityName || ""
+        );
+        return;
+      }
+
+      var stage = event.target.closest(".pkm-species-evolution-stage[data-species-id]");
+      if (stage) {
+        openSpeciesModal(Number(stage.dataset.speciesId));
+      }
+    });
+  }
+
   function init() {
     var order = getOrderFromUrl();
 
+    initModalActions();
+    initSpeciesModalActions();
+
     window.pywebview.api.get_server_base_url().then(function (baseUrl) {
+      spriteBaseUrl = baseUrl || "";
       window.pywebview.api.get_leader_team_window_data(order).then(function (leader) {
         render(leader, baseUrl || "");
       });

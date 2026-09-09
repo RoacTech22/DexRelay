@@ -157,7 +157,7 @@
         card.style.setProperty(
           "--card-bg",
           "linear-gradient(180deg, rgba(10,14,24,0.15) 0%, rgba(10,14,24,0.55) 55%, rgba(10,14,24,0.92) 100%), " +
-            "url('" + game.background + "')"
+          "url('" + game.background + "')"
         );
       }
 
@@ -279,6 +279,9 @@
     initTabs();
     initDashboardActions();
     initNuzlockeActions();
+    initPokemonPageActions();
+    initNuzlockeLeadersTabActions();
+    initSpeciesModalActions();
     initOverlaysActions();
     initHerramientasActions();
     initConfiguracionActions();
@@ -315,6 +318,24 @@
     // vista, no todo el tiempo como el resto del Dashboard.
     if (page === "pokemon") {
       startPokemonPoll();
+
+      // Pestañas General/Caja (08/09/2026, roadmap 5.1) no tienen
+      // poll propio -- se piden bajo demanda. El evento
+      // "dexrelay:tabchange" (ver initTabs()) solo dispara con un
+      // CLICK en una pestaña, así que al entrar a la página por
+      // primera vez (o volver a ella) con "General" ya activa por
+      // defecto, hace falta pedir sus datos acá explícitamente, o
+      // quedaría vacía hasta que el usuario haga click en algo.
+      var activePokemonTab = document.querySelector(
+        '.tabs-bar[data-tabs-group="pokemon"] .tab-btn.active'
+      );
+      var activeTab = activePokemonTab ? activePokemonTab.dataset.tab : "general";
+
+      if (activeTab === "general") {
+        loadGeneralTab();
+      } else if (activeTab === "caja") {
+        loadBoxTab();
+      }
     } else {
       stopPokemonPoll();
     }
@@ -1020,8 +1041,32 @@
   // Íconos de sexo provistos por el usuario (03/09/2026) -- fill="currentColor"
   // para heredar color por CSS (.pokemon-card-gender.male/.female), mismo
   // criterio que los íconos del sidebar.
+  // Ícono "Pokédex" (07/09/2026, roadmap 4.2 -- botón nuevo en
+  // cada tarjeta que abre el modal de detalle de especie) -- ícono
+  // estándar de "info" (círculo con "i"), genérico, no un dibujo a
+  // medida como el resto de los íconos de esta página.
+  // Ícono "Pokédex" (07/09/2026, roadmap 4.2 -- botón nuevo en
+  // cada tarjeta que abre el modal de detalle de especie) --
+  // reemplazado (08/09/2026, a pedido del usuario) por el ícono
+  // real que subió (Pokedex.svg), en vez del genérico de "info".
+  // Ícono Pokédex (08/09/2026, reemplazo a pedido del usuario --
+  // SVG provisto por Ronald, viewBox original 0 0 150.42 226.12).
+  var POKEDEX_ICON_SVG = '<svg viewBox="0 0 150.42 226.12" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M136.63,0H13.79C6.19,0,0,5.9,0,13.16v199.81c0,7.26,6.19,13.16,13.79,13.16h102.7V55.78h-18.23c-5.05,0-9.93,2.01-13.4,5.52l-22.86,23.18c-1.73,1.75-4.17,2.76-6.7,2.76H9.2V13.16c0-2.42,2.06-4.39,4.6-4.39h122.84c2.53,0,4.6,1.97,4.6,4.39v42.62h-15.54v170.35h10.94c7.61,0,13.79-5.9,13.79-13.16V13.16c0-7.26-6.19-13.16-13.79-13.16ZM99.5,194.47c2.56,0,4.63,1.96,4.63,4.39s-2.07,4.39-4.63,4.39h-58.21c-2.56,0-4.63-1.96-4.63-4.39s2.07-4.39,4.63-4.39h58.21ZM21.52,134.17c0-3.7,4.51-5.74,7.51-3.4l11.38,8.88c2.25,1.76,2.25,5.03,0,6.79l-11.38,8.88c-3,2.34-7.51.31-7.51-3.39v-17.76Z"/><path fill="currentColor" d="M19.51,42.14c0,12.35,10.54,22.41,23.49,22.41s23.49-10.05,23.49-22.41-10.54-22.41-23.49-22.41-23.49,10.05-23.49,22.41ZM57.29,42.14c0,7.52-6.41,13.64-14.29,13.64s-14.29-6.12-14.29-13.64,6.41-13.63,14.29-13.63,14.29,6.12,14.29,13.63Z"/><path fill="currentColor" d="M83.93,28.41c0,2.37,2.01,4.29,4.5,4.29s4.5-1.92,4.5-4.29-2.01-4.29-4.5-4.29-4.5,1.92-4.5,4.29Z"/><path fill="currentColor" d="M101.02,28.41c0,2.37,2.01,4.29,4.5,4.29s4.5-1.92,4.5-4.29-2.01-4.29-4.5-4.29-4.5,1.92-4.5,4.29Z"/><path fill="currentColor" d="M121.71,24.12c-2.48,0-4.5,1.92-4.5,4.29s2.01,4.29,4.5,4.29,4.5-1.92,4.5-4.29-2.01-4.29-4.5-4.29Z"/></svg>';
+
   var MALE_ICON_SVG = '<svg viewBox="0 0 215.1 216.4" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M169.77,28.89l-33.23,33.23c-33.49-24.9-81.12-22.16-111.5,8.22-33.39,33.39-33.39,87.62,0,121.01,33.39,33.39,87.62,33.39,121.01,0,30.38-30.38,33.12-78,8.22-111.5l32.33-32.33c1.26-1.26,3.41-.37,3.41,1.41v24.83c0,2.21,1.79,4,4,4h17.08c2.21,0,4-1.79,4-4V4C215.1,1.78,213.29-.02,211.07,0l-69.99.65c-2.21.02-3.98,1.83-3.96,4.04l.16,17.08c.02,2.21,1.83,3.98,4.04,3.96l27.03-.25c1.79-.02,2.7,2.15,1.43,3.41ZM42.78,173.62c-23.61-23.61-23.61-61.94,0-85.54,23.61-23.61,61.94-23.61,85.54,0,23.61,23.61,23.61,61.93,0,85.54-23.61,23.61-61.94,23.61-85.54,0"/></svg>';
   var FEMALE_ICON_SVG = '<svg viewBox="0 0 169.6 249.65" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M72.37,168.69v22.29h-29.81c-2.21,0-4,1.79-4,4v16.86c0,2.21,1.79,4,4,4h29.81v29.81c0,2.21,1.79,4,4,4h16.85c2.21,0,4-1.79,4-4v-29.81h29.81c2.21,0,4-1.79,4-4v-16.86c0-2.21-1.79-4-4-4h-29.81v-22.29c41.25-6.07,72.88-41.89,72.37-84.93C169.06,39.34,133.75,2.47,89.39.12,40.51-2.46,0,36.47,0,84.8c0,42.58,31.45,77.87,72.37,83.89ZM84.8,24.85c34.03,0,61.48,28.42,59.88,62.8-1.43,30.7-26.35,55.6-57.04,57.02-34.37,1.59-62.78-25.85-62.78-59.88s26.86-59.94,59.94-59.94"/></svg>';
+
+  // Ícono de respaldo (08/09/2026, reportado por el usuario: las
+  // celdas de caja "donde no hay pokemon" mostraban el ícono roto
+  // típico de imagen no encontrada) -- se muestra en vez del
+  // sprite cuando la imagen falla al cargar (ver pkmMiniMonHtml()
+  // más abajo). El filtro real ya se corrigió del lado del backend
+  // (get_boxes_overview()/get_box_page_data() en api.py descartan
+  // los slots fantasma con speciesId 0 antes de mandarlos), esto
+  // es la red de contención en el frontend para cualquier otro
+  // caso de sprite faltante (ej. un speciesId real sin archivo
+  // .png todavía).
+  var POKEBALL_FALLBACK_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="var(--bg-elevated-2)" stroke="currentColor" stroke-width="2"/></svg>';
 
   // Ícono de género reutilizable (05/09/2026, a pedido del
   // usuario: "al lado del nombre de especie" en TODA la app, no
@@ -1084,13 +1129,58 @@
   ];
 
   function renderPokemonPage(pages) {
-    var container = document.getElementById("pokemon-grid");
+    renderPokemonGrid("pokemon-grid", pages, { showEmptySlots: true });
+  }
+
+  // Extraído de renderPokemonPage() (08/09/2026, roadmap 5.3 --
+  // pestaña "Caja") para reusar exactamente la misma tarjeta
+  // (sprite/tipos/habilidad/stats/movimientos, con los mismos
+  // modales clickeables) tanto en la grilla de Equipo (6 slots
+  // fijos, incluye vacíos) como en la de Caja (hasta 30 slots,
+  // pero solo se listan los ocupados -- ver `showEmptySlots`).
+  // Estado de tarjetas desplegadas, persistido por afuera del
+  // render (08/09/2026, bug real corregido: "a lo que despliego la
+  // segunda fila se cierra enseguida, solo sucede en la pestaña de
+  // equipo"). Causa: el poll de 2s de Equipo llama a
+  // renderPokemonGrid() de nuevo cada vez (container.innerHTML =
+  // ""), reconstruyendo las tarjetas desde cero y perdiendo
+  // cualquier clase "expanded" que tuvieran -- no pasaba en Caja
+  // porque esa pestaña no tiene poll de fondo, se pide una sola vez
+  // al entrar. Clave por containerId+slot (no alcanza con el slot
+  // solo: Equipo y Caja son grids distintos con su propia
+  // numeración de slot).
+  var expandedCardSlots = {};
+
+  function isCardExpanded(containerId, slot) {
+    return !!(expandedCardSlots[containerId] && expandedCardSlots[containerId][slot]);
+  }
+
+  function setCardExpanded(containerId, slot, expanded) {
+    if (!expandedCardSlots[containerId]) {
+      expandedCardSlots[containerId] = {};
+    }
+    if (expanded) {
+      expandedCardSlots[containerId][slot] = true;
+    } else {
+      delete expandedCardSlots[containerId][slot];
+    }
+  }
+
+  function renderPokemonGrid(containerId, pages, options) {
+    var container = document.getElementById(containerId);
     if (!container) {
       return;
     }
+
+    var showEmptySlots = !!(options && options.showEmptySlots);
+
     container.innerHTML = "";
 
     (pages || []).forEach(function (slot) {
+      if ((!slot || slot.empty) && !showEmptySlots) {
+        return;
+      }
+
       var card = document.createElement("div");
       card.className = "pokemon-card";
 
@@ -1099,6 +1189,11 @@
         card.innerHTML = EMPTY_SLOT_ICON + "<span>Vacío</span>";
         container.appendChild(card);
         return;
+      }
+
+      card.dataset.slot = slot.slot;
+      if (isCardExpanded(containerId, slot.slot)) {
+        card.classList.add("expanded");
       }
 
       var details = slot.details || {};
@@ -1139,11 +1234,21 @@
           typeIconSvg(details.type2Key, 14) + "<span>" + (t2 ? t2.label : "") + "</span></span>";
       }
 
-      // Descripción de habilidad: pendiente a propósito (a
-      // resolver más adelante contra una API externa, ver
-      // Documento Maestro) -- se muestra solo el nombre por ahora.
+      // Descripción de habilidad: ahora sí se pide (roadmap
+      // 07/09/2026, sección 4.1) -- clickeable, abre el modal de
+      // habilidad (ver initPokemonPageActions()). Se agrega
+      // data-ability-id/data-ability-name solo si la habilidad se
+      // pudo resolver (abilityId != null) -- un guión "—" sin
+      // habilidad conocida no debería ser clickeable.
+      var abilityAttrs = "";
+      if (details.abilityId != null) {
+        abilityAttrs =
+          ' data-ability-id="' + details.abilityId + '"' +
+          ' data-ability-name="' + escapeHtml(details.abilityName || "") + '"';
+      }
       var abilityHtml =
-        '<div class="pokemon-card-ability"><div class="ability-name">' +
+        '<div class="pokemon-card-ability"><div class="ability-name"' +
+        abilityAttrs + ">" +
         (details.abilityName || "—") + "</div></div>";
 
       // Naturaleza (a pedido del usuario): sin flechas -- el stat
@@ -1164,7 +1269,27 @@
 
         var value;
         if (stat.key === "hp") {
-          value = (slot.hp != null ? slot.hp : "—") + " / " + (slot.maxHp != null ? slot.maxHp : "—");
+          // Caja PC: bug real corregido (08/09/2026, reportado por
+          // el usuario -- "el hp no está apareciendo" en la
+          // pestaña Caja). Un Pokémon guardado no tiene HP actual/
+          // máximo real en memoria (slot.hp/slot.maxHp vienen 0 --
+          // el juego lo recalcula recién al retirarlo, ver
+          // Pokemon6.hp()/.max_hp() en structures.py, que leen un
+          // offset que solo existe en el bloque extra de la
+          // party). El bridge SÍ puede calcular el HP máximo real
+          // a partir de IVs/EVs/naturaleza/nivel (Program.cs,
+          // stats.hpMax = pk.Stat_HPMax) -- se usa ese como
+          // respaldo cuando slot.maxHp no vino, mostrando el
+          // actual igual al máximo (un Pokémon guardado siempre
+          // "sale con la vida llena", misma convención que ya
+          // aplica el propio bridge).
+          if (slot.maxHp) {
+            value = (slot.hp != null ? slot.hp : "—") + " / " + slot.maxHp;
+          } else if (stats.hpMax) {
+            value = stats.hpMax + " / " + stats.hpMax;
+          } else {
+            value = "—";
+          }
         } else {
           value = stats[stat.key] != null ? stats[stat.key] : "—";
         }
@@ -1186,7 +1311,8 @@
         if (move) {
           var mt = typeInfo(move.typeKey);
           movesHtml +=
-            '<div class="pokemon-move-row"><span class="pokemon-move-name">' + move.name +
+            '<div class="pokemon-move-row" data-move-id="' + move.id + '">' +
+            '<span class="pokemon-move-name">' + move.name +
             '</span><span class="pokemon-move-type" style="' + typeStyleVars(move.typeKey) +
             '" title="' + (mt ? mt.label : "") + '">' + typeIconSvg(move.typeKey, 20) + "</span></div>";
         } else {
@@ -1201,11 +1327,24 @@
         '<div class="pokemon-card-info">' +
         '<div class="pokemon-card-name-row"><span>' + (slot.nickname || slot.species || "—") +
         "</span>" + genderHtml + "</div>" +
-        '<div class="pokemon-card-species">' + (slot.species || "—") + " · Nv. " + slot.level + "</div>" +
+        '<div class="pokemon-card-species" data-species-id="' + slot.speciesId + '" title="Ver Pokédex de la especie">' +
+        (slot.species || "—") + " · Nv. " + slot.level +
+        "</div>" +
         '<div class="pokemon-card-types">' + typesHtml + "</div>" +
         abilityHtml +
         "</div>" +
         "</div>" +
+        // Desplegable (08/09/2026, a pedido del usuario): la
+        // "segunda fila" (stats + movimientos) arranca oculta --
+        // ver .pokemon-card-bottom en style.css -- y este botón
+        // alterna la clase "expanded" en la tarjeta (ver
+        // initPokemonPageActions()). Sprite/nickname/especie/
+        // habilidad (arriba) quedan siempre visibles.
+        '<button class="pokemon-card-toggle" type="button">' +
+        "<span>Ver detalle</span>" +
+        '<svg class="pokemon-card-toggle-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<polyline points="6,9 12,15 18,9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        "</button>" +
         '<div class="pokemon-card-bottom">' +
         '<div class="pokemon-card-stats"><div class="dash-card-header-icon-title pokemon-card-stats-title">' + STATS_TITLE_ICON + "<span>Estadísticas</span></div>" +
         statsHtml + "</div>" +
@@ -1213,6 +1352,741 @@
         "</div>";
 
       container.appendChild(card);
+    });
+  }
+
+  // ===================== MODALES DE MOVIMIENTO / HABILIDAD (roadmap 07/09/2026, sección 4.1) =====================
+
+  // Nombre legible en español por categoryKey (physical/special/status,
+  // ver merge_move_details() en move_data.py -- viene en inglés porque
+  // es la clave estable del enum de PKHeX, mismo criterio que typeKey).
+  var MOVE_CATEGORY_LABELS = {
+    Physical: "Físico",
+    Special: "Especial",
+    Status: "Estado",
+  };
+
+  function initPokemonPageActions() {
+    // Delegación de eventos (07/09/2026): el grid se reconstruye
+    // entero en cada poll de 2s (ver renderPokemonPage(),
+    // container.innerHTML = ""), así que atar un listener por fila
+    // en cada render implicaría rearmarlos todo el tiempo. Un solo
+    // listener acá, sobre el contenedor que SÍ persiste entre
+    // renders, alcanza -- mismo patrón que ya usa
+    // initNuzlockeActions() para los botones "cerrar modal".
+    //
+    // Extendido (08/09/2026, pestaña "Caja") a #pkm-box-grid --
+    // misma tarjeta, mismos modales (Pokédex/movimiento/habilidad),
+    // un solo handler compartido en vez de reimplementarlo.
+    function handlePokemonGridClick(event) {
+      // Toggle de detalle (08/09/2026) -- alterna la clase
+      // "expanded" en la tarjeta contenedora, que muestra/oculta
+      // .pokemon-card-bottom vía CSS (ver style.css).
+      var toggleBtn = event.target.closest(".pokemon-card-toggle");
+      if (toggleBtn) {
+        var card = toggleBtn.closest(".pokemon-card");
+        if (card) {
+          var nowExpanded = card.classList.toggle("expanded");
+          setCardExpanded(event.currentTarget.id, card.dataset.slot, nowExpanded);
+        }
+        return;
+      }
+
+      // Modal Pokédex (08/09/2026, a pedido del usuario: "quitale
+      // el icono de la pokedex y que lo abra la especie") -- ya no
+      // hay un botón dedicado, se abre haciendo click en el texto
+      // de la especie.
+      var speciesEl = event.target.closest(".pokemon-card-species[data-species-id]");
+      if (speciesEl) {
+        openSpeciesModal(Number(speciesEl.dataset.speciesId));
+        return;
+      }
+
+      var moveRow = event.target.closest(".pokemon-move-row[data-move-id]");
+      if (moveRow) {
+        openMoveModal(Number(moveRow.dataset.moveId));
+        return;
+      }
+
+      var abilityEl = event.target.closest(".ability-name[data-ability-id]");
+      if (abilityEl) {
+        openAbilityModal(
+          Number(abilityEl.dataset.abilityId),
+          abilityEl.dataset.abilityName || ""
+        );
+      }
+    }
+
+    ["pokemon-grid", "pkm-box-grid"].forEach(function (id) {
+      var grid = document.getElementById(id);
+      if (grid) {
+        grid.addEventListener("click", handlePokemonGridClick);
+      }
+    });
+
+    // Íconos mini de "Equipo actual"/"Cajas PC" en la pestaña
+    // General (08/09/2026) -- abren el mismo modal Pokédex que el
+    // botón dedicado de las otras pestañas.
+    ["pkm-general-team", "pkm-general-boxes"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("click", function (event) {
+          var mon = event.target.closest(".pkm-mini-mon[data-species-id]");
+          if (mon) {
+            openSpeciesModal(Number(mon.dataset.speciesId));
+          }
+        });
+      }
+    });
+
+    initPokemonTabsBehavior();
+  }
+
+  // ===================== PESTAÑA "GENERAL" (roadmap 08/09/2026, sección 5.1/5.2) =====================
+
+  function pkmMiniMonHtml(mon) {
+    var spriteUrl = spriteBaseUrl + "/sprites/pokemon/" + mon.speciesId + ".png";
+    var title = (mon.nickname || mon.species || "—") + " · Nv. " + mon.level;
+    return (
+      '<div class="pkm-mini-mon" data-species-id="' + mon.speciesId + '" title="' + escapeHtml(title) + '">' +
+      '<img src="' + spriteUrl + '" alt="" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';" />' +
+      '<span class="pkm-mini-mon-fallback">' + POKEBALL_FALLBACK_ICON_SVG + "</span>" +
+      "<span>Nv. " + mon.level + "</span>" +
+      "</div>"
+    );
+  }
+
+  // Celda de "no hay Pokémon acá" (08/09/2026, a pedido del
+  // usuario -- reemplaza el texto plano "Vacía" que había antes)
+  // -- mismo ícono de pokebola que ya usa pkmMiniMonHtml() como
+  // respaldo cuando un sprite no carga, reusado acá a propósito
+  // (una sola fuente visual para "no hay nada que mostrar", no dos
+  // convenciones distintas conviviendo).
+  function pkmEmptyBoxCellHtml() {
+    return (
+      '<div class="pkm-mini-mon-empty" title="Vacía">' +
+      POKEBALL_FALLBACK_ICON_SVG +
+      "</div>"
+    );
+  }
+
+  function renderGeneralTab(data) {
+    var teamContainer = document.getElementById("pkm-general-team");
+    var boxesContainer = document.getElementById("pkm-general-boxes");
+    if (!teamContainer || !boxesContainer) {
+      return;
+    }
+
+    // Sin conexión con el emulador (08/09/2026): NUNCA se muestra
+    // "Vacía"/"Equipo vacío" en este caso -- eso afirmaría un
+    // estado del juego que en realidad no se pudo leer, mismo
+    // criterio de "nunca mostrar un valor sin fuente confirmada"
+    // que el resto del proyecto (ver Documento Maestro).
+    if (data && data.connected === false) {
+      var disconnectedMsg = '<span class="pkm-modal-stat-label">Sin conexión con el emulador.</span>';
+      teamContainer.innerHTML = disconnectedMsg;
+      boxesContainer.innerHTML = disconnectedMsg;
+      return;
+    }
+
+    var team = (data && data.team) || [];
+    var occupiedTeam = team.filter(function (entry) {
+      return entry && !entry.empty;
+    });
+
+    teamContainer.innerHTML = occupiedTeam.length
+      ? occupiedTeam.map(pkmMiniMonHtml).join("")
+      : pkmEmptyBoxCellHtml();
+
+    var boxes = (data && data.boxes) || [];
+
+    boxesContainer.innerHTML = boxes.map(function (box) {
+      var mons = box.pokemon || [];
+      var monsHtml = mons.length
+        ? mons.map(pkmMiniMonHtml).join("")
+        : pkmEmptyBoxCellHtml();
+
+      return (
+        '<div class="pkm-general-box-row">' +
+        '<span class="pkm-general-box-label">Caja ' + box.boxIndex + "</span>" +
+        '<div class="pkm-general-box-mons">' + monsHtml + "</div>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  function loadGeneralTab() {
+    api()
+      .get_boxes_overview()
+      .then(renderGeneralTab);
+  }
+
+  // ===================== PESTAÑA "CAJA" (roadmap 08/09/2026, sección 5.1/5.3) =====================
+
+  var BOX_COUNT = 31;
+  var currentBoxIndex = 1;
+  var boxSelectorBuilt = false;
+
+  function buildBoxSelector() {
+    var selector = document.getElementById("pkm-box-selector");
+    if (!selector || boxSelectorBuilt) {
+      return;
+    }
+
+    var html = "";
+    for (var boxIndex = 1; boxIndex <= BOX_COUNT; boxIndex++) {
+      html +=
+        '<button class="pkm-box-selector-btn' + (boxIndex === currentBoxIndex ? " active" : "") +
+        '" data-box-index="' + boxIndex + '">' + boxIndex + "</button>";
+    }
+    selector.innerHTML = html;
+    boxSelectorBuilt = true;
+
+    selector.addEventListener("click", function (event) {
+      var btn = event.target.closest(".pkm-box-selector-btn[data-box-index]");
+      if (!btn) {
+        return;
+      }
+
+      var boxIndex = Number(btn.dataset.boxIndex);
+      if (boxIndex === currentBoxIndex) {
+        return;
+      }
+
+      currentBoxIndex = boxIndex;
+
+      selector.querySelectorAll(".pkm-box-selector-btn").forEach(function (el) {
+        el.classList.toggle("active", Number(el.dataset.boxIndex) === boxIndex);
+      });
+
+      loadBoxTab();
+    });
+  }
+
+  function renderBoxTab(data) {
+    var title = document.getElementById("pkm-box-title");
+    if (title) {
+      title.textContent = "Caja " + ((data && data.boxIndex) || currentBoxIndex);
+    }
+
+    var grid = document.getElementById("pkm-box-grid");
+
+    // Sin conexión (08/09/2026): mismo criterio que renderGeneralTab()
+    // -- nunca decir "vacía" cuando en realidad no se pudo leer.
+    if (data && data.connected === false) {
+      renderPokemonGrid("pkm-box-grid", [], { showEmptySlots: false });
+      if (grid) {
+        grid.innerHTML = '<span class="pkm-modal-stat-label">Sin conexión con el emulador.</span>';
+      }
+      return;
+    }
+
+    var slots = (data && data.slots) || [];
+    var occupiedCount = slots.filter(function (slot) {
+      return slot && !slot.empty;
+    }).length;
+
+    if (grid && !occupiedCount) {
+      renderPokemonGrid("pkm-box-grid", [], { showEmptySlots: false });
+      grid.innerHTML = '<span class="pkm-modal-stat-label">Esta caja está vacía.</span>';
+      return;
+    }
+
+    renderPokemonGrid("pkm-box-grid", slots, { showEmptySlots: false });
+  }
+
+  function loadBoxTab() {
+    api()
+      .get_box_page_data(currentBoxIndex)
+      .then(renderBoxTab);
+  }
+
+  // ===================== Reacción a cambio de pestaña (General/Equipo/Caja) =====================
+
+  function initPokemonTabsBehavior() {
+    var panelsContainer = document.querySelector('[data-tabs-panels="pokemon"]');
+    if (!panelsContainer) {
+      return;
+    }
+
+    buildBoxSelector();
+
+    panelsContainer.addEventListener("dexrelay:tabchange", function (event) {
+      if (event.detail.tab === "general") {
+        loadGeneralTab();
+      } else if (event.detail.tab === "caja") {
+        loadBoxTab();
+      }
+    });
+  }
+
+  // Pestaña Líderes del Nuzlocke Tracker (07/09/2026, a pedido del
+  // usuario: "también faltó la pestaña de líderes") -- mismos
+  // modales, pero acá los datos salen de data/gym_leaders.json
+  // (curado a mano, solo nombre en inglés, sin id) igual que la
+  // ventana de detalle de equipo -- por eso usa las variantes
+  // "ByName" (ver más abajo), no las de id directo.
+  function initNuzlockeLeadersTabActions() {
+    var container = document.getElementById("nz-leaders-list");
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener("click", function (event) {
+      // Pokédex de especie (08/09/2026, a pedido del usuario:
+      // "extiende el modal de pokedex a los pokes de los lideres
+      // de gimnasio") -- mismo modal que ya usan las tarjetas de
+      // Equipo/Caja de la página Pokémon (openSpeciesModal() más
+      // abajo), acá clickeando el nombre de la especie.
+      var speciesEl = event.target.closest(".nz-leader-mon-name[data-species-id]");
+      if (speciesEl) {
+        openSpeciesModal(Number(speciesEl.dataset.speciesId));
+        return;
+      }
+
+      var moveEl = event.target.closest(".nz-leader-mon-move-line[data-move-name]");
+      if (moveEl) {
+        openMoveModalByName(moveEl.dataset.moveName);
+        return;
+      }
+
+      var abilityEl = event.target.closest(".nz-leader-mon-ability[data-ability-name]");
+      if (abilityEl) {
+        openAbilityModalByName(abilityEl.dataset.abilityName, abilityEl.textContent);
+      }
+    });
+  }
+
+  function openMoveModal(moveId) {
+    _openMoveModalCommon(api().get_move_modal_data(moveId));
+  }
+
+  function openMoveModalByName(name) {
+    _openMoveModalCommon(api().get_move_modal_data_by_name(name));
+  }
+
+  function _openMoveModalCommon(dataPromise) {
+    document.getElementById("pkm-move-modal-title").textContent = "Cargando...";
+    document.getElementById("pkm-move-modal-type").textContent = "";
+    document.getElementById("pkm-move-modal-type").style.cssText = "";
+    document.getElementById("pkm-move-modal-category").textContent = "";
+    document.getElementById("pkm-move-modal-power").textContent = "—";
+    document.getElementById("pkm-move-modal-accuracy").textContent = "—";
+    document.getElementById("pkm-move-modal-pp").textContent = "—";
+    document.getElementById("pkm-move-modal-description").textContent = "";
+
+    openModal("pkm-modal-move");
+
+    dataPromise.then(function (data) {
+      if (!data || data.error) {
+        document.getElementById("pkm-move-modal-title").textContent = "No se pudo cargar";
+        document.getElementById("pkm-move-modal-description").textContent =
+          "No se pudo obtener el detalle de este movimiento.";
+        return;
+      }
+
+      document.getElementById("pkm-move-modal-title").textContent = data.name || "—";
+
+      var typeEl = document.getElementById("pkm-move-modal-type");
+      var ti = typeInfo(data.typeKey);
+      typeEl.style.cssText = typeStyleVars(data.typeKey);
+      typeEl.innerHTML = typeIconSvg(data.typeKey, 14) + "<span>" + (ti ? ti.label : data.type || "") + "</span>";
+
+      document.getElementById("pkm-move-modal-category").textContent =
+        MOVE_CATEGORY_LABELS[data.categoryKey] || data.categoryKey || "—";
+
+      document.getElementById("pkm-move-modal-power").textContent =
+        data.power != null ? data.power : "—";
+      document.getElementById("pkm-move-modal-accuracy").textContent =
+        data.accuracy != null ? data.accuracy + "%" : "—";
+      document.getElementById("pkm-move-modal-pp").textContent =
+        data.basePP != null ? data.basePP : "—";
+
+      document.getElementById("pkm-move-modal-description").textContent =
+        data.descriptionEs || "Descripción no disponible.";
+    });
+  }
+
+  function openAbilityModal(abilityId, abilityName) {
+    _openAbilityModalCommon(
+      api().get_ability_modal_data(abilityId),
+      abilityName
+    );
+  }
+
+  function openAbilityModalByName(name, displayedText) {
+    _openAbilityModalCommon(
+      api().get_ability_modal_data_by_name(name),
+      displayedText
+    );
+  }
+
+  function _openAbilityModalCommon(dataPromise, titleText) {
+    document.getElementById("pkm-ability-modal-title").textContent = titleText || "Cargando...";
+    document.getElementById("pkm-ability-modal-description").textContent = "";
+
+    openModal("pkm-modal-ability");
+
+    dataPromise.then(function (data) {
+      document.getElementById("pkm-ability-modal-description").textContent =
+        (data && data.descriptionEs) || "Descripción no disponible.";
+    });
+  }
+
+  // ===================== MODAL POKÉDEX DE ESPECIE (roadmap 4.2, 07/09/2026) =====================
+
+  // Multiplicador -> color de fondo del badge (rojo más fuerte
+  // cuanto más débil, azul más fuerte cuanto más resiste, gris
+  // para inmunidad) -- puramente informativo, no hay un color
+  // "oficial" del juego para esto.
+  function formatMultiplier(multiplier) {
+    if (multiplier === 0) { return "0×"; }
+    if (multiplier === 0.25) { return "¼×"; }
+    if (multiplier === 0.5) { return "½×"; }
+    return multiplier + "×";
+  }
+
+  function renderTypeEffectGrid(containerId, entries) {
+    var container = document.getElementById(containerId);
+
+    if (!entries || !entries.length) {
+      container.innerHTML = '<span class="pkm-modal-stat-label">Ninguna</span>';
+      return;
+    }
+
+    container.innerHTML = entries.map(function (entry) {
+      var info = typeInfo(entry.typeKey);
+      return (
+        '<span class="pokemon-type-badge" style="' + typeStyleVars(entry.typeKey) + '">' +
+        typeIconSvg(entry.typeKey, 14) +
+        "<span>" + (info ? info.label : entry.typeKey) + " " + formatMultiplier(entry.multiplier) + "</span>" +
+        "</span>"
+      );
+    }).join("");
+  }
+
+  // Colores de barra por stat -- distintos de los ya usados en
+  // STAT_ROWS (esos son para la tarjeta de un Pokémon individual
+  // de la página Pokémon) porque acá el contexto es "stats BASE de
+  // la especie" en el modal Pokédex, mismo criterio de paleta que
+  // el mockup (HP verde, ATK rojo, DEF ámbar, SPA azul, SPD
+  // violeta, SPE cian).
+  var BASE_STAT_BAR_COLORS = {
+    hp: "#22c55e",
+    attack: "#ef4444",
+    defense: "#f59e0b",
+    spAttack: "#3b82f6",
+    spDefense: "#a855f7",
+    speed: "#22d3ee",
+  };
+
+  // Máximo teórico de un stat base en el juego (255, ej. la
+  // Velocidad de Blissey en Salud/HP) -- se usa solo para la
+  // proporción visual de la barra, no es un dato que límite nada.
+  var BASE_STAT_BAR_MAX = 255;
+
+  function openSpeciesModal(speciesId) {
+    document.getElementById("pkm-species-modal-name").textContent = "Cargando...";
+    document.getElementById("pkm-species-modal-dexnum").textContent = "";
+    document.getElementById("pkm-species-modal-artwork").src = "";
+    document.getElementById("pkm-species-modal-gender").innerHTML = "";
+    document.getElementById("pkm-species-modal-types").innerHTML = "";
+    document.getElementById("pkm-species-modal-description").textContent = "";
+    document.getElementById("pkm-species-modal-height").textContent = "—";
+    document.getElementById("pkm-species-modal-weight").textContent = "—";
+    document.getElementById("pkm-species-modal-genus").textContent = "—";
+    document.getElementById("pkm-species-modal-ability1").textContent = "—";
+    document.getElementById("pkm-species-modal-ability1").removeAttribute("data-ability-id");
+    var ability2ResetEl = document.getElementById("pkm-species-modal-ability2");
+    ability2ResetEl.textContent = "";
+    ability2ResetEl.hidden = true;
+    ability2ResetEl.removeAttribute("data-ability-id");
+    document.getElementById("pkm-species-modal-abilityhidden").textContent = "—";
+    document.getElementById("pkm-species-modal-abilityhidden").removeAttribute("data-ability-id");
+    document.getElementById("pkm-species-modal-stats").innerHTML = "";
+    document.getElementById("pkm-species-modal-evolutions").innerHTML = "";
+    document.getElementById("pkm-species-modal-weaknesses").innerHTML = "";
+    document.getElementById("pkm-species-modal-resistances").innerHTML = "";
+    document.getElementById("pkm-species-modal-immunities").innerHTML = "";
+
+    openModal("pkm-modal-species");
+
+    api().get_species_modal_data(speciesId).then(function (data) {
+      if (!data || data.error) {
+        document.getElementById("pkm-species-modal-name").textContent = "No se pudo cargar";
+        return;
+      }
+
+      document.getElementById("pkm-species-modal-name").textContent = data.name || "—";
+      document.getElementById("pkm-species-modal-dexnum").textContent = "#" + String(speciesId).padStart(3, "0");
+      document.getElementById("pkm-species-modal-artwork").src =
+        spriteBaseUrl + "/sprites/species_artwork/" + speciesId + ".png";
+
+      var genderHtml = "";
+      // Nota: species_details() es dato de ESPECIE, no de un
+      // individuo puntual -- no trae género (una especie no tiene
+      // "un" género fijo, salvo las de género único). Se deja el
+      // contenedor vacío a propósito, sin inventar un ícono.
+
+      document.getElementById("pkm-species-modal-gender").innerHTML = genderHtml;
+
+      var typesHtml = "";
+      if (data.type1Key) {
+        var t1 = typeInfo(data.type1Key);
+        typesHtml += '<span class="pokemon-type-badge" style="' + typeStyleVars(data.type1Key) + '">' +
+          typeIconSvg(data.type1Key, 14) + "<span>" + (t1 ? t1.label : "") + "</span></span>";
+      }
+      if (data.type2Key) {
+        var t2 = typeInfo(data.type2Key);
+        typesHtml += '<span class="pokemon-type-badge" style="' + typeStyleVars(data.type2Key) + '">' +
+          typeIconSvg(data.type2Key, 14) + "<span>" + (t2 ? t2.label : "") + "</span></span>";
+      }
+      document.getElementById("pkm-species-modal-types").innerHTML = typesHtml;
+
+      document.getElementById("pkm-species-modal-description").textContent =
+        data.description || "Descripción no disponible.";
+
+      document.getElementById("pkm-species-modal-height").textContent =
+        data.heightM != null ? data.heightM + " m" : "—";
+      document.getElementById("pkm-species-modal-weight").textContent =
+        data.weightKg != null ? data.weightKg + " kg" : "—";
+      document.getElementById("pkm-species-modal-genus").textContent = data.genus || "—";
+
+      // Habilidades (08/09/2026 -- ahora ambas habilidades normales
+      // se muestran acá, una arriba y otra abajo, en vez de en la
+      // sección aparte de la derecha que quedó eliminada por estar
+      // duplicada). data.ability2Id puede repetir data.ability1Id
+      // en especies que solo tienen una habilidad normal -- en ese
+      // caso el segundo renglón queda oculto, mismo criterio que
+      // ya usaba la lista de abajo eliminada.
+      var ability1El = document.getElementById("pkm-species-modal-ability1");
+      ability1El.textContent = data.ability1Name || "—";
+      if (data.ability1Id != null) {
+        ability1El.dataset.abilityId = data.ability1Id;
+        ability1El.dataset.abilityName = data.ability1Name || "";
+      } else {
+        delete ability1El.dataset.abilityId;
+        delete ability1El.dataset.abilityName;
+      }
+
+      var ability2El = document.getElementById("pkm-species-modal-ability2");
+      var hasAbility2 = data.ability2Id != null && data.ability2Id !== data.ability1Id;
+      ability2El.hidden = !hasAbility2;
+      if (hasAbility2) {
+        ability2El.textContent = data.ability2Name || "—";
+        ability2El.dataset.abilityId = data.ability2Id;
+        ability2El.dataset.abilityName = data.ability2Name || "";
+      } else {
+        ability2El.textContent = "";
+        delete ability2El.dataset.abilityId;
+        delete ability2El.dataset.abilityName;
+      }
+
+      var abilityHiddenEl = document.getElementById("pkm-species-modal-abilityhidden");
+      abilityHiddenEl.textContent = data.abilityHiddenName || "—";
+      if (data.abilityHiddenId != null) {
+        abilityHiddenEl.dataset.abilityId = data.abilityHiddenId;
+        abilityHiddenEl.dataset.abilityName = data.abilityHiddenName || "";
+      } else {
+        delete abilityHiddenEl.dataset.abilityId;
+        delete abilityHiddenEl.dataset.abilityName;
+      }
+
+      var stats = data.baseStats || {};
+      var statsOrder = [
+        { key: "hp", label: "HP" }, { key: "attack", label: "ATK" }, { key: "spAttack", label: "SPA" }, { key: "defense", label: "DEF" }, { key: "spDefense", label: "SPD" }, { key: "speed", label: "SPE" },
+      ];
+      document.getElementById("pkm-species-modal-stats").innerHTML = statsOrder.map(function (s) {
+        var value = stats[s.key] != null ? stats[s.key] : 0;
+        var barPercent = Math.min(100, (value / BASE_STAT_BAR_MAX) * 100);
+        var barColor = BASE_STAT_BAR_COLORS[s.key];
+        return (
+          '<div class="pkm-species-stat-card">' +
+          '<span class="pkm-species-stat-card-value">' + (stats[s.key] != null ? stats[s.key] : "—") + "</span>" +
+          '<span class="pkm-species-stat-card-label">' + s.label + "</span>" +
+          '<div class="pkm-species-stat-bar-track"><div class="pkm-species-stat-bar-fill" style="width:' + barPercent + "%;background:" + barColor + ';"></div></div>' +
+          "</div>"
+        );
+      }).join("");
+
+      // Cadena de evolución completa (07/09/2026, a pedido del
+      // usuario: "haz que en la evolución siempre salgan las tres
+      // etapas") -- ya viene armada del lado de Python
+      // (_build_evolution_chain() en api.py), acá solo se
+      // renderiza.
+      //
+      // Actualizado 08/09/2026: bug real corregido (reportado por
+      // el usuario -- "Wurmple tiene dos ramas evolutivas y la app
+      // solo muestra una", Silcoon/Cascoon -> Beautifly/Dustox).
+      // La forma de los datos cambió de una lista plana a
+      // {ancestors: [...], current: <nodo>} -- ver docstring de
+      // _build_evolution_chain() en api.py. Los ancestros siguen
+      // siendo un camino único (un Pokémon evoluciona siempre desde
+      // una sola pre-evolución), pero desde la especie actual hacia
+      // adelante ahora es un ÁRBOL: cada nodo puede tener varios
+      // hijos (una rama por cada evolución posible), no solo el
+      // primero.
+      var evolutionData = data.evolutionChain || null;
+      var ancestors = (evolutionData && evolutionData.ancestors) || [];
+      var currentNode = evolutionData && evolutionData.current;
+
+      function stageHtml(stage) {
+        var spriteUrl = spriteBaseUrl + "/sprites/pokemon/" + stage.speciesId + ".png";
+        return (
+          '<div class="pkm-species-evolution-stage' + (stage.isCurrent ? " current" : "") + '" data-species-id="' + stage.speciesId + '">' +
+          '<img src="' + spriteUrl + '" alt="" />' +
+          '<span class="pkm-species-evolution-stage-name">' + escapeHtml(stage.name || "—") + "</span>" +
+          "</div>"
+        );
+      }
+
+      // Conector entre etapas (07/09/2026, a pedido del usuario:
+      // "remplaza las flechas por el nivel necesario para
+      // evolucionar (o el objeto/movimiento de ser el caso)") --
+      // en vez de una flecha genérica siempre igual, se muestra el
+      // requisito concreto: nivel, objeto (con sprite), movimiento
+      // o compañero. Cuando el método no tiene ninguno de esos
+      // (ej. intercambio simple, amistad, belleza -- condiciones
+      // sin un valor puntual que mostrar compacto) se cae a una
+      // flecha simple, con la descripción completa como tooltip en
+      // cualquier caso.
+      function connectorHtml(transition) {
+        if (!transition) {
+          return (
+            '<span class="pkm-species-evolution-connector">' +
+            '<svg class="pkm-species-evolution-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<line x1="4" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+            '<polyline points="13,7 18,12 13,17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            "</span>"
+          );
+        }
+
+        var innerHtml;
+
+        // Bug real corregido (08/09/2026): `transition.level` viene
+        // en 0 para los métodos sin nivel real (amistad,
+        // intercambio, belleza, etc.) -- `if (transition.level)`
+        // trataba 0 igual que "sin nivel" (0 es falsy en JS) y
+        // caía a la flecha genérica sin decir nada de la condición
+        // real. Chequeo explícito de "> 0" en vez de solo
+        // verdadero/falso.
+        if (transition.level != null && transition.level > 0) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">Nv. ' + transition.level + "</span>";
+        } else if (transition.itemId != null) {
+          innerHtml = '<img class="pkm-species-evolution-item-sprite" src="' + spriteBaseUrl + "/sprites/items/" + transition.itemId + '.png" alt="" onerror="this.style.display=\'none\'" />';
+        } else if (transition.moveName) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.moveName) + "</span>";
+        } else if (transition.teammateName) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.teammateName) + "</span>";
+        } else if (transition.conditionLabel) {
+          innerHtml = '<span class="pkm-species-evolution-connector-label">' + escapeHtml(transition.conditionLabel) + "</span>";
+        } else {
+          innerHtml =
+            '<svg class="pkm-species-evolution-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<line x1="4" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+            '<polyline points="13,7 18,12 13,17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        }
+
+        return (
+          '<span class="pkm-species-evolution-connector" title="' + escapeHtml(transition.description || "") + '">' +
+          innerHtml +
+          "</span>"
+        );
+      }
+
+      // Recorre el árbol hacia adelante desde un nodo dado. Caso
+      // común (0 o 1 evolución posible): se ve exactamente igual
+      // que antes, una fila horizontal simple. Caso con
+      // ramificación (2+ evoluciones posibles, ej. Wurmple ->
+      // Silcoon/Cascoon): la etapa actual queda seguida de un
+      // bloque vertical con una fila por cada rama, cada una
+      // arrancando con su propio conector + el resto de su cadena
+      // (que a su vez puede volver a ramificarse, aunque en la
+      // práctica no hay casos así en ORAS).
+      function renderForwardNode(node) {
+        var html = stageHtml(node);
+        var children = node.children || [];
+
+        if (children.length === 0) {
+          return html;
+        }
+
+        if (children.length === 1) {
+          html += connectorHtml(children[0].transition) + renderForwardNode(children[0].node);
+          return html;
+        }
+
+        var branchesHtml = children.map(function (child) {
+          return (
+            '<div class="pkm-species-evolution-branch-row">' +
+            connectorHtml(child.transition) + renderForwardNode(child.node) +
+            "</div>"
+          );
+        }).join("");
+
+        html += '<div class="pkm-species-evolution-branches">' + branchesHtml + "</div>";
+        return html;
+      }
+
+      var stagesHtml = "";
+
+      ancestors.forEach(function (ancestor) {
+        stagesHtml += stageHtml(ancestor) + connectorHtml(ancestor.transitionToNext);
+      });
+
+      if (currentNode) {
+        stagesHtml += renderForwardNode(currentNode);
+      }
+
+      var hasChain = ancestors.length > 0 || (currentNode && currentNode.children && currentNode.children.length > 0);
+
+      document.getElementById("pkm-species-modal-evolutions").innerHTML =
+        hasChain ? stagesHtml : '<span class="pkm-modal-stat-label">No evoluciona</span>';
+
+      renderTypeEffectGrid("pkm-species-modal-weaknesses", data.weaknesses);
+      renderTypeEffectGrid("pkm-species-modal-resistances", data.resistances);
+      renderTypeEffectGrid("pkm-species-modal-immunities", data.immunities);
+    });
+  }
+
+  function initSpeciesModalActions() {
+    var modalBody = document.getElementById("pkm-modal-species");
+    if (!modalBody) {
+      return;
+    }
+
+    // Delegación DENTRO del modal (07/09/2026) -- a diferencia de
+    // los otros casos, acá el contenido se reconstruye cada vez
+    // que se abre el modal (openSpeciesModal()), no en un poll
+    // continuo, pero el mismo criterio de "un solo listener en el
+    // contenedor persistente" aplica igual.
+    modalBody.addEventListener("click", function (event) {
+      // Habilidades clickeables (08/09/2026) -- ahora viven en el
+      // panel izquierdo (.pkm-species-info-value con
+      // data-ability-id) en vez de en la lista de la derecha
+      // (.pkm-species-ability-row, que quedó eliminada por estar
+      // duplicada); el selector cubre ambas por si algún día vuelve
+      // a haber una fila con ese formato.
+      var abilityRow = event.target.closest(
+        ".pkm-species-ability-row[data-ability-id], .pkm-species-info-value[data-ability-id]"
+      );
+      if (abilityRow) {
+        openAbilityModal(
+          Number(abilityRow.dataset.abilityId),
+          abilityRow.dataset.abilityName || ""
+        );
+        return;
+      }
+
+      // Etapa de evolución clickeable -- reabre este mismo modal
+      // con esa especie (funciona para pre-evolución Y evoluciones
+      // hacia adelante, ambas usan el mismo data-species-id). No
+      // hay límite de profundidad -- se puede recorrer una cadena
+      // completa clickeando varias veces seguidas.
+      var stage = event.target.closest(".pkm-species-evolution-stage[data-species-id]");
+      if (stage) {
+        openSpeciesModal(Number(stage.dataset.speciesId));
+      }
     });
   }
 
@@ -1868,8 +2742,8 @@
     var filtered = !query
       ? logsAllEntries
       : logsAllEntries.filter(function (entry) {
-          return entry.text.toLowerCase().indexOf(query) !== -1;
-        });
+        return entry.text.toLowerCase().indexOf(query) !== -1;
+      });
 
     countEl.textContent =
       query && filtered.length !== logsAllEntries.length
@@ -2417,8 +3291,8 @@
       known && known.level != null
         ? known.level
         : entry.level != null
-        ? entry.level
-        : null;
+          ? entry.level
+          : null;
     var spriteId = speciesSpriteIdFor(entry);
 
     // A pedido del usuario (05/09/2026): sprites estilo Pokémon
@@ -2437,25 +3311,25 @@
         entry.location === "Inicial" || entry.isPlaceholder
           ? "<td></td>"
           : '<td><button class="nz-row-delete-btn" data-delete-location="' +
-            escapeHtml(entry.location || "") +
-            '" title="Eliminar ruta">' +
-            NZ_TRASH_ICON_SVG +
-            "</button></td>";
+          escapeHtml(entry.location || "") +
+          '" title="Eliminar ruta">' +
+          NZ_TRASH_ICON_SVG +
+          "</button></td>";
     }
 
     row.innerHTML =
       "<td>" + (displayIndex + 1) + "</td>" +
       "<td>" + escapeHtml(entry.location || "") + "</td>" +
       '<td><span class="nz-row-species">' +
-        spriteHtml +
-        escapeHtml(entry.species || "—") +
-        (entry.shiny ? " ✨" : "") +
-        "</span></td>" +
+      spriteHtml +
+      escapeHtml(entry.species || "—") +
+      (entry.shiny ? " ✨" : "") +
+      "</span></td>" +
       "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
       "<td>" + (level != null ? level : "—") + "</td>" +
       '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
-        escapeHtml(nuzlockeStatusLabel(entry)) +
-        "</span></td>" +
+      escapeHtml(nuzlockeStatusLabel(entry)) +
+      "</span></td>" +
       deleteCell;
 
     return row;
@@ -2574,12 +3448,12 @@
       item.innerHTML =
         '<img src="' + spriteUrl + '" alt="" />' +
         '<div class="nz-pending-info">' +
-          '<span class="nz-pending-name">' + escapeHtml(entry.nickname || entry.species || "") + "</span>" +
-          '<span class="nz-pending-sub">' + escapeHtml(subParts.join(" · ")) + "</span>" +
+        '<span class="nz-pending-name">' + escapeHtml(entry.nickname || entry.species || "") + "</span>" +
+        '<span class="nz-pending-sub">' + escapeHtml(subParts.join(" · ")) + "</span>" +
         "</div>" +
         '<div class="nz-pending-actions">' +
-          '<button class="dash-btn-sm" data-assign="' + escapeHtml(entry.nickname || "") + '">Asignar</button>' +
-          '<button class="dash-btn-sm" data-discard="' + escapeHtml(entry.nickname || "") + '">Descartar</button>' +
+        '<button class="dash-btn-sm" data-assign="' + escapeHtml(entry.nickname || "") + '">Asignar</button>' +
+        '<button class="dash-btn-sm" data-discard="' + escapeHtml(entry.nickname || "") + '">Descartar</button>' +
         "</div>";
 
       list.appendChild(item);
@@ -2628,8 +3502,8 @@
       item.innerHTML =
         '<img src="' + spriteUrl + '" alt="" />' +
         '<div class="nz-graveyard-info">' +
-          '<span class="nz-graveyard-name">' + escapeHtml(entry.nickname || "") + "</span>" +
-          '<span class="nz-graveyard-sub">' + escapeHtml(entry.species || "") + " · Nv. " + (entry.level != null ? entry.level : "—") + "</span>" +
+        '<span class="nz-graveyard-name">' + escapeHtml(entry.nickname || "") + "</span>" +
+        '<span class="nz-graveyard-sub">' + escapeHtml(entry.species || "") + " · Nv. " + (entry.level != null ? entry.level : "—") + "</span>" +
         "</div>";
 
       list.appendChild(item);
@@ -2750,8 +3624,8 @@
       var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
       return (
         '<div class="nz-next-leader-mon">' +
-          '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
-          "<span>Nv. " + mon.level + "</span>" +
+        '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
+        "<span>Nv. " + mon.level + "</span>" +
         "</div>"
       );
     }).join("");
@@ -2759,16 +3633,16 @@
     body.innerHTML =
       '<img class="nz-next-leader-portrait" src="' + portraitUrl + '" alt="" />' +
       '<div class="nz-next-leader-info">' +
-        '<span class="nz-next-leader-name">' + escapeHtml(nextLeader.nameEs || nextLeader.name || "") + "</span>" +
-        '<span class="nz-next-leader-badge">' + escapeHtml(nextLeader.badgeNameEs || nextLeader.badgeName || "") + "</span>" +
-        '<span class="nz-next-leader-location">' + escapeHtml(nextLeader.gymLocationEs || nextLeader.gymLocation || "") + "</span>" +
+      '<span class="nz-next-leader-name">' + escapeHtml(nextLeader.nameEs || nextLeader.name || "") + "</span>" +
+      '<span class="nz-next-leader-badge">' + escapeHtml(nextLeader.badgeNameEs || nextLeader.badgeName || "") + "</span>" +
+      '<span class="nz-next-leader-location">' + escapeHtml(nextLeader.gymLocationEs || nextLeader.gymLocation || "") + "</span>" +
       "</div>" +
       '<div class="nz-next-leader-team">' + teamHtml + "</div>" +
       '<div class="nz-next-leader-cap">' +
-        '<span class="nz-next-leader-cap-value">Nv. ' + nextLeader.levelCap + "</span>" +
-        // "Lvl Cap" (06/09/2026, a pedido del usuario -- antes
-        // decía "Nivel máximo").
-        '<span class="nz-next-leader-cap-label">Lvl Cap</span>' +
+      '<span class="nz-next-leader-cap-value">Nv. ' + nextLeader.levelCap + "</span>" +
+      // "Lvl Cap" (06/09/2026, a pedido del usuario -- antes
+      // decía "Nivel máximo").
+      '<span class="nz-next-leader-cap-label">Lvl Cap</span>' +
       "</div>";
   }
 
@@ -2798,7 +3672,7 @@
           var info = typeInfo(typeKey);
           return (
             '<span class="nz-leader-mon-type" style="' + typeStyleVars(typeKey) + '" title="' + (info ? info.label : "") + '">' +
-              typeIconSvg(typeKey, 12) +
+            typeIconSvg(typeKey, 12) +
             "</span>"
           );
         }).join("");
@@ -2807,59 +3681,69 @@
         // antes iban unidos con " · " en una sola línea) -- cada
         // uno en su propia fila dentro de .nz-leader-mon-moves
         // (ver style.css, ahora flex-column en vez de texto plano).
+        // Clickeables (07/09/2026) -- data-move-name en inglés
+        // (name, sin traducir), mismo criterio que
+        // leader_team_window.js: get_move_modal_data_by_name()
+        // normaliza contra el identifier real de PokéAPI.
         var movesHtml = (mon.moves || []).map(function (name) {
-          return '<span class="nz-leader-mon-move-line">' + escapeHtml(translateMoveName(name)) + "</span>";
+          return '<span class="nz-leader-mon-move-line" data-move-name="' + escapeHtml(name) + '">' +
+            escapeHtml(translateMoveName(name)) + "</span>";
         }).join("");
 
         return (
           '<div class="nz-leader-mon' + (mon.isAce ? " ace" : "") + '">' +
-            '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
-            '<div class="nz-leader-mon-info">' +
-              '<span class="nz-leader-mon-name">' + escapeHtml(mon.species || "") +
-                (mon.isAce ? ' <span class="nz-leader-ace-tag">Ace</span>' : "") +
-              "</span>" +
-              '<span class="nz-leader-mon-level">Nv. ' + mon.level + "</span>" +
-              '<span class="nz-leader-mon-types">' + typesHtml + "</span>" +
-              // Habilidad (06/09/2026): ahora curada en
-              // data/gym_leaders.json (investigada contra
-              // Bulbapedia + un playthrough completo de ORAS,
-              // ver GYM_ABILITY_NAMES_ES en gym_leaders.py) -- ya
-              // no es "No disponible" a diferencia de Naturaleza/
-              // IVs/EVs, que sí son imposibles de saber sin el
-              // save real del entrenador rival.
-              '<span class="nz-leader-mon-ability">Habilidad: <em>' + escapeHtml(mon.abilityEs || mon.ability || "—") + "</em></span>" +
-              (movesHtml ? '<div class="nz-leader-mon-moves">' + movesHtml + "</div>" : "") +
-            "</div>" +
+          '<img src="' + spriteUrl + '" alt="' + escapeHtml(mon.species || "") + '" />' +
+          '<div class="nz-leader-mon-info">' +
+          '<span class="nz-leader-mon-name" data-species-id="' + mon.speciesId + '" title="Ver Pokédex de la especie">' + escapeHtml(mon.species || "") +
+          (mon.isAce ? ' <span class="nz-leader-ace-tag">Ace</span>' : "") +
+          "</span>" +
+          '<span class="nz-leader-mon-level">Nv. ' + mon.level + "</span>" +
+          '<span class="nz-leader-mon-types">' + typesHtml + "</span>" +
+          // Habilidad (06/09/2026): ahora curada en
+          // data/gym_leaders.json (investigada contra
+          // Bulbapedia + un playthrough completo de ORAS,
+          // ver GYM_ABILITY_NAMES_ES en gym_leaders.py) -- ya
+          // no es "No disponible" a diferencia de Naturaleza/
+          // IVs/EVs, que sí son imposibles de saber sin el
+          // save real del entrenador rival. Clickeable
+          // (07/09/2026) solo si mon.ability existe -- mismo
+          // criterio que la página Pokémon (un "—" sin
+          // habilidad conocida no debería ser clickeable).
+          '<span class="nz-leader-mon-ability"' +
+          (mon.ability ? ' data-ability-name="' + escapeHtml(mon.ability) + '"' : "") +
+          ">Habilidad: <em>" + escapeHtml(mon.abilityEs || mon.ability || "—") + "</em></span>" +
+          (movesHtml ? '<div class="nz-leader-mon-moves">' + movesHtml + "</div>" : "") +
+          "</div>" +
           "</div>"
         );
       }).join("");
 
       card.innerHTML =
         '<div class="nz-leader-header">' +
-          '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" />' +
-          '<div class="nz-leader-info">' +
-            '<span class="nz-leader-name">' + escapeHtml(leader.nameEs || leader.name || "") + "</span>" +
-            '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>" +
-            '<span class="nz-leader-location">' + escapeHtml(leader.gymLocationEs || leader.gymLocation || "") + "</span>" +
-          "</div>" +
-          '<div class="nz-leader-header-actions">' +
-            '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
-              (leader.earned ? "Obtenida" : "Pendiente") +
-            "</span>" +
-            // Botón de solo ícono + tooltip (06/09/2026, mismo
-            // tratamiento que "Detalle de equipo" de la tarjeta de
-            // líder siguiente en Seguimiento -- ver .dash-icon-btn/
-            // [data-tooltip] en style.css) -- reemplaza al botón de
-            // texto que antes iba en una fila aparte al pie de la
-            // tarjeta.
-            '<button class="dash-icon-btn nz-leader-detail-btn" data-order="' + leader.order + '" data-tooltip="Detalle de equipo" aria-label="Detalle de equipo">' +
-              '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9,2v2H5v16h14V4h-4v-2H9ZM7,6h10v12H7V6ZM9,8v2h6v-2h-6ZM9,11v2h6v-2h-6ZM9,14v2h4v-2h-4Z" /></svg>' +
-            "</button>" +
-          "</div>" +
+        '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" />' +
+        '<div class="nz-leader-info">' +
+        '<span class="nz-leader-name">' + escapeHtml(leader.nameEs || leader.name || "") + "</span>" +
+        '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>" +
+        '<span class="nz-leader-location">' + escapeHtml(leader.gymLocationEs || leader.gymLocation || "") + "</span>" +
+        "</div>" +
+        '<div class="nz-leader-header-actions">' +
+        '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
+        (leader.earned ? "Obtenida" : "Pendiente") +
+        "</span>" +
+        // Botón de solo ícono + tooltip (06/09/2026, mismo
+        // tratamiento que "Detalle de equipo" de la tarjeta de
+        // líder siguiente en Seguimiento -- ver .dash-icon-btn/
+        // [data-tooltip] en style.css) -- reemplaza al botón de
+        // texto que antes iba en una fila aparte al pie de la
+        // tarjeta.
+        '<button class="dash-icon-btn nz-leader-detail-btn" data-order="' + leader.order + '" data-tooltip="Detalle de equipo" aria-label="Detalle de equipo">' +
+        '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9,2v2H5v16h14V4h-4v-2H9ZM7,6h10v12H7V6ZM9,8v2h6v-2h-6ZM9,11v2h6v-2h-6ZM9,14v2h4v-2h-4Z" /></svg>' +
+        "</button>" +
+        "</div>" +
         "</div>" +
         '<div class="nz-leader-cap-row">' +
-          "<span>Nivel máximo permitido</span>" +
-          '<span class="nz-leader-cap-value">Nv. ' + leader.levelCap + "</span>" +
+        "<span>Nivel máximo permitido</span>" +
+        '<span class="nz-leader-cap-value">Nv. ' + leader.levelCap + "</span>" +
         "</div>" +
         '<div class="nz-leader-team">' + teamHtml + "</div>";
 

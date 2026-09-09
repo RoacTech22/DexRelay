@@ -35,6 +35,8 @@ from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
     RARE_CANDY_ITEM_ID,
+    BOX_COUNT,
+    BOX_SLOT_COUNT,
 )
 from app.services.bag_service import BagService, BagWriteError
 from app.services.gym_leaders import GymLeaderCatalog
@@ -42,6 +44,25 @@ from app.services.location_catalog import LocationCatalog
 from app.services.playtime_service import PlaytimeService
 from app.services.pokemon_detail_resolver import PokemonDetailResolver
 from app.services.species_catalog import SpeciesCatalog
+from app.services.pkhex.bridge import PKHeXBridge
+from app.services.move_data import MoveDataCatalog, merge_move_details
+from app.services.move_description import MoveDescriptionCatalog
+from app.services.ability_description import AbilityDescriptionCatalog
+from app.services.type_effectiveness import (
+    TypeChartCatalog,
+    compute_effectiveness,
+    categorize_effectiveness,
+)
+from app.services.evolution_translations import (
+    describe_evolution,
+    METHOD_KEYS_USING_ITEM_ARGUMENT,
+    METHOD_KEYS_USING_MOVE_ARGUMENT,
+    METHOD_KEYS_USING_TEAMMATE_ARGUMENT,
+    EVOLUTION_METHOD_COMPACT_LABELS,
+)
+from app.services.item_catalog import ItemCatalog
+from app.services.species_extra import SpeciesExtraCatalog
+from app.services.pre_evolution_catalog import PreEvolutionCatalog
 
 # La versión de la app YA NO se hardcodea acá -- se resuelve en
 # `app/core/version.py` (`resolve_app_version()`, importado
@@ -148,6 +169,28 @@ class Api:
         # esto vive acá (solo GUI) y no en Application (no lo usa
         # ningún overlay ni el HTTP server).
         self.pokemon_detail_resolver = PokemonDetailResolver()
+
+        # Modales de movimiento/habilidad/especie (07/09/2026,
+        # roadmap 4.1/4.2) -- instancia PROPIA del bridge, mismo
+        # criterio que ya usa PokemonDetailResolver (cada resolver/
+        # catálogo de la GUI arranca su propio proceso .NET en vez
+        # de compartir uno global; no es lo más liviano posible,
+        # pero es el patrón ya establecido en el resto de este
+        # archivo, no se cambia acá de paso). Se llama
+        # "modal_bridge" (no "move_details_bridge" como al
+        # principio) porque ahora también resuelve species_details()
+        # para el modal Pokédex de especie, no solo movimientos.
+        # MoveDataCatalog/MoveDescriptionCatalog/
+        # AbilityDescriptionCatalog/TypeChartCatalog son lecturas de
+        # JSON cacheadas, sin costo de mantener vivas.
+        self.modal_bridge = PKHeXBridge()
+        self.move_data_catalog = MoveDataCatalog()
+        self.move_description_catalog = MoveDescriptionCatalog()
+        self.ability_description_catalog = AbilityDescriptionCatalog()
+        self.type_chart_catalog = TypeChartCatalog()
+        self.item_catalog = ItemCatalog()
+        self.species_extra_catalog = SpeciesExtraCatalog()
+        self.pre_evolution_catalog = PreEvolutionCatalog()
 
         # Página Nuzlocke (GUI v2, 04/09/2026) -- mismo criterio
         # que pokemon_detail_resolver: instancias propias, solo
@@ -612,6 +655,534 @@ class Api:
             pages.append(entry)
 
         return pages
+
+    def get_boxes_overview(self):
+        """
+        Pestaña "General" de la página Pokémon (roadmap 08/09/2026,
+        sección 5.1/5.2) -- equipo actual + las 31 Cajas PC, ambos
+        con detalle MÍNIMO (sprite/nombre/nivel, sin golpear el
+        bridge PKHeX) -- a diferencia de get_box_page_data() de más
+        abajo, que sí resuelve detalle completo pero solo para UNA
+        caja puntual (la que el usuario abre en la pestaña "Caja").
+
+        Una sola lectura UDP para las 31 cajas
+        (AzaharReader.read_boxes_range(), ya usada para el matching
+        del Nuzlocke Tracker) en vez de 31 lecturas sueltas -- se
+        pide bajo demanda, solo mientras la pestaña "General" está
+        abierta (ver dexrelay:tabchange en app.js), no en el poll
+        de fondo del Dashboard.
+
+        INCERTIDUMBRE REAL (08/09/2026): hasta ahora read_boxes_
+        range() solo se probó en producción pidiendo 7 cajas de
+        una (uso del Nuzlocke Tracker). Acá se pide las 31 juntas
+        (~215KB) en una sola lectura -- debería andar igual si
+        self.memory.read() ya trocea internamente lecturas grandes
+        (mismo mecanismo que usan los sprites/ítems), pero si en la
+        práctica resulta lenta o poco confiable, el primer lugar a
+        sospechar es este call, con partirlo en 2-3 tandas de ~10-15
+        cajas como arreglo más simple.
+
+        Devuelve {"connected": bool, "team": [...] (mismo formato
+        que ya usa el Dashboard), "boxes": [{"boxIndex", "pokemon":
+        [...]}, ...]} -- una entrada por caja, 1 a BOX_COUNT, en
+        orden, incluso las vacías (con "pokemon": []).
+        """
+
+        connected = self.app.state.azahar_connected
+        team = self.app.state.team or []
+
+        if not connected:
+            return {
+                "connected": False,
+                "team": team,
+                "boxes": [
+                    {"boxIndex": box_index, "pokemon": []}
+                    for box_index in range(1, BOX_COUNT + 1)
+                ],
+            }
+
+        occupied = self.app.reader.read_boxes_range(
+            1, BOX_COUNT
+        )
+
+        by_box_index = {}
+
+        for entry in occupied:
+            by_box_index.setdefault(
+                entry.get("boxIndex"), []
+            ).append({
+                "slot": entry.get("slot"),
+                "speciesId": entry.get("speciesId"),
+                "species": entry.get("species"),
+                "nickname": entry.get("nickname"),
+                "level": entry.get("level"),
+                "shiny": entry.get("shiny"),
+                "isEgg": entry.get("isEgg"),
+            })
+
+        boxes = [
+            {
+                "boxIndex": box_index,
+                "pokemon": by_box_index.get(box_index, []),
+            }
+            for box_index in range(1, BOX_COUNT + 1)
+        ]
+
+        return {
+            "connected": True,
+            "team": team,
+            "boxes": boxes,
+        }
+
+    def get_box_page_data(self, box_index):
+        """
+        Pestaña "Caja" de la página Pokémon (roadmap 08/09/2026,
+        sección 5.1/5.3) -- detalle COMPLETO (tipos/habilidad/
+        naturaleza/stats/movimientos, vía PKHeX) para los Pokémon
+        de UNA caja puntual, mismo criterio exacto que
+        get_pokemon_page_data() ya usa para el equipo: identidad
+        básica primero (read_box(), sin bridge), detalle vía
+        PokemonDetailResolver bajo demanda después, solo para los
+        slots ocupados.
+
+        A diferencia de la party (siempre 6 slots fijos), acá se
+        arma la lista completa de BOX_SLOT_COUNT (30) slots,
+        marcando "empty": True los que no tengan Pokémon -- así el
+        frontend puede mostrar la grilla completa de la caja igual
+        que ya hace con los 6 slots del equipo.
+
+        `box_index` es 1-based (Caja 1 = 1). Fuera de rango
+        (1..BOX_COUNT) devuelve {"error": "..."} sin tocar memoria.
+        """
+
+        if not (1 <= box_index <= BOX_COUNT):
+            return {"error": f"box_index fuera de rango: {box_index}"}
+
+        connected = self.app.state.azahar_connected
+
+        slots = [
+            {"slot": slot, "boxIndex": box_index, "empty": True}
+            for slot in range(1, BOX_SLOT_COUNT + 1)
+        ]
+
+        if not connected:
+            return {
+                "boxIndex": box_index,
+                "boxCount": BOX_COUNT,
+                "connected": False,
+                "slots": slots,
+            }
+
+        occupied_by_slot = {
+            entry["slot"]: entry
+            for entry in self.app.reader.read_box(box_index)
+        }
+
+        for index, slot_number in enumerate(
+            range(1, BOX_SLOT_COUNT + 1)
+        ):
+
+            basic = occupied_by_slot.get(slot_number)
+
+            if not basic:
+                continue
+
+            raw_data = self.app.reader.read_box_slot_raw(
+                box_index, slot_number
+            )
+
+            details = (
+                self.pokemon_detail_resolver.resolve(raw_data)
+                if raw_data is not None
+                else None
+            )
+
+            entry = dict(basic)
+            entry["details"] = details
+            slots[index] = entry
+
+        return {
+            "boxIndex": box_index,
+            "boxCount": BOX_COUNT,
+            "connected": True,
+            "slots": slots,
+        }
+
+    def get_move_modal_data(self, move_id):
+        """
+        Modal de movimiento (GUI v2, roadmap 07/09/2026, sección
+        4.1) -- junta las 3 fuentes ya confirmadas en una sola
+        respuesta: nombre/tipo/PP (bridge PKHeX,
+        PKHeXBridge.move_details()), potencia/precisión/categoría
+        (dataset estático, MoveDataCatalog/merge_move_details(), ya
+        curado y verificado contra ORAS) y descripción en español
+        (dataset estático, MoveDescriptionCatalog, ya curado desde
+        move_flavor_text.csv).
+
+        No necesita memoria del juego -- move_id ya lo tiene el
+        frontend (viene en `details.moves[].id`, ver
+        PokemonDetailResolver/HandlePokemonDetails() en Program.cs),
+        así que esto se puede pedir independiente del ciclo de
+        polling normal, solo cuando el usuario hace click en una
+        fila de movimiento.
+
+        Devuelve el dict combinado tal cual, o
+        {"error": "..."} si el bridge falló -- el frontend decide
+        cómo mostrar ese caso (no se inventa un valor de respaldo
+        acá).
+        """
+
+        try:
+            bridge_response = self.modal_bridge.move_details(
+                move_id
+            )
+        except Exception as error:
+            return {"error": str(error)}
+
+        merged = merge_move_details(
+            bridge_response, self.move_data_catalog
+        )
+
+        if "error" in merged:
+            return merged
+
+        description = self.move_description_catalog.get(move_id)
+
+        merged["descriptionEs"] = description["descriptionEs"]
+        merged["descriptionSource"] = description["source"]
+
+        return merged
+
+    def get_ability_modal_data(self, ability_id):
+        """
+        Modal de habilidad (GUI v2, roadmap 07/09/2026, sección
+        4.1) -- a diferencia del de movimiento, no hace falta
+        golpear el bridge de nuevo acá: el nombre de la habilidad
+        ya lo tiene el frontend (viene en `details.abilityName`,
+        resuelto por PokemonDetailResolver cuando se cargó la
+        tarjeta), así que esto solo agrega la descripción en
+        español (dataset estático, AbilityDescriptionCatalog).
+        """
+
+        description = self.ability_description_catalog.get(
+            ability_id
+        )
+
+        return {
+            "id": ability_id,
+            "descriptionEs": description["descriptionEs"],
+            "descriptionSource": description["source"],
+        }
+
+    def get_move_modal_data_by_name(self, name):
+        """
+        Mismo resultado que get_move_modal_data(), pero para
+        lugares de la app que solo tienen el NOMBRE en inglés del
+        movimiento, sin id -- hoy, la ventana de detalle de equipo
+        de líder de gimnasio (leader_team_window.js), cuyos datos
+        salen de data/gym_leaders.json (curado a mano, sin ids).
+
+        Resuelve el id vía
+        MoveDescriptionCatalog.get_id_by_name() y delega en
+        get_move_modal_data() -- un solo lugar con la lógica real,
+        no reimplementada aparte.
+        """
+
+        move_id = self.move_description_catalog.get_id_by_name(name)
+
+        if move_id is None:
+            return {
+                "error": f"Movimiento no encontrado: {name!r}"
+            }
+
+        return self.get_move_modal_data(move_id)
+
+    def get_ability_modal_data_by_name(self, name):
+        """
+        Mismo criterio que get_move_modal_data_by_name(), para
+        habilidades.
+        """
+
+        ability_id = self.ability_description_catalog.get_id_by_name(
+            name
+        )
+
+        if ability_id is None:
+            return {
+                "id": None,
+                "descriptionEs": None,
+                "descriptionSource": None,
+            }
+
+        return self.get_ability_modal_data(ability_id)
+
+    def _resolve_evolution_transition(self, evolution):
+        """
+        Junta toda la info de CÓMO se da una evolución puntual
+        (nivel/objeto/movimiento/compañero + descripción) a partir
+        de un dict crudo {methodKey, level, argument} tal como lo
+        devuelve species_details() del bridge. Reusado tanto por la
+        lista plana de evoluciones como por _build_evolution_chain()
+        (roadmap 4.2, 07/09/2026).
+        """
+
+        method_key = evolution.get("methodKey")
+        level = evolution.get("level")
+        argument = evolution.get("argument")
+
+        item_id = None
+        item_name = None
+
+        if method_key in METHOD_KEYS_USING_ITEM_ARGUMENT:
+            item_id = argument
+            item_name = self.item_catalog.get_name(argument)
+
+        move_name = None
+
+        if method_key in METHOD_KEYS_USING_MOVE_ARGUMENT:
+            try:
+                move_result = self.modal_bridge.move_details(argument)
+                if "error" not in move_result:
+                    move_name = move_result.get("name")
+            except Exception:
+                move_name = None
+
+        teammate_name = None
+
+        if method_key in METHOD_KEYS_USING_TEAMMATE_ARGUMENT:
+            teammate_name = self.species_catalog.get_name(argument)
+
+        return {
+            "level": level,
+            "itemId": item_id,
+            "itemName": item_name,
+            "moveName": move_name,
+            "teammateName": teammate_name,
+            # Bug real corregido (08/09/2026, reportado por el
+            # usuario: "Azurill evoluciona a Marill por amistad no
+            # está saliendo eso") -- para los métodos sin nivel real
+            # ni objeto/movimiento/compañero (amistad, intercambio
+            # simple, belleza, etc. -- `level` viene en 0, que
+            # JavaScript trata como "falso"), el frontend necesita
+            # ALGO más que mostrar en el conector visual entre
+            # etapas -- ver EVOLUTION_METHOD_COMPACT_LABELS.
+            "conditionLabel": EVOLUTION_METHOD_COMPACT_LABELS.get(
+                method_key
+            ),
+            "description": describe_evolution(
+                method_key,
+                level,
+                argument,
+                item_name=item_name,
+                move_name=move_name,
+                teammate_name=teammate_name,
+            ),
+        }
+
+    def _build_forward_evolution_node(
+        self, stage_id, stage_details, depth_remaining, seen_ids, current_species_id
+    ):
+        """
+        Nodo de la cadena hacia adelante, con TODAS las ramas (no
+        solo la primera) -- corrige el bug real reportado por el
+        usuario el 08/09/2026: "Wurmple tiene dos ramas evolutivas
+        (Silcoon/Cascoon -> Beautifly/Dustox) y la app solo
+        mostraba una". Recursivo: cada nodo puede tener 0, 1 o
+        varios hijos (uno por evolución posible), cada uno con su
+        propia transición. `depth_remaining` limita cuántos saltos
+        hacia adelante se siguen desde la especie actual (2, mismo
+        tope que antes tenía el camino único) -- se aplica por
+        rama, no en total, así que Wurmple (especie actual) -> 2
+        ramas -> cada una 1 salto más alcanza sin problema dentro
+        del límite de 2.
+        """
+
+        node = {
+            "speciesId": stage_id,
+            "name": stage_details.get("name") or f"#{stage_id}",
+            "isCurrent": stage_id == current_species_id,
+            "children": [],
+        }
+
+        if depth_remaining <= 0:
+            return node
+
+        for evolution in stage_details.get("evolutions", []):
+            next_id = evolution.get("toSpeciesId")
+
+            if not next_id or next_id in seen_ids:
+                continue
+
+            seen_ids.add(next_id)
+
+            try:
+                next_details = self.modal_bridge.species_details(next_id)
+            except Exception:
+                next_details = {}
+
+            child_node = self._build_forward_evolution_node(
+                next_id,
+                next_details,
+                depth_remaining - 1,
+                seen_ids,
+                current_species_id,
+            )
+
+            node["children"].append({
+                "transition": self._resolve_evolution_transition(evolution),
+                "node": child_node,
+            })
+
+        return node
+
+    def _build_evolution_chain(self, species_id, original_details):
+        """
+        Cadena de evolución COMPLETA (07/09/2026, a pedido del
+        usuario: "haz que en la evolución siempre salgan las tres
+        etapas" -- antes solo se mostraba lo que species_details()
+        de la especie actual traía directo: hacia adelante siempre,
+        hacia atrás nunca, así que una especie de 3ra etapa
+        mostraba solo 2 eslabones en vez de los 3).
+
+        Actualizado 08/09/2026 para mostrar TODAS las ramas hacia
+        adelante, no solo la primera (bug real: Wurmple solo
+        mostraba Silcoon->Beautifly, nunca Cascoon->Dustox -- puede
+        haber otros casos de ramificación en ORAS con el mismo
+        problema, ej. Gloom->Vileplume/Bellossom, Poliwhirl->
+        Poliwrath/Politoed, Slowpoke->Slowbro/Slowking, Snorunt->
+        Glalie/Froslass, Kirlia->Gallade, más las 8 ramas de Eevee).
+
+        Arma la cadena así:
+        1. Sube por PreEvolutionCatalog desde `species_id` hasta la
+           raíz (especie que no evoluciona de ninguna otra) -- esta
+           parte SIGUE siendo un camino único hacia atrás (un
+           Pokémon evoluciona siempre desde una sola pre-evolución
+           en los juegos principales, no hay ramificación posible
+           yendo hacia atrás).
+        2. Desde `species_id`, arma un ÁRBOL con TODAS las
+           evoluciones posibles, hasta 2 saltos más hacia adelante
+           por rama.
+
+        Devuelve {"ancestors": [{"speciesId","name",
+        "transitionToNext"}, ...], "current": <nodo del árbol
+        hacia adelante, ver _build_forward_evolution_node()>}.
+        """
+
+        # 1. Ancestros (de la raíz hacia `species_id`, sin incluirlo)
+        ancestor_ids = []
+        walker_id = species_id
+        seen_ids = {species_id}
+
+        while True:
+            pre = self.pre_evolution_catalog.get(walker_id)
+            if not pre or pre["speciesId"] in seen_ids:
+                break
+            ancestor_ids.append(pre["speciesId"])
+            seen_ids.add(pre["speciesId"])
+            walker_id = pre["speciesId"]
+
+        ancestor_ids.reverse()
+
+        # Detalle completo de cada ancestro -- hace falta su propio
+        # species_details() para saber CÓMO evoluciona hacia el
+        # siguiente eslabón (nivel/objeto/etc.), no solo su nombre.
+        details_by_species_id = {species_id: original_details}
+
+        for ancestor_id in ancestor_ids:
+            try:
+                details_by_species_id[ancestor_id] = (
+                    self.modal_bridge.species_details(ancestor_id)
+                )
+            except Exception:
+                details_by_species_id[ancestor_id] = {}
+
+        ancestors = []
+        ancestor_chain_ids = ancestor_ids + [species_id]
+
+        for index, stage_id in enumerate(ancestor_ids):
+            stage_details = details_by_species_id.get(stage_id, {})
+            next_stage_id = ancestor_chain_ids[index + 1]
+
+            evolution_entry = next(
+                (
+                    evolution
+                    for evolution in stage_details.get("evolutions", [])
+                    if evolution.get("toSpeciesId") == next_stage_id
+                ),
+                None,
+            )
+
+            ancestors.append({
+                "speciesId": stage_id,
+                "name": stage_details.get("name") or f"#{stage_id}",
+                "transitionToNext": (
+                    self._resolve_evolution_transition(evolution_entry)
+                    if evolution_entry
+                    else None
+                ),
+            })
+
+        # 2. Árbol hacia adelante desde `species_id`, con todas las
+        # ramas -- ver _build_forward_evolution_node().
+        current_node = self._build_forward_evolution_node(
+            species_id, original_details, 2, seen_ids, species_id
+        )
+
+        return {"ancestors": ancestors, "current": current_node}
+
+    def get_species_modal_data(self, species_id):
+        """
+        Modal "Pokédex" de detalle de especie (GUI v2, roadmap
+        07/09/2026, sección 4.2) -- junta las piezas ya confirmadas
+        y curadas por separado:
+
+        - Tipo/stats base/habilidades (bridge PKHeX,
+          species_details(), ver Program.cs).
+        - Cadena de evolución completa (pre-evolución + especie
+          actual + evoluciones siguientes) -- ver
+          _build_evolution_chain().
+        - Resistencias/debilidades/inmunidades -- CÁLCULO LOCAL
+          puro a partir del tipo (type_effectiveness.py +
+          data/type_chart.json), no un dato para pedirle a nadie.
+        - Altura/peso/categoría/descripción -- dataset estático
+          curado (SpeciesExtraCatalog), no PKHeX (ver el docstring
+          largo en build_species_extra.py para el porqué).
+
+        No necesita memoria del juego -- species_id ya lo tiene el
+        frontend (viene de `slot.speciesId`, ya presente en cada
+        tarjeta de la página Pokémon desde antes).
+        """
+
+        try:
+            details = self.modal_bridge.species_details(species_id)
+        except Exception as error:
+            return {"error": str(error)}
+
+        if "error" in details:
+            return details
+
+        effectiveness = compute_effectiveness(
+            details.get("type1Key", ""),
+            details.get("type2Key", ""),
+            self.type_chart_catalog,
+        )
+
+        categorized = categorize_effectiveness(effectiveness)
+
+        details["evolutionChain"] = self._build_evolution_chain(
+            species_id, details
+        )
+        details["weaknesses"] = categorized["weaknesses"]
+        details["resistances"] = categorized["resistances"]
+        details["immunities"] = categorized["immunities"]
+
+        extra = self.species_extra_catalog.get(species_id)
+        details["heightM"] = extra["heightM"]
+        details["weightKg"] = extra["weightKg"]
+        details["genus"] = extra["genus"]
+        details["description"] = extra["description"]
+
+        return details
 
     # -----------------------------------------------------------
     # Página Nuzlocke (GUI v2, 04/09/2026) -- reemplaza el
