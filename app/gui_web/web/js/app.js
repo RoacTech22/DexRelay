@@ -1523,7 +1523,12 @@
 
   // ===================== PESTAÑA "CAJA" (roadmap 08/09/2026, sección 5.1/5.3) =====================
 
-  var BOX_COUNT = 31;
+  // Alcance de la app (09/09/2026, decision del usuario): solo las
+  // 7 cajas que trae el juego de fabrica -- ver BOX_COUNT en
+  // pointers.py para el motivo completo. Este valor debe coincidir
+  // con el de ahi; si algun dia cambia el alcance, hay que tocar
+  // los dos lados.
+  var BOX_COUNT = 7;
   var currentBoxIndex = 1;
   var boxSelectorBuilt = false;
 

@@ -305,10 +305,32 @@ def get_box_base_address(process_name):
     )
 
 
-# Cantidad total de cajas en ORAS (estandar del juego, 31 cajas de
-# 30 slots cada una). Al igual que BOX_SLOT_COUNT, es el numero
-# estandar del juego -- no algo que haya hecho falta medir.
-BOX_COUNT = 31
+# Cantidad de cajas que DexRelay lee/muestra realmente.
+#
+# El juego (ORAS) soporta hasta 31 cajas de 30 slots cada una como
+# maximo teorico, pero solo trae 7 habilitadas de fabrica -- las
+# demas hay que comprarlas con dinero del juego. DECISION DE
+# ALCANCE (09/09/2026, a pedido del usuario): DexRelay se queda en
+# 7, no en 31. Motivo: en un Nuzlocke las capturas estan limitadas
+# (un intento por encuentro/zona), asi que en la practica un run
+# real nunca necesita mas de las 7 cajas de fabrica -- soportar
+# hasta 31 hubiera sido complejidad sin uso real detras.
+#
+# Esto tambien resuelve de raiz las dos incertidumbres que habia
+# quedado abiertas en el cierre de Fase C sobre el caso de las 31
+# cajas (tamaño de la lectura UDP unica y direcciones 8-31 sin
+# confirmar): como la app ya no pide ni muestra mas alla de la
+# Caja 7, ninguna de las dos aplica mas.
+#
+# CONFIRMADO EMPIRICAMENTE (09/09/2026,
+# tools/probes/party/confirmar_cajas_pc_rango.py, resultado
+# reportado por el usuario): las Cajas 3, 5 y 7 aparecieron en la
+# direccion contigua calculada al depositar un Pokemon real en cada
+# una -- se suma a la Caja 2 ya confirmada el 06/09/2026. Con esto,
+# TODO el rango 1-7 que la app realmente usa esta confirmado en
+# vivo, no es extrapolacion. Cajas 8-31 (fuera del alcance elegido)
+# quedan sin confirmar y sin necesidad de confirmarlas.
+BOX_COUNT = 7
 
 # Tamaño en bytes de una caja completa (30 slots * 232 bytes cada
 # uno) -- usado para calcular donde empieza cada caja siguiente,
@@ -332,13 +354,14 @@ def get_box_address(process_name, box_index):
     Pokemon reconocible) que el que ya se acepto en su momento para
     validar BOX_SLOT_STRIDE dentro de la Caja 1.
 
-    Las Cajas 3-31 NO se probaron una por una todavia -- se asume
-    que el patron de contigüidad se mantiene igual (mismo array
-    compacto, sin padding, para las 31 cajas completas) por ser la
-    hipotesis mas simple y ya validada en el primer salto, pero
-    sigue siendo una EXTRAPOLACION no verificada slot por slot mas
-    alla de la Caja 2. Si en el futuro aparece algun dato raro en
-    una caja especifica (3+), es el primer lugar a sospechar.
+    CONFIRMADO (09/09/2026, tools/probes/party/
+    confirmar_cajas_pc_rango.py): Cajas 3, 5 y 7 tambien viven en la
+    direccion contigua calculada, mismo patron que la Caja 2. Con
+    esto, TODO el rango 1-7 -- el unico que BOX_COUNT expone hoy,
+    ver su definicion mas arriba -- esta confirmado en vivo, no es
+    extrapolacion. Mas alla de la Caja 7 (fuera del alcance elegido
+    para la app) la formula sigue sin probarse, pero no hace falta:
+    BOX_COUNT ya no deja pedir esos indices.
 
     `box_index` es 1-based (Caja 1 = box_index 1), para que coincida
     con la numeracion que ve el usuario en el juego.

@@ -659,28 +659,29 @@ class Api:
     def get_boxes_overview(self):
         """
         Pestaña "General" de la página Pokémon (roadmap 08/09/2026,
-        sección 5.1/5.2) -- equipo actual + las 31 Cajas PC, ambos
-        con detalle MÍNIMO (sprite/nombre/nivel, sin golpear el
-        bridge PKHeX) -- a diferencia de get_box_page_data() de más
-        abajo, que sí resuelve detalle completo pero solo para UNA
-        caja puntual (la que el usuario abre en la pestaña "Caja").
+        sección 5.1/5.2) -- equipo actual + las Cajas PC (BOX_COUNT,
+        7 -- ver pointers.py), ambos con detalle MÍNIMO
+        (sprite/nombre/nivel, sin golpear el bridge PKHeX) -- a
+        diferencia de get_box_page_data() de más abajo, que sí
+        resuelve detalle completo pero solo para UNA caja puntual
+        (la que el usuario abre en la pestaña "Caja").
 
-        Una sola lectura UDP para las 31 cajas
+        Una sola lectura UDP para las BOX_COUNT cajas
         (AzaharReader.read_boxes_range(), ya usada para el matching
-        del Nuzlocke Tracker) en vez de 31 lecturas sueltas -- se
-        pide bajo demanda, solo mientras la pestaña "General" está
-        abierta (ver dexrelay:tabchange en app.js), no en el poll
-        de fondo del Dashboard.
+        del Nuzlocke Tracker) en vez de BOX_COUNT lecturas sueltas
+        -- se pide bajo demanda, solo mientras la pestaña "General"
+        está abierta (ver dexrelay:tabchange en app.js), no en el
+        poll de fondo del Dashboard.
 
-        INCERTIDUMBRE REAL (08/09/2026): hasta ahora read_boxes_
-        range() solo se probó en producción pidiendo 7 cajas de
-        una (uso del Nuzlocke Tracker). Acá se pide las 31 juntas
-        (~215KB) en una sola lectura -- debería andar igual si
-        self.memory.read() ya trocea internamente lecturas grandes
-        (mismo mecanismo que usan los sprites/ítems), pero si en la
-        práctica resulta lenta o poco confiable, el primer lugar a
-        sospechar es este call, con partirlo en 2-3 tandas de ~10-15
-        cajas como arreglo más simple.
+        DECISIÓN DE ALCANCE (09/09/2026, a pedido del usuario):
+        BOX_COUNT quedó fijo en 7 (las cajas de fábrica), no en las
+        31 que soporta el juego como máximo teórico -- un Nuzlocke
+        real nunca necesita comprar más, las capturas están
+        limitadas. Esto es exactamente la misma lectura que ya usa
+        el Nuzlocke Tracker en producción desde antes (mismo
+        BOX_COUNT, mismo read_boxes_range()), así que no hay
+        incertidumbre de tamaño/latencia nueva acá -- ya está
+        probado en vivo.
 
         Devuelve {"connected": bool, "team": [...] (mismo formato
         que ya usa el Dashboard), "boxes": [{"boxIndex", "pokemon":
