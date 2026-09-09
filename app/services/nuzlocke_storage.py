@@ -31,6 +31,18 @@ _GAME_STORAGE_SLUGS = {
 # Los `id` son fijos para las reglas de este set inicial -- una
 # regla agregada a mano por el usuario después lleva un id nuevo
 # (ver Api.nuzlocke_add_ruleset_rule() en app/gui_web/api.py).
+#
+# AJUSTE (09/09/2026, a pedido del usuario): de las 7 reglas, solo
+# 3 vienen tildadas por defecto ahora (primer_encuentro,
+# muerte_permanente, nickname_obligatorio) -- las demás quedan
+# definidas (visibles y editables en el modal) pero destildadas de
+# entrada. También se renombró "muerte_permanente" para que quede
+# claro que aplica al Pokémon debilitado. "nickname_obligatorio" es
+# nueva en este set por defecto -- ya existía como regla agregada a
+# mano en el save real de Alpha Sapphire del usuario (id
+# custom_..., ver Documento Maestro de esta sesión), ahora pasa a
+# ser parte del set base para que Omega Ruby también la tenga sin
+# tener que agregarla de nuevo a mano.
 DEFAULT_RULESET = [
     {
         "id": "primer_encuentro",
@@ -39,27 +51,32 @@ DEFAULT_RULESET = [
     },
     {
         "id": "muerte_permanente",
-        "label": "Muerte permanente",
+        "label": "Muerte permanente del Pokémon debilitado",
         "enabled": True,
     },
     {
         "id": "objetos_encontrados",
         "label": "Solo objetos de curación encontrados",
-        "enabled": True,
+        "enabled": False,
     },
     {
         "id": "nivel_maximo_lider",
         "label": "Nivel máximo según siguiente líder",
-        "enabled": True,
+        "enabled": False,
     },
     {
         "id": "sin_tradeos",
         "label": "Sin tradeos",
-        "enabled": True,
+        "enabled": False,
     },
     {
         "id": "sin_legendarios",
         "label": "Sin legendarios (opcional)",
+        "enabled": False,
+    },
+    {
+        "id": "nickname_obligatorio",
+        "label": "Todos los pokemon deben llevar un nombre/nickname",
         "enabled": True,
     },
 ]
