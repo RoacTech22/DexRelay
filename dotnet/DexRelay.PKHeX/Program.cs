@@ -21,11 +21,20 @@ GameInfo.CurrentLanguage = "es";
 // PKHeX.Core, o si directamente el diccionario "es" embebido
 // tiene huecos para esas listas puntuales. Se fuerza
 // explícitamente GameInfo.Strings a la versión en español vía
-// GetStrings() -- si el problema era lo primero, esto lo
-// resuelve solo; si es lo segundo (huecos reales en el
-// diccionario), esto no alcanza y hay que armar una tabla propia
-// como se hizo con hoenn_locations_es.py, pero recién ahí, no
-// antes de confirmar que esto no lo resuelve.
+// GetStrings().
+//
+// CONFIRMADO (09/09/2026, tools/probes/verificar_nombres_movimiento_es.py,
+// corrido en vivo por el usuario): este fix resuelve el 100% de
+// los nombres de movimiento -- 919 movimientos revisados uno por
+// uno contra el bridge, CERO huecos reales. Los 5 casos que la
+// primera pasada marcó como "sospechosos" (Surf/Amnesia/Embargo/
+// Poltergeist/Triple Axel) resultaron ser movimientos cuyo nombre
+// oficial en español es LITERALMENTE IGUAL al inglés (préstamos),
+// no traducciones faltantes -- confirmado contra el nombre real
+// del juego. Con esto, el pendiente heredado "nombres de
+// movimiento en inglés, confirmar si el fix lo resolvió del todo"
+// (Documento Maestro 04/09/2026 en adelante) queda CERRADO -- no
+// hace falta ninguna tabla acotada, GetStrings("es") ya alcanza.
 GameInfo.Strings = GameInfo.GetStrings("es");
 
 while (true)
@@ -81,6 +90,10 @@ while (true)
 
             case "move_details":
                 HandleMoveDetails(root);
+                break;
+
+            case "item_list":
+                HandleItemList();
                 break;
 
             default:
@@ -147,6 +160,54 @@ static void HandleSpeciesList()
     }
 
     var response = new { species };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+// GUI v2, roadmap 07/09/2026 -- nombres de ítem para el catálogo de
+// ítems (necesario para el modal de detalle de evolución, que
+// necesita mostrar qué objeto puntual hace falta usar/llevar en
+// varios de los 33 methodKey confirmados por
+// tools/probes/recolectar_evolution_method_keys.py -- ver
+// app/services/evolution_translations.py). Mismo molde EXACTO que
+// HandleSpeciesList() -- los nombres de ítem viven en el mismo
+// paquete de GameStrings que especies/movimientos/habilidades
+// (confirmado inspeccionando el código fuente real de PKHeX:
+// GameInfo.setItemDataSource(..., GameStrings s) usa esta misma
+// fuente para poblar el combo de ítems del programa), así que NO
+// hace falta ningún dataset nuevo para los nombres, solo esta
+// acción.
+//
+// NOTA IMPORTANTE para quien retome esto si no compila: el nombre
+// exacto de la propiedad (`GameInfo.Strings.Item`) es la mejor
+// conjetura por convención con `.Species`/`.Move`/`.Ability`, pero
+// no se pudo confirmar compilando en esta sesión (mismo criterio
+// ya documentado para HandleSpeciesDetails() en su momento) -- si
+// el nombre real es otro (ej. `.Items`, `.itemlist`), correr
+// `dotnet publish` va a tirar el error EXACTO con el nombre
+// correcto, no hay que adivinar dos veces.
+static void HandleItemList()
+{
+    var names = GameInfo.Strings.Item;
+
+    var items = new List<object>();
+
+    // id 0 es "Ninguno"/sin ítem, se salta -- mismo criterio que
+    // el id 0 de especies en HandleSpeciesList().
+    for (int id = 1; id < names.Count; id++)
+    {
+        if (string.IsNullOrEmpty(names[id]))
+        {
+            continue;
+        }
+
+        items.Add(new { id, name = names[id] });
+    }
+
+    var response = new { items };
 
     Console.WriteLine(
         JsonSerializer.Serialize(response)
