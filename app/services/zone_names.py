@@ -45,10 +45,13 @@ from __future__ import annotations
 #
 # Sigue incompleta a propósito: cualquier ID no listado acá (fuera
 # de los 116 ya recolectados) cae al placeholder "Zona {id}" en
-# resolve_zone_name(), en vez de fallar -- mismo criterio que las
-# ~16 ubicaciones de Hoenn sin traducir en hoenn_locations_es.py.
-# Completar con tools/probes/memory/mapear_zonas.py (modo dirigido)
-# u observar_zonas_nuevas.py (modo pasivo).
+# resolve_zone_name(), en vez de fallar -- esto es un sistema de
+# IDs completamente distinto del de hoenn_locations_es.py (ver
+# nota arriba), así que no tiene relación con las traducciones de
+# Met_Location ya completadas ahí el 09/09/2026 (92 de 93). Acá se
+# completa con tools/probes/memory/mapear_zonas.py (modo dirigido)
+# u observar_zonas_nuevas.py (modo pasivo), a medida que aparezcan
+# zonas nuevas todavía no recolectadas.
 ZONE_ID_TO_NAME: dict[int, str] = {
     6: "Villa Raíz",
     7: "Pueblo Escaso",

@@ -34,20 +34,26 @@ EXCLUDED_LOCATION_IDS = {
     276,  # "???" -- ID interno sin uso real, no una ubicación
           # jugable (nombre crudo de PKHeX, nunca se pudo
           # confirmar qué es)
-    278,  # Desert Ruins
-    306,  # Island Cave
-    308,  # Ancient Tomb
-    310,  # Sealed Chamber
-    334,  # Trackless Forest
-    336,  # Pathless Plain
-    338,  # Nameless Cavern
-    340,  # Fabled Cave
-    342,  # Gnarled Den
-    344,  # Crescent Isle
-    354,  # Secret Base
+    278,  # Desert Ruins / "Ruinas del Desierto"
+    306,  # Island Cave / "Cueva Insular"
+    308,  # Ancient Tomb / "Tumba Antigua"
+    310,  # Sealed Chamber / "Cámara Sellada"
+    334,  # Trackless Forest / "Bosque Virgen"
+    336,  # Pathless Plain / "Llanura Sinnombre"
+    338,  # Nameless Cavern / "Cueva Ignota"
+    340,  # Fabled Cave / "Cueva Incierta"
+    342,  # Gnarled Den / "Boquete Irregular"
+    344,  # Crescent Isle / "Isla Creciente"
+    354,  # Secret Base / "Base Secreta"
     350,  # Secret Shore / "Costa Secreta"
     352,  # Secret Meadow / "Prado Secreto"
 }
+
+# Actualización (09/09/2026): las 13 de acá abajo (todas menos 276)
+# ya tienen traducción real en hoenn_locations_es.py -- esta lista
+# sigue existiendo igual (sigue siendo una decisión de UX sobre qué
+# precargar en el panel, no sobre qué traducir), pero ya no hay que
+# leerla como "sin traducción" -- eso quedó resuelto.
 
 # Orden narrativo aproximado (progresión de historia de ORAS), por
 # ID -- no por nombre, para que funcione sin importar en qué idioma

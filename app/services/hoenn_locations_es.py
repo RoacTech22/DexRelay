@@ -17,14 +17,23 @@ lista directo de PKHeX en primer lugar.
 
 Actualizada 30/08/2026: 4 traducciones nuevas pasadas por el
 usuario (Cueva Cardumen/Shoal Cave, Malvamar/Sea Mauville,
-Gruta Solar/Scorched Slab, Firmamento/Soaring in the Sky) --
-quedan 79 de las 93 ubicaciones de Hoenn con traduccion
-verificada. Las 14 restantes son zonas post-juego/DexNav no
-relevantes para un Nuzlocke normal (mirage spots, cuevas de
-los Regis, base secreta, Costa Secreta, Prado Secreto, y el ID
-276 sin nombre real) -- excluidas a proposito del panel via
-EXCLUDED_LOCATION_IDS en location_catalog.py, asi que ya no
-hace falta traducirlas ni tenerlas en este diccionario.
+Gruta Solar/Scorched Slab, Firmamento/Soaring in the Sky).
+
+Actualizada 09/09/2026: las 14 ubicaciones restantes (menos
+ID 276, "???", que no es una ubicación real) se tradujeron
+también, verificadas contra WikiDex/Fandom/PokéCompany --
+92 de las 93 ubicaciones de Hoenn con traducción confirmada.
+Hallazgo real de esta pasada: el comentario anterior daba por
+sentado que las 14 eran "post-juego/DexNav no relevantes para
+un Nuzlocke normal" -- eso es cierto para los 6 parajes
+espejismo raros (334-344, sí necesitan Ultravuelo + condiciones
+puntuales), pero NO para las 4 ruinas de los Regis (278/306/
+308/310), que son parte de la historia principal y alcanzables
+sin nada especial más que buceo para la Cámara Sellada. Quedan
+igual EXCLUIDAS del panel precargado (EXCLUDED_LOCATION_IDS en
+location_catalog.py, decisión de UX del usuario, no cambia),
+pero ahora si una captura real reporta alguna como Met_Location,
+el fallback muestra español en vez del crudo de PKHeX en inglés.
 """
 
 HOENN_LOCATION_NAMES_ES = {
@@ -127,11 +136,48 @@ HOENN_LOCATION_NAMES_ES = {
                                     # (30/08/2026, traduccion
                                     # pasada por el usuario)
 
-    # Costa Secreta (350, Secret Shore) y Prado Secreto (352,
-    # Secret Meadow) sacados a proposito (30/08/2026, decision
-    # explicita del usuario) -- no son relevantes para un
-    # Nuzlocke normal, mismo criterio que EXCLUDED_LOCATION_IDS
-    # en location_catalog.py (que ya los excluye del panel).
+    # Costa Secreta (350, Secret Shore), Prado Secreto (352, Secret
+    # Meadow) y Base Secreta (354, Secret Base) -- excluidas del
+    # panel precargado a propósito (EXCLUDED_LOCATION_IDS en
+    # location_catalog.py, decisión explícita del usuario del
+    # 30/08/2026: no son relevantes para armar la lista inicial de
+    # un Nuzlocke normal), pero SÍ traducidas acá -- si una captura
+    # real termina reportando alguna de estas como Met_Location, el
+    # fallback debe mostrar español, no el crudo de PKHeX en inglés.
+    350: "Costa Secreta",           # Secret Shore
+    352: "Prado Secreto",           # Secret Meadow
+    354: "Base Secreta",            # Secret Base
+
+    # --- Las 4 ruinas de los Regis (278/306/308/310) -- alcanzables
+    # en la historia normal (no post-juego real, a diferencia de lo
+    # que decía el comentario viejo de este archivo), verificadas
+    # contra WikiDex/Fandom el 09/09/2026. Encontrado real: el
+    # comentario anterior las marcaba como "post-juego/DexNav no
+    # relevantes", pero solo la Cámara Sellada (310, la que abre las
+    # otras 3) requiere buceo -- las otras son parte del recorrido
+    # normal de la ruta 111/105/120. Si un Nuzlocke real encuentra o
+    # captura algo ahí, el nombre ahora sale en español.
+    278: "Ruinas del Desierto",     # Desert Ruins
+    306: "Cueva Insular",           # Island Cave
+    308: "Tumba Antigua",           # Ancient Tomb
+    310: "Cámara Sellada",          # Sealed Chamber
+
+    # --- Parajes espejismo raros (334-344) -- SÍ son post-juego/
+    # DexNav real (solo accesibles con Ultravuelo y condiciones
+    # puntuales por Pokémon en el equipo), pero se traducen igual
+    # por completitud -- verificadas contra WikiDex/PokéCompany el
+    # 09/09/2026.
+    334: "Bosque Virgen",           # Trackless Forest
+    336: "Llanura Sinnombre",       # Pathless Plain
+    338: "Cueva Ignota",            # Nameless Cavern
+    340: "Cueva Incierta",         # Fabled Cave
+    342: "Boquete Irregular",       # Gnarled Den
+    344: "Isla Creciente",          # Crescent Isle
+
+    # ID 276 ("???") queda SIN traducir a propósito -- no es una
+    # ubicación jugable real (nombre crudo interno de PKHeX, nunca
+    # se pudo confirmar qué es), no hay nada verificable para
+    # traducir (regla #12: no adivinar).
 }
 
 
