@@ -89,38 +89,13 @@
     return '<svg class="type-icon" viewBox="' + TYPE_ICON_VIEWBOX + '" width="' + size + '" height="' + size + '" xmlns="http://www.w3.org/2000/svg">' + info.glyph + '</svg>';
   }
 
-  // Traducción de movimientos -- misma tabla que app.js (ver ese
-  // archivo para el comentario completo sobre las fuentes usadas
-  // para curarla). Duplicada acá a propósito (ver comentario al
-  // principio del archivo).
-  var MOVE_NAME_ES = {
-    "Aerial Ace": "Golpe Aéreo", "Air Cutter": "Corte Aéreo", "Amnesia": "Amnesia",
-    "Aqua Ring": "Anillo Hídrico", "Arm Thrust": "Golpe Brazo", "Attract": "Atracción",
-    "Aurora Beam": "Rayo Aurora", "Body Slam": "Golpe Cuerpo", "Bulk Up": "Corpulencia",
-    "Calm Mind": "Paz Mental", "Charge": "Carga", "Chip Away": "Erosión",
-    "Cotton Guard": "Guardia Algodón", "Curse": "Maldición", "Defense Curl": "Rizo Defensa",
-    "Disarming Voice": "Voz Cautivadora", "Double Team": "Doble Equipo", "Dragon Breath": "Dragoaliento",
-    "Draining Kiss": "Beso Drenaje", "Earth Power": "Tierra Viva", "Earthquake": "Terremoto",
-    "Encore": "Otra Vez", "Endeavor": "Esfuerzo", "Feint Attack": "Finta",
-    "Fury Swipes": "Golpes Furia", "Harden": "Fortaleza", "Horn Drill": "Perforador",
-    "Hydro Pump": "Hidrobomba", "Hypnosis": "Hipnosis", "Ice Beam": "Rayo Hielo",
-    "Karate Chop": "Golpe Kárate", "Knock Off": "Desarme", "Lava Plume": "Humareda",
-    "Leer": "Malicioso", "Light Screen": "Pantalla de Luz", "Magnet Bomb": "Bomba Magnética",
-    "Mud Sport": "Chapoteo Lodo", "Overheat": "Sofoco", "Protect": "Protección",
-    "Psychic": "Psíquico", "Quick Attack": "Ataque Rápido", "Rain Dance": "Danza Lluvia",
-    "Recover": "Recuperación", "Retaliate": "Represalia", "Rock Slide": "Avalancha",
-    "Rock Throw": "Lanzarrocas", "Rock Tomb": "Tumba Rocas", "Rollout": "Rodar",
-    "Roost": "Respiro", "Sand Attack": "Ataque Arena", "Seismic Toss": "Sísmico",
-    "Solar Beam": "Rayo Solar", "Steel Wing": "Ala de Acero", "Sunny Day": "Día Soleado",
-    "Supersonic": "Supersónico", "Swagger": "Contoneo", "Sweet Kiss": "Beso Dulce",
-    "Tackle": "Placaje", "Thunder Wave": "Onda Trueno", "Volt Switch": "Cambio de Voltios",
-    "Water Pulse": "Hidropulso", "Waterfall": "Cascada", "Yawn": "Bostezo",
-    "Zen Headbutt": "Golpe Cabeza Zen",
-  };
-
-  function translateMoveName(name) {
-    return MOVE_NAME_ES[name] || name;
-  }
+  // Traducción de movimientos (09/09/2026, Fase E): MOVE_NAME_ES/
+  // translateMoveName() (tabla duplicada de app.js, mismo límite de
+  // 64 movimientos) se eliminó -- causaba el bug reportado jugando
+  // el hackroom ("el idioma de los movimientos y habilidades se han
+  // mezclado"). Ahora usa mon.movesEs, ya resuelto en el backend
+  // contra el bridge PKHeX (ver _resolve_move_es() en
+  // gym_leaders.py) -- cubre cualquier movimiento real de Gen 6.
 
   function escapeHtml(value) {
     var div = document.createElement("div");
@@ -208,12 +183,14 @@
     // real de PokéAPI, que está en inglés -- ver
     // MoveDescriptionCatalog.get_id_by_name().
     var moveTypeKeys = mon.moveTypeKeys || [];
+    var movesEs = mon.movesEs || [];
     var movesHtml = (mon.moves || []).length
       ? mon.moves.map(function (name, index) {
           var moveType = moveTypeKeys[index];
+          var nameEs = movesEs[index] || name;
           return (
             '<div class="pokemon-move-row" data-move-name="' + escapeHtml(name) + '">' +
-              '<span class="pokemon-move-name">' + escapeHtml(translateMoveName(name)) + "</span>" +
+              '<span class="pokemon-move-name">' + escapeHtml(nameEs) + "</span>" +
               '<span class="pokemon-move-type" style="' + typeStyleVars(moveType) + '">' + typeIconSvg(moveType, 16) + "</span>" +
             "</div>"
           );
@@ -228,12 +205,15 @@
     // de .pokemon-card-ability -- a pedido del usuario, "dejalos
     // como estaba antes".
     //
-    // Habilidad: curada en data/gym_leaders.json (investigada
-    // contra Bulbapedia + un playthrough completo de ORAS, ver
-    // GYM_ABILITY_NAMES_ES en gym_leaders.py) -- a diferencia de
+    // Habilidad: curada en data/gym_leaders.json/
+    // gym_leaders_rrss.json (investigada contra Bulbapedia + un
+    // playthrough completo de ORAS) -- a diferencia de
     // Naturaleza/IVs/EVs (que NUNCA se pueden saber sin el save
     // real del entrenador rival), la habilidad de un Pokémon de un
     // líder de gimnasio SÍ está fija en los datos del juego.
+    // abilityEs se resuelve en el backend vía el bridge PKHeX
+    // (09/09/2026, Fase E -- ver _resolve_ability_es() en
+    // gym_leaders.py), no con un diccionario local.
     return (
       '<div class="mondetail-card">' +
         '<div class="mondetail-left">' +

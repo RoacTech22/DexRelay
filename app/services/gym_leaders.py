@@ -30,9 +30,33 @@ el JSON no trae:
    siempre es el Ace -- más robusto ante cualquier caso raro futuro
    donde el Ace no sea el de nivel más alto (no pasa hoy en los 8
    equipos curados, pero no hace falta depender de esa asunción).
+5. `abilityEs`/`movesEs`: traducción al español de la habilidad y
+   de cada movimiento del equipo.
 
-No lee memoria ni necesita el bridge PKHeX -- es 100% el dataset
-estático ya commiteado (data/gym_leaders.json, Fase A).
+   CORRECCIÓN REAL (09/09/2026, reportado por el usuario jugando el
+   hackroom Rising Ruby/Sinking Sapphire -- Fase E: "el idioma de
+   los movimientos y habilidades se han mezclado, aparecen algunos
+   en español y otros en inglés"): antes esto se resolvía en el
+   FRONTEND con dos diccionarios chicos a mano (MOVE_NAME_ES, 64
+   movimientos, y GYM_ABILITY_NAMES_ES, 24 habilidades) -- cubrían
+   justo lo que necesitaba el juego BASE (8 líderes, 24 Pokémon),
+   pero el hackroom usa muchos más movimientos/habilidades reales
+   que no estaban en esas listas, así que se colaba texto en
+   inglés. Ahora se resuelve acá, del lado del backend, contra el
+   bridge PKHeX (MoveCatalog/AbilityCatalog, mismo mecanismo ya
+   confirmado 100% correcto para nombres de movimiento el
+   09/09/2026 -- ver tools/probes/verificar_nombres_movimiento_es.py)
+   -- cubre CUALQUIER movimiento/habilidad real de Gen 6, no solo
+   los que ya se habían visto. Si el bridge no está disponible (o
+   un nombre puntual no matchea contra el dataset de identifiers en
+   inglés), cae al nombre en inglés tal cual -- nunca inventa una
+   traducción.
+
+No lee memoria en vivo -- es 100% el dataset estático ya commiteado
+(data/gym_leaders.json o data/gym_leaders_rrss.json, según
+config.json -> hackroom.enabled), aunque SÍ necesita el bridge
+PKHeX arrancado para resolver abilityEs/movesEs la primera vez
+(después queda cacheado en disco, ver MoveCatalog/AbilityCatalog).
 """
 
 from __future__ import annotations
@@ -40,6 +64,10 @@ from __future__ import annotations
 import json
 
 from app.core import paths
+from app.services.ability_catalog import AbilityCatalog
+from app.services.ability_description import AbilityDescriptionCatalog
+from app.services.move_catalog import MoveCatalog
+from app.services.move_description import MoveDescriptionCatalog
 
 
 # Mismo orden 1-8 que gym_leaders.json y que el bitfield de
@@ -101,35 +129,35 @@ GYM_LOCATION_NAMES_ES = {
 # save real del entrenador rival), la habilidad de un Pokémon de un
 # líder de gimnasio SÍ está fija en los datos del juego y documentada
 # en guías -- por eso acá sí se cura como dato real, no se deja
-# como "No disponible".
-GYM_ABILITY_NAMES_ES = {
-    "Sturdy": "Robustez",
-    "Magnet Pull": "Imán",
-    "Guts": "Agallas",
-    "Soundproof": "Insonorizar",
-    "Flame Body": "Cuerpo Llama",
-    "Simple": "Simple",
-    "White Smoke": "Humo Blanco",
-    "Truant": "Pereza",
-    "Vital Spirit": "Espíritu Vital",
-    "Keen Eye": "Vista Lince",
-    "Natural Cure": "Cura Natural",
-    "Levitate": "Levitación",
-    "Swift Swim": "Nado Rápido",
-    "Oblivious": "Despiste",
-    "Thick Fat": "Sebo",
-    "Marvel Scale": "Escama Especial",
-}
+# como "No disponible". El valor en sí (ej. "Sturdy") vive en
+# data/gym_leaders.json/gym_leaders_rrss.json -- acá abajo ya NO
+# hay un diccionario de traducción a mano (GYM_ABILITY_NAMES_ES se
+# eliminó el 09/09/2026, ver punto 5 del docstring del módulo):
+# la traducción a español se resuelve dinámicamente vía
+# AbilityCatalog/AbilityDescriptionCatalog en _resolve_ability_es().
 
 # Tipo de cada uno de los 64 movimientos que aparecen en los 8
-# equipos de líder (06/09/2026, a pedido del usuario: "por qué no
-# tienes los tipos de los movimientos también deberíamos tener ese
-# dato"). A diferencia de los nombres de líderes/insignias/ciudades
-# (que sí tienen variantes de localización), el tipo de un
-# movimiento es un dato único y bien documentado en toda fuente
-# Pokémon (Bulbapedia, Serebii, el juego mismo) -- no hace falta
-# investigar caso por caso, es conocimiento estándar de la
-# franquicia. Clave en inglés (igual que "moves" en el dataset).
+# equipos de líder DEL JUEGO BASE (06/09/2026, a pedido del
+# usuario: "por qué no tienes los tipos de los movimientos también
+# deberíamos tener ese dato"). A diferencia de los nombres de
+# líderes/insignias/ciudades (que sí tienen variantes de
+# localización), el tipo de un movimiento es un dato único y bien
+# documentado en toda fuente Pokémon (Bulbapedia, Serebii, el juego
+# mismo) -- no hace falta investigar caso por caso, es conocimiento
+# estándar de la franquicia. Clave en inglés (igual que "moves" en
+# el dataset).
+#
+# GAP CONOCIDO (09/09/2026, hackroom Rising Ruby/Sinking Sapphire):
+# esta tabla NO cubre los movimientos nuevos que usa
+# gym_leaders_rrss.json -- quedan con moveTypeKeys=None (sin ícono
+# de tipo), a diferencia de abilityEs/movesEs que ya se resuelven
+# dinámicamente vía el bridge. No es lo que reportó el usuario
+# (mezcla de idioma, ya resuelta) así que se deja para otra pasada
+# si hace falta -- el tipo de un MOVIMIENTO no depende del idioma,
+# pero sí necesitaría el mismo tipo de resolución dinámica (el
+# bridge no expone el tipo de un movimiento por su nombre en
+# inglés directamente, haría falta cruzar por id como con
+# abilityEs/movesEs).
 MOVE_TYPE_KEYS = {
     "Aerial Ace": "Flying", "Air Cutter": "Flying", "Amnesia": "Psychic",
     "Aqua Ring": "Water", "Arm Thrust": "Fighting", "Attract": "Normal",
@@ -184,6 +212,45 @@ class GymLeaderCatalog:
         )
         self._leaders = None
 
+        # Fase E (09/09/2026): resolución dinámica de nombres en
+        # español, ver punto 5 del docstring del módulo. Instancias
+        # propias -- mismo criterio que el resto de los catálogos
+        # de este proyecto (SpeciesCatalog/ItemCatalog/etc en
+        # api.py), no comparten estado con nada más.
+        self._ability_catalog = AbilityCatalog()
+        self._ability_description_catalog = AbilityDescriptionCatalog()
+        self._move_catalog = MoveCatalog()
+        self._move_description_catalog = MoveDescriptionCatalog()
+
+    def _resolve_ability_es(self, ability_name):
+        """
+        "Defeatist" -> id vía AbilityDescriptionCatalog (dataset de
+        identifiers en inglés ya curado) -> nombre en español vía
+        AbilityCatalog (bridge PKHeX). Cae al nombre en inglés tal
+        cual si cualquiera de los dos pasos falla -- nunca inventa.
+        """
+
+        ability_id = self._ability_description_catalog.get_id_by_name(
+            ability_name
+        )
+
+        if ability_id is None:
+            return ability_name
+
+        return self._ability_catalog.get_name(ability_id) or ability_name
+
+    def _resolve_move_es(self, move_name):
+        """Idem _resolve_ability_es(), para movimientos."""
+
+        move_id = self._move_description_catalog.get_id_by_name(
+            move_name
+        )
+
+        if move_id is None:
+            return move_name
+
+        return self._move_catalog.get_name(move_id) or move_name
+
     def _ensure_loaded(self):
 
         if self._leaders is not None:
@@ -227,7 +294,10 @@ class GymLeaderCatalog:
                 moves = member.get("moves", [])
                 team.append({
                     **member,
-                    "abilityEs": GYM_ABILITY_NAMES_ES.get(ability, ability),
+                    "abilityEs": self._resolve_ability_es(ability),
+                    "movesEs": [
+                        self._resolve_move_es(move) for move in moves
+                    ],
                     "moveTypeKeys": [
                         MOVE_TYPE_KEYS.get(move) for move in moves
                     ],

@@ -96,6 +96,14 @@ while (true)
                 HandleItemList();
                 break;
 
+            case "ability_list":
+                HandleAbilityList();
+                break;
+
+            case "move_list":
+                HandleMoveList();
+                break;
+
             default:
                 WriteError(
                     $"Acción no soportada: {action}"
@@ -189,6 +197,67 @@ static void HandleSpeciesList()
 // el nombre real es otro (ej. `.Items`, `.itemlist`), correr
 // `dotnet publish` va a tirar el error EXACTO con el nombre
 // correcto, no hay que adivinar dos veces.
+static void HandleMoveList()
+{
+    // Mismo patrón EXACTO que HandleItemList()/HandleAbilityList().
+    var names = GameInfo.Strings.Move;
+
+    var moves = new List<object>();
+
+    // id 0 es "Ninguno"/sin movimiento, se salta -- mismo criterio
+    // que el id 0 de ítems/especies/habilidades.
+    for (int id = 1; id < names.Count; id++)
+    {
+        if (string.IsNullOrEmpty(names[id]))
+        {
+            continue;
+        }
+
+        moves.Add(new { id, name = names[id] });
+    }
+
+    var response = new { moves };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
+static void HandleAbilityList()
+{
+    // Mismo patrón EXACTO que HandleItemList() -- GameInfo.Strings.Ability
+    // ya viene en español gracias al fix de idioma (ver
+    // GameInfo.Strings = GameInfo.GetStrings("es") más arriba,
+    // confirmado 100% sin huecos para movimientos el 09/09/2026;
+    // no hay motivo para esperar que las habilidades sean distintas,
+    // pero igual queda sujeto a la misma verificación en vivo si
+    // hiciera falta -- ver tools/probes/verificar_nombres_movimiento_es.py
+    // como plantilla si algún día hay que repetir el chequeo acá.
+    var names = GameInfo.Strings.Ability;
+
+    var abilities = new List<object>();
+
+    // id 0 es "Ninguna"/sin habilidad, se salta -- mismo criterio
+    // que el id 0 de ítems/especies.
+    for (int id = 1; id < names.Count; id++)
+    {
+        if (string.IsNullOrEmpty(names[id]))
+        {
+            continue;
+        }
+
+        abilities.Add(new { id, name = names[id] });
+    }
+
+    var response = new { abilities };
+
+    Console.WriteLine(
+        JsonSerializer.Serialize(response)
+    );
+}
+
+
 static void HandleItemList()
 {
     var names = GameInfo.Strings.Item;

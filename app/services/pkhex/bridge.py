@@ -224,6 +224,56 @@ class PKHeXBridge:
             }
         )
 
+    def item_list(self):
+        """
+        GUI v2, roadmap 07/09/2026 -- lista completa {id, name} de
+        ítems conocidos por PKHeX, en español (mismo paquete de
+        GameStrings que species_list()/etc., ver el comentario
+        largo en HandleItemList(), Program.cs). Se llama una sola
+        vez -- el resultado se cachea del lado de Python (mismo
+        patrón que species_list()/SpeciesCatalog).
+        """
+
+        return self.request(
+            {
+                "action": "item_list",
+            }
+        )
+
+    def ability_list(self):
+        """
+        Fase E (09/09/2026, soporte hackroom) -- idem item_list()
+        pero para habilidades ({id, name} en español, ver
+        HandleAbilityList() en Program.cs). Hacía falta para
+        traducir habilidades del hack que no estaban en el
+        diccionario chico a mano GYM_ABILITY_NAMES_ES (pensado solo
+        para las 24 combinaciones del juego base).
+        """
+
+        return self.request(
+            {
+                "action": "ability_list",
+            }
+        )
+
+    def move_list(self):
+        """
+        Fase E (09/09/2026, soporte hackroom) -- idem item_list()/
+        ability_list() pero para movimientos ({id, name} en
+        español, ver HandleMoveList() en Program.cs). Reemplaza el
+        diccionario chico a mano MOVE_NAME_ES del frontend (64
+        movimientos, pensado solo para el juego base) por el mismo
+        mecanismo ya confirmado 100% correcto para movimientos
+        (tools/probes/verificar_nombres_movimiento_es.py,
+        09/09/2026, 919/919 sin huecos reales).
+        """
+
+        return self.request(
+            {
+                "action": "move_list",
+            }
+        )
+
     def met_location(self, decrypted_box_data):
         """
         Resuelve el lugar de encuentro (y si es shiny) a
