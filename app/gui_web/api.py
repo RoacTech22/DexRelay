@@ -206,8 +206,31 @@ class Api:
 
         # Pestaña Líderes del Nuzlocke (Fase B, roadmap 3.1/3.2) --
         # dataset estático curado en Fase A, no necesita el bridge
-        # PKHeX ni memoria en vivo (ver docstring del módulo).
+        # PKHeX ni memoria en vivo para el JSON en sí (aunque sí
+        # necesita el bridge la primera vez para resolver
+        # abilityEs/movesEs, ver gym_leaders.py).
+        #
+        # Fase E (09/09/2026): soporte para el hack Rising Ruby /
+        # Sinking Sapphire (Drayano) -- toggle manual en
+        # Configuración (config.json -> hackroom.enabled), decisión
+        # del usuario: Azahar no expone si el ROM cargado es el
+        # juego base o el hack parcheado, así que no hay forma de
+        # detectarlo solo.
+        #
+        # CORRECCIÓN (09/09/2026, a pedido del usuario: "el cambio
+        # al hackroom no se puede hacer sin reiniciar la app"): se
+        # instancian los DOS catálogos de una vez acá (vanilla y
+        # rrss) en vez de elegir uno solo al arrancar -- cada uno
+        # cachea su propio JSON en memoria por separado, así que
+        # tenerlos los dos vivos no duplica trabajo real. Cuál se
+        # usa se decide en cada pedido (_active_gym_leader_catalog()
+        # más abajo), leyendo config.json en el momento -- así el
+        # toggle de Configuración surte efecto ni bien se guarda,
+        # sin reiniciar DexRelay.
         self.gym_leader_catalog = GymLeaderCatalog()
+        self.gym_leader_catalog_hackroom = GymLeaderCatalog(
+            data_path=paths.path("data", "gym_leaders_rrss.json")
+        )
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -1280,6 +1303,20 @@ class Api:
             "nextLeader": next_leader,
         }
 
+    def _active_gym_leader_catalog(self):
+        """
+        Decide en el momento (leyendo config.json cada vez, no una
+        sola vez al arrancar) si usar el catálogo vanilla o el del
+        hackroom -- ver la corrección del 09/09/2026 junto a
+        self.gym_leader_catalog en __init__ (el toggle de
+        Configuración ahora surte efecto sin reiniciar DexRelay).
+        """
+
+        if self.app.config.get("hackroom", "enabled", default=False):
+            return self.gym_leader_catalog_hackroom
+
+        return self.gym_leader_catalog
+
     def _gym_leaders_with_earned(self):
         """
         Los 8 líderes del catálogo (`GymLeaderCatalog.list_all()`)
@@ -1305,7 +1342,7 @@ class Api:
 
         gym_leaders = []
 
-        for leader in self.gym_leader_catalog.list_all():
+        for leader in self._active_gym_leader_catalog().list_all():
             index = (leader.get("order") or 0) - 1
             earned = 0 <= index < len(badge_flags) and bool(
                 badge_flags[index]
@@ -1519,6 +1556,11 @@ class Api:
                     "realtime", "refresh_ms", default=200
                 ),
             },
+            "hackroom": {
+                "enabled": config.get(
+                    "hackroom", "enabled", default=False
+                ),
+            },
             "appVersion": resolve_app_version(),
             "githubUrl": GITHUB_URL,
             "issuesUrl": ISSUES_URL,
@@ -1565,6 +1607,26 @@ class Api:
         config.set("server", "host", value=host)
         config.set("server", "port", value=port)
         config.set("realtime", "refresh_ms", value=refresh_ms)
+        config.save()
+
+        return {"success": True}
+
+    def save_hackroom_setting(self, enabled):
+        """
+        Toggle "Modo hack: Rising Ruby/Sinking Sapphire" (Fase E,
+        09/09/2026, decisión del usuario -- ver el comentario junto
+        a self.gym_leader_catalog en __init__).
+
+        CORRECCIÓN (09/09/2026, a pedido del usuario): surte efecto
+        de inmediato, sin reiniciar DexRelay -- _active_gym_leader_
+        catalog() lee este valor de config.json en cada pedido, no
+        una sola vez al arrancar. Los dos catálogos (vanilla y
+        hackroom) ya están cargados en memoria de antes, así que no
+        hay ningún retraso extra al tildar/destildar.
+        """
+
+        config = self.app.config
+        config.set("hackroom", "enabled", value=bool(enabled))
         config.save()
 
         return {"success": True}

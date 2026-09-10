@@ -906,90 +906,15 @@
   // ninguna tabla escrita a mano (ver Program.cs, TypeKey()).
   var TYPE_ICON_VIEWBOX = "0 0 76.71 76.71";
 
-  // Traducción al español de los movimientos que aparecen en los
-  // equipos de líderes de gimnasio (06/09/2026, a pedido del
-  // usuario -- pendiente heredado de Fase A/Fase B: el dataset
-  // curado en data/gym_leaders.json trae los nombres en inglés tal
-  // cual los dan pokemondb.net/dittobase.com, las fuentes usadas
-  // para curarlo). Cubre SOLO los 64 movimientos que realmente
-  // aparecen en los 8 equipos -- no la lista completa de
-  // movimientos del juego, que son casi 1000 y no hace falta acá.
-  // Nombre oficial España (mismo criterio que ya se usó para los
-  // nombres de los líderes -- Alana/Petra/etc. son la localización
-  // España, no la de Hispanoamérica, que a veces difiere). Si
-  // algún nombre no coincide con lo que se ve en el juego real,
-  // avisar para corregirlo -- mismo criterio que la corrección de
-  // Alana/Petra intercambiadas.
-  var MOVE_NAME_ES = {
-    "Aerial Ace": "Golpe Aéreo",
-    "Air Cutter": "Corte Aéreo",
-    "Amnesia": "Amnesia",
-    "Aqua Ring": "Anillo Hídrico",
-    "Arm Thrust": "Golpe Brazo",
-    "Attract": "Atracción",
-    "Aurora Beam": "Rayo Aurora",
-    "Body Slam": "Golpe Cuerpo",
-    "Bulk Up": "Corpulencia",
-    "Calm Mind": "Paz Mental",
-    "Charge": "Carga",
-    "Chip Away": "Erosión",
-    "Cotton Guard": "Guardia Algodón",
-    "Curse": "Maldición",
-    "Defense Curl": "Rizo Defensa",
-    "Disarming Voice": "Voz Cautivadora",
-    "Double Team": "Doble Equipo",
-    "Dragon Breath": "Dragoaliento",
-    "Draining Kiss": "Beso Drenaje",
-    "Earth Power": "Tierra Viva",
-    "Earthquake": "Terremoto",
-    "Encore": "Otra Vez",
-    "Endeavor": "Esfuerzo",
-    "Feint Attack": "Finta",
-    "Fury Swipes": "Golpes Furia",
-    "Harden": "Fortaleza",
-    "Horn Drill": "Perforador",
-    "Hydro Pump": "Hidrobomba",
-    "Hypnosis": "Hipnosis",
-    "Ice Beam": "Rayo Hielo",
-    "Karate Chop": "Golpe Kárate",
-    "Knock Off": "Desarme",
-    "Lava Plume": "Humareda",
-    "Leer": "Malicioso",
-    "Light Screen": "Pantalla de Luz",
-    "Magnet Bomb": "Bomba Magnética",
-    "Mud Sport": "Chapoteo Lodo",
-    "Overheat": "Sofoco",
-    "Protect": "Protección",
-    "Psychic": "Psíquico",
-    "Quick Attack": "Ataque Rápido",
-    "Rain Dance": "Danza Lluvia",
-    "Recover": "Recuperación",
-    "Retaliate": "Represalia",
-    "Rock Slide": "Avalancha",
-    "Rock Throw": "Lanzarrocas",
-    "Rock Tomb": "Tumba Rocas",
-    "Rollout": "Rodar",
-    "Roost": "Respiro",
-    "Sand Attack": "Ataque Arena",
-    "Seismic Toss": "Sísmico",
-    "Solar Beam": "Rayo Solar",
-    "Steel Wing": "Ala de Acero",
-    "Sunny Day": "Día Soleado",
-    "Supersonic": "Supersónico",
-    "Swagger": "Contoneo",
-    "Sweet Kiss": "Beso Dulce",
-    "Tackle": "Placaje",
-    "Thunder Wave": "Onda Trueno",
-    "Volt Switch": "Cambio de Voltios",
-    "Water Pulse": "Hidropulso",
-    "Waterfall": "Cascada",
-    "Yawn": "Bostezo",
-    "Zen Headbutt": "Golpe Cabeza Zen",
-  };
-
-  function translateMoveName(name) {
-    return MOVE_NAME_ES[name] || name;
-  }
+  // Traducción de nombres de movimiento (09/09/2026, Fase E):
+  // MOVE_NAME_ES/translateMoveName() (un diccionario local de 64
+  // movimientos, solo cubría el juego base) se eliminó -- causaba
+  // justo el bug reportado jugando el hackroom ("el idioma de los
+  // movimientos y habilidades se han mezclado"), porque el hack usa
+  // muchos más movimientos que esos 64. Ahora la pestaña Líderes
+  // usa mon.movesEs, ya resuelto en el backend contra el bridge
+  // PKHeX (ver _resolve_move_es() en gym_leaders.py) -- cubre
+  // cualquier movimiento real de Gen 6.
 
   var TYPE_INFO = {
     "Normal": { label: "Normal", color: "#9fa19f", colorDark: "#4f504f", colorLight: "#cfd0cf", glyph: "<path d=\"M63.81 26.43c3.12-4.29 2.43-10.33-1.69-13.79-4-3.36-9.82-3.11-13.54.39-3.18-1.21-6.63-1.88-10.23-1.88s-7.05.67-10.23 1.88c-3.71-3.5-9.53-3.74-13.54-.39-4.13 3.46-4.81 9.49-1.69 13.79-2.17 4.05-3.4 8.67-3.4 13.58 0 15.91 12.95 28.86 28.86 28.86s28.86-12.95 28.86-28.86c0-4.91-1.23-9.53-3.4-13.58zM38.35 60.87c-11.5 0-20.86-9.36-20.86-20.86s9.36-20.86 20.86-20.86 20.86 9.36 20.86 20.86-9.36 20.86-20.86 20.86z\" fill=\"#fff\"/>" },
@@ -2600,6 +2525,7 @@
     document.getElementById("cfg-btn-save").addEventListener("click", onSaveConnectionSettingsClicked);
     document.getElementById("cfg-btn-reset").addEventListener("click", onResetConnectionSettingsClicked);
     document.getElementById("cfg-btn-clear-cache").addEventListener("click", onClearCacheClicked);
+    document.getElementById("cfg-btn-save-hackroom").addEventListener("click", onSaveHackroomSettingClicked);
   }
 
   function loadConfiguracionPage() {
@@ -2610,9 +2536,11 @@
         document.getElementById("cfg-port").value = data.server.port;
         document.getElementById("cfg-refresh").value = data.realtime.refresh_ms;
         document.getElementById("cfg-app-version").textContent = data.appVersion;
+        document.getElementById("cfg-hackroom-enabled").checked = !!data.hackroom.enabled;
 
         setCfgStatus("cfg-connection-status", "", null);
         setCfgStatus("cfg-cache-status", "", null);
+        setCfgStatus("cfg-hackroom-status", "", null);
 
         // Los links de "Acerca de" se bindean una sola vez -- el
         // destino (repo real) no cambia entre pedidos, así que no
@@ -2674,6 +2602,25 @@
         setCfgStatus(
           "cfg-connection-status",
           "Restablecido a los valores por defecto. Reiniciá DexRelay para que tome efecto.",
+          "success"
+        );
+      });
+  }
+
+  function onSaveHackroomSettingClicked() {
+    var enabled = document.getElementById("cfg-hackroom-enabled").checked;
+
+    api()
+      .save_hackroom_setting(enabled)
+      .then(function (result) {
+        if (result && result.error) {
+          setCfgStatus("cfg-hackroom-status", result.error, "error");
+          return;
+        }
+
+        setCfgStatus(
+          "cfg-hackroom-status",
+          "Guardado -- ya está activo, no hace falta reiniciar.",
           "success"
         );
       });
@@ -3690,9 +3637,19 @@
         // (name, sin traducir), mismo criterio que
         // leader_team_window.js: get_move_modal_data_by_name()
         // normaliza contra el identifier real de PokéAPI.
-        var movesHtml = (mon.moves || []).map(function (name) {
+        //
+        // CORRECCIÓN (09/09/2026, Fase E -- reportado jugando el
+        // hackroom: "el idioma de los movimientos y habilidades se
+        // han mezclado"): antes traducía con translateMoveName()
+        // (diccionario local de 64 movimientos, solo cubría el
+        // juego base). Ahora usa movesEs, ya resuelto en el
+        // backend vía el bridge PKHeX (ver _resolve_move_es() en
+        // gym_leaders.py) -- cubre cualquier movimiento real de
+        // Gen 6, no solo los 64 conocidos.
+        var movesHtml = (mon.moves || []).map(function (name, index) {
+          var nameEs = (mon.movesEs && mon.movesEs[index]) || name;
           return '<span class="nz-leader-mon-move-line" data-move-name="' + escapeHtml(name) + '">' +
-            escapeHtml(translateMoveName(name)) + "</span>";
+            escapeHtml(nameEs) + "</span>";
         }).join("");
 
         return (
@@ -3705,15 +3662,18 @@
           '<span class="nz-leader-mon-level">Nv. ' + mon.level + "</span>" +
           '<span class="nz-leader-mon-types">' + typesHtml + "</span>" +
           // Habilidad (06/09/2026): ahora curada en
-          // data/gym_leaders.json (investigada contra
-          // Bulbapedia + un playthrough completo de ORAS,
-          // ver GYM_ABILITY_NAMES_ES en gym_leaders.py) -- ya
-          // no es "No disponible" a diferencia de Naturaleza/
-          // IVs/EVs, que sí son imposibles de saber sin el
-          // save real del entrenador rival. Clickeable
-          // (07/09/2026) solo si mon.ability existe -- mismo
-          // criterio que la página Pokémon (un "—" sin
-          // habilidad conocida no debería ser clickeable).
+          // data/gym_leaders.json/gym_leaders_rrss.json
+          // (investigada contra Bulbapedia + un playthrough
+          // completo de ORAS) -- ya no es "No disponible" a
+          // diferencia de Naturaleza/IVs/EVs, que sí son
+          // imposibles de saber sin el save real del entrenador
+          // rival. abilityEs se resuelve en el backend vía el
+          // bridge PKHeX (09/09/2026, Fase E -- ver
+          // _resolve_ability_es() en gym_leaders.py), no con un
+          // diccionario local. Clickeable (07/09/2026) solo si
+          // mon.ability existe -- mismo criterio que la página
+          // Pokémon (un "—" sin habilidad conocida no debería ser
+          // clickeable).
           '<span class="nz-leader-mon-ability"' +
           (mon.ability ? ' data-ability-name="' + escapeHtml(mon.ability) + '"' : "") +
           ">Habilidad: <em>" + escapeHtml(mon.abilityEs || mon.ability || "—") + "</em></span>" +
