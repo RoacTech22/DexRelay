@@ -30,13 +30,15 @@ el JSON no trae:
    siempre es el Ace -- más robusto ante cualquier caso raro futuro
    donde el Ace no sea el de nivel más alto (no pasa hoy en los 8
    equipos curados, pero no hace falta depender de esa asunción).
-5. `abilityEs`/`movesEs`: traducción al español de la habilidad y
-   de cada movimiento del equipo.
+5. `abilityEs`/`movesEs`/`itemEs`: traducción al español de la
+   habilidad, cada movimiento, y el objeto equipado del equipo.
 
    CORRECCIÓN REAL (09/09/2026, reportado por el usuario jugando el
    hackroom Rising Ruby/Sinking Sapphire -- Fase E: "el idioma de
    los movimientos y habilidades se han mezclado, aparecen algunos
-   en español y otros en inglés"): antes esto se resolvía en el
+   en español y otros en inglés", y después también "los objetos
+   de los Pokémon de los líderes también están en inglés"): antes
+   esto se resolvía en el
    FRONTEND con dos diccionarios chicos a mano (MOVE_NAME_ES, 64
    movimientos, y GYM_ABILITY_NAMES_ES, 24 habilidades) -- cubrían
    justo lo que necesitaba el juego BASE (8 líderes, 24 Pokémon),
@@ -66,6 +68,8 @@ import json
 from app.core import paths
 from app.services.ability_catalog import AbilityCatalog
 from app.services.ability_description import AbilityDescriptionCatalog
+from app.services.item_catalog import ItemCatalog
+from app.services.item_description import ItemDescriptionCatalog
 from app.services.move_catalog import MoveCatalog
 from app.services.move_description import MoveDescriptionCatalog
 
@@ -221,6 +225,8 @@ class GymLeaderCatalog:
         self._ability_description_catalog = AbilityDescriptionCatalog()
         self._move_catalog = MoveCatalog()
         self._move_description_catalog = MoveDescriptionCatalog()
+        self._item_catalog = ItemCatalog()
+        self._item_description_catalog = ItemDescriptionCatalog()
 
     def _resolve_ability_es(self, ability_name):
         """
@@ -250,6 +256,29 @@ class GymLeaderCatalog:
             return move_name
 
         return self._move_catalog.get_name(move_id) or move_name
+
+    def _resolve_item_es(self, item_name):
+        """
+        Idem _resolve_ability_es(), para ítems -- reportado por el
+        usuario jugando el hackroom (09/09/2026): "los objetos de
+        los Pokémon de los líderes también están en inglés". Mismo
+        mecanismo, con el cruce extra de numeración que hace falta
+        para ítems (ver ItemDescriptionCatalog.get_id_by_name()).
+        `item_name` puede ser None (Pokémon sin objeto) -- se
+        devuelve None tal cual, sin tocar.
+        """
+
+        if not item_name:
+            return item_name
+
+        item_id = self._item_description_catalog.get_id_by_name(
+            item_name
+        )
+
+        if item_id is None:
+            return item_name
+
+        return self._item_catalog.get_name(item_id) or item_name
 
     def _ensure_loaded(self):
 
@@ -295,6 +324,7 @@ class GymLeaderCatalog:
                 team.append({
                     **member,
                     "abilityEs": self._resolve_ability_es(ability),
+                    "itemEs": self._resolve_item_es(member.get("item")),
                     "movesEs": [
                         self._resolve_move_es(move) for move in moves
                     ],

@@ -197,7 +197,11 @@
         }).join("")
       : '<div class="pokemon-move-row empty"><span class="pokemon-move-name">No disponible</span></div>';
 
-    var itemText = mon.item ? escapeHtml(mon.item) : "Ninguno";
+    // itemEs (09/09/2026, Fase E -- reportado por el usuario: "los
+    // objetos de los Pokémon de los líderes también están en
+    // inglés") se resuelve en el backend vía el bridge PKHeX (ver
+    // _resolve_item_es() en gym_leaders.py), no acá.
+    var itemText = mon.item ? escapeHtml(mon.itemEs || mon.item) : "Ninguno";
 
     // Naturaleza: "NN" (06/09/2026) -- no hay forma de saberla sin
     // el save real del entrenador rival, a diferencia de la
