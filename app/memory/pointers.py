@@ -17,57 +17,55 @@
 # ningún error visible, ni una lectura fallida: la dirección
 # simplemente cae en un lugar distinto de memoria. Encontrado
 # porque al usuario se le había borrado por error la actualización
-# de su copia de Omega Ruby. Alpha Sapphire no mostró este
-# síntoma, pero probablemente aplica igual si le faltara su
-# propia actualización -- no confirmado todavía, revisar si vuelve
-# a aparecer un "no carga el equipo" sin explicación.
-# REQUISITO REAL DE VERSIÓN DE JUEGO (04/09/2026): las direcciones
-# de este archivo se confirmaron contra Omega Ruby CON la
-# actualización 1.4 instalada. Sin el parche (juego base tal cual
-# viene de fábrica), el mapa de memoria queda corrido y estas
-# direcciones ya no apuntan a nada válido -- se manifiesta como
-# "el equipo no carga" (Dashboard y página Pokémon vacíos) sin
-# ningún error visible, ni una lectura fallida: la dirección
-# simplemente cae en un lugar distinto de memoria. Encontrado
-# porque al usuario se le había borrado por error la actualización
 # de su copia de Omega Ruby.
 #
-# CONFIRMADO (04/09/2026): Alpha Sapphire tiene el MISMO problema
-# al revés -- las direcciones actuales (PARTY_ORDER_ADDRESS =
-# 0x08CF71F0 y el resto de _BY_PROCESS de acá abajo) están
-# confirmadas contra el juego BASE de Alpha Sapphire, sin la
-# actualización 1.4. Con el parche puesto, no funcionan (mismo
-# síntoma: equipo vacío, sin error).
+# RESUELTO (09/09/2026, investigación completa con Cheat Engine en
+# vivo -- tools/probes/memory/investigar_alpha_sapphire_1_4.py):
+# Alpha Sapphire con la actualización 1.4 usa EXACTAMENTE las
+# mismas 5 direcciones que Omega Ruby 1.4 (PARTY_ORDER_ADDRESS,
+# PARTY_COUNT_ADDRESS, BOX_BASE_ADDRESS, CURRENT_ZONE_ID_ADDRESS y
+# su espejo) -- el parche 1.4 unificó el mapa de memoria de las dos
+# versiones, ya no hace falta un tercer set de direcciones. Validado
+# en vivo con doble cruce: el Pokémon del slot 1 leído por el probe
+# (species_id=535 "Tympole", nivel 17, nickname "Tiny") coincidió
+# EXACTO, apodo incluido, con el registro ya guardado en el propio
+# Nuzlocke Tracker del usuario (data/nuzlocke_alpha_sapphire.json).
 #
-# PENDIENTE (a propósito, para otra sesión -- no urgente, el
-# usuario decidió seguir jugando la versión base de AS por ahora):
-# volver a investigar con Cheat Engine en vivo, jugando Alpha
-# Sapphire CON la actualización 1.4, las direcciones equivalentes
-# a PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS/BOX_BASE_ADDRESS/
-# CURRENT_ZONE_ID_ADDRESS para esa versión -- mismo proceso que ya
-# se hizo para Omega Ruby. Importante: el process_name (sango-2)
-# es el MISMO esté parcheado o no -- Azahar no expone la versión
-# del juego por este protocolo, así que DexRelay no puede elegir
-# solo qué set de direcciones usar si en algún momento hay que
-# soportar las dos versiones de AS a la vez (base y 1.4). Por
-# ahora no hace falta resolver eso -- alcanza con una sola versión
-# de AS confirmada, igual que ya pasa con Omega Ruby.
+# DECISIÓN (09/09/2026, a pedido del usuario): las 5 direcciones de
+# PROCESS_NAME_ALPHA_SAPPHIRE de acá abajo se reemplazaron por las
+# de 1.4 (iguales a las de Omega Ruby) -- el usuario ya migró su
+# copia a 1.4 y no piensa volver a la base. Las direcciones VIEJAS
+# de AS-base quedan archivadas en ARCHIVO_DIRECCIONES_AS_BASE (más
+# abajo) por si hiciera falta volver atrás alguna vez -- no se usan
+# en ningún lado del código, son solo referencia histórica.
 PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2"
 PROCESS_NAME_OMEGA_RUBY = "sango-1"
 
+# Archivo histórico (09/09/2026): direcciones de Alpha Sapphire SIN
+# la actualización 1.4 (juego base), confirmadas el 29/08/2026 y
+# reemplazadas hoy por las de 1.4 -- ver la decisión de arriba. Se
+# guardan acá solo como referencia si algún día hace falta volver a
+# jugar la versión base; no se leen desde ningún lado del código.
+ARCHIVO_DIRECCIONES_AS_BASE = {
+    "PARTY_ORDER_ADDRESS": 0x08CF71F0,
+    "PARTY_COUNT_ADDRESS": 0x08CF7208,
+    "BOX_BASE_ADDRESS": 0x08C9A144,
+    "CURRENT_ZONE_ID_ADDRESS": 0x08C6A7B2,
+    "CURRENT_ZONE_ID_MIRROR_ADDRESS": 0x08C6A894,
+}
+
 # Tabla que contiene el orden lógico de los Pokémon de la party.
-# CONFIRMADO (29/08/2026): esta dirección NO es la misma entre
-# Alpha Sapphire y Omega Ruby -- la de AS da 0x0 en los 6 slots
-# probando en OR (investigación completa en el Documento Maestro,
-# sección 14 y 19). Encontrada la de OR con el mismo método que
-# PARTY_COUNT_ADDRESS: por la relación PARTY_COUNT = PARTY_ORDER +
-# 0x18, ya confirmada para AS, aplicada a la inversa sobre el
-# PARTY_COUNT_ADDRESS de OR (confirmado primero, en vivo, con
-# Cheat Engine) para llegar a esta dirección -- y confirmada en
-# vivo con observar_orden_party_or.py: 6 punteros no-cero que se
-# reordenan solos al reordenar el equipo, igual que en AS.
+# CONFIRMADO (29/08/2026): esta dirección NO era la misma entre
+# Alpha Sapphire (base) y Omega Ruby (1.4) -- la de AS-base daba
+# 0x0 en los 6 slots probando en OR (investigación completa en el
+# Documento Maestro, sección 14 y 19).
+#
+# ACTUALIZADO (09/09/2026): Alpha Sapphire migró a la actualización
+# 1.4 (ver decisión junto a PROCESS_NAME_ALPHA_SAPPHIRE más arriba)
+# -- con el parche puesto, AS usa la MISMA dirección que Omega Ruby.
+# Valor viejo de AS-base archivado en ARCHIVO_DIRECCIONES_AS_BASE.
 _PARTY_ORDER_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CF71F0,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CFB1E0,
     PROCESS_NAME_OMEGA_RUBY: 0x08CFB1E0,
 }
 
@@ -81,7 +79,8 @@ ORDER_ENTRY_SIZE = 4
 # equipo). Justo el byte siguiente al final de la tabla de 6
 # punteros (PARTY_ORDER_ADDRESS + 0x18, ya que 6 punteros × 4
 # bytes = 0x18) -- un lugar muy lógico, pegado a la tabla que
-# describe. Misma relación confirmada para las dos versiones.
+# describe. Misma relación confirmada para las dos versiones, y
+# también para Alpha Sapphire 1.4 (09/09/2026).
 #
 # Confirmado en vivo bajando de 6 a 2 en tiempo real (Alpha
 # Sapphire) y subiendo/bajando 1→5→4 (Omega Ruby), exactamente en
@@ -92,8 +91,12 @@ ORDER_ENTRY_SIZE = 4
 # decodificaba bien y aparecía "fantasma" en el overlay). Hay que
 # consultar esta dirección para saber cuántos de esos 6 punteros
 # son realmente parte de la party actual.
+#
+# ACTUALIZADO (09/09/2026): mismo criterio que PARTY_ORDER_ADDRESS
+# de acá arriba -- AS 1.4 comparte esta dirección con Omega Ruby.
+# Valor viejo de AS-base archivado en ARCHIVO_DIRECCIONES_AS_BASE.
 _PARTY_COUNT_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CF7208,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CFB1F8,
     PROCESS_NAME_OMEGA_RUBY: 0x08CFB1F8,
 }
 
@@ -262,8 +265,14 @@ TOTAL_CAUGHT_ADDRESS = 0x08C8729C
 # Solo se confirmaron empíricamente los primeros 5 slots -- el
 # resto se asume por el tamaño estándar del juego, no está
 # validado slot por slot.
+#
+# ACTUALIZADO (09/09/2026): Alpha Sapphire migró a la actualización
+# 1.4 -- con el parche puesto, AS usa la MISMA dirección que Omega
+# Ruby (ver decisión junto a PROCESS_NAME_ALPHA_SAPPHIRE, arriba
+# del todo del archivo). Valor viejo de AS-base archivado en
+# ARCHIVO_DIRECCIONES_AS_BASE.
 _BOX_BASE_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C9A144,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C9E134,
     PROCESS_NAME_OMEGA_RUBY: 0x08C9E134,
 }
 
@@ -445,13 +454,19 @@ def get_box_address(process_name, box_index):
 # versiones comparten el mismo esquema de IDs de zona. El candidato
 # tambien aparecio en pareja separada por 0xE2 bytes, igual que la
 # relacion ya confirmada entre CURRENT_ZONE_ID_ADDRESS y su espejo
-# en Alpha Sapphire (0x08C6A894 - 0x08C6A7B2 == 0xE2).
+# en Alpha Sapphire-base (0x08C6A894 - 0x08C6A7B2 == 0xE2).
+#
+# ACTUALIZADO (09/09/2026): Alpha Sapphire migró a la actualización
+# 1.4 -- con el parche puesto, AS usa las MISMAS direcciones que
+# Omega Ruby para la zona actual y su espejo (ver decisión junto a
+# PROCESS_NAME_ALPHA_SAPPHIRE, arriba del todo del archivo). Valores
+# viejos de AS-base archivados en ARCHIVO_DIRECCIONES_AS_BASE.
 _CURRENT_ZONE_ID_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6A7B2,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6E7A2,
     PROCESS_NAME_OMEGA_RUBY: 0x08C6E7A2,
 }
 _CURRENT_ZONE_ID_MIRROR_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6A894,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6E884,
     PROCESS_NAME_OMEGA_RUBY: 0x08C6E884,
 }
 
