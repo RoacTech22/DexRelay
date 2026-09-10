@@ -5496,6 +5496,32 @@ body {
   gap: 8px;
 }
 
+/* Varios métodos alternativos hacia el MISMO destino (09/09/2026,
+   bug real corregido -- hackroom: Kadabra ahora evoluciona a
+   Alakazam por Trade, por amistad, O al nivel 36, y las tres se
+   perdían menos la primera). Se apilan los conectores individuales
+   (connectorHtmlSingle) verticalmente, separados por un "o" chico
+   -- mismo conector visual de siempre, solo que ahora puede haber
+   más de uno apilado en el mismo lugar de la cadena. */
+.pkm-species-evolution-connector-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.pkm-species-evolution-connector-option {
+  display: flex;
+}
+
+.pkm-species-evolution-connector-or {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
 .pkm-species-evolution-item-sprite {
   width: 24px;
   height: 24px;

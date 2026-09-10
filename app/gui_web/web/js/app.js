@@ -1880,7 +1880,7 @@
       // sin un valor puntual que mostrar compacto) se cae a una
       // flecha simple, con la descripción completa como tooltip en
       // cualquier caso.
-      function connectorHtml(transition) {
+      function connectorHtmlSingle(transition) {
         if (!transition) {
           return (
             '<span class="pkm-species-evolution-connector">' +
@@ -1924,6 +1924,31 @@
         );
       }
 
+      // Envoltorio sobre connectorHtmlSingle() para el caso de
+      // VARIOS métodos alternativos hacia el mismo destino (ej.
+      // Kadabra -> Alakazam ahora por Trade, por amistad, O al
+      // nivel 36 en el hackroom -- ver "transitions" plural que
+      // arma _build_forward_evolution_node() en api.py, 09/09/2026,
+      // bug real corregido: antes se perdían todos los métodos
+      // menos el primero). Con una sola transición se ve
+      // exactamente igual que antes (un conector). Con varias, se
+      // apilan verticalmente separadas por un "o" chico -- mismo
+      // patrón visual que las ramas de evolución (Wurmple), pero
+      // en miniatura dentro de un solo conector.
+      function connectorHtml(transitions) {
+        var list = transitions || [];
+
+        if (list.length <= 1) {
+          return connectorHtmlSingle(list[0]);
+        }
+
+        var optionsHtml = list.map(function (transition) {
+          return '<div class="pkm-species-evolution-connector-option">' + connectorHtmlSingle(transition) + "</div>";
+        }).join('<span class="pkm-species-evolution-connector-or">o</span>');
+
+        return '<div class="pkm-species-evolution-connector-group">' + optionsHtml + "</div>";
+      }
+
       // Recorre el árbol hacia adelante desde un nodo dado. Caso
       // común (0 o 1 evolución posible): se ve exactamente igual
       // que antes, una fila horizontal simple. Caso con
@@ -1942,14 +1967,14 @@
         }
 
         if (children.length === 1) {
-          html += connectorHtml(children[0].transition) + renderForwardNode(children[0].node);
+          html += connectorHtml(children[0].transitions) + renderForwardNode(children[0].node);
           return html;
         }
 
         var branchesHtml = children.map(function (child) {
           return (
             '<div class="pkm-species-evolution-branch-row">' +
-            connectorHtml(child.transition) + renderForwardNode(child.node) +
+            connectorHtml(child.transitions) + renderForwardNode(child.node) +
             "</div>"
           );
         }).join("");

@@ -1123,10 +1123,35 @@ class Api:
         if depth_remaining <= 0:
             return node
 
+        # BUG REAL corregido (09/09/2026, reportado por el usuario
+        # jugando el hackroom: "las evoluciones que se hacen por
+        # intercambios no se han modificado al nuevo método").
+        # Causa real: cuando una especie tiene VARIOS métodos
+        # alternativos hacia el MISMO destino (ej. Kadabra ahora
+        # evoluciona a Alakazam por Trade, por amistad, O al nivel
+        # 36 -- ver evolution_changes_rrss.json, "in addition to
+        # the trading way" en el documento del hack), el chequeo de
+        # `next_id in seen_ids` de acá abajo descartaba TODAS las
+        # transiciones menos la primera, porque las tres apuntan al
+        # mismo `toSpeciesId` -- `seen_ids` fue pensado para evitar
+        # ciclos/loops en el árbol, no para des-duplicar métodos
+        # alternativos legítimos hacia un mismo destino. Se agrupan
+        # ahora por toSpeciesId ANTES de chequear seen_ids, así el
+        # nodo hijo se construye una sola vez pero con TODAS las
+        # transiciones que lleven ahí.
+        evolutions_by_target = {}
+
         for evolution in stage_details.get("evolutions", []):
             next_id = evolution.get("toSpeciesId")
 
-            if not next_id or next_id in seen_ids:
+            if not next_id:
+                continue
+
+            evolutions_by_target.setdefault(next_id, []).append(evolution)
+
+        for next_id, evolutions in evolutions_by_target.items():
+
+            if next_id in seen_ids:
                 continue
 
             seen_ids.add(next_id)
@@ -1145,7 +1170,10 @@ class Api:
             )
 
             node["children"].append({
-                "transition": self._resolve_evolution_transition(evolution),
+                "transitions": [
+                    self._resolve_evolution_transition(evolution)
+                    for evolution in evolutions
+                ],
                 "node": child_node,
             })
 
