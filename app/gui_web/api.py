@@ -23,6 +23,7 @@ lo mismo sin ser una petición de red real.
 from __future__ import annotations
 
 import base64
+import json
 import time
 import webbrowser
 
@@ -231,6 +232,97 @@ class Api:
         self.gym_leader_catalog_hackroom = GymLeaderCatalog(
             data_path=paths.path("data", "gym_leaders_rrss.json")
         )
+
+        # Overrides de evolución del hackroom (09/09/2026, Fase E,
+        # segunda parte -- EvolutionChanges.txt vía
+        # build_evolution_changes_hackroom.py). species_details()
+        # del bridge resuelve evoluciones desde las tablas
+        # INTERNAS de PKHeX.Core (las del juego base) -- no tiene
+        # forma de saber que el ROM está parcheado, así que estos
+        # overrides se aplican a mano encima de lo que devuelve,
+        # solo cuando hackroom.enabled está prendido (ver
+        # _species_details_with_hackroom_overrides() más abajo,
+        # usado en vez de self.modal_bridge.species_details()
+        # directo en los 3 lugares que resuelven evoluciones).
+        # Agrupado por fromSpeciesId para no recorrer la lista
+        # entera en cada consulta.
+        self._hackroom_evolution_overrides_by_species = (
+            self._load_hackroom_evolution_overrides()
+        )
+
+    def _load_hackroom_evolution_overrides(self):
+
+        overrides_path = paths.path(
+            "data", "evolution_changes_rrss.json"
+        )
+
+        if not overrides_path.exists():
+            return {}
+
+        try:
+            with open(overrides_path, "r", encoding="utf-8") as file:
+                raw = json.load(file)
+        except Exception:
+            return {}
+
+        by_species = {}
+
+        for override in raw.get("overrides", []):
+            from_id = override.get("fromSpeciesId")
+            by_species.setdefault(from_id, []).append(override)
+
+        return by_species
+
+    def _species_details_with_hackroom_overrides(self, species_id):
+        """
+        Reemplazo directo de self.modal_bridge.species_details(id)
+        -- misma firma, mismo formato de respuesta -- que además
+        aplica los overrides de evolución del hackroom (ver arriba)
+        cuando config.json -> hackroom.enabled está prendido. Si
+        está apagado, o la especie no tiene overrides, el resultado
+        es idéntico al del bridge sin tocar.
+        """
+
+        details = self.modal_bridge.species_details(species_id)
+
+        if "error" in details:
+            return details
+
+        if not self.app.config.get("hackroom", "enabled", default=False):
+            return details
+
+        overrides = self._hackroom_evolution_overrides_by_species.get(
+            species_id
+        )
+
+        if not overrides:
+            return details
+
+        evolutions = list(details.get("evolutions", []))
+
+        for override in overrides:
+
+            to_id = override["toSpeciesId"]
+            new_entry = {
+                "toSpeciesId": to_id,
+                "toSpeciesName": override["toSpecies"],
+                "methodKey": override["methodKey"],
+                "level": override["level"],
+                "argument": override["argument"],
+            }
+
+            if override["mode"] == "replace":
+                evolutions = [
+                    entry for entry in evolutions
+                    if entry.get("toSpeciesId") != to_id
+                ]
+
+            evolutions.append(new_entry)
+
+        return {
+            **details,
+            "evolutions": evolutions,
+        }
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -1040,7 +1132,7 @@ class Api:
             seen_ids.add(next_id)
 
             try:
-                next_details = self.modal_bridge.species_details(next_id)
+                next_details = self._species_details_with_hackroom_overrides(next_id)
             except Exception:
                 next_details = {}
 
@@ -1115,7 +1207,7 @@ class Api:
         for ancestor_id in ancestor_ids:
             try:
                 details_by_species_id[ancestor_id] = (
-                    self.modal_bridge.species_details(ancestor_id)
+                    self._species_details_with_hackroom_overrides(ancestor_id)
                 )
             except Exception:
                 details_by_species_id[ancestor_id] = {}
@@ -1178,7 +1270,7 @@ class Api:
         """
 
         try:
-            details = self.modal_bridge.species_details(species_id)
+            details = self._species_details_with_hackroom_overrides(species_id)
         except Exception as error:
             return {"error": str(error)}
 
