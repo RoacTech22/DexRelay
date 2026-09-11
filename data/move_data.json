@@ -86,7 +86,7 @@
   },
   "18": {
     "power": null,
-    "accuracy": 100,
+    "accuracy": null,
     "categoryKey": "Status"
   },
   "19": {
@@ -105,7 +105,7 @@
     "categoryKey": "Physical"
   },
   "22": {
-    "power": 35,
+    "power": 45,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -205,8 +205,8 @@
     "categoryKey": "Physical"
   },
   "42": {
-    "power": 14,
-    "accuracy": 85,
+    "power": 25,
+    "accuracy": 95,
     "categoryKey": "Physical"
   },
   "43": {
@@ -226,7 +226,7 @@
   },
   "46": {
     "power": null,
-    "accuracy": 100,
+    "accuracy": null,
     "categoryKey": "Status"
   },
   "47": {
@@ -260,7 +260,7 @@
     "categoryKey": "Special"
   },
   "53": {
-    "power": 95,
+    "power": 90,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -275,22 +275,22 @@
     "categoryKey": "Special"
   },
   "56": {
-    "power": 120,
+    "power": 110,
     "accuracy": 80,
     "categoryKey": "Special"
   },
   "57": {
-    "power": 95,
+    "power": 90,
     "accuracy": 100,
     "categoryKey": "Special"
   },
   "58": {
-    "power": 95,
+    "power": 90,
     "accuracy": 100,
     "categoryKey": "Special"
   },
   "59": {
-    "power": 120,
+    "power": 110,
     "accuracy": 70,
     "categoryKey": "Special"
   },
@@ -420,7 +420,7 @@
     "categoryKey": "Special"
   },
   "85": {
-    "power": 95,
+    "power": 90,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -430,7 +430,7 @@
     "categoryKey": "Status"
   },
   "87": {
-    "power": 120,
+    "power": 110,
     "accuracy": 70,
     "categoryKey": "Special"
   },
@@ -605,12 +605,12 @@
     "categoryKey": "Physical"
   },
   "122": {
-    "power": 20,
+    "power": 30,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
   "123": {
-    "power": 20,
+    "power": 30,
     "accuracy": 70,
     "categoryKey": "Special"
   },
@@ -625,7 +625,7 @@
     "categoryKey": "Physical"
   },
   "126": {
-    "power": 120,
+    "power": 110,
     "accuracy": 85,
     "categoryKey": "Special"
   },
@@ -645,7 +645,7 @@
     "categoryKey": "Special"
   },
   "130": {
-    "power": 100,
+    "power": 130,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -681,7 +681,7 @@
   },
   "137": {
     "power": null,
-    "accuracy": 90,
+    "accuracy": 100,
     "categoryKey": "Status"
   },
   "138": {
@@ -691,7 +691,7 @@
   },
   "139": {
     "power": null,
-    "accuracy": 80,
+    "accuracy": 90,
     "categoryKey": "Status"
   },
   "140": {
@@ -720,7 +720,7 @@
     "categoryKey": "Status"
   },
   "145": {
-    "power": 20,
+    "power": 40,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -741,7 +741,7 @@
   },
   "149": {
     "power": null,
-    "accuracy": 80,
+    "accuracy": 100,
     "categoryKey": "Special"
   },
   "150": {
@@ -755,7 +755,7 @@
     "categoryKey": "Status"
   },
   "152": {
-    "power": 90,
+    "power": 100,
     "accuracy": 90,
     "categoryKey": "Physical"
   },
@@ -835,7 +835,7 @@
     "categoryKey": "Physical"
   },
   "168": {
-    "power": 40,
+    "power": 60,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -860,7 +860,7 @@
     "categoryKey": "Physical"
   },
   "173": {
-    "power": 40,
+    "power": 50,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -1045,7 +1045,7 @@
     "categoryKey": "Physical"
   },
   "210": {
-    "power": 20,
+    "power": 40,
     "accuracy": 95,
     "categoryKey": "Physical"
   },
@@ -1180,7 +1180,7 @@
     "categoryKey": "Status"
   },
   "237": {
-    "power": 1,
+    "power": 60,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -1235,7 +1235,7 @@
     "categoryKey": "Special"
   },
   "248": {
-    "power": 100,
+    "power": 120,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -1280,7 +1280,7 @@
     "categoryKey": "Status"
   },
   "257": {
-    "power": 100,
+    "power": 95,
     "accuracy": 90,
     "categoryKey": "Special"
   },
@@ -1301,7 +1301,7 @@
   },
   "261": {
     "power": null,
-    "accuracy": 75,
+    "accuracy": 85,
     "categoryKey": "Status"
   },
   "262": {
@@ -1320,7 +1320,7 @@
     "categoryKey": "Physical"
   },
   "265": {
-    "power": 60,
+    "power": 70,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -1405,7 +1405,7 @@
     "categoryKey": "Status"
   },
   "282": {
-    "power": 20,
+    "power": 65,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -1540,8 +1540,8 @@
     "categoryKey": "Special"
   },
   "309": {
-    "power": 100,
-    "accuracy": 85,
+    "power": 90,
+    "accuracy": 90,
     "categoryKey": "Physical"
   },
   "310": {
@@ -1565,12 +1565,12 @@
     "categoryKey": "Status"
   },
   "314": {
-    "power": 55,
+    "power": 60,
     "accuracy": 95,
     "categoryKey": "Special"
   },
   "315": {
-    "power": 140,
+    "power": 130,
     "accuracy": 90,
     "categoryKey": "Special"
   },
@@ -1580,8 +1580,8 @@
     "categoryKey": "Status"
   },
   "317": {
-    "power": 50,
-    "accuracy": 80,
+    "power": 60,
+    "accuracy": 95,
     "categoryKey": "Physical"
   },
   "318": {
@@ -1645,7 +1645,7 @@
     "categoryKey": "Special"
   },
   "330": {
-    "power": 95,
+    "power": 90,
     "accuracy": 85,
     "categoryKey": "Special"
   },
@@ -1785,7 +1785,7 @@
     "categoryKey": "Status"
   },
   "358": {
-    "power": 60,
+    "power": 70,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -1855,7 +1855,7 @@
     "categoryKey": "Physical"
   },
   "372": {
-    "power": 50,
+    "power": 60,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -1871,7 +1871,7 @@
   },
   "375": {
     "power": null,
-    "accuracy": 90,
+    "accuracy": 100,
     "categoryKey": "Status"
   },
   "376": {
@@ -1975,7 +1975,7 @@
     "categoryKey": "Physical"
   },
   "396": {
-    "power": 90,
+    "power": 80,
     "accuracy": null,
     "categoryKey": "Special"
   },
@@ -2025,7 +2025,7 @@
     "categoryKey": "Special"
   },
   "406": {
-    "power": 90,
+    "power": 85,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2035,7 +2035,7 @@
     "categoryKey": "Physical"
   },
   "408": {
-    "power": 70,
+    "power": 80,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2055,7 +2055,7 @@
     "categoryKey": "Special"
   },
   "412": {
-    "power": 80,
+    "power": 90,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2165,7 +2165,7 @@
     "categoryKey": "Status"
   },
   "434": {
-    "power": 140,
+    "power": 130,
     "accuracy": 90,
     "categoryKey": "Special"
   },
@@ -2180,7 +2180,7 @@
     "categoryKey": "Special"
   },
   "437": {
-    "power": 140,
+    "power": 130,
     "accuracy": 90,
     "categoryKey": "Special"
   },
@@ -2201,7 +2201,7 @@
   },
   "441": {
     "power": 120,
-    "accuracy": 70,
+    "accuracy": 80,
     "categoryKey": "Physical"
   },
   "442": {
@@ -2235,7 +2235,7 @@
     "categoryKey": "Special"
   },
   "448": {
-    "power": 60,
+    "power": 65,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2310,7 +2310,7 @@
     "categoryKey": "Physical"
   },
   "463": {
-    "power": 120,
+    "power": 100,
     "accuracy": 75,
     "categoryKey": "Special"
   },
@@ -2395,7 +2395,7 @@
     "categoryKey": "Physical"
   },
   "480": {
-    "power": 40,
+    "power": 60,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -2420,7 +2420,7 @@
     "categoryKey": "Physical"
   },
   "485": {
-    "power": 70,
+    "power": 120,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2445,7 +2445,7 @@
     "categoryKey": "Status"
   },
   "490": {
-    "power": 60,
+    "power": 65,
     "accuracy": 100,
     "categoryKey": "Physical"
   },
@@ -2525,7 +2525,7 @@
     "categoryKey": "Status"
   },
   "506": {
-    "power": 50,
+    "power": 65,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2545,7 +2545,7 @@
     "categoryKey": "Physical"
   },
   "510": {
-    "power": 30,
+    "power": 60,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2585,17 +2585,17 @@
     "categoryKey": "Special"
   },
   "518": {
-    "power": 50,
+    "power": 80,
     "accuracy": 100,
     "categoryKey": "Special"
   },
   "519": {
-    "power": 50,
+    "power": 80,
     "accuracy": 100,
     "categoryKey": "Special"
   },
   "520": {
-    "power": 50,
+    "power": 80,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2605,7 +2605,7 @@
     "categoryKey": "Special"
   },
   "522": {
-    "power": 30,
+    "power": 50,
     "accuracy": 100,
     "categoryKey": "Special"
   },
@@ -2615,7 +2615,7 @@
     "categoryKey": "Physical"
   },
   "524": {
-    "power": 40,
+    "power": 60,
     "accuracy": 90,
     "categoryKey": "Special"
   },
@@ -2705,7 +2705,7 @@
     "categoryKey": "Physical"
   },
   "542": {
-    "power": 120,
+    "power": 110,
     "accuracy": 70,
     "categoryKey": "Special"
   },
@@ -2725,7 +2725,7 @@
     "categoryKey": "Special"
   },
   "546": {
-    "power": 85,
+    "power": 120,
     "accuracy": 100,
     "categoryKey": "Special"
   },

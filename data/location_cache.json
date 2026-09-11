@@ -1,843 +1,1019 @@
 [
   {
     "id": 0,
-    "name": "(None)"
+    "name": "(Ningún objeto)"
   },
   {
     "id": 60002,
-    "name": "Day Care helpers"
+    "name": "Pareja de la Guardería"
   },
   {
     "id": 30002,
-    "name": "a Link Trade (Egg)"
+    "name": "Intercambio en conexión (Huevo)"
   },
   {
     "id": 276,
-    "name": "???"
-  },
-  {
-    "id": 308,
-    "name": "Ancient Tomb"
-  },
-  {
-    "id": 318,
-    "name": "Battle Resort"
-  },
-  {
-    "id": 296,
-    "name": "Cave of Origin"
-  },
-  {
-    "id": 344,
-    "name": "Crescent Isle"
-  },
-  {
-    "id": 278,
-    "name": "Desert Ruins"
-  },
-  {
-    "id": 174,
-    "name": "Dewford Town"
-  },
-  {
-    "id": 200,
-    "name": "Ever Grande City"
-  },
-  {
-    "id": 340,
-    "name": "Fabled Cave"
-  },
-  {
-    "id": 178,
-    "name": "Fallarbor Town"
-  },
-  {
-    "id": 288,
-    "name": "Fiery Path"
-  },
-  {
-    "id": 192,
-    "name": "Fortree City"
-  },
-  {
-    "id": 342,
-    "name": "Gnarled Den"
-  },
-  {
-    "id": 280,
-    "name": "Granite Cave"
-  },
-  {
-    "id": 306,
-    "name": "Island Cave"
-  },
-  {
-    "id": 286,
-    "name": "Jagged Pass"
-  },
-  {
-    "id": 176,
-    "name": "Lavaridge Town"
-  },
-  {
-    "id": 194,
-    "name": "Lilycove City"
-  },
-  {
-    "id": 170,
-    "name": "Littleroot Town"
-  },
-  {
-    "id": 188,
-    "name": "Mauville City"
-  },
-  {
-    "id": 272,
-    "name": "Meteor Falls"
-  },
-  {
-    "id": 328,
-    "name": "Mirage Cave"
-  },
-  {
-    "id": 326,
-    "name": "Mirage Forest"
-  },
-  {
-    "id": 330,
-    "name": "Mirage Island"
-  },
-  {
-    "id": 332,
-    "name": "Mirage Mountain"
-  },
-  {
-    "id": 196,
-    "name": "Mossdeep City"
-  },
-  {
-    "id": 284,
-    "name": "Mt. Chimney"
-  },
-  {
-    "id": 290,
-    "name": "Mt. Pyre"
-  },
-  {
-    "id": 338,
-    "name": "Nameless Cavern"
-  },
-  {
-    "id": 302,
-    "name": "New Mauville"
-  },
-  {
-    "id": 172,
-    "name": "Oldale Town"
-  },
-  {
-    "id": 182,
-    "name": "Pacifidlog Town"
-  },
-  {
-    "id": 336,
-    "name": "Pathless Plain"
-  },
-  {
-    "id": 184,
-    "name": "Petalburg City"
-  },
-  {
-    "id": 282,
-    "name": "Petalburg Woods"
-  },
-  {
-    "id": 202,
-    "name": "Pokémon League (OR/AS)"
-  },
-  {
-    "id": 204,
-    "name": "Route 101"
-  },
-  {
-    "id": 206,
-    "name": "Route 102"
-  },
-  {
-    "id": 208,
-    "name": "Route 103"
-  },
-  {
-    "id": 210,
-    "name": "Route 104"
-  },
-  {
-    "id": 212,
-    "name": "Route 105"
-  },
-  {
-    "id": 214,
-    "name": "Route 106"
-  },
-  {
-    "id": 216,
-    "name": "Route 107"
-  },
-  {
-    "id": 218,
-    "name": "Route 108"
-  },
-  {
-    "id": 220,
-    "name": "Route 109"
-  },
-  {
-    "id": 222,
-    "name": "Route 110"
-  },
-  {
-    "id": 224,
-    "name": "Route 111"
-  },
-  {
-    "id": 226,
-    "name": "Route 112"
-  },
-  {
-    "id": 228,
-    "name": "Route 113"
-  },
-  {
-    "id": 230,
-    "name": "Route 114"
-  },
-  {
-    "id": 232,
-    "name": "Route 115"
-  },
-  {
-    "id": 234,
-    "name": "Route 116"
-  },
-  {
-    "id": 236,
-    "name": "Route 117"
-  },
-  {
-    "id": 238,
-    "name": "Route 118"
-  },
-  {
-    "id": 240,
-    "name": "Route 119"
-  },
-  {
-    "id": 242,
-    "name": "Route 120"
-  },
-  {
-    "id": 244,
-    "name": "Route 121"
-  },
-  {
-    "id": 246,
-    "name": "Route 122"
-  },
-  {
-    "id": 248,
-    "name": "Route 123"
-  },
-  {
-    "id": 250,
-    "name": "Route 124"
-  },
-  {
-    "id": 252,
-    "name": "Route 125"
-  },
-  {
-    "id": 254,
-    "name": "Route 126"
-  },
-  {
-    "id": 256,
-    "name": "Route 127"
-  },
-  {
-    "id": 258,
-    "name": "Route 128"
-  },
-  {
-    "id": 260,
-    "name": "Route 129"
-  },
-  {
-    "id": 262,
-    "name": "Route 130"
-  },
-  {
-    "id": 264,
-    "name": "Route 131"
-  },
-  {
-    "id": 266,
-    "name": "Route 132"
-  },
-  {
-    "id": 268,
-    "name": "Route 133"
-  },
-  {
-    "id": 270,
-    "name": "Route 134"
-  },
-  {
-    "id": 190,
-    "name": "Rustboro City"
-  },
-  {
-    "id": 274,
-    "name": "Rusturf Tunnel"
-  },
-  {
-    "id": 322,
-    "name": "S.S. Tidal"
-  },
-  {
-    "id": 324,
-    "name": "Safari Zone"
-  },
-  {
-    "id": 312,
-    "name": "Scorched Slab"
-  },
-  {
-    "id": 304,
-    "name": "Sea Mauville"
-  },
-  {
-    "id": 294,
-    "name": "Seafloor Cavern"
-  },
-  {
-    "id": 310,
-    "name": "Sealed Chamber"
-  },
-  {
-    "id": 354,
-    "name": "Secret Base"
-  },
-  {
-    "id": 346,
-    "name": "Secret Islet"
-  },
-  {
-    "id": 352,
-    "name": "Secret Meadow"
-  },
-  {
-    "id": 350,
-    "name": "Secret Shore"
-  },
-  {
-    "id": 300,
-    "name": "Shoal Cave"
-  },
-  {
-    "id": 316,
-    "name": "Sky Pillar"
-  },
-  {
-    "id": 186,
-    "name": "Slateport City"
-  },
-  {
-    "id": 348,
-    "name": "Soaring in the sky"
+    "name": "(?)"
   },
   {
     "id": 198,
-    "name": "Sootopolis City"
+    "name": "Arrecípolis"
   },
   {
-    "id": 320,
-    "name": "Southern Island"
+    "id": 354,
+    "name": "Base Secreta"
   },
   {
-    "id": 292,
-    "name": "Team Aqua Hideout"
+    "id": 342,
+    "name": "Boquete Irregular"
   },
   {
-    "id": 314,
-    "name": "Team Magma Hideout"
+    "id": 326,
+    "name": "Bosque Espejismo"
+  },
+  {
+    "id": 282,
+    "name": "Bosque Petalia"
   },
   {
     "id": 334,
-    "name": "Trackless Forest"
-  },
-  {
-    "id": 180,
-    "name": "Verdanturf Town"
+    "name": "Bosque Virgen"
   },
   {
     "id": 298,
-    "name": "Victory Road (OR/AS)"
+    "name": "Calle Victoria (OR/AS)"
   },
   {
-    "id": 166,
-    "name": "Ambrette Aquarium"
+    "id": 272,
+    "name": "Cascada Meteoro"
   },
   {
-    "id": 118,
-    "name": "Ambrette Gate"
+    "id": 294,
+    "name": "Caverna Abisal"
   },
   {
-    "id": 44,
-    "name": "Ambrette Town"
+    "id": 196,
+    "name": "Ciudad Algaria"
   },
   {
-    "id": 86,
-    "name": "Anistar City"
+    "id": 192,
+    "name": "Ciudad Arborada"
   },
   {
-    "id": 128,
-    "name": "Anistar Gate"
+    "id": 194,
+    "name": "Ciudad Calagua"
   },
   {
-    "id": 10,
-    "name": "Aquacorde Town"
+    "id": 200,
+    "name": "Ciudad Colosalia"
   },
   {
-    "id": 112,
-    "name": "Azure Bay"
+    "id": 190,
+    "name": "Ciudad Férrica"
   },
   {
-    "id": 48,
-    "name": "Battle Chateau"
+    "id": 188,
+    "name": "Ciudad Malvalona"
   },
   {
-    "id": 110,
-    "name": "Battle Maison"
+    "id": 184,
+    "name": "Ciudad Petalia"
   },
   {
-    "id": 150,
-    "name": "Blazing Chamber"
+    "id": 186,
+    "name": "Ciudad Portual"
   },
   {
-    "id": 30,
-    "name": "Camphrier Town"
+    "id": 350,
+    "name": "Costa Secreta"
   },
   {
-    "id": 144,
-    "name": "Chamber of Emptiness"
+    "id": 296,
+    "name": "Cueva Ancestral"
   },
   {
-    "id": 134,
-    "name": "Connecting Cave (Zubat Roost)"
+    "id": 300,
+    "name": "Cueva Cardumen"
   },
   {
-    "id": 64,
-    "name": "Coumarine City"
+    "id": 328,
+    "name": "Cueva Espejismo"
   },
   {
-    "id": 124,
-    "name": "Coumarine Gate"
+    "id": 280,
+    "name": "Cueva Granito"
   },
   {
-    "id": 116,
-    "name": "Couriway Gate"
+    "id": 338,
+    "name": "Cueva Ignota"
   },
   {
-    "id": 90,
-    "name": "Couriway Town"
+    "id": 340,
+    "name": "Cueva Incierta"
   },
   {
-    "id": 40,
-    "name": "Cyllage City"
+    "id": 306,
+    "name": "Cueva Insular"
   },
   {
-    "id": 114,
-    "name": "Dendemille Gate"
+    "id": 310,
+    "name": "Cámara Sellada"
   },
   {
-    "id": 76,
-    "name": "Dendemille Town"
+    "id": 286,
+    "name": "Desfiladero"
   },
   {
-    "id": 156,
-    "name": "Dragonmark Chamber"
+    "id": 348,
+    "name": "Firmamento"
   },
   {
-    "id": 152,
-    "name": "Flood Chamber"
+    "id": 312,
+    "name": "Gruta Solar"
   },
   {
-    "id": 148,
-    "name": "Friend Safari"
+    "id": 292,
+    "name": "Guarida Aqua"
   },
   {
-    "id": 82,
-    "name": "Frost Cavern"
+    "id": 314,
+    "name": "Guarida Magma"
   },
   {
-    "id": 52,
-    "name": "Geosenge Town"
+    "id": 344,
+    "name": "Isla Creciente"
   },
   {
-    "id": 132,
-    "name": "Glittering Cave"
+    "id": 330,
+    "name": "Isla Espejismo"
   },
   {
-    "id": 154,
-    "name": "Ironworks Chamber"
+    "id": 320,
+    "name": "Isla del Sur"
   },
   {
-    "id": 136,
-    "name": "Kalos Power Plant"
+    "id": 346,
+    "name": "Islote Secreto"
   },
   {
-    "id": 108,
-    "name": "Kiloude City"
+    "id": 202,
+    "name": "Liga Pokémon (OR/AS)"
   },
   {
-    "id": 164,
-    "name": "Kiloude Station"
+    "id": 336,
+    "name": "Llanura Sinnombre"
   },
   {
-    "id": 70,
-    "name": "Laverre City"
+    "id": 302,
+    "name": "Malvalanova"
   },
   {
-    "id": 126,
-    "name": "Laverre Gate"
+    "id": 304,
+    "name": "Malvamar"
   },
   {
-    "id": 142,
-    "name": "Lost Hotel"
+    "id": 284,
+    "name": "Monte Cenizo"
   },
   {
-    "id": 22,
-    "name": "Lumiose City"
+    "id": 332,
+    "name": "Monte Espejismo"
   },
   {
-    "id": 120,
-    "name": "Lumiose Gate"
+    "id": 290,
+    "name": "Monte Pírico"
   },
   {
-    "id": 162,
-    "name": "Lumiose Station"
+    "id": 316,
+    "name": "Pilar Celeste"
   },
   {
-    "id": 26,
-    "name": "Lysandre Labs"
+    "id": 352,
+    "name": "Prado Secreto"
   },
   {
-    "id": 2,
-    "name": "Mystery Zone"
+    "id": 174,
+    "name": "Pueblo Azuliza"
   },
   {
-    "id": 36,
-    "name": "Parfum Palace"
+    "id": 172,
+    "name": "Pueblo Escaso"
   },
   {
-    "id": 72,
-    "name": "Poké Ball Factory"
+    "id": 176,
+    "name": "Pueblo Lavacalda"
   },
   {
-    "id": 106,
-    "name": "Pokémon League (X/Y)"
+    "id": 182,
+    "name": "Pueblo Oromar"
+  },
+  {
+    "id": 178,
+    "name": "Pueblo Pardal"
+  },
+  {
+    "id": 180,
+    "name": "Pueblo Verdegal"
+  },
+  {
+    "id": 318,
+    "name": "Resort Batalla"
+  },
+  {
+    "id": 278,
+    "name": "Ruinas del Desierto"
+  },
+  {
+    "id": 204,
+    "name": "Ruta 101"
+  },
+  {
+    "id": 206,
+    "name": "Ruta 102"
+  },
+  {
+    "id": 208,
+    "name": "Ruta 103"
+  },
+  {
+    "id": 210,
+    "name": "Ruta 104"
+  },
+  {
+    "id": 212,
+    "name": "Ruta 105"
+  },
+  {
+    "id": 214,
+    "name": "Ruta 106"
+  },
+  {
+    "id": 216,
+    "name": "Ruta 107"
+  },
+  {
+    "id": 218,
+    "name": "Ruta 108"
+  },
+  {
+    "id": 220,
+    "name": "Ruta 109"
+  },
+  {
+    "id": 222,
+    "name": "Ruta 110"
+  },
+  {
+    "id": 224,
+    "name": "Ruta 111"
+  },
+  {
+    "id": 226,
+    "name": "Ruta 112"
+  },
+  {
+    "id": 228,
+    "name": "Ruta 113"
+  },
+  {
+    "id": 230,
+    "name": "Ruta 114"
+  },
+  {
+    "id": 232,
+    "name": "Ruta 115"
+  },
+  {
+    "id": 234,
+    "name": "Ruta 116"
+  },
+  {
+    "id": 236,
+    "name": "Ruta 117"
+  },
+  {
+    "id": 238,
+    "name": "Ruta 118"
+  },
+  {
+    "id": 240,
+    "name": "Ruta 119"
+  },
+  {
+    "id": 242,
+    "name": "Ruta 120"
+  },
+  {
+    "id": 244,
+    "name": "Ruta 121"
+  },
+  {
+    "id": 246,
+    "name": "Ruta 122"
+  },
+  {
+    "id": 248,
+    "name": "Ruta 123"
+  },
+  {
+    "id": 250,
+    "name": "Ruta 124"
+  },
+  {
+    "id": 252,
+    "name": "Ruta 125"
+  },
+  {
+    "id": 254,
+    "name": "Ruta 126"
+  },
+  {
+    "id": 256,
+    "name": "Ruta 127"
+  },
+  {
+    "id": 258,
+    "name": "Ruta 128"
+  },
+  {
+    "id": 260,
+    "name": "Ruta 129"
+  },
+  {
+    "id": 262,
+    "name": "Ruta 130"
+  },
+  {
+    "id": 264,
+    "name": "Ruta 131"
+  },
+  {
+    "id": 266,
+    "name": "Ruta 132"
+  },
+  {
+    "id": 268,
+    "name": "Ruta 133"
+  },
+  {
+    "id": 270,
+    "name": "Ruta 134"
+  },
+  {
+    "id": 322,
+    "name": "S.S. Marea"
+  },
+  {
+    "id": 288,
+    "name": "Senda Ígnea"
+  },
+  {
+    "id": 308,
+    "name": "Tumba Antigua"
+  },
+  {
+    "id": 274,
+    "name": "Túnel Fervergal"
+  },
+  {
+    "id": 170,
+    "name": "Villa Raíz"
+  },
+  {
+    "id": 324,
+    "name": "Zona Safari"
   },
   {
     "id": 160,
-    "name": "Pokémon League Gate"
+    "name": "Acceso Liga Pokémon"
   },
   {
-    "id": 98,
-    "name": "Pokémon Village"
-  },
-  {
-    "id": 24,
-    "name": "Prism Tower"
-  },
-  {
-    "id": 158,
-    "name": "Radiant Chamber"
-  },
-  {
-    "id": 56,
-    "name": "Reflection Cave"
-  },
-  {
-    "id": 8,
-    "name": "Route 1 (Vaniville Pathway)"
-  },
-  {
-    "id": 50,
-    "name": "Route 10 (Menhir Trail)"
-  },
-  {
-    "id": 54,
-    "name": "Route 11 (Miroir Way)"
-  },
-  {
-    "id": 62,
-    "name": "Route 12 (Fourrage Road)"
-  },
-  {
-    "id": 66,
-    "name": "Route 13 (Lumiose Badlands)"
-  },
-  {
-    "id": 68,
-    "name": "Route 14 (Laverre Nature Trail)"
-  },
-  {
-    "id": 74,
-    "name": "Route 15 (Brun Way)"
-  },
-  {
-    "id": 78,
-    "name": "Route 16 (Mélancolie Path)"
-  },
-  {
-    "id": 84,
-    "name": "Route 17 (Mamoswine Road)"
-  },
-  {
-    "id": 88,
-    "name": "Route 18 (Vallée Étroite Way)"
-  },
-  {
-    "id": 92,
-    "name": "Route 19 (Grande Vallée Way)"
-  },
-  {
-    "id": 12,
-    "name": "Route 2 (Avance Trail)"
-  },
-  {
-    "id": 96,
-    "name": "Route 20 (Winding Woods)"
-  },
-  {
-    "id": 100,
-    "name": "Route 21 (Dernière Way)"
-  },
-  {
-    "id": 102,
-    "name": "Route 22 (Détourner Way)"
-  },
-  {
-    "id": 16,
-    "name": "Route 3 (Ouvert Way)"
-  },
-  {
-    "id": 20,
-    "name": "Route 4 (Parterre Way)"
-  },
-  {
-    "id": 28,
-    "name": "Route 5 (Versant Road)"
-  },
-  {
-    "id": 34,
-    "name": "Route 6 (Palais Lane)"
-  },
-  {
-    "id": 38,
-    "name": "Route 7 (Rivière Walk)"
-  },
-  {
-    "id": 42,
-    "name": "Route 8 (Muraille Coast)"
-  },
-  {
-    "id": 46,
-    "name": "Route 9 (Spikes Passage)"
-  },
-  {
-    "id": 18,
-    "name": "Santalune City"
-  },
-  {
-    "id": 14,
-    "name": "Santalune Forest"
-  },
-  {
-    "id": 146,
-    "name": "Sea Spirit’s Den"
-  },
-  {
-    "id": 32,
-    "name": "Shabboneau Castle"
-  },
-  {
-    "id": 58,
-    "name": "Shalour City"
-  },
-  {
-    "id": 122,
-    "name": "Shalour Gate"
-  },
-  {
-    "id": 94,
-    "name": "Snowbelle City"
+    "id": 128,
+    "name": "Acceso a Fluxus"
   },
   {
     "id": 130,
-    "name": "Snowbelle Gate"
+    "name": "Acceso a Fractal"
   },
   {
-    "id": 138,
-    "name": "Team Flare Secret HQ"
+    "id": 114,
+    "name": "Acceso a Fresco"
   },
   {
-    "id": 140,
-    "name": "Terminus Cave"
+    "id": 120,
+    "name": "Acceso a Luminalia"
   },
   {
-    "id": 60,
-    "name": "Tower of Mastery"
+    "id": 116,
+    "name": "Acceso a Mosaico"
   },
   {
-    "id": 168,
-    "name": "Unknown Dungeon"
+    "id": 118,
+    "name": "Acceso a Petroglifo"
   },
   {
-    "id": 6,
-    "name": "Vaniville Town"
+    "id": 126,
+    "name": "Acceso a Romantis"
+  },
+  {
+    "id": 124,
+    "name": "Acceso a Témpera"
+  },
+  {
+    "id": 122,
+    "name": "Acceso a Yantra"
+  },
+  {
+    "id": 166,
+    "name": "Acuario Petroglifo"
+  },
+  {
+    "id": 112,
+    "name": "Bahía Azul"
+  },
+  {
+    "id": 48,
+    "name": "Bastión Batalla"
+  },
+  {
+    "id": 14,
+    "name": "Bosque de Novarte"
   },
   {
     "id": 104,
-    "name": "Victory Road (X/Y)"
+    "name": "Calle Victoria (X/Y)"
   },
   {
-    "id": 30008,
-    "name": "----------"
+    "id": 32,
+    "name": "Castillo Caduco"
   },
   {
-    "id": 30011,
-    "name": "Pokémon Link"
+    "id": 136,
+    "name": "Central de Kalos"
   },
   {
-    "id": 30001,
-    "name": "a Link Trade (NPC)"
+    "id": 108,
+    "name": "Ciudad Batik"
   },
   {
-    "id": 30007,
-    "name": "a distant land"
+    "id": 86,
+    "name": "Ciudad Fluxus"
+  },
+  {
+    "id": 94,
+    "name": "Ciudad Fractal"
+  },
+  {
+    "id": 22,
+    "name": "Ciudad Luminalia"
+  },
+  {
+    "id": 18,
+    "name": "Ciudad Novarte"
+  },
+  {
+    "id": 40,
+    "name": "Ciudad Relieve"
+  },
+  {
+    "id": 70,
+    "name": "Ciudad Romantis"
+  },
+  {
+    "id": 64,
+    "name": "Ciudad Témpera"
+  },
+  {
+    "id": 58,
+    "name": "Ciudad Yantra"
+  },
+  {
+    "id": 132,
+    "name": "Cueva Brillante"
+  },
+  {
+    "id": 140,
+    "name": "Cueva Desenlace"
+  },
+  {
+    "id": 56,
+    "name": "Cueva Reflejos"
+  },
+  {
+    "id": 146,
+    "name": "Cueva Talasia"
+  },
+  {
+    "id": 164,
+    "name": "Estación Batik"
+  },
+  {
+    "id": 162,
+    "name": "Estación Luminalia"
+  },
+  {
+    "id": 144,
+    "name": "Estancia Vacua"
+  },
+  {
+    "id": 72,
+    "name": "Fábrica Poké Balls"
+  },
+  {
+    "id": 82,
+    "name": "Gruta Helada"
+  },
+  {
+    "id": 134,
+    "name": "Gruta Tierraunida (Escondrijo Zubat)"
+  },
+  {
+    "id": 138,
+    "name": "Guarida Team Flare"
+  },
+  {
+    "id": 142,
+    "name": "Hotel Desolación"
+  },
+  {
+    "id": 26,
+    "name": "Laboratorios Lysson"
+  },
+  {
+    "id": 106,
+    "name": "Liga Pokémon (X/Y)"
+  },
+  {
+    "id": 2,
+    "name": "Lugar misterioso"
+  },
+  {
+    "id": 110,
+    "name": "Mansión Batalla"
+  },
+  {
+    "id": 168,
+    "name": "Mazmorra Rara"
+  },
+  {
+    "id": 36,
+    "name": "Palacio Cénit"
+  },
+  {
+    "id": 10,
+    "name": "Pueblo Acuarela"
+  },
+  {
+    "id": 6,
+    "name": "Pueblo Boceto"
+  },
+  {
+    "id": 52,
+    "name": "Pueblo Crómlech"
+  },
+  {
+    "id": 76,
+    "name": "Pueblo Fresco"
+  },
+  {
+    "id": 90,
+    "name": "Pueblo Mosaico"
+  },
+  {
+    "id": 44,
+    "name": "Pueblo Petroglifo"
+  },
+  {
+    "id": 30,
+    "name": "Pueblo Vánitas"
+  },
+  {
+    "id": 8,
+    "name": "Ruta 1 (Sendero Boceto)"
+  },
+  {
+    "id": 50,
+    "name": "Ruta 10 (Camino Menhires)"
+  },
+  {
+    "id": 54,
+    "name": "Ruta 11 (Senda Reflejos)"
+  },
+  {
+    "id": 62,
+    "name": "Ruta 12 (Vereda del Heno)"
+  },
+  {
+    "id": 66,
+    "name": "Ruta 13 (Páramo de Luminalia)"
+  },
+  {
+    "id": 68,
+    "name": "Ruta 14 (Arboleda Romantis)"
+  },
+  {
+    "id": 74,
+    "name": "Ruta 15 (Sendero Hojarasca)"
+  },
+  {
+    "id": 78,
+    "name": "Ruta 16 (Senda Melancolía)"
+  },
+  {
+    "id": 84,
+    "name": "Ruta 17 (Sendero Mamoswine)"
+  },
+  {
+    "id": 88,
+    "name": "Ruta 18 (Senda Valle Angosto)"
+  },
+  {
+    "id": 92,
+    "name": "Ruta 19 (Senda del Gran Valle)"
+  },
+  {
+    "id": 12,
+    "name": "Ruta 2 (Vía del Avance)"
+  },
+  {
+    "id": 96,
+    "name": "Ruta 20 (Bosque Errantes)"
+  },
+  {
+    "id": 100,
+    "name": "Ruta 21 (Vía Ultimia)"
+  },
+  {
+    "id": 102,
+    "name": "Ruta 22 (Vía Desvío)"
+  },
+  {
+    "id": 16,
+    "name": "Ruta 3 (Senda Despejada)"
+  },
+  {
+    "id": 20,
+    "name": "Ruta 4 (Senda del Parterre)"
+  },
+  {
+    "id": 28,
+    "name": "Ruta 5 (Vía Repecho)"
+  },
+  {
+    "id": 34,
+    "name": "Ruta 6 (Alameda del Palacio)"
+  },
+  {
+    "id": 38,
+    "name": "Ruta 7 (Paseo de la Ribera)"
+  },
+  {
+    "id": 42,
+    "name": "Ruta 8 (Muralla Costera)"
+  },
+  {
+    "id": 46,
+    "name": "Ruta 9 (Paso de Rhyhorn)"
+  },
+  {
+    "id": 148,
+    "name": "Safari Amistad"
+  },
+  {
+    "id": 152,
+    "name": "Sala de la Esclusa"
+  },
+  {
+    "id": 158,
+    "name": "Sala de la Luz"
+  },
+  {
+    "id": 150,
+    "name": "Sala de las Llamas"
+  },
+  {
+    "id": 156,
+    "name": "Sala del Draco"
+  },
+  {
+    "id": 154,
+    "name": "Sala del Metal"
+  },
+  {
+    "id": 60,
+    "name": "Torre Maestra"
+  },
+  {
+    "id": 24,
+    "name": "Torre Prisma"
+  },
+  {
+    "id": 98,
+    "name": "Villa Pokémon"
   },
   {
     "id": 30005,
-    "name": "the Hoenn region"
+    "name": "Hoenn"
+  },
+  {
+    "id": 30001,
+    "name": "Intercambio (NPC)"
   },
   {
     "id": 30004,
-    "name": "the Johto region"
+    "name": "Johto"
   },
   {
     "id": 30010,
-    "name": "the Kalos region"
+    "name": "Kalos"
   },
   {
     "id": 30003,
-    "name": "the Kanto region"
+    "name": "Kanto"
+  },
+  {
+    "id": 30011,
+    "name": "Nexo Pokémon"
   },
   {
     "id": 30006,
-    "name": "the Sinnoh region"
+    "name": "Sinnoh"
   },
   {
     "id": 30009,
-    "name": "the Unova region"
+    "name": "Teselia"
+  },
+  {
+    "id": 30007,
+    "name": "Tierra lejana"
+  },
+  {
+    "id": 30008,
+    "name": "－－－－－－－－－－"
+  },
+  {
+    "id": 40073,
+    "name": "Camp. de Videojuegos"
+  },
+  {
+    "id": 40074,
+    "name": "Camp. de Videojuegos 2013"
+  },
+  {
+    "id": 40075,
+    "name": "Camp. de Videojuegos 2014"
+  },
+  {
+    "id": 40076,
+    "name": "Camp. de Videojuegos 2015"
+  },
+  {
+    "id": 40077,
+    "name": "Camp. de Videojuegos 2016"
+  },
+  {
+    "id": 40078,
+    "name": "Camp. de Videojuegos 2017"
+  },
+  {
+    "id": 40079,
+    "name": "Camp. de Videojuegos 2018"
+  },
+  {
+    "id": 40021,
+    "name": "Campeonato Mundial"
+  },
+  {
+    "id": 40028,
+    "name": "Campeonato Mundial (-)"
+  },
+  {
+    "id": 40022,
+    "name": "Campeonato Mundial 2013"
+  },
+  {
+    "id": 40029,
+    "name": "Campeonato Mundial 2013 (-)"
+  },
+  {
+    "id": 40023,
+    "name": "Campeonato Mundial 2014"
+  },
+  {
+    "id": 40030,
+    "name": "Campeonato Mundial 2014 (-)"
+  },
+  {
+    "id": 40024,
+    "name": "Campeonato Mundial 2015"
+  },
+  {
+    "id": 40031,
+    "name": "Campeonato Mundial 2015 (-)"
+  },
+  {
+    "id": 40025,
+    "name": "Campeonato Mundial 2016"
+  },
+  {
+    "id": 40032,
+    "name": "Campeonato Mundial 2016 (-)"
+  },
+  {
+    "id": 40026,
+    "name": "Campeonato Mundial 2017"
+  },
+  {
+    "id": 40033,
+    "name": "Campeonato Mundial 2017 (-)"
+  },
+  {
+    "id": 40027,
+    "name": "Campeonato Mundial 2018"
+  },
+  {
+    "id": 40034,
+    "name": "Campeonato Mundial 2018 (-)"
+  },
+  {
+    "id": 40010,
+    "name": "Centro Pokémon"
+  },
+  {
+    "id": 40014,
+    "name": "Centro Pokémon Fukuoka"
+  },
+  {
+    "id": 40015,
+    "name": "Centro Pokémon Nagoya"
+  },
+  {
+    "id": 40013,
+    "name": "Centro Pokémon Osaka"
+  },
+  {
+    "id": 40016,
+    "name": "Centro Pokémon Sapporo"
+  },
+  {
+    "id": 40018,
+    "name": "Centro Pokémon Tohoku"
+  },
+  {
+    "id": 40012,
+    "name": "Centro Pokémon Tokio"
+  },
+  {
+    "id": 40019,
+    "name": "Centro Pokémon Tokyo Bay"
+  },
+  {
+    "id": 40017,
+    "name": "Centro Pokémon Yokohama"
+  },
+  {
+    "id": 40045,
+    "name": "Club de Fans de Pokémon"
+  },
+  {
+    "id": 40047,
+    "name": "Concierto Pokémon"
+  },
+  {
+    "id": 40072,
+    "name": "Estadio"
+  },
+  {
+    "id": 40070,
+    "name": "Evento"
+  },
+  {
+    "id": 40042,
+    "name": "Evento Pokémon"
+  },
+  {
+    "id": 40050,
+    "name": "Evento Pokémon 2013"
+  },
+  {
+    "id": 40051,
+    "name": "Evento Pokémon 2014"
+  },
+  {
+    "id": 40052,
+    "name": "Evento Pokémon 2015"
+  },
+  {
+    "id": 40053,
+    "name": "Evento Pokémon 2016"
+  },
+  {
+    "id": 40054,
+    "name": "Evento Pokémon 2017"
+  },
+  {
+    "id": 40055,
+    "name": "Evento Pokémon 2018"
+  },
+  {
+    "id": 40036,
+    "name": "Evento Videojuegos 2013"
+  },
+  {
+    "id": 40037,
+    "name": "Evento Videojuegos 2014"
+  },
+  {
+    "id": 40038,
+    "name": "Evento Videojuegos 2015"
+  },
+  {
+    "id": 40039,
+    "name": "Evento Videojuegos 2016"
+  },
+  {
+    "id": 40040,
+    "name": "Evento Videojuegos 2017"
+  },
+  {
+    "id": 40041,
+    "name": "Evento Videojuegos 2018"
+  },
+  {
+    "id": 40044,
+    "name": "Evento de Videojuegos"
+  },
+  {
+    "id": 40035,
+    "name": "Evento de Videojuegos (-)"
   },
   {
     "id": 40071,
     "name": "GAME FREAK"
   },
   {
-    "id": 40014,
-    "name": "PC Fukuoka"
+    "id": 40001,
+    "name": "Lugar encantador"
   },
   {
-    "id": 40015,
-    "name": "PC Nagoya"
+    "id": 40002,
+    "name": "Lugar lejano"
   },
   {
-    "id": 40013,
-    "name": "PC Osaka"
+    "id": 40003,
+    "name": "Película Pokémon"
   },
   {
-    "id": 40016,
-    "name": "PC Sapporo"
+    "id": 40004,
+    "name": "Película Pokémon 2013"
   },
   {
-    "id": 40018,
-    "name": "PC Tohoku"
+    "id": 40005,
+    "name": "Película Pokémon 2014"
   },
   {
-    "id": 40012,
-    "name": "PC Tokyo"
+    "id": 40006,
+    "name": "Película Pokémon 2015"
   },
   {
-    "id": 40019,
-    "name": "PC Tokyo Bay"
+    "id": 40007,
+    "name": "Película Pokémon 2016"
   },
   {
-    "id": 40017,
-    "name": "PC Yokohama"
+    "id": 40008,
+    "name": "Película Pokémon 2017"
+  },
+  {
+    "id": 40009,
+    "name": "Película Pokémon 2018"
   },
   {
     "id": 40063,
-    "name": "POKÉPARK (1)"
+    "name": "PokéPark (1)"
   },
   {
     "id": 40064,
-    "name": "POKÉPARK (2)"
+    "name": "PokéPark 2013 (2)"
   },
   {
     "id": 40065,
-    "name": "POKÉPARK (3)"
+    "name": "PokéPark 2014 (3)"
   },
   {
     "id": 40066,
-    "name": "POKÉPARK (4)"
+    "name": "PokéPark 2015 (4)"
   },
   {
     "id": 40067,
-    "name": "POKÉPARK (5)"
+    "name": "PokéPark 2016 (5)"
   },
   {
     "id": 40068,
-    "name": "POKÉPARK (6)"
+    "name": "PokéPark 2017 (6)"
   },
   {
     "id": 40069,
-    "name": "POKÉPARK (7)"
-  },
-  {
-    "id": 40050,
-    "name": "Pokémon Event 13"
-  },
-  {
-    "id": 40051,
-    "name": "Pokémon Event 14"
-  },
-  {
-    "id": 40052,
-    "name": "Pokémon Event 15"
-  },
-  {
-    "id": 40053,
-    "name": "Pokémon Event 16"
-  },
-  {
-    "id": 40054,
-    "name": "Pokémon Event 17"
-  },
-  {
-    "id": 40055,
-    "name": "Pokémon Event 18"
+    "name": "PokéPark 2018 (7)"
   },
   {
     "id": 40056,
@@ -845,238 +1021,62 @@
   },
   {
     "id": 40057,
-    "name": "Pokémon Festa 13"
+    "name": "Pokémon Festa 2013"
   },
   {
     "id": 40058,
-    "name": "Pokémon Festa 14"
+    "name": "Pokémon Festa 2014"
   },
   {
     "id": 40059,
-    "name": "Pokémon Festa 15"
+    "name": "Pokémon Festa 2015"
   },
   {
     "id": 40060,
-    "name": "Pokémon Festa 16"
+    "name": "Pokémon Festa 2016"
   },
   {
     "id": 40061,
-    "name": "Pokémon Festa 17"
+    "name": "Pokémon Festa 2017"
   },
   {
     "id": 40062,
-    "name": "Pokémon Festa 18"
-  },
-  {
-    "id": 40004,
-    "name": "Pokémon Movie 13"
-  },
-  {
-    "id": 40005,
-    "name": "Pokémon Movie 14"
-  },
-  {
-    "id": 40006,
-    "name": "Pokémon Movie 15"
-  },
-  {
-    "id": 40007,
-    "name": "Pokémon Movie 16"
-  },
-  {
-    "id": 40008,
-    "name": "Pokémon Movie 17"
-  },
-  {
-    "id": 40009,
-    "name": "Pokémon Movie 18"
-  },
-  {
-    "id": 40036,
-    "name": "VGE 2013"
-  },
-  {
-    "id": 40037,
-    "name": "VGE 2014"
-  },
-  {
-    "id": 40038,
-    "name": "VGE 2015"
-  },
-  {
-    "id": 40039,
-    "name": "VGE 2016"
-  },
-  {
-    "id": 40040,
-    "name": "VGE 2017"
-  },
-  {
-    "id": 40041,
-    "name": "VGE 2018"
-  },
-  {
-    "id": 40022,
-    "name": "WCS 2013"
-  },
-  {
-    "id": 40023,
-    "name": "WCS 2014"
-  },
-  {
-    "id": 40024,
-    "name": "WCS 2015"
-  },
-  {
-    "id": 40025,
-    "name": "WCS 2016"
-  },
-  {
-    "id": 40026,
-    "name": "WCS 2017"
-  },
-  {
-    "id": 40027,
-    "name": "WCS 2018"
-  },
-  {
-    "id": 40028,
-    "name": "Worlds"
-  },
-  {
-    "id": 40029,
-    "name": "Worlds 2013"
-  },
-  {
-    "id": 40030,
-    "name": "Worlds 2014"
-  },
-  {
-    "id": 40031,
-    "name": "Worlds 2015"
-  },
-  {
-    "id": 40032,
-    "name": "Worlds 2016"
-  },
-  {
-    "id": 40033,
-    "name": "Worlds 2017"
-  },
-  {
-    "id": 40034,
-    "name": "Worlds 2018"
-  },
-  {
-    "id": 40043,
-    "name": "a Battle Competition"
-  },
-  {
-    "id": 40010,
-    "name": "a Pokémon Center"
-  },
-  {
-    "id": 40020,
-    "name": "a Pokémon Store"
-  },
-  {
-    "id": 40046,
-    "name": "a Pokémon TV program"
-  },
-  {
-    "id": 40042,
-    "name": "a Pokémon event"
-  },
-  {
-    "id": 40003,
-    "name": "a Pokémon movie"
-  },
-  {
-    "id": 40073,
-    "name": "a VGC"
-  },
-  {
-    "id": 40035,
-    "name": "a VGE"
-  },
-  {
-    "id": 40021,
-    "name": "a WCS"
-  },
-  {
-    "id": 40047,
-    "name": "a concert"
-  },
-  {
-    "id": 40002,
-    "name": "a faraway place"
-  },
-  {
-    "id": 40044,
-    "name": "a game event"
-  },
-  {
-    "id": 40001,
-    "name": "a lovely place"
-  },
-  {
-    "id": 40072,
-    "name": "a stadium"
-  },
-  {
-    "id": 40070,
-    "name": "an event site"
-  },
-  {
-    "id": 40048,
-    "name": "an online Present"
+    "name": "Pokémon Festa 2018"
   },
   {
     "id": 40049,
-    "name": "the PGL"
+    "name": "Pokémon Global Link"
   },
   {
-    "id": 40045,
-    "name": "the Pokémon Fan Club"
+    "id": 40020,
+    "name": "Pokémon Store"
+  },
+  {
+    "id": 40046,
+    "name": "Programa sobre Pokémon"
+  },
+  {
+    "id": 40048,
+    "name": "Regalo en línea"
   },
   {
     "id": 40011,
-    "name": "the Pokémon cartoon"
+    "name": "Serie de animación Pokémon"
   },
   {
-    "id": 40074,
-    "name": "the VGC 2013"
-  },
-  {
-    "id": 40075,
-    "name": "the VGC 2014"
-  },
-  {
-    "id": 40076,
-    "name": "the VGC 2015"
-  },
-  {
-    "id": 40077,
-    "name": "the VGC 2016"
-  },
-  {
-    "id": 40078,
-    "name": "the VGC 2017"
-  },
-  {
-    "id": 40079,
-    "name": "the VGC 2018"
-  },
-  {
-    "id": 60001,
-    "name": "a stranger"
-  },
-  {
-    "id": 60003,
-    "name": "a treasure hunter"
+    "id": 40043,
+    "name": "Torneo"
   },
   {
     "id": 60004,
-    "name": "an old hot-springs visitor"
+    "name": "Anciana del Balneario"
+  },
+  {
+    "id": 60003,
+    "name": "Buscatesoros"
+  },
+  {
+    "id": 60001,
+    "name": "Persona lejana"
   }
 ]

@@ -6,6 +6,7 @@ import struct
 import random
 import enum
 import socket
+import threading
 
 CURRENT_REQUEST_VERSION = 1
 MAX_REQUEST_DATA_SIZE = 1024
@@ -37,6 +38,37 @@ class Citra:
         # que haga falta tocar nada más.
         self.socket.settimeout(2.0)
 
+        # Bug real corregido (07/09/2026, reportado por el usuario:
+        # "lectura fallida" en varios slots + "Expected 1 byte for
+        # badges, received None" justo al entrar a la página
+        # Pokémon, se arreglaba solo cambiando de página y
+        # volviendo): este socket UDP es COMPARTIDO entre el hilo
+        # de fondo del Runtime (ciclo de 200ms: medallas/party/
+        # combate/zona) y el hilo de la GUI (ej.
+        # Api.get_pokemon_page_data(), que dispara hasta 12 idas y
+        # vueltas seguidas -- read_party_order()+read_pokemon() por
+        # cada uno de los 6 slots -- ver
+        # AzaharReader.read_pokemon_raw_for_slot()). Sin ningún
+        # bloqueo, dos hilos podían mandar (sendto) y esperar
+        # (recv) por el mismo socket al mismo tiempo -- un hilo
+        # terminaba recibiendo la respuesta que le correspondía al
+        # OTRO, el chequeo de request_id en
+        # _read_and_validate_header() no coincidía, y esa lectura
+        # se descartaba en silencio (None) como si hubiera fallado
+        # de verdad. Más probable justo al entrar a la página
+        # Pokémon por la ráfaga de 12 pedidos compitiendo contra el
+        # ciclo de fondo.
+        #
+        # Este Lock asegura que un ciclo completo pedido/respuesta
+        # (sendto + recv, SIEMPRE los dos juntos) nunca se
+        # entrelaza con el de otro hilo, sin importar cuál llegó
+        # primero -- mismo criterio de "una ida y vuelta a la vez"
+        # que ya usa el resto del proyecto para evitar lecturas
+        # inconsistentes (ej. LECTURA_DESCARTADA en
+        # combat_service.py), aplicado acá al nivel más bajo, que
+        # es donde el problema realmente vive.
+        self._lock = threading.Lock()
+
     def is_connected(self):
         return self.socket is not None
 
@@ -60,9 +92,11 @@ class Citra:
             request_data = struct.pack("II", read_processes, 0x7FFFFFFF)
             request, request_id = self._generate_header(RequestType.ProcessList, len(request_data))
             request += request_data
-            self.socket.sendto(request, (self.address, CITRA_PORT))
 
-            raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+            with self._lock:
+                self.socket.sendto(request, (self.address, CITRA_PORT))
+                raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+
             reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.ProcessList)
 
             if reply_data:
@@ -84,9 +118,11 @@ class Citra:
         request_data = struct.pack("II", 0, 0)
         request, request_id = self._generate_header(RequestType.SetGetProcess, len(request_data))
         request += request_data
-        self.socket.sendto(request, (self.address, CITRA_PORT))
 
-        raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+        with self._lock:
+            self.socket.sendto(request, (self.address, CITRA_PORT))
+            raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+
         reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.SetGetProcess)
 
         if reply_data:
@@ -98,9 +134,10 @@ class Citra:
         request_data = struct.pack("II", 1, process_id)
         request, request_id = self._generate_header(RequestType.SetGetProcess, len(request_data))
         request += request_data
-        self.socket.sendto(request, (self.address, CITRA_PORT))
 
-        self.socket.recv(MAX_PACKET_SIZE)
+        with self._lock:
+            self.socket.sendto(request, (self.address, CITRA_PORT))
+            self.socket.recv(MAX_PACKET_SIZE)
 
     def read_memory(self, read_address, read_size):
         """
@@ -113,9 +150,11 @@ class Citra:
             request_data = struct.pack("II", read_address, temp_read_size)
             request, request_id = self._generate_header(RequestType.ReadMemory, len(request_data))
             request += request_data
-            self.socket.sendto(request, (self.address, CITRA_PORT))
 
-            raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+            with self._lock:
+                self.socket.sendto(request, (self.address, CITRA_PORT))
+                raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+
             reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.ReadMemory)
 
             if reply_data:
@@ -145,9 +184,11 @@ class Citra:
             request_data += write_contents[:temp_write_size]
             request, request_id = self._generate_header(RequestType.WriteMemory, len(request_data))
             request += request_data
-            self.socket.sendto(request, (self.address, CITRA_PORT))
 
-            raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+            with self._lock:
+                self.socket.sendto(request, (self.address, CITRA_PORT))
+                raw_reply = self.socket.recv(MAX_PACKET_SIZE)
+
             reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.WriteMemory)
 
             if None != reply_data:

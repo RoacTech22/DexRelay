@@ -137,6 +137,19 @@ TITLE_ID_REGIONS = {
 GITHUB_URL = "https://github.com/RoacTech22/DexRelay"
 ISSUES_URL = GITHUB_URL + "/issues"
 
+# Fase E (09/09/2026, hackroom) -- methodKey de PKHeX que
+# representan intercambio (mismos 3 valores reales usados por
+# evolution_translations.py: METHOD_KEYS_ES/orden de prioridad). Se
+# usan en _species_details_with_hackroom_overrides() para sacar el
+# método de intercambio original cuando el hackroom agrega una
+# alternativa -- a pedido del usuario, el intercambio deja de
+# mostrarse del todo en ese caso, no queda como opción en paralelo.
+TRADE_METHOD_KEYS = {
+    "Trade",
+    "TradeHeldItem",
+    "TradeShelmetKarrablast",
+}
+
 # Valores por defecto reales -- los mismos que usa
 # `Application.__init__()` (app/core/app.py) como fallback cuando
 # una clave no está en config.json. "Restablecer" de la página
@@ -228,9 +241,12 @@ class Api:
         # más abajo), leyendo config.json en el momento -- así el
         # toggle de Configuración surte efecto ni bien se guarda,
         # sin reiniciar DexRelay.
-        self.gym_leader_catalog = GymLeaderCatalog()
+        self.gym_leader_catalog = GymLeaderCatalog(
+            bridge=self.modal_bridge
+        )
         self.gym_leader_catalog_hackroom = GymLeaderCatalog(
-            data_path=paths.path("data", "gym_leaders_rrss.json")
+            data_path=paths.path("data", "gym_leaders_rrss.json"),
+            bridge=self.modal_bridge,
         )
 
         # Overrides de evolución del hackroom (09/09/2026, Fase E,
@@ -249,6 +265,57 @@ class Api:
         self._hackroom_evolution_overrides_by_species = (
             self._load_hackroom_evolution_overrides()
         )
+
+        # Overrides de tipo/habilidad/stats base (09/09/2026, Fase
+        # E, segunda parte -- PokemonChanges.txt vía
+        # build_pokemon_changes_hackroom.py). Mismo motivo que los
+        # de evolución: species_details() no sabe que el ROM está
+        # parcheado. Ya viene indexado por species_id (el propio
+        # documento usa el número de Pokédex real como clave, no
+        # hizo falta resolver nombres).
+        self._hackroom_pokemon_changes_by_species = (
+            self._load_hackroom_pokemon_changes()
+        )
+
+        # Overrides de movimiento (09/09/2026, Fase E, tercera
+        # parte -- AttackChanges.txt vía
+        # build_attack_changes_hackroom.py). Ya viene indexado por
+        # move_id -- el propio script de curación lo resuelve
+        # usando MoveDescriptionCatalog, no hace falta resolverlo
+        # de nuevo acá.
+        self._hackroom_attack_changes_by_move = (
+            self._load_hackroom_attack_changes()
+        )
+
+    def _load_hackroom_attack_changes(self):
+
+        changes_path = paths.path("data", "attack_changes_rrss.json")
+
+        if not changes_path.exists():
+            return {}
+
+        try:
+            with open(changes_path, "r", encoding="utf-8") as file:
+                raw = json.load(file)
+        except Exception:
+            return {}
+
+        return {int(move_id): entry for move_id, entry in raw.items()}
+
+    def _load_hackroom_pokemon_changes(self):
+
+        changes_path = paths.path("data", "pokemon_changes_rrss.json")
+
+        if not changes_path.exists():
+            return {}
+
+        try:
+            with open(changes_path, "r", encoding="utf-8") as file:
+                raw = json.load(file)
+        except Exception:
+            return {}
+
+        return {int(species_id): entry for species_id, entry in raw.items()}
 
     def _load_hackroom_evolution_overrides(self):
 
@@ -277,10 +344,24 @@ class Api:
         """
         Reemplazo directo de self.modal_bridge.species_details(id)
         -- misma firma, mismo formato de respuesta -- que además
-        aplica los overrides de evolución del hackroom (ver arriba)
-        cuando config.json -> hackroom.enabled está prendido. Si
-        está apagado, o la especie no tiene overrides, el resultado
-        es idéntico al del bridge sin tocar.
+        aplica los overrides de evolución Y de tipo/habilidad/stats
+        del hackroom (ver arriba) cuando config.json ->
+        hackroom.enabled está prendido. Si está apagado, o la
+        especie no tiene NINGÚN override de ningún tipo, el
+        resultado es idéntico al del bridge sin tocar.
+
+        BUG REAL corregido (09/09/2026, reportado por el usuario:
+        Luxray no mostraba su tipo Dark nuevo): un `return`
+        temprano acá abajo cortaba la función completa si la
+        especie no tenía overrides de EVOLUCIÓN -- Luxray no
+        evoluciona por intercambio, así que nunca tiene overrides
+        de esa lista, y el bloque de tipo/habilidad/stats (que
+        vive más abajo) nunca llegaba a ejecutarse. Afectaba a
+        CASI TODAS las 306 especies con cambios de tipo/habilidad/
+        stats (solo las pocas que además evolucionan por
+        intercambio se salvaban de este bug). Los dos bloques de
+        overrides son independientes -- ahora los dos se evalúan
+        siempre, tengan o no overrides de evolución.
         """
 
         details = self.modal_bridge.species_details(species_id)
@@ -295,12 +376,9 @@ class Api:
             species_id
         )
 
-        if not overrides:
-            return details
-
         evolutions = list(details.get("evolutions", []))
 
-        for override in overrides:
+        for override in overrides or []:
 
             to_id = override["toSpeciesId"]
             new_entry = {
@@ -317,12 +395,224 @@ class Api:
                     if entry.get("toSpeciesId") != to_id
                 ]
 
+            elif override["mode"] == "add":
+                # CORRECCIÓN (09/09/2026, a pedido del usuario: "el
+                # método de evolución por intercambios no debería
+                # mostrarse porque no son necesarias" -- con el
+                # hackroom activo, los métodos nuevos (amistad/
+                # nivel/objeto/compañero) hacen innecesario el
+                # intercambio original, así que se saca en vez de
+                # mostrarse en paralelo). Se filtra específicamente
+                # el/los métodos de intercambio (Trade/
+                # TradeHeldItem/TradeShelmetKarrablast) hacia ESE
+                # mismo destino -- no cualquier "Trade" de la
+                # especie, por si en algún caso hubiera más de un
+                # destino real (no pasa en las 24 especies de este
+                # hackroom, pero es más correcto filtrar por
+                # destino que por especie entera).
+                evolutions = [
+                    entry for entry in evolutions
+                    if not (
+                        entry.get("toSpeciesId") == to_id
+                        and entry.get("methodKey") in TRADE_METHOD_KEYS
+                    )
+                ]
+
             evolutions.append(new_entry)
 
-        return {
+        details = {
             **details,
             "evolutions": evolutions,
         }
+
+        # Overrides de tipo/habilidad/stats base (09/09/2026, Fase
+        # E, segunda parte, a pedido del usuario: "sigamos con
+        # tipos habilidades y stats"). Se aplican DESPUÉS de armar
+        # `details` con las evoluciones ya resueltas -- son
+        # independientes entre sí, no hay orden que importe acá.
+        pokemon_changes = self._hackroom_pokemon_changes_by_species.get(
+            species_id
+        )
+
+        if pokemon_changes:
+
+            if "type1" in pokemon_changes:
+                details["type1Key"] = pokemon_changes["type1"]
+                details["type2Key"] = pokemon_changes.get("type2") or ""
+
+            if "ability1" in pokemon_changes:
+                ability_id, ability_name = self._resolve_hackroom_ability(
+                    pokemon_changes["ability1"]
+                )
+                details["ability1Id"] = ability_id
+                details["ability1Name"] = ability_name
+
+            if "ability2" in pokemon_changes:
+                ability_id, ability_name = self._resolve_hackroom_ability(
+                    pokemon_changes["ability2"]
+                )
+                details["ability2Id"] = ability_id
+                details["ability2Name"] = ability_name
+
+            if "baseStats" in pokemon_changes:
+                details["baseStats"] = {
+                    **details.get("baseStats", {}),
+                    **pokemon_changes["baseStats"],
+                }
+
+        return details
+
+    def _hackroom_base_stats_override(self, species_id):
+        """
+        {"hp"?, "attack"?, ...} para pasarle a
+        PokemonDetailResolver.resolve() (ver su docstring y la de
+        bridge.pokemon_details()) -- None si el hackroom está
+        apagado o esta especie no tiene cambio de stats.
+        """
+
+        if not self.app.config.get("hackroom", "enabled", default=False):
+            return None
+
+        pokemon_changes = self._hackroom_pokemon_changes_by_species.get(
+            species_id
+        )
+
+        if not pokemon_changes:
+            return None
+
+        return pokemon_changes.get("baseStats")
+
+    def _apply_hackroom_pokemon_changes_to_live_detail(
+        self, species_id, details
+    ):
+        """
+        Mismo propósito que los overrides de species_details()
+        (_species_details_with_hackroom_overrides()), pero para el
+        detalle de un Pokémon VIVO (PokemonDetailResolver, ver su
+        docstring) -- CORRECCIÓN REAL (09/09/2026, reportado por el
+        usuario: revisó Luxray de la lista de cambios de tipo y no
+        se había actualizado). Causa real: HandlePokemonDetails()
+        en Program.cs resuelve type1Key/type2Key/abilidad desde SU
+        PROPIA PersonalTable, en un lugar del bridge completamente
+        distinto de species_details() (HandleSpeciesDetails) -- son
+        dos handlers separados, arreglar uno no arregla el otro.
+
+        Tipo/habilidad de la ESPECIE, y tipo de cada MOVIMIENTO --
+        las stats CALCULADAS (attack/defense/etc, que dependen de
+        IVs/EVs/naturaleza/nivel además de la stat base) se
+        resuelven aparte, pasándole `base_stats_override` directo a
+        PokemonDetailResolver.resolve() (ver
+        _hackroom_base_stats_override() y bridge.pokemon_details())
+        ANTES de que el bridge calcule -- más confiable que
+        intentar reescribir un número ya calculado acá sin rehacer
+        la fórmula completa del juego.
+        """
+
+        if details is None:
+            return details
+
+        if not self.app.config.get("hackroom", "enabled", default=False):
+            return details
+
+        pokemon_changes = self._hackroom_pokemon_changes_by_species.get(
+            species_id
+        )
+
+        if pokemon_changes:
+
+            if "type1" in pokemon_changes:
+                details["type1Key"] = pokemon_changes["type1"]
+                details["type2Key"] = pokemon_changes.get("type2") or ""
+
+            # El Pokémon vivo solo tiene UN slot de habilidad activo
+            # (el que realmente lleva puesto, no los 3 posibles como
+            # en species_details()) -- hay que saber CUÁL de los dos
+            # (ability1/ability2) es el que overridear. Se compara
+            # contra el nombre en inglés que ya resolvió el bridge
+            # (details["abilityName"] está en español, así que se
+            # compara por id vía AbilityCatalog en vez de por
+            # texto).
+            if "ability1" in pokemon_changes or "ability2" in pokemon_changes:
+                for key in ("ability1", "ability2"):
+                    if key not in pokemon_changes:
+                        continue
+
+                    new_id, new_name = self._resolve_hackroom_ability(
+                        pokemon_changes[key]
+                    )
+
+                    # Sin el id real del ability ORIGINAL de esa
+                    # especie/slot (species_details() no se consulta
+                    # acá para no pagar otro viaje al bridge por
+                    # cada Pokémon del equipo/caja), no hay forma
+                    # barata de saber con certeza si el ability
+                    # ACTUAL del Pokémon corresponde al slot 1 o al
+                    # 2 en el caso ambiguo de que AMBOS slots
+                    # cambien para la misma especie -- verificado
+                    # que no pasa en este hackroom (las 242 especies
+                    # con cambio de habilidad cambian un solo slot,
+                    # nunca los dos a la vez), pero se deja la
+                    # guarda igual por si un futuro hack sí tuviera
+                    # ese caso -- mejor no aplicar nada que adivinar
+                    # mal.
+                    only_one_ability_changed = not (
+                        "ability1" in pokemon_changes
+                        and "ability2" in pokemon_changes
+                    )
+
+                    if only_one_ability_changed:
+                        details["abilityId"] = new_id
+                        details["abilityName"] = new_name
+
+        # CORRECCIÓN (09/09/2026, reportado por el usuario: "el
+        # Corte aparece con el ícono de tipo Normal en la vista sin
+        # abrir el modal, en el modal sí sale bien de tipo Planta")
+        # -- BUG REAL idéntico al que ya se corrigió arriba en
+        # _species_details_with_hackroom_overrides(): este override
+        # de movimientos NO puede vivir adentro del `if
+        # pokemon_changes:` de arriba, porque el tipo de un
+        # MOVIMIENTO es independiente de si la ESPECIE del Pokémon
+        # tiene algún cambio -- cualquier Pokémon que sepa Corte
+        # necesita este override, tenga o no su especie algo en
+        # pokemon_changes_rrss.json.
+        moves = details.get("moves")
+
+        if moves:
+            for move in moves:
+                move_changes = self._hackroom_attack_changes_by_move.get(
+                    move.get("id")
+                )
+
+                if move_changes and "typeKey" in move_changes:
+                    move["typeKey"] = move_changes["typeKey"]
+
+        return details
+
+    def _resolve_hackroom_ability(self, ability_name_en):
+        """
+        "Limber" -> (id_real, "Limber" en español) usando los
+        mismos catálogos ya construidos para las habilidades de
+        líderes de gimnasio (self.gym_leader_catalog, ver
+        gym_leaders.py) -- comparten el mismo bridge/caché, no hace
+        falta duplicar la lógica. Si no se puede resolver, devuelve
+        (None, ability_name_en) tal cual -- nunca inventa.
+        """
+
+        ability_id = (
+            self.gym_leader_catalog
+            ._ability_description_catalog
+            .get_id_by_name(ability_name_en)
+        )
+
+        if ability_id is None:
+            return None, ability_name_en
+
+        ability_name_es = (
+            self.gym_leader_catalog._ability_catalog.get_name(ability_id)
+            or ability_name_en
+        )
+
+        return ability_id, ability_name_es
 
     # -----------------------------------------------------------
     # Bienvenida
@@ -762,7 +1052,14 @@ class Api:
                 continue
 
             details = self.pokemon_detail_resolver.resolve(
-                pokemon.raw_data[:232]
+                pokemon.raw_data[:232],
+                base_stats_override=self._hackroom_base_stats_override(
+                    basic.get("speciesId")
+                ),
+            )
+
+            details = self._apply_hackroom_pokemon_changes_to_live_detail(
+                basic.get("speciesId"), details
             )
 
             entry = dict(basic)
@@ -908,9 +1205,18 @@ class Api:
             )
 
             details = (
-                self.pokemon_detail_resolver.resolve(raw_data)
+                self.pokemon_detail_resolver.resolve(
+                    raw_data,
+                    base_stats_override=self._hackroom_base_stats_override(
+                        basic.get("speciesId")
+                    ),
+                )
                 if raw_data is not None
                 else None
+            )
+
+            details = self._apply_hackroom_pokemon_changes_to_live_detail(
+                basic.get("speciesId"), details
             )
 
             entry = dict(basic)
@@ -966,6 +1272,28 @@ class Api:
 
         merged["descriptionEs"] = description["descriptionEs"]
         merged["descriptionSource"] = description["source"]
+
+        # Fase E (09/09/2026, hackroom -- AttackChanges.txt) -- el
+        # bridge/dataset estático dan los valores del juego BASE,
+        # sin saber que el ROM está parcheado. Mismo criterio que
+        # los demás overrides de esta fase: solo se aplica con
+        # hackroom.enabled prendido, y solo si este movimiento
+        # puntual tiene algo documentado.
+        if self.app.config.get("hackroom", "enabled", default=False):
+
+            move_changes = self._hackroom_attack_changes_by_move.get(
+                move_id
+            )
+
+            if move_changes:
+                if "typeKey" in move_changes:
+                    merged["typeKey"] = move_changes["typeKey"]
+                if "power" in move_changes:
+                    merged["power"] = move_changes["power"]
+                if "accuracy" in move_changes:
+                    merged["accuracy"] = move_changes["accuracy"]
+                if "pp" in move_changes:
+                    merged["basePP"] = move_changes["pp"]
 
         return merged
 
@@ -1208,7 +1536,7 @@ class Api:
            por rama.
 
         Devuelve {"ancestors": [{"speciesId","name",
-        "transitionToNext"}, ...], "current": <nodo del árbol
+        "transitionsToNext"}, ...], "current": <nodo del árbol
         hacia adelante, ver _build_forward_evolution_node()>}.
         """
 
@@ -1247,23 +1575,30 @@ class Api:
             stage_details = details_by_species_id.get(stage_id, {})
             next_stage_id = ancestor_chain_ids[index + 1]
 
-            evolution_entry = next(
-                (
-                    evolution
-                    for evolution in stage_details.get("evolutions", [])
-                    if evolution.get("toSpeciesId") == next_stage_id
-                ),
-                None,
-            )
+            # BUG REAL corregido (09/09/2026, mismo patrón que ya
+            # se arregló en _build_forward_evolution_node() -- acá
+            # se había quedado afuera): `next(...)` se quedaba con
+            # la PRIMERA evolución que matcheara `next_stage_id` y
+            # descartaba el resto -- rompía justo con las especies
+            # "Trade Evolutions" del hackroom (Trade + amistad +
+            # nivel, las tres apuntan al mismo destino) cuando esa
+            # especie aparece como ANCESTRO de otra (ej. si algún
+            # día se abre la cadena completa desde Alakazam, el
+            # paso "Kadabra -> Alakazam" tiene que mostrar los 3
+            # métodos, no solo uno).
+            matching_evolutions = [
+                evolution
+                for evolution in stage_details.get("evolutions", [])
+                if evolution.get("toSpeciesId") == next_stage_id
+            ]
 
             ancestors.append({
                 "speciesId": stage_id,
                 "name": stage_details.get("name") or f"#{stage_id}",
-                "transitionToNext": (
-                    self._resolve_evolution_transition(evolution_entry)
-                    if evolution_entry
-                    else None
-                ),
+                "transitionsToNext": [
+                    self._resolve_evolution_transition(evolution)
+                    for evolution in matching_evolutions
+                ],
             })
 
         # 2. Árbol hacia adelante desde `species_id`, con todas las
@@ -1467,9 +1802,57 @@ class Api:
             earned = 0 <= index < len(badge_flags) and bool(
                 badge_flags[index]
             )
-            gym_leaders.append({**leader, "earned": earned})
+
+            # CORRECCIÓN (09/09/2026, a pedido del usuario: revisó
+            # el Luxio del equipo de Watson y seguía mostrando solo
+            # Electric, no Electric/Dark). data/gym_leaders_rrss.json
+            # se armó con "typeKeys": [] a propósito (ver docstring
+            # de build_gym_leaders_hackroom.py -- en ese momento
+            # todavía no existía el dataset de tipos del hackroom).
+            # Ahora que sí existe, se completa acá bajo demanda,
+            # reusando el MISMO mecanismo de species_details() +
+            # override que ya usa el modal Pokédex -- así que
+            # también sirve para el juego base sin tocar nada (si
+            # `typeKeys` ya viene poblado a mano, como en
+            # gym_leaders.json vanilla, no se pisa ni se vuelve a
+            # pedir al bridge).
+            team = [
+                self._with_resolved_type_keys(member)
+                for member in leader.get("team", [])
+            ]
+
+            gym_leaders.append({**leader, "team": team, "earned": earned})
 
         return gym_leaders
+
+    def _with_resolved_type_keys(self, member):
+
+        if member.get("typeKeys"):
+            return member
+
+        species_id = member.get("speciesId")
+
+        if not species_id:
+            return member
+
+        try:
+            details = self._species_details_with_hackroom_overrides(
+                species_id
+            )
+        except Exception:
+            return member
+
+        if "error" in details:
+            return member
+
+        type_keys = [
+            key for key in (
+                details.get("type1Key"), details.get("type2Key")
+            )
+            if key
+        ]
+
+        return {**member, "typeKeys": type_keys}
 
     # -----------------------------------------------------------
     # Ventana nativa: detalle de equipo de un líder (Fase B,

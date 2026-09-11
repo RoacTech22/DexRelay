@@ -1,0 +1,95 @@
+o-----------------------------------------------------------------------------------o
+| POKÉMON RISING RUBY / SINKING SAPPHIRE                                            |
+o-----------------------------------------------------------------------------------o
+| Gift/Static Encounter Changes | IVs, Levels and more for gifts and statics        |
+o-----------------------------------------------------------------------------------o
+| This document covers any changes made to the Gift Pokémon you receive as well as  |
+| any static encounters within the game e.g. the Kecleon you encounter throughout   |
+| the game, many legendary Pokémon and even the Wild Pokémon you encounter when     |
+| Soaring in the Sky.                                                               |
+|                                                                                   |
+| To see these changes, you need to include the DllField.cro file when building     |
+| your game. However you will only be able to actually use these changes if you're  |
+| playing with a method that is able to 'patch the RO module', else your game will  |
+| crash upon trying to launch it. This means for Gateway and HANS users you can't   |
+| use these changes, but Luma3DS or Citra users should be able to include it with   |
+| no problems whatsoever.                                                           |
+o-----------------------------------------------------------------------------------o
+| Files mentioned in this document                                                  |
+o-----------------------------------------------------------------------------------o
+| DllField  | Static Encounter / Gift Pokémon Values                                |
+o-----------------------------------------------------------------------------------o
+
+o-----------------------------------------------------------------------------------o
+| Gift Pokémon Changes                                                              |
+o-----------------------------------------------------------------------------------o
+| Description                       | Changes                                       |
+o-----------------------------------------------------------------------------------o
+| Starter Pokémon, Treecko          | Holds Oran Berry and always has max IVs       |
+| Starter Pokémon, Torchic          | Holds Oran Berry and always has max IVs       |
+| Starter Pokémon, Mudkip           | Holds Oran Berry and always has max IVs       |
+| Fossil Pokémon, Lileep            | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Anorith           | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Aerodactyl        | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Shieldon          | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Cranidos          | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Tirtouga          | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Archen            | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Tyrunt            | Level increased to 30, always has max IVs     |
+| Fossil Pokémon, Amaura            | Level increased to 30, always has max IVs     |
+| Weather Institute, Castform       | Level increased to 40, random nature, max IVs |
+| Battle Resort, Camerupt           | Level increased to 80, always has max IVs     |
+| Battle Resort, Sharpedo           | Level increased to 80, always has max IVs     |
+| Route 118, Latias                 | Level increased to 40, always has max IVs     |
+| Route 118, Latios                 | Level increased to 40, always has max IVs     |
+| Gift from Birch, Chikorita        | Always has max IVs                            |
+| Gift from Birch, Cyndaquil        | Always has max IVs                            |
+| Gift from Birch, Totodile         | Always has max IVs                            |
+| Gift from Birch, Turtwig          | Always has max IVs                            |
+| Gift from Birch, Chimchar         | Always has max IVs                            |
+| Gift from Birch, Piplup           | Always has max IVs                            |
+| Gift from Birch, Snivy            | Always has max IVs                            |
+| Gift from Birch, Tepig            | Always has max IVs                            |
+| Gift from Birch, Oshawott         | Always has max IVs                            |
+o-----------------------------------------------------------------------------------o
+
+o-----------------------------------------------------------------------------------o
+| Static Encounter Changes                                                          |
+o-----------------------------------------------------------------------------------o
+| Description                       | Changes                                       |
+o-----------------------------------------------------------------------------------o
+| Route 101, First Battle on Route  | Changed from Lv. 3 Wurmple to Lv. 5 Pidgey    |
+| Route 119/120, Kecleon            | Level increased to 40                         |
+| Team Hideout, Voltorb             | Level increased to 40                         |
+| Team Hideout, Electrode           | Level increased to 50                         |
+| Desert Ruins, Regirock            | Level increased to 60                         |
+| Island Cave, Regice               | Level increased to 60                         |
+| Ancient Tomb, Registeel           | Level increased to 60                         |
+| Island Cave, Regigigas            | Level increased to 68                         |
+| Cave of Origin, Kyogre            | Level increased to 65                         |
+| Cave of Origin, Groudon           | Level increased to 65                         |
+| Soaring in the Sky, Wild Pokémon  | Level 60, hidden ability, max IV*             |
+| Sky Pillar, Rayquaza              | Level increased to 75                         |
+| Soaring in the Sky, Thundurus     | Level increased to 65, found as Therian forme |
+| Soaring in the Sky, Tornadus      | Level increased to 65, found as Therian forme |
+| Soaring in the Sky, Landorus      | Level increased to 68, found as Therian forme |
+| Soaring in the Sky, Dialga        | Level increased to 70, holding Adamant Orb    |
+| Soaring in the Sky, Palkia        | Level increased to 70, holding Lustrous Orb   |
+| Soaring in the Sky, Giratina      | Level increased to 70, holding Griseous Orb   |
+| Trackless Forest, Raikou          | Level increased to 65                         |
+| Trackless Forest, Entei           | Level increased to 65                         |
+| Trackless Forest, Suicune         | Level increased to 65                         |
+| Pathless Plain, Cobalion          | Level increased to 65                         |
+| Pathless Plain, Terrakion         | Level increased to 65                         |
+| Pathless Plain, Virizion          | Level increased to 65                         |
+| Fabled Cave, Reshiram             | Level increased to 70                         |
+| Fabled Cave, Zekrom               | Level increased to 70                         |
+| Gnarled Den, Kyurem               | Level increased to 70                         |
+| Sea Mauville, Ho-oh               | Level increased to 70, has Regenerator        |
+| Sea Mauville, Lugia               | Level increased to 70, has Multiscale         |
+| Sea Mauville, Spiritomb           | Level increased to 60                         |
+| Southern Island, Latias           | Level increased to 40                         |
+| Southern Island, Latios           | Level increased to 40                         |
+o-----------------------------------------------------------------------------------o
+| * Pokémon species also changed. See area changes doc for details.                 |
+o-----------------------------------------------------------------------------------o

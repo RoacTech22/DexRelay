@@ -2202,40 +2202,45 @@ body {
   font-size: 11px;
 }
 
-/* Desplegable de detalle (08/09/2026, a pedido del usuario: "que
-   solo esté visible la primera fila... y la segunda con un botón
-   se pueda desplegar") -- stats + movimientos arrancan ocultos,
-   .pokemon-card-toggle los muestra/oculta (ver
-   handlePokemonGridClick() en app.js, que alterna la clase
-   "expanded" en .pokemon-card). */
-.pokemon-card-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 6px 0;
+/* Desplegable de detalle -- stats + movimientos arrancan ocultos
+   por CSS acá abajo (.pokemon-card-bottom), la clase "expanded" en
+   .pokemon-card los muestra.
+
+   CORRECCIÓN (09/09/2026, a pedido del usuario: "quitar el botón
+   individual de ver detalles y hacerlo para todos los pokemon de
+   la pestaña"): antes había un botón .pokemon-card-toggle por
+   tarjeta -- se reemplazó por el control de dos botones
+   .pkm-view-mode-toggle de acá abajo, uno por pestaña (Equipo/
+   Caja), que aplica el modo a TODA la grilla de una (ver
+   setGridViewMode() en app.js). */
+.pkm-view-mode-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  background: var(--bg-elevated-2);
+  margin: 4px 0 8px;
+}
+
+.pkm-view-mode-btn {
   border: none;
-  border-top: 1px solid var(--border);
   background: transparent;
   color: var(--text-dim);
   font-size: 12px;
   font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
   cursor: pointer;
 }
 
-.pokemon-card-toggle:hover {
+.pkm-view-mode-btn:hover {
   color: var(--text);
 }
 
-.pokemon-card-toggle-icon {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.15s ease;
-}
-
-.pokemon-card.expanded .pokemon-card-toggle-icon {
-  transform: rotate(180deg);
+.pkm-view-mode-btn.active {
+  background: var(--accent);
+  color: var(--bg);
 }
 
 /* 50/50 real (03/09/2026, a pedido del usuario) -- antes
@@ -4991,6 +4996,11 @@ body {
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--bg-elevated-2);
+  /* 09/09/2026: ahora lleva un ícono (moveCategoryIconSvg()) antes
+     del texto -- antes era texto plano nada más. */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pkm-modal-stats-row {

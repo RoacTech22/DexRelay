@@ -86,10 +86,20 @@ class Runtime:
         #   NuzlockeService.update() comparando `party` contra el
         #   roster guardado -- no hace falta nada especial acá.
         # - Las capturas que van a la CAJA PC (party llena) nunca
-        #   aparecen en `party`, así que se escanea la caja real
-        #   (AzaharReader.read_box(), array persistente confirmado
-        #   empíricamente) y se pasa como `boxed_party`.
-        box = self.reader.read_box()
+        #   aparecen en `party`, así que se escanean las Cajas PC
+        #   reales (AzaharReader.read_boxes_range(), confirmado
+        #   empíricamente contiguas) y se pasan como `boxed_party`.
+        #
+        # 07/09/2026 (a pedido del usuario, bug real): antes solo se
+        # escaneaba la Caja 1 (read_box()) -- una captura depositada
+        # directo en la Caja 2+ (algo que pasa apenas se llena la
+        # Caja 1) nunca se registraba en el Nuzlocke Tracker.
+        # read_boxes_range() ahora cubre las 7 cajas que el juego
+        # trae habilitadas de fábrica en una sola lectura UDP (ver
+        # su docstring en azahar_reader.py) -- comprar más cajas es
+        # opcional y no todos los Nuzlocke lo necesitan, así que no
+        # se escanea más allá de esto por defecto.
+        box = self.reader.read_boxes_range()
 
         self.state.nuzlocke = self.nuzlocke_service.update(
             party,

@@ -523,20 +523,83 @@ static void HandlePokemonDetails(JsonElement root)
         return;
     }
 
-    // Stats de combate reales (Ataque/Defensa/Ataque Esp/Defensa
-    // Esp/Velocidad). El formato "box" (232 bytes) que ya leemos
-    // de memoria NO las trae calculadas -- viven en la sección de
-    // datos de party que DexRelay lee aparte (STAT_DATA_OFFSET en
-    // pointers.py), pero en vez de sumar offsets nuevos ahí (y
-    // tener que investigarlos/validarlos con Cheat Engine), se le
-    // pide a PKHeX que las calcule con la misma fórmula del juego
-    // (especie + nivel + IVs + EVs + naturaleza) --
-    // ResetPartyStats() es el mismo método que usa PKHeX
-    // internamente al cargar un Pokémon a la party, así que el
-    // resultado es idéntico al que muestra el juego.
-    pk.ResetPartyStats();
-
     PersonalInfo personal = pk.PersonalInfo;
+
+    // Fase E (09/09/2026, hackroom Rising Ruby/Sinking Sapphire) --
+    // a pedido del usuario: reflejar el cambio de stat BASE del
+    // hackroom también en las stats CALCULADAS de un Pokémon vivo
+    // (no solo en el modal Pokédex genérico, que solo muestra la
+    // stat base sin calcular). "baseStatsOverride" es un objeto
+    // JSON opcional {hp?,attack?,defense?,spAttack?,spDefense?,
+    // speed?} armado del lado Python a partir de
+    // data/pokemon_changes_rrss.json -- el bridge no sabe nada del
+    // hackroom en sí, solo aplica los números que le llegan.
+    //
+    // RIESGO REAL (documentado a propósito, sin poder compilar/
+    // probar C# en el entorno donde se escribió esto): `personal`
+    // es la MISMA instancia que devuelve PersonalTable.AO para
+    // TODOS los Pokémon de esta especie durante toda la vida del
+    // proceso (tabla cacheada, no una copia por Pokémon) -- mutarla
+    // sin restaurar dejaría el cambio "pegado" para cualquier otra
+    // consulta de esa especie en este mismo proceso del bridge, sin
+    // relación con el hackroom. Por eso el override se aplica
+    // temporalmente, ResetPartyStats() se llama con el valor
+    // cambiado, y los valores originales se restauran de inmediato
+    // en el `finally` -- pase lo que pase, la tabla vuelve a quedar
+    // como estaba antes de este request.
+    int originalHP = personal.HP;
+    int originalATK = personal.ATK;
+    int originalDEF = personal.DEF;
+    int originalSPA = personal.SPA;
+    int originalSPD = personal.SPD;
+    int originalSPE = personal.SPE;
+
+    if (root.TryGetProperty("baseStatsOverride", out JsonElement statsOverride))
+    {
+        if (statsOverride.TryGetProperty("hp", out JsonElement hpEl))
+            personal.HP = hpEl.GetInt32();
+
+        if (statsOverride.TryGetProperty("attack", out JsonElement atkEl))
+            personal.ATK = atkEl.GetInt32();
+
+        if (statsOverride.TryGetProperty("defense", out JsonElement defEl))
+            personal.DEF = defEl.GetInt32();
+
+        if (statsOverride.TryGetProperty("spAttack", out JsonElement spaEl))
+            personal.SPA = spaEl.GetInt32();
+
+        if (statsOverride.TryGetProperty("spDefense", out JsonElement spdEl))
+            personal.SPD = spdEl.GetInt32();
+
+        if (statsOverride.TryGetProperty("speed", out JsonElement speEl))
+            personal.SPE = speEl.GetInt32();
+    }
+
+    try
+    {
+        // Stats de combate reales (Ataque/Defensa/Ataque Esp/Defensa
+        // Esp/Velocidad). El formato "box" (232 bytes) que ya leemos
+        // de memoria NO las trae calculadas -- viven en la sección de
+        // datos de party que DexRelay lee aparte (STAT_DATA_OFFSET en
+        // pointers.py), pero en vez de sumar offsets nuevos ahí (y
+        // tener que investigarlos/validarlos con Cheat Engine), se le
+        // pide a PKHeX que las calcule con la misma fórmula del juego
+        // (especie + nivel + IVs + EVs + naturaleza) --
+        // ResetPartyStats() es el mismo método que usa PKHeX
+        // internamente al cargar un Pokémon a la party, así que el
+        // resultado es idéntico al que muestra el juego -- ahora
+        // usando la stat base del hackroom si se pidió arriba.
+        pk.ResetPartyStats();
+    }
+    finally
+    {
+        personal.HP = originalHP;
+        personal.ATK = originalATK;
+        personal.DEF = originalDEF;
+        personal.SPA = originalSPA;
+        personal.SPD = originalSPD;
+        personal.SPE = originalSPE;
+    }
 
     string TypeName(int typeId) =>
         (typeId >= 0 && typeId < GameInfo.Strings.Types.Count)

@@ -1,5 +1,6 @@
 import json
 import subprocess
+import threading
 from pathlib import Path
 
 from app.core import paths
@@ -31,6 +32,24 @@ class PKHeXBridge:
 
     def __init__(self):
         self.process = None
+
+        # CORRECCIÓN REAL (09/09/2026, reportado por el usuario:
+        # "ahora no me salen algunas evoluciones y en algunos
+        # pokemon no me muestra todos los datos" -- síntoma
+        # mezclado entre especies SIN relación entre sí, lo que
+        # descartó un bug de lógica y apuntó a esto): request() no
+        # tenía ningún lock protegiendo el par escritura+lectura
+        # sobre el mismo pipe stdin/stdout del proceso -- si dos
+        # llamadas se solapan (ahora más probable que antes, Fase E
+        # 09/09/2026: gym_leaders.py pasó a compartir esta MISMA
+        # instancia de bridge con species_details() del modal
+        # Pokédex, en vez de tener cada uno la suya), la respuesta
+        # de una petición se puede leer mezclada con la de otra --
+        # exactamente el síntoma reportado. Mismo criterio que ya
+        # usa AzaharReader para el socket UDP compartido
+        # (threading.Lock envolviendo cada sendto+recv): acá
+        # envuelve cada escritura+lectura sobre el proceso.
+        self._lock = threading.Lock()
 
         # paths.base_dir() en modo desarrollo es la raiz del
         # proyecto (igual que antes); en un build empaquetado
@@ -105,81 +124,87 @@ class PKHeXBridge:
         """
         Envía una petición JSON y devuelve
         la respuesta como diccionario.
+
+        Con lock (ver self._lock en __init__) -- una sola petición
+        a la vez sobre el mismo proceso, sin importar desde qué
+        hilo se llame.
         """
 
-        if not self.is_running():
-            self.start()
+        with self._lock:
 
-        if self.process is None:
-            raise RuntimeError(
-                "No se pudo iniciar el bridge PKHeX."
+            if not self.is_running():
+                self.start()
+
+            if self.process is None:
+                raise RuntimeError(
+                    "No se pudo iniciar el bridge PKHeX."
+                )
+
+            if self.process.stdin is None:
+                raise RuntimeError(
+                    "La entrada del bridge no está disponible."
+                )
+
+            if self.process.stdout is None:
+                raise RuntimeError(
+                    "La salida del bridge no está disponible."
+                )
+
+            message = (
+                json.dumps(payload)
+                + "\n"
             )
 
-        if self.process.stdin is None:
-            raise RuntimeError(
-                "La entrada del bridge no está disponible."
+            try:
+                self.process.stdin.write(
+                    message
+                )
+
+                self.process.stdin.flush()
+
+            except (BrokenPipeError, OSError) as error:
+
+                self.stop()
+
+                raise RuntimeError(
+                    "No se pudo enviar la petición "
+                    "al bridge PKHeX."
+                ) from error
+
+            response = (
+                self.process.stdout.readline()
             )
 
-        if self.process.stdout is None:
-            raise RuntimeError(
-                "La salida del bridge no está disponible."
-            )
+            if not response:
+                exit_code = (
+                    self.process.poll()
+                )
 
-        message = (
-            json.dumps(payload)
-            + "\n"
-        )
+                self.stop()
 
-        try:
-            self.process.stdin.write(
-                message
-            )
+                raise RuntimeError(
+                    "El bridge PKHeX dejó de responder. "
+                    f"Código de salida: {exit_code}"
+                )
 
-            self.process.stdin.flush()
+            try:
+                result = json.loads(
+                    response
+                )
 
-        except (BrokenPipeError, OSError) as error:
+            except json.JSONDecodeError as error:
 
-            self.stop()
+                raise RuntimeError(
+                    "El bridge PKHeX devolvió "
+                    "una respuesta JSON inválida."
+                ) from error
 
-            raise RuntimeError(
-                "No se pudo enviar la petición "
-                "al bridge PKHeX."
-            ) from error
+            if "error" in result:
+                raise RuntimeError(
+                    result["error"]
+                )
 
-        response = (
-            self.process.stdout.readline()
-        )
-
-        if not response:
-            exit_code = (
-                self.process.poll()
-            )
-
-            self.stop()
-
-            raise RuntimeError(
-                "El bridge PKHeX dejó de responder. "
-                f"Código de salida: {exit_code}"
-            )
-
-        try:
-            result = json.loads(
-                response
-            )
-
-        except json.JSONDecodeError as error:
-
-            raise RuntimeError(
-                "El bridge PKHeX devolvió "
-                "una respuesta JSON inválida."
-            ) from error
-
-        if "error" in result:
-            raise RuntimeError(
-                result["error"]
-            )
-
-        return result
+            return result
 
     def species(self, species_id):
         """
@@ -296,12 +321,25 @@ class PKHeXBridge:
             }
         )
 
-    def pokemon_details(self, decrypted_box_data):
+    def pokemon_details(self, decrypted_box_data, base_stats_override=None):
         """
         Resuelve tipos, habilidad, naturaleza, stats de combate y
         movimientos a partir de los 232 bytes YA DESCIFRADOS de un
         Pokémon -- misma fuente que met_location() (GUI v2,
         Bloque 3, página Pokémon).
+
+        `base_stats_override` (Fase E, 09/09/2026, hackroom, a
+        pedido del usuario: "que también se vea reflejado el
+        cambio de stat base en las stats calculadas") -- dict
+        opcional {"hp"?, "attack"?, "defense"?, "spAttack"?,
+        "spDefense"?, "speed"?} con la stat base del hackroom para
+        la especie de este Pokémon (ver data/pokemon_changes_rrss.json).
+        Se manda tal cual al bridge, que la aplica TEMPORALMENTE
+        antes de calcular (ver HandlePokemonDetails() en Program.cs
+        para el porqué del cuidado de restaurar después). None (o
+        no pasar el argumento) es el comportamiento de siempre, sin
+        tocar nada -- pensado así para que ningún llamador existente
+        tenga que cambiar.
         """
 
         import base64
@@ -310,12 +348,15 @@ class PKHeXBridge:
             decrypted_box_data
         ).decode("ascii")
 
-        return self.request(
-            {
-                "action": "pokemon_details",
-                "data": encoded_data,
-            }
-        )
+        payload = {
+            "action": "pokemon_details",
+            "data": encoded_data,
+        }
+
+        if base_stats_override:
+            payload["baseStatsOverride"] = base_stats_override
+
+        return self.request(payload)
 
     def save_info(self, save_file_path):
         """

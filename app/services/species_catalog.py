@@ -40,6 +40,7 @@ class SpeciesCatalog:
             else paths.path("data", "species_cache.json")
         )
         self._species = None
+        self._by_id = None
 
     def list_all(self):
         """
@@ -76,6 +77,24 @@ class SpeciesCatalog:
             self._save_to_disk(species)
 
         return species
+
+    def get_name(self, species_id):
+        """
+        Nombre en español de una especie puntual, o None si no se
+        pudo resolver (07/09/2026, agregado para el modal
+        Pokédex de especie: la evolución `LevelUpWithTeammate`
+        necesita mostrar el nombre de la especie compañera
+        requerida, no solo su id). Reusa list_all() -- no vuelve a
+        golpear el bridge si ya está cacheada.
+        """
+
+        if self._by_id is None:
+            self._by_id = {
+                entry["id"]: entry["name"]
+                for entry in self.list_all()
+            }
+
+        return self._by_id.get(species_id)
 
     def _load_from_disk(self):
 

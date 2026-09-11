@@ -35,13 +35,18 @@ class PokemonDetailResolver:
             else PKHeXBridge()
         )
 
-    def resolve(self, decrypted_box_data):
+    def resolve(self, decrypted_box_data, base_stats_override=None):
         """
         Devuelve un dict con genderId/type1/type2/abilityId/
         abilityName/natureId/natureName/natureIncreasedStat/
         natureDecreasedStat/stats/moves. Si no se pudo resolver
         (bridge no disponible, error), devuelve un dict "vacío"
         -- nunca lanza, para no romper la página por esto.
+
+        `base_stats_override` (Fase E, 09/09/2026, hackroom): se
+        reenvía tal cual a bridge.pokemon_details() -- ver su
+        docstring. None de forma explícita es el default de
+        siempre.
         """
 
         empty_result = {
@@ -68,7 +73,8 @@ class PokemonDetailResolver:
 
         try:
             result = self.bridge.pokemon_details(
-                decrypted_box_data
+                decrypted_box_data,
+                base_stats_override=base_stats_override,
             )
 
         except Exception as error:

@@ -537,11 +537,13 @@ class NuzlockeService:
         cambios, y devuelve el estado actual completo
         (roster + graveyard).
 
-        `boxed_party`: resultado de AzaharReader.read_box() -- la
-        lista completa de Pokémon actualmente en la Caja PC (fue
-        ahí directo porque la party estaba llena; en ese caso nunca
-        aparecen en `team`, y sin esto el Tracker nunca se enteraba
-        de esas capturas). Identidad-basada, sin estado adicional
+        `boxed_party`: resultado de AzaharReader.read_boxes_range()
+        (07/09/2026, antes read_box() -- solo cubría la Caja 1) --
+        la lista combinada de Pokémon actualmente en cualquiera de
+        las Cajas PC habilitadas de fábrica (fueron ahí directo
+        porque la party estaba llena; en ese caso nunca aparecen en
+        `team`, y sin esto el Tracker nunca se enteraba de esas
+        capturas). Identidad-basada, sin estado adicional
         que mantener: cualquier nickname que no esté ya en
         roster/graveyard se registra como captura nueva, igual que
         un Pokémon nuevo visto en la party.

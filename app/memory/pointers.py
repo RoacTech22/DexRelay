@@ -52,6 +52,9 @@ ARCHIVO_DIRECCIONES_AS_BASE = {
     "BOX_BASE_ADDRESS": 0x08C9A144,
     "CURRENT_ZONE_ID_ADDRESS": 0x08C6A7B2,
     "CURRENT_ZONE_ID_MIRROR_ADDRESS": 0x08C6A894,
+    "BAG_START_ADDRESS": 0x08C6AC80,
+    "BAG_END_ADDRESS": 0x08C6B810,
+    "MEDICINE_POCKET_START_ADDRESS": 0x08C6B5F0,
 }
 
 # Tabla que contiene el orden lógico de los Pokémon de la party.
@@ -514,20 +517,26 @@ def get_current_zone_id_address(process_name):
 #
 # Multi-version (07/09/2026, mismo patrón ya visto con
 # PARTY_ORDER_ADDRESS/BOX_BASE_ADDRESS/CURRENT_ZONE_ID_ADDRESS): la
-# dirección NO coincide entre versiones -- pero a diferencia de esas
-# otras direcciones, acá el desplazamiento entre AS y OR resultó ser
-# una constante EXACTA (0x3FF0) tanto para el inicio como para el
-# final del tramo confirmado por auto-detección
+# dirección NO coincidía entre versiones -- pero a diferencia de esas
+# otras direcciones, en su momento el desplazamiento entre AS-base y
+# OR resultó ser una constante EXACTA (0x3FF0) tanto para el inicio
+# como para el final del tramo confirmado por auto-detección
 # (confirmar_bolsa_items.py: 740 casilleros / 2960 bytes en las DOS
-# versiones, mismo tamaño exacto) -- fuerte señal de que es
-# literalmente la misma estructura, corrida en memoria por ese
-# offset fijo.
+# versiones, mismo tamaño exacto).
+#
+# ACTUALIZADO (09/09/2026): Alpha Sapphire migró a la actualización
+# 1.4 -- mismo fenómeno que ya se confirmó con PARTY_ORDER_ADDRESS/
+# BOX_BASE_ADDRESS/CURRENT_ZONE_ID_ADDRESS (bug real reportado por
+# el usuario: Caramelo Raro dejó de funcionar tras el parche).
+# Confirmado en vivo (dump_medicina_candidato_as_1_4.py) que AS 1.4
+# usa la MISMA dirección que Omega Ruby. Valores viejos de AS-base
+# archivados en ARCHIVO_DIRECCIONES_AS_BASE.
 _BAG_START_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6AC80,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6EC70,
     PROCESS_NAME_OMEGA_RUBY: 0x08C6EC70,
 }
 _BAG_END_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B810,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6F800,
     PROCESS_NAME_OMEGA_RUBY: 0x08C6F800,
 }
 
@@ -602,8 +611,15 @@ def get_bag_end_address(process_name):
 # Ruby y el juego lo mostro y conto correctamente dentro del
 # bolsillo de Medicina (a diferencia del bug original, que lo
 # mandaba a "Objetos").
+#
+# ACTUALIZADO (09/09/2026): Alpha Sapphire migró a la actualización
+# 1.4 -- confirmado en vivo con dump_medicina_candidato_as_1_4.py
+# (bug real reportado por el usuario: Caramelo Raro dejó de
+# funcionar tras el parche) que AS 1.4 usa la MISMA dirección que
+# Omega Ruby. Valor viejo de AS-base archivado en
+# ARCHIVO_DIRECCIONES_AS_BASE.
 _MEDICINE_POCKET_START_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B5F0,
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B5F0 + 0x3FF0,
     PROCESS_NAME_OMEGA_RUBY: 0x08C6B5F0 + 0x3FF0,
 }
 

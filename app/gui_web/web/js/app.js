@@ -1063,32 +1063,52 @@
   // modales clickeables) tanto en la grilla de Equipo (6 slots
   // fijos, incluye vacíos) como en la de Caja (hasta 30 slots,
   // pero solo se listan los ocupados -- ver `showEmptySlots`).
-  // Estado de tarjetas desplegadas, persistido por afuera del
-  // render (08/09/2026, bug real corregido: "a lo que despliego la
-  // segunda fila se cierra enseguida, solo sucede en la pestaña de
-  // equipo"). Causa: el poll de 2s de Equipo llama a
-  // renderPokemonGrid() de nuevo cada vez (container.innerHTML =
-  // ""), reconstruyendo las tarjetas desde cero y perdiendo
-  // cualquier clase "expanded" que tuvieran -- no pasaba en Caja
-  // porque esa pestaña no tiene poll de fondo, se pide una sola vez
-  // al entrar. Clave por containerId+slot (no alcanza con el slot
-  // solo: Equipo y Caja son grids distintos con su propia
-  // numeración de slot).
-  var expandedCardSlots = {};
+  //
+  // Modo de vista de las tarjetas Equipo/Caja (09/09/2026, a pedido
+  // del usuario: "quitar el botón individual de ver detalles y
+  // hacerlo para todos los pokemon de la pestaña") -- reemplaza el
+  // botón por-tarjeta (que alternaba "expanded" una por una) por un
+  // control de dos botones (Vista compacta/Vista expandida) que
+  // aplica a TODA la grilla de una. Clave por containerId
+  // (pokemon-grid/pkm-box-grid son grillas independientes, cada
+  // una con su propio modo). "compact" es el default -- mismo
+  // comportamiento inicial que antes (tarjetas cerradas).
+  var gridViewMode = {};
 
-  function isCardExpanded(containerId, slot) {
-    return !!(expandedCardSlots[containerId] && expandedCardSlots[containerId][slot]);
+  function isGridExpanded(containerId) {
+    return gridViewMode[containerId] === "expanded";
   }
 
-  function setCardExpanded(containerId, slot, expanded) {
-    if (!expandedCardSlots[containerId]) {
-      expandedCardSlots[containerId] = {};
+  function setGridViewMode(containerId, mode) {
+    gridViewMode[containerId] = mode;
+
+    var container = document.getElementById(containerId);
+    if (container) {
+      container.querySelectorAll(".pokemon-card").forEach(function (card) {
+        card.classList.toggle("expanded", mode === "expanded");
+      });
     }
-    if (expanded) {
-      expandedCardSlots[containerId][slot] = true;
-    } else {
-      delete expandedCardSlots[containerId][slot];
+
+    var toggle = document.querySelector(
+      '.pkm-view-mode-toggle[data-target-grid="' + containerId + '"]'
+    );
+    if (toggle) {
+      toggle.querySelectorAll(".pkm-view-mode-btn").forEach(function (btn) {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+      });
     }
+  }
+
+  function initViewModeToggles() {
+    document.querySelectorAll(".pkm-view-mode-toggle").forEach(function (toggle) {
+      toggle.addEventListener("click", function (event) {
+        var btn = event.target.closest(".pkm-view-mode-btn");
+        if (!btn) {
+          return;
+        }
+        setGridViewMode(toggle.dataset.targetGrid, btn.dataset.mode);
+      });
+    });
   }
 
   function renderPokemonGrid(containerId, pages, options) {
@@ -1117,7 +1137,7 @@
       }
 
       card.dataset.slot = slot.slot;
-      if (isCardExpanded(containerId, slot.slot)) {
+      if (isGridExpanded(containerId)) {
         card.classList.add("expanded");
       }
 
@@ -1259,17 +1279,13 @@
         abilityHtml +
         "</div>" +
         "</div>" +
-        // Desplegable (08/09/2026, a pedido del usuario): la
-        // "segunda fila" (stats + movimientos) arranca oculta --
-        // ver .pokemon-card-bottom en style.css -- y este botón
-        // alterna la clase "expanded" en la tarjeta (ver
-        // initPokemonPageActions()). Sprite/nickname/especie/
-        // habilidad (arriba) quedan siempre visibles.
-        '<button class="pokemon-card-toggle" type="button">' +
-        "<span>Ver detalle</span>" +
-        '<svg class="pokemon-card-toggle-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<polyline points="6,9 12,15 18,9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        "</button>" +
+        // Desplegable (08/09/2026, a pedido del usuario) -- la
+        // "segunda fila" (stats + movimientos) se muestra u oculta
+        // según el modo de vista GLOBAL de la pestaña (ver
+        // setGridViewMode()/isGridExpanded() más arriba), no un
+        // botón por tarjeta como antes (09/09/2026, a pedido del
+        // usuario: "quitar ese botón individual y hacerlo para
+        // todos los pokemon de la pestaña").
         '<div class="pokemon-card-bottom">' +
         '<div class="pokemon-card-stats"><div class="dash-card-header-icon-title pokemon-card-stats-title">' + STATS_TITLE_ICON + "<span>Estadísticas</span></div>" +
         statsHtml + "</div>" +
@@ -1291,6 +1307,33 @@
     Status: "Estado",
   };
 
+  // Íconos de categoría de movimiento provistos por el usuario
+  // (09/09/2026) -- mismo criterio que los íconos de sexo (fill
+  // reemplazado por currentColor para heredar el color del texto
+  // en vez de quedar fijo en gris). Cada uno con su propio viewBox
+  // real (no comparten proporción entre sí, a diferencia de los
+  // íconos de tipo).
+  var MOVE_CATEGORY_ICONS = {
+    Physical: {
+      viewBox: "0 0 254.98 246.72",
+      glyph: '<path fill="currentColor" d="M50.01,69.93l18.15,37.25c.51,1.05-.31,2.26-1.48,2.15-12.68-1.15-66.67-5.89-66.67-3.01s50.16,32.61,59.64,38.19c.8.47.98,1.55.37,2.26l-15.01,17.59c-.93,1.08.04,2.73,1.44,2.44l25.42-5.17c1.09-.22,2.03.77,1.75,1.84l-18.33,71.32c-.36,1.41,1.3,2.46,2.42,1.52l60-50.5c.78-.65,1.96-.36,2.35.57l16.34,39.42c.5,1.21,2.22,1.24,2.75.04l14.5-32.28c.43-.97,1.71-1.19,2.44-.43l51.67,53.12c1.13,1.16,3.04-.04,2.48-1.56l-24.52-67.3c-.37-1.01.42-2.07,1.49-2.01l52.39,2.83c1.53.08,2.19-1.92.9-2.76l-47.7-31c-.9-.58-.91-1.89-.03-2.5l61.53-42.02c1.15-.79.7-2.59-.69-2.73l-57.82-5.93c-.87-.09-1.48-.91-1.32-1.77l12.67-67.67c.28-1.48-1.55-2.4-2.57-1.3l-38.37,41.39c-.81.87-2.27.5-2.56-.66l-11.25-44.99c-.35-1.41-2.29-1.55-2.84-.2l-16.86,41.21c-.43,1.05-1.83,1.26-2.55.38L83.22.55c-.98-1.19-2.9-.31-2.64,1.2l12.26,72.01c.18,1.03-.74,1.92-1.77,1.72l-39.43-7.69c-1.21-.24-2.18,1.02-1.64,2.13Z"/>',
+    },
+    Special: {
+      viewBox: "0 0 264.51 160.72",
+      glyph: '<path fill="currentColor" d="M132.26,0C59.21,0,0,35.98,0,80.36s59.21,80.36,132.26,80.36,132.26-35.98,132.26-80.36S205.3,0,132.26,0ZM131.99,139.84c-60.93,0-110.32-26.76-110.32-59.76s49.39-59.76,110.32-59.76,110.32,26.76,110.32,59.76-49.39,59.76-110.32,59.76Z"/><path fill="currentColor" d="M131.76,29.53c-45.4,0-82.21,19.25-82.21,42.99s36.8,42.99,82.21,42.99,82.21-19.25,82.21-42.99-36.8-42.99-82.21-42.99ZM131.76,96.61c-34.64,0-62.72-10.79-62.72-24.09s28.08-24.09,62.72-24.09,62.72,10.79,62.72,24.09-28.08,24.09-62.72,24.09Z"/><path fill="currentColor" d="M131.76,56.05c-16.83,0-30.47,6.09-30.47,13.61s13.64,13.61,30.47,13.61,30.47-6.09,30.47-13.61-13.64-13.61-30.47-13.61Z"/>',
+    },
+    Status: {
+      viewBox: "0 0 262.03 158.16",
+      glyph: '<path fill="currentColor" d="M131.02,0C58.66,0,0,35.41,0,79.08s58.66,79.08,131.02,79.08,131.02-35.41,131.02-79.08S203.37,0,131.02,0ZM110.95,81.57c7.06,6.52,25.46,6.05,33.28,7.26,19.52,3,14.01,17.77,2.38,22.9-10.07,4.44-20.9,5.26-20.9,5.26-75.58,5.51-97.89-32.03-97.89-32.03-8.17-15.02,5.89-32.11,16.02-39.04C118.75-5.31,201.79,30.27,201.79,30.27c-88-20.37-121.75,22.75-90.84,51.3Z"/>',
+    },
+  };
+
+  function moveCategoryIconSvg(categoryKey, size) {
+    var icon = MOVE_CATEGORY_ICONS[categoryKey];
+    if (!icon) { return ""; }
+    return '<svg viewBox="' + icon.viewBox + '" width="' + size + '" height="' + size + '" xmlns="http://www.w3.org/2000/svg">' + icon.glyph + "</svg>";
+  }
+
   function initPokemonPageActions() {
     // Delegación de eventos (07/09/2026): el grid se reconstruye
     // entero en cada poll de 2s (ver renderPokemonPage(),
@@ -1304,19 +1347,6 @@
     // misma tarjeta, mismos modales (Pokédex/movimiento/habilidad),
     // un solo handler compartido en vez de reimplementarlo.
     function handlePokemonGridClick(event) {
-      // Toggle de detalle (08/09/2026) -- alterna la clase
-      // "expanded" en la tarjeta contenedora, que muestra/oculta
-      // .pokemon-card-bottom vía CSS (ver style.css).
-      var toggleBtn = event.target.closest(".pokemon-card-toggle");
-      if (toggleBtn) {
-        var card = toggleBtn.closest(".pokemon-card");
-        if (card) {
-          var nowExpanded = card.classList.toggle("expanded");
-          setCardExpanded(event.currentTarget.id, card.dataset.slot, nowExpanded);
-        }
-        return;
-      }
-
       // Modal Pokédex (08/09/2026, a pedido del usuario: "quitale
       // el icono de la pokedex y que lo abra la especie") -- ya no
       // hay un botón dedicado, se abre haciendo click en el texto
@@ -1365,6 +1395,7 @@
     });
 
     initPokemonTabsBehavior();
+    initViewModeToggles();
   }
 
   // ===================== PESTAÑA "GENERAL" (roadmap 08/09/2026, sección 5.1/5.2) =====================
@@ -1622,8 +1653,10 @@
       typeEl.style.cssText = typeStyleVars(data.typeKey);
       typeEl.innerHTML = typeIconSvg(data.typeKey, 14) + "<span>" + (ti ? ti.label : data.type || "") + "</span>";
 
-      document.getElementById("pkm-move-modal-category").textContent =
+      var categoryLabel =
         MOVE_CATEGORY_LABELS[data.categoryKey] || data.categoryKey || "—";
+      document.getElementById("pkm-move-modal-category").innerHTML =
+        moveCategoryIconSvg(data.categoryKey, 14) + "<span>" + categoryLabel + "</span>";
 
       document.getElementById("pkm-move-modal-power").textContent =
         data.power != null ? data.power : "—";
@@ -1986,7 +2019,7 @@
       var stagesHtml = "";
 
       ancestors.forEach(function (ancestor) {
-        stagesHtml += stageHtml(ancestor) + connectorHtml(ancestor.transitionToNext);
+        stagesHtml += stageHtml(ancestor) + connectorHtml(ancestor.transitionsToNext);
       });
 
       if (currentNode) {

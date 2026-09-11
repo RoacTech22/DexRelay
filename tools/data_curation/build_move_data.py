@@ -24,18 +24,46 @@ Solución: PokéAPI expone el historial de cambios por movimiento vía
 su endpoint REST (`past_values`, ligado a en qué "version_group" se
 originó cada cambio) -- no está en el CSV masivo, así que este
 script pide cada movimiento INDIVIDUALMENTE (937 llamadas al momento
-de escribir esto) para resolver el valor que corresponde a Gen 6.
+de escribir esto) para resolver el valor que corresponde a ORAS.
 
-Lógica de resolución (verificada contra dos casos reales conocidos
-antes de confiar en ella -- ver verify_resolution_logic()): cada
-entrada de `past_values` representa el valor que rigió HASTA
-(inclusive) la generación de su `version_group`, después de la cual
-cambió a otra cosa (el siguiente past_value más nuevo, o el valor
-"actual" si no hay ninguno más nuevo). Para Gen 6: se busca, entre
-los past_values, el de MENOR generación que sea >= 6 -- si existe,
-esa es la respuesta (el cambio a otra cosa todavía no había pasado
-en Gen 6). Si ninguno califica (todos los cambios fueron ANTES de
-Gen 6, o no hay historial), Gen 6 usa el valor actual.
+BUG REAL encontrado y corregido (07/09/2026, reportado por el
+usuario tras verificar Rayo/Thunderbolt contra la API real): la
+primera versión de esta lógica resolvía por NÚMERO DE GENERACIÓN
+(x-y y omega-ruby-alpha-sapphire ambos mapeados a "6"), perdiendo
+la granularidad DENTRO de una misma generación. Rayo tiene un
+`past_value` marcado específicamente en "x-y" con potencia 95 -- el
+cambio a 90 (valor actual, confirmado contra pokeapi.co/api/v2/move/85/
+en vivo) pasó ENTRE X/Y y ORAS, dos version_groups de la misma
+Generación 6 (Game Freak sí aplicó ajustes de potencia a varios
+movimientos especiales -- Rayo, y probablemente otros como
+Lanzallamas/Rayo Hielo -- específicamente al lanzar ORAS, no al
+lanzar X/Y). Al resolver por "generación 6" en bloque, el algoritmo
+viejo devolvía 95 (el valor de X/Y) para ORAS, que es exactamente
+lo que ORAS NO tiene.
+
+Corrección: en vez de VERSION_GROUP_GENERATION (número de
+generación, demasiado grueso), ahora se usa VERSION_GROUP_ORDER
+(posición cronológica exacta de cada version_group, curada a mano
+en orden real de lanzamiento -- no reutiliza los IDs numéricos
+internos de PokéAPI, que NO respetan orden cronológico real: por
+ejemplo Colosseum/XD tienen IDs más altos que Corazón de Oro/Alma
+de Plata pese a haber salido varios años antes). El objetivo ya no
+es "Generación 6" en general sino el version_group específico
+"omega-ruby-alpha-sapphire" -- así se distingue correctamente un
+cambio que pasó entre X/Y y ORAS de uno que pasó en cualquier otro
+punto.
+
+Lógica de resolución (verificada contra TRES casos reales conocidos
+antes de confiar en ella -- ver verify_resolution_logic(), el
+tercero agregado tras este bug): cada entrada de `past_values`
+representa el valor que rigió HASTA (inclusive) el version_group
+indicado, después del cual cambió a otra cosa (el siguiente
+past_value más nuevo, o el valor "actual" si no hay ninguno más
+nuevo). Para ORAS: se busca, entre los past_values, el de MENOR
+orden cronológico que sea >= el de "omega-ruby-alpha-sapphire" -- si
+existe, esa es la respuesta (el cambio a otra cosa todavía no había
+pasado en ORAS). Si ninguno califica (todos los cambios fueron ANTES
+de ORAS, o no hay historial), ORAS usa el valor actual.
 
 Este script SÍ necesita internet -- por eso es una herramienta de
 curación aparte (mismo espíritu que un probe de investigación de
@@ -50,6 +78,13 @@ USO:
 Tarda varios minutos (una llamada HTTP por movimiento, con una
 pausa chica entre cada una para no golpear la API de golpe). Es
 normal. Solo hace falta correrlo una vez.
+
+IMPORTANTE (07/09/2026): si ya corriste este script antes del
+07/09/2026 (antes de esta corrección), `data/move_data.json` tiene
+el bug de arriba -- hay que VOLVER A CORRERLO para regenerar el
+dataset completo con la lógica corregida. No alcanza con parchear
+Rayo a mano: cualquier otro movimiento que haya cambiado
+específicamente entre X/Y y ORAS tiene el mismo problema.
 """
 
 import csv
@@ -80,8 +115,32 @@ OUTPUT_PATH = paths.path("data", "move_data.json")
 # corre una sola vez).
 REQUEST_DELAY_SECONDS = 0.1
 
-# Generación objetivo: Alpha Sapphire / Omega Ruby.
-TARGET_GENERATION = 6
+# version_group objetivo exacto -- ya no alcanza con "Generación 6"
+# a secas (ver el bug real corregido en el docstring del módulo):
+# X/Y y ORAS son dos version_groups DISTINTOS dentro de la misma
+# generación, y al menos un movimiento (Rayo/Thunderbolt) cambió de
+# potencia específicamente entre uno y otro.
+#
+# PENDIENTE A FUTURO (07/09/2026, a pedido del usuario -- anotado
+# para cuando DexRelay dé soporte también a Pokémon X/Y, no solo
+# ORAS): hoy este valor está fijo a "omega-ruby-alpha-sapphire"
+# porque DexRelay solo lee memoria de ORAS. Si en algún momento se
+# agrega soporte para X/Y, ESTE dataset no sirve tal cual para esa
+# versión -- Rayo/Lanzallamas/Rayo Hielo (y probablemente más) YA
+# CONFIRMADO que tienen valores distintos entre X/Y (95) y ORAS
+# (90), justamente el bug que motivó este archivo. Habría que:
+#   1. Parametrizar TARGET_VERSION_GROUP en vez de dejarlo fijo acá.
+#   2. Correr build_move_data.py una segunda vez con
+#      TARGET_VERSION_GROUP="x-y" para generar un dataset SEPARADO
+#      (ej. move_data_xy.json), no pisar move_data.json.
+#   3. MoveDataCatalog (app/services/move_data.py) necesitaría
+#      elegir qué archivo cargar según la versión de juego conectada
+#      (mismo patrón multi-versión que ya usa pointers.py para
+#      direcciones de memoria por process_name).
+# No se resuelve ahora porque no hay soporte de X/Y todavía en
+# ningún otro lado del proyecto (memoria, PKHeX bridge, etc.) --
+# hacerlo bien acá solo, sin lo demás, no serviría de nada.
+TARGET_VERSION_GROUP = "omega-ruby-alpha-sapphire"
 
 # Clave estable en inglés (mismo criterio que TypeKey en el bridge
 # PKHeX: nombre fijo, no localizado, para que el FRONTEND traduzca)
@@ -94,34 +153,54 @@ CATEGORY_KEY_BY_IDENTIFIER = {
     "status": "Status",
 }
 
-# Identifier de version_group -> número de generación. Dato
-# estructural público y permanente (las generaciones ya cerradas no
-# se renumeran) -- mismo criterio que la tabla de Title IDs de
-# pointers.py. No hace falta pedirlo por red: es la misma lista fija
-# que cualquier fuente pública sobre las versiones del juego.
-VERSION_GROUP_GENERATION = {
+# Orden CRONOLÓGICO real de cada version_group (07/09/2026,
+# reemplaza a VERSION_GROUP_GENERATION -- ver el bug real corregido
+# en el docstring del módulo). El número es solo una posición
+# relativa en la secuencia de lanzamiento real -- NO son los IDs
+# internos de PokéAPI (esos NO respetan orden cronológico: por
+# ejemplo Colosseum/XD tienen IDs más altos que Corazón de Oro/Alma
+# de Plata pese a haber salido varios años antes -- confirmado
+# comparando los IDs reales que trae el campo "machines" de
+# pokeapi.co/api/v2/move/85/ contra las fechas de lanzamiento
+# reales de cada juego).
+#
+# Los pares japoneses de Gen 1 (red-green-japan/blue-japan)
+# salieron ANTES que red-blue internacional, pero no importan para
+# ningún cambio relevante a Gen 6 -- se dejan fuera de esta tabla a
+# propósito (si algún movimiento tuviera un past_value marcado ahí,
+# el script lo ignora igual que cualquier version_group desconocido,
+# ver resolve_target_value()).
+VERSION_GROUP_ORDER = {
     "red-blue": 1,
-    "yellow": 1,
-    "gold-silver": 2,
-    "crystal": 2,
-    "ruby-sapphire": 3,
-    "emerald": 3,
-    "firered-leafgreen": 3,
-    "diamond-pearl": 4,
-    "platinum": 4,
-    "heartgold-soulsilver": 4,
-    "black-white": 5,
-    "black-2-white-2": 5,
-    "x-y": 6,
-    "omega-ruby-alpha-sapphire": 6,
-    "sun-moon": 7,
-    "ultra-sun-ultra-moon": 7,
-    "lets-go-pikachu-lets-go-eevee": 7,
-    "sword-shield": 8,
-    "brilliant-diamond-and-shining-pearl": 8,
-    "legends-arceus": 8,
-    "scarlet-violet": 9,
+    "yellow": 2,
+    "gold-silver": 3,
+    "crystal": 4,
+    "ruby-sapphire": 5,
+    "colosseum": 6,
+    "firered-leafgreen": 7,
+    "emerald": 8,
+    "xd": 9,
+    "diamond-pearl": 10,
+    "platinum": 11,
+    "heartgold-soulsilver": 12,
+    "black-white": 13,
+    "black-2-white-2": 14,
+    "x-y": 15,
+    "omega-ruby-alpha-sapphire": 16,
+    "sun-moon": 17,
+    "ultra-sun-ultra-moon": 18,
+    "lets-go-pikachu-lets-go-eevee": 19,
+    "sword-shield": 20,
+    "brilliant-diamond-and-shining-pearl": 21,
+    "legends-arceus": 22,
+    "scarlet-violet": 23,
 }
+
+# Orden del version_group objetivo -- se resuelve una sola vez acá
+# en vez de buscarlo en cada llamada a resolve_target_value().
+TARGET_VERSION_GROUP_ORDER = VERSION_GROUP_ORDER[
+    TARGET_VERSION_GROUP
+]
 
 
 def fetch_csv_rows(url):
@@ -194,12 +273,14 @@ def build_category_key_by_id(damage_class_rows):
     return mapping
 
 
-def resolve_generation_6_value(current_value, past_values, field_name):
+def resolve_target_value(current_value, past_values, field_name):
     """
     Devuelve el valor de `field_name` (ej. "power"/"accuracy") que
-    regía en Generación 6, a partir del valor actual y el historial
-    `past_values` de PokéAPI para un movimiento. Ver la lógica
-    completa en el docstring del módulo.
+    regía en TARGET_VERSION_GROUP (Omega Ruby/Alpha Sapphire), a
+    partir del valor actual y el historial `past_values` de PokéAPI
+    para un movimiento. Ver la lógica completa y el bug real que
+    corrige (resolver por version_group exacto, no por generación
+    en bloque) en el docstring del módulo.
     """
 
     candidates = []
@@ -207,9 +288,9 @@ def resolve_generation_6_value(current_value, past_values, field_name):
     for entry in past_values:
 
         version_group_name = entry["version_group"]["name"]
-        generation = VERSION_GROUP_GENERATION.get(version_group_name)
+        order = VERSION_GROUP_ORDER.get(version_group_name)
 
-        if generation is None:
+        if order is None:
             # version_group desconocido (no debería pasar con la
             # tabla de arriba, pero mejor no reventar el script
             # entero por un movimiento raro) -- se ignora esta
@@ -225,23 +306,23 @@ def resolve_generation_6_value(current_value, past_values, field_name):
         if value is None:
             continue
 
-        candidates.append((generation, value))
+        candidates.append((order, value))
 
     if not candidates:
         return current_value
 
-    # De las entradas con generación >= 6 (el cambio todavía no
-    # había pasado en Gen 6), la de generación más CHICA es la más
-    # cercana a Gen 6 -- esa es la que regía en ese momento.
+    # De las entradas con orden >= el de ORAS (el cambio todavía no
+    # había pasado en ORAS), la de orden más CHICO es la más
+    # cercana a ORAS -- esa es la que regía en ese momento.
     applicable = [
-        (generation, value)
-        for generation, value in candidates
-        if generation >= TARGET_GENERATION
+        (order, value)
+        for order, value in candidates
+        if order >= TARGET_VERSION_GROUP_ORDER
     ]
 
     if not applicable:
-        # Todos los cambios registrados fueron ANTES de Gen 6 --
-        # para Gen 6 ya regía el valor actual.
+        # Todos los cambios registrados fueron ANTES de ORAS -- en
+        # ORAS ya regía el valor actual.
         return current_value
 
     applicable.sort(key=lambda item: item[0])
@@ -251,46 +332,75 @@ def resolve_generation_6_value(current_value, past_values, field_name):
 
 def verify_resolution_logic():
     """
-    Chequeo contra dos casos reales conocidos ANTES de confiar en
+    Chequeo contra TRES casos reales conocidos ANTES de confiar en
     la lógica para las 937 llamadas reales -- mismo criterio de
     siempre (nunca dar por buena una fórmula sin probarla contra un
     caso conocido).
 
     Caso 1 (Recover): PP bajó de 10 a 5 recién en Generación 9. En
-    Gen 6 (ORAS) tenía que seguir siendo 10.
+    ORAS tenía que seguir siendo 10.
     Caso 2 (Vine Whip): potencia subió a 45 justo al empezar
-    Generación 6 (X/Y), y se mantuvo así desde entonces -- en Gen 6
+    Generación 6 (X/Y), y se mantuvo así desde entonces -- en ORAS
     ya es 45, no el valor viejo de antes.
+    Caso 3 (Rayo/Thunderbolt, agregado 07/09/2026 tras el bug real
+    encontrado por el usuario): potencia bajó de 95 a 90
+    ESPECÍFICAMENTE entre X/Y y ORAS -- el past_value real de
+    PokéAPI está marcado en "x-y" (confirmado contra
+    pokeapi.co/api/v2/move/85/ en vivo), no en una generación
+    completa. En ORAS ya tiene que dar 90 (el valor actual), NO 95
+    -- este es exactamente el caso que la versión vieja de esta
+    función (por generación) resolvía mal.
     """
 
     recover_past_values = [
         {"pp": 10, "version_group": {"name": "sword-shield"}},
     ]
 
-    recover_pp_gen6 = resolve_generation_6_value(
+    recover_pp_oras = resolve_target_value(
         current_value=5,
         past_values=recover_past_values,
         field_name="pp",
     )
 
-    assert recover_pp_gen6 == 10, (
-        f"Lógica de resolución mal: Recover en Gen 6 debería dar "
-        f"10 PP, dio {recover_pp_gen6}."
+    assert recover_pp_oras == 10, (
+        f"Lógica de resolución mal: Recover en ORAS debería dar "
+        f"10 PP, dio {recover_pp_oras}."
     )
 
     vine_whip_past_values = [
         {"power": 35, "version_group": {"name": "black-white"}},
     ]
 
-    vine_whip_power_gen6 = resolve_generation_6_value(
+    vine_whip_power_oras = resolve_target_value(
         current_value=45,
         past_values=vine_whip_past_values,
         field_name="power",
     )
 
-    assert vine_whip_power_gen6 == 45, (
-        f"Lógica de resolución mal: Vine Whip en Gen 6 debería dar "
-        f"45 de potencia, dio {vine_whip_power_gen6}."
+    assert vine_whip_power_oras == 45, (
+        f"Lógica de resolución mal: Vine Whip en ORAS debería dar "
+        f"45 de potencia, dio {vine_whip_power_oras}."
+    )
+
+    thunderbolt_past_values = [
+        {
+            "accuracy": None,
+            "power": 95,
+            "pp": None,
+            "version_group": {"name": "x-y"},
+        },
+    ]
+
+    thunderbolt_power_oras = resolve_target_value(
+        current_value=90,
+        past_values=thunderbolt_past_values,
+        field_name="power",
+    )
+
+    assert thunderbolt_power_oras == 90, (
+        f"Lógica de resolución mal: Rayo en ORAS debería dar 90 "
+        f"de potencia (el cambio de 95 a 90 fue ANTES de ORAS, "
+        f"entre X/Y y ORAS), dio {thunderbolt_power_oras}."
     )
 
 
@@ -354,7 +464,7 @@ def main():
 
         # Valores actuales del CSV -- usados como respaldo si el
         # pedido individual falla, y como "current_value" de
-        # partida para resolve_generation_6_value().
+        # partida para resolve_target_value().
         csv_power = row["power"]
         csv_accuracy = row["accuracy"]
 
@@ -371,10 +481,10 @@ def main():
 
             past_values = detail.get("past_values") or []
 
-            power = resolve_generation_6_value(
+            power = resolve_target_value(
                 current_power, past_values, "power"
             )
-            accuracy = resolve_generation_6_value(
+            accuracy = resolve_target_value(
                 current_accuracy, past_values, "accuracy"
             )
 

@@ -43,6 +43,13 @@ class LocationResolver:
     llamadas al bridge por ciclo. Solo se cachean resultados
     EXITOSOS (metLocation ya resuelto) -- ver el docstring de
     resolve() para el bug real que causaba esto y por qué importa.
+
+    El NIVEL es la excepción a todo esto (07/09/2026) -- no vive en
+    el dict que cachea resolve(), tiene su propio método sin caché
+    (resolve_current_level()), justamente porque a diferencia del
+    lugar de encuentro, el nivel sí cambia mientras el Pokémon sigue
+    vivo. Ver el docstring de resolve_current_level() para el bug
+    real que esto corrige.
     """
 
     def __init__(self, bridge=None):
@@ -105,11 +112,11 @@ class LocationResolver:
             "eggLocation": "",
             "shiny": False,
             "isEgg": False,
-            # Bug real corregido (05/09/2026) -- ver
-            # build_pokemon_data() en azahar_reader.py: se usa
-            # como respaldo cuando la lectura directa de memoria
-            # da nivel 0 (capturas que van directo a la Caja PC).
-            "level": 0,
+            # "level" SACADO de acá (07/09/2026, ver
+            # resolve_current_level() más abajo y el bug que
+            # corrige) -- a diferencia de todo lo demás en este
+            # dict, el nivel NO es inmutable, así que no puede
+            # vivir en algo que se cachea para siempre.
             # Ícono de género en el Nuzlocke Tracker (05/09/2026,
             # a pedido del usuario) -- None = no se pudo resolver
             # (bridge caído), 0 = macho, 1 = hembra, 2 = sin
@@ -193,9 +200,9 @@ class LocationResolver:
                     False,
                 )
             ),
-            # Bug real corregido (05/09/2026) -- ver
-            # build_pokemon_data() en azahar_reader.py.
-            "level": result.get("level", 0),
+            # "level" SACADO de acá (07/09/2026) -- ver
+            # resolve_current_level(). No pertenece a este dict
+            # cacheado, ver el comentario de empty_result arriba.
             # Ícono de género en el Nuzlocke Tracker (05/09/2026).
             "genderId": result.get("genderId"),
         }
@@ -225,6 +232,49 @@ class LocationResolver:
             self.cache[nickname] = info
 
         return info
+
+    def resolve_current_level(self, decrypted_box_data):
+        """
+        Nivel real de un Pokémon en formato de Caja PC (232 bytes
+        ya descifrados), vía PKHeX (acción 'met_location',
+        propiedad CurrentLevel -- ver HandleMetLocation() en
+        Program.cs). Devuelve 0 si el bridge no está disponible o
+        falla, nunca lanza.
+
+        Bug real corregido (07/09/2026, reportado por el usuario:
+        la tabla de "Encuentros por Ruta" mostraba mal el nivel de
+        un Pokémon guardado en la Caja PC): antes este dato viajaba
+        adentro del dict que cachea resolve() por nickname junto
+        con metLocation/eggLocation/shiny/isEgg. Esos campos sí son
+        inmutables una vez resueltos (el lugar de encuentro de un
+        Pokémon puntual no cambia nunca), pero el NIVEL no lo es --
+        si el Pokémon entrenó en la party antes de guardarse en la
+        Caja, la primera resolución exitosa (típicamente apenas se
+        atrapa, nivel bajo) quedaba cacheada para siempre, y como
+        `pokemon.level()` siempre da 0 para una lectura de Caja
+        (ver build_pokemon_data()), TODA lectura futura de ese
+        Pokémon en caja mostraba ese nivel viejo congelado, sin
+        importar cuánto hubiera entrenado después en la party.
+
+        Por eso este método es deliberadamente SIN CACHÉ -- se
+        llama al bridge de nuevo cada vez que hace falta (solo
+        cuando build_pokemon_data() detecta nivel 0 en la lectura
+        directa, o sea, solo para slots de Caja PC realmente
+        ocupados -- nunca para party, que ya trae el nivel real).
+        El volumen es acotado: como mucho la cantidad de slots
+        ocupados entre las cajas leídas por ciclo (07/09/2026,
+        ver AzaharReader.read_boxes_range() -- las 7 cajas de
+        fábrica, antes solo la Caja 1), no toda la party.
+        """
+
+        try:
+            result = self.bridge.met_location(
+                decrypted_box_data
+            )
+        except Exception:
+            return 0
+
+        return result.get("level", 0)
 
     def forget(self, nickname):
         """

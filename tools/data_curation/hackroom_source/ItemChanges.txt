@@ -1,0 +1,106 @@
+o-----------------------------------------------------------------------------------o
+| POKÉMON RISING RUBY / SINKING SAPPHIRE                                            |
+o-----------------------------------------------------------------------------------o
+| Item Changes | Modifications to Item Values and Shopping                          |
+o-----------------------------------------------------------------------------------o
+| This document covers any changes made to items such as usability or price, as     |
+| well as changes to what the PokéMarts and markets around Hoenn are selling.       |
+|                                                                                   |
+| The changes to PokéMarts are key to evolving many of the new Pokémon you can get  |
+| as they will sell you evolution stones and items. You need to use the code.bin    |
+| file in the exeFS and if not using HANS, also make sure no OR/AS patches from the |
+| eshop are installed to see these mart changes. (The same also applies to text     |
+| edits but those aren't as important.)                                             |
+|                                                                                   |
+| PokéMarts also sell a few Mega Stones for a hefty price that you weren't able to  |
+| get before defeating the Elite Four in OR/AS. This includes every Mega Stone with |
+| the exception of Salamencite and Diancite, which can be found as held items on    |
+| Shelgon or Salamence and Diancie respectively.                                    |
+o-----------------------------------------------------------------------------------o
+| Files mentioned in this document                                                  |
+o-----------------------------------------------------------------------------------o
+| code.bin  | Pokémon Mart Values (among other untouched things)                    |
+| a/1/9/7   | Pokémon Item Values                                                   |
+o-----------------------------------------------------------------------------------o
+
+o-----------------------------------------------------------------------------------o
+| Item Usability Changes                                                            |
+o-----------------------------------------------------------------------------------o
+| The items listed below can now be USEd like evolution stones in addition to their |
+| previous effects. They evolve the Pokémon they normally would through trading.    |
+o-----------------------------------------------------------------------------------o
+| Deep Sea Scale, Deep Sea Tooth, Dragon Scale, Dubious Disc, Electirizer,          |
+| King's Rock, Magmarizer, Metal Coat, Prism Scale, Protector, Reaper Cloth,        |
+| Sachet, Up-Grade, Whipped Dream                                                   |
+o-----------------------------------------------------------------------------------o
+
+o-----------------------------------------------------------------------------------o
+| Item Price Changes                                                                |
+o-----------------------------------------------------------------------------------o
+| Items listed below have had their price modified; Poké Balls are cheaper to make  |
+| things easier to catch everything you see, while some items are given prices as   |
+| they are now buyable where they weren't before. Cheaper items are in the left     |
+| column and more expensive items on the right.                                     |
+o-----------------------------------------------------------------------------------o
+| Item Name       | Old Cost | New Cost | Item Name           | Old Cost | New Cost | 
+o-----------------------------------------------------------------------------------o
+| Poké Ball       | ¥200     | ¥50      | Audinite            | ¥0       | ¥20,000  |
+| Great Ball      | ¥600     | ¥150     | Blastoisinite       | ¥0       | ¥20,000  |
+| Ultra Ball      | ¥1,200   | ¥300     | Cameruptite         | ¥0       | ¥20,000  |
+| Master Ball     | ¥0       | ¥80,000  | Galladite           | ¥0       | ¥20,000  |
+| Heart Scale     | ¥100     | ¥2,100   | Gengarite           | ¥0       | ¥20,000  |
+| Deep Sea Tooth  | ¥200     | ¥2,100   | Garchompite         | ¥0       | ¥20,000  |
+| Deep Sea Scale  | ¥200     | ¥2,100   | Lucarionite         | ¥0       | ¥20,000  |
+| King's Rock     | ¥200     | ¥2,100   | Metagrossite        | ¥0       | ¥20,000  |
+| Metal Coat      | ¥200     | ¥2,100   | Sharpedonite        | ¥0       | ¥20,000  |
+o-----------------------------------------------------------------------------------o
+
+o-----------------------------------------------------------------------------------o
+| Market Changes                                                                    |
+o-----------------------------------------------------------------------------------o
+| A lot of the shops have been changed around the Hoenn region, now selling you a   |
+| mixture of evolution items, mega stones and some TMs. The inventories for these   |
+| shops is listed below.                                                            |
+|                                                                                   |
+| Due to limited space, you cannot buy vitamins or X items anymore. Vitamins can    |
+| be found from the Battle Resort stalls, but X items that you don't find on the    |
+| floor are no longer available. Sorry about that!                                  |
+o-----------------------------------------------------------------------------------o
+| Shop Location         | Inventory                                                 |
+o-----------------------------------------------------------------------------------o
+| Any Mart, 6 Badges    | Poké Ball, Great Ball, Ultra Ball, Hyper Potion,          |
+|                       | Max Potion, Full Restore, Revive, Full Heal, Escape Rope, |
+|                       | Repel, Super Repel, Max Repel, Audinite, Blastoisinite,   |
+|                       | Cameruptite, Galladite, Gengarite, Lucarionite,           |
+|                       | Sharpedonite                                              |
+o-----------------------------------------------------------------------------------o
+| Any Mart, 7 Badges    | Poké Ball, Great Ball, Ultra Ball, Hyper Potion,          |
+|                       | Max Potion, Full Restore, Revive, Full Heal, Escape Rope, |
+|                       | Repel, Super Repel, Max Repel, Audinite, Blastoisinite,   |
+|                       | Cameruptite, Galladite, Gengarite, Lucarionite,           |
+|                       | Sharpedonite                                              |
+o-----------------------------------------------------------------------------------o
+| Any Mart, 8 Badges    | Poké Ball, Great Ball, Ultra Ball, Master Ball,           |
+|                       | Max Potion, Full Restore, Revive, Full Heal,              |
+|                       | Escape Rope, Max Repel, Audinite, Blastoisinite,          |
+|                       | Cameruptite, Galladite, Garchompite, Gengarite,           |
+|                       | Lucarionite, Metagrossite, Sharpedonite                   |
+o-----------------------------------------------------------------------------------o
+| Slateport Poké Mart   | Fire Stone, Water Stone, Leaf Stone, Thunder Stone,       |
+|                       | Sun Stone, Moon Stone, Whipped Dream, Sachet              |
+o-----------------------------------------------------------------------------------o
+| Slateport Market      | Deep Sea Tooth, Deep Sea Scale, Dragon Scale,             |
+|                       | King's Rock, Metal Coat, Up-Grade                         |
+o-----------------------------------------------------------------------------------o
+| Verdanturf Poké Mart  | Dusk Ball, Luxury Ball, Quick Ball                        |
+o-----------------------------------------------------------------------------------o
+| Fallarbor Poké Mart   | Dawn Stone, Dusk Stone, Shiny Stone                       |
+o-----------------------------------------------------------------------------------o
+| Lilycove Poké Mart 2F | Dive Ball, Heal Ball, Nest Ball                           |
+o-----------------------------------------------------------------------------------o
+| Lilycove Poké Mart 3F | TM66 Payback, TM74 Gyro Ball, TM84 Poison Jab,            |
+|                       | TM90 Substitute, TM91 Flash Cannon, TM95 Snarl            |
+o-----------------------------------------------------------------------------------o
+| Lilycove Poké Mart 3F | Heart Scale, Dubious Disc, Electirizer, Magmarizer,       |
+|                       | Protector, Razor Claw, Razor Fang, Reaper Cloth           |
+o-----------------------------------------------------------------------------------o

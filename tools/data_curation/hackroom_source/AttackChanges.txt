@@ -1,0 +1,117 @@
+o-----------------------------------------------------------------------------------o
+| POKÉMON RISING RUBY / SINKING SAPPHIRE                                            |
+o-----------------------------------------------------------------------------------o
+| Attack Changes | Modifications to Pokémon Move Values                             |
+o-----------------------------------------------------------------------------------o
+| This document covers any changes made to any attacks. Only modified attacks are   |
+| listed here, with modifications to power, type, accuracy, PP, or effects written  |
+| out if applicable.                                                                |
+|                                                                                   |
+| The changes here mostly focus on making HM moves usable, as well as boosting the  |
+| base power of some moves that feel too weak early or buffing the effectiveness of |
+| some moves obtainable by only a few Pokémon.                                      |
+|                                                                                   |
+| Moves are listed in alphabetical order.                                           |
+o-----------------------------------------------------------------------------------o
+| Files mentioned in this document                                                  |
+o-----------------------------------------------------------------------------------o
+| a/1/8/9   | Pokémon Move Values                                                   |
+o-----------------------------------------------------------------------------------o
+
+Ancient Power
+============================
+Power       60 >> 80
+PP          5 >> 10
+Effect %    10 >> 5
+
+Chatter
+============================
+Power       65 >> 90
+
+Cut
+============================
+Type        Normal >> Grass
+Power       50 >> 70
+Accuracy    95 >> 100
+PP          30 >> 15
+Effect      High Critical Rate
+
+Disarming Voice
+============================
+Power       40 >> 60
+PP          15 >> 20
+
+Draining Kiss
+============================
+Power       50 >> 75
+Absorb %    75 >> 50
+
+Fairy Wind
+============================
+Power       40 >> 50
+PP          30 >> 25
+
+Fire Pledge
+============================
+Power       80 >> 85
+
+Fly
+============================
+Power       90 >> 100
+Accuracy    95 >> 100
+PP          15 >> 10
+
+Grass Pledge
+============================
+Power       80 >> 85
+
+Mystical Fire
+============================
+Power       65 >> 80
+Effect %    100 >> 50
+
+Needle Arm
+============================
+Power       60 >> 80
+
+Night Daze
+============================
+Power       85 >> 90
+Accuracy    95 >> 100
+
+Pound
+============================
+Power       40 >> 50
+
+Power Gem
+============================
+Power       80 >> 90
+PP          20 >> 10
+
+Relic Song
+============================
+Power       75 >> 90
+
+Rock Smash
+============================
+Power       40 >> 65
+Effect %    50 >> 30
+
+Scratch
+============================
+Power       40 >> 50
+
+Steamroller
+============================
+Power       65 >> 85
+Accuracy    100 >> 90
+PP          20 >> 10
+
+Strength
+============================
+Power       80 >> 100
+PP          15 >> 10
+
+Water Pledge
+============================
+Power       80 >> 85

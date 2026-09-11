@@ -133,6 +133,47 @@ class HTTPServer:
             project_root / "assets" / "pokemon_shuffle"
         )
 
+        # Íconos de ítem (07/09/2026, roadmap 4.2 -- modal de
+        # evolución, varios de los 33 methodKey confirmados
+        # necesitan mostrar el objeto puntual) -- descargados por
+        # tools/data_curation/download_item_sprites.py desde el
+        # repo PokeAPI/sprites (mismo ecosistema ya usado para
+        # datos de movimientos/habilidades/ítems, licencia ISC).
+        # Nombrados "{id}.png" por id numérico de PokéAPI.
+        #
+        # BUG REAL encontrado y corregido (09/09/2026, reportado
+        # por el usuario: "Roca del Rey... me sale el sprite de
+        # Pico Afilado"): el comentario de arriba decía "mismo id
+        # que ya devuelve item_list() del bridge" -- ESO ERA FALSO.
+        # El id de PokéAPI y el índice real del ítem en el juego
+        # (el que usa item_list()/item_cache.json/RARE_CANDY_ITEM_ID)
+        # son DOS numeraciones distintas que coinciden para muchos
+        # ítems tempranos pero divergen para otros (confirmado:
+        # índice real 221 = "Roca del Rey", pero sprite 221.png se
+        # descargó como id de PokéAPI 221 = "sharp-beak"/Pico
+        # Afilado). Ver item_sprite_id_map (cargado más abajo) y
+        # tools/data_curation/build_item_sprite_id_map.py para el
+        # mapeo real, construido desde item_game_indices.csv de
+        # PokéAPI (la tabla que existe justamente para esta
+        # traducción). Sin ese archivo generado, el mapeo queda
+        # vacío y se sirve el id tal cual (comportamiento viejo,
+        # con el bug).
+        self.item_sprites_directory = (
+            project_root / "assets" / "items"
+        )
+        self.item_sprite_id_map = self._load_item_sprite_id_map(
+            project_root
+        )
+        # Artwork oficial de especie (07/09/2026, roadmap 4.2 --
+        # modal Pokédex, a diferencia del ícono chico ya usado en
+        # el resto de la app) -- descargado por
+        # tools/data_curation/download_species_artwork.py desde
+        # PokeAPI/sprites, carpeta "official-artwork". Nombrado
+        # "{speciesId}.png", mismo criterio que item_sprites.
+        self.species_artwork_directory = (
+            project_root / "assets" / "species_artwork"
+        )
+
         self._server: ThreadingHTTPServer | None = None
         self._thread: Thread | None = None
 
@@ -222,6 +263,35 @@ class HTTPServer:
 
         print("HTTP Server detenido.")
 
+    def _load_item_sprite_id_map(self, project_root):
+        """
+        Carga data/item_sprite_id_map.json ({indice_real_del_juego:
+        id_de_pokeapi}, ver tools/data_curation/
+        build_item_sprite_id_map.py) -- traduce el id que usa el
+        resto de DexRelay (índice real del ítem en el juego) al id
+        que realmente tienen los archivos de sprite en disco (id de
+        PokéAPI), ver el comentario largo junto a
+        self.item_sprites_directory para el bug real que esto
+        corrige.
+
+        Si el archivo no existe todavía (no se corrió el script de
+        curación, requiere red) devuelve un dict vacío -- se sigue
+        sirviendo el id tal cual, mismo comportamiento que antes de
+        este fix, en vez de romper el server entero por un dataset
+        opcional faltante.
+        """
+
+        map_path = project_root / "data" / "item_sprite_id_map.json"
+
+        if not map_path.exists():
+            return {}
+
+        try:
+            with open(map_path, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except (OSError, json.JSONDecodeError):
+            return {}
+
     def _create_handler(self):
         """Crea el handler HTTP."""
 
@@ -231,6 +301,9 @@ class HTTPServer:
         pokemon_sprites_directory = self.pokemon_sprites_directory
         gym_leaders_directory = self.gym_leaders_directory
         pokemon_shuffle_sprites_directory = self.pokemon_shuffle_sprites_directory
+        item_sprites_directory = self.item_sprites_directory
+        item_sprite_id_map = self.item_sprite_id_map
+        species_artwork_directory = self.species_artwork_directory
         nuzlocke_service = self.nuzlocke_service
         species_catalog = self.species_catalog
         location_catalog = self.location_catalog
@@ -294,6 +367,12 @@ class HTTPServer:
                     return
 
                 if self._serve_pokemon_shuffle_sprite():
+                    return
+
+                if self._serve_item_sprite():
+                    return
+
+                if self._serve_species_artwork():
                     return
 
                 if self.path == "/api/status":
@@ -970,6 +1049,72 @@ class HTTPServer:
 
                 self._send_file(
                     pokemon_shuffle_sprites_directory,
+                    relative_path,
+                    self._content_type(relative_path),
+                )
+                return True
+
+            def _serve_item_sprite(self) -> bool:
+                """
+                Sirve /sprites/items/{id}.png (07/09/2026, roadmap
+                4.2) -- mismo patrón que _serve_pokemon_sprite(),
+                sin padding de ceros (ver comentario en
+                self.item_sprites_directory). 404 normal si el ítem
+                puntual no tuvo sprite en el repo fuente (ver
+                download_item_sprites.py) -- no todos los ~2223
+                ítems de PokéAPI tienen ícono descargado, solo hace
+                falta que _send_file() devuelva 404 con gracia, no
+                que rompa nada.
+
+                CORRECCIÓN (09/09/2026, ver el comentario largo
+                junto a self.item_sprites_directory en __init__):
+                el `{id}` que llega en la URL es el índice REAL del
+                ítem en el juego, no el id de PokéAPI que en
+                realidad tienen los archivos en disco -- se traduce
+                acá vía item_sprite_id_map antes de buscar el
+                archivo. Si el índice no está en el mapa (los dos
+                ids coinciden, o no se corrió el script de
+                curación todavía), se sirve tal cual -- mismo
+                comportamiento de siempre.
+                """
+
+                prefix = "/sprites/items/"
+
+                if not self.path.startswith(prefix):
+                    return False
+
+                relative_path = self.path[len(prefix):]
+
+                stem = relative_path[:-len(".png")] if relative_path.endswith(".png") else relative_path
+
+                mapped_id = item_sprite_id_map.get(stem)
+
+                if mapped_id is not None:
+                    relative_path = f"{mapped_id}.png"
+
+                self._send_file(
+                    item_sprites_directory,
+                    relative_path,
+                    self._content_type(relative_path),
+                )
+                return True
+
+            def _serve_species_artwork(self) -> bool:
+                """
+                Sirve /sprites/species_artwork/{speciesId}.png
+                (07/09/2026, roadmap 4.2 -- modal Pokédex) -- mismo
+                patrón que _serve_item_sprite().
+                """
+
+                prefix = "/sprites/species_artwork/"
+
+                if not self.path.startswith(prefix):
+                    return False
+
+                relative_path = self.path[len(prefix):]
+
+                self._send_file(
+                    species_artwork_directory,
                     relative_path,
                     self._content_type(relative_path),
                 )

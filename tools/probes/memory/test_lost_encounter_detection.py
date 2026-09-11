@@ -39,7 +39,7 @@ class FakeReader:
     def read_party(self):
         return [{"slot": i + 1, "empty": True} for i in range(6)]
 
-    def read_box(self):
+    def read_boxes_range(self, start_box_index=1, box_count=7):
         return []
 
     def read_current_zone_id(self):

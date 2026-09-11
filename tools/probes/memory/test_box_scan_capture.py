@@ -18,8 +18,11 @@ Dos cosas se prueban acá:
      buscar_caja_pc.py, tres veces, incluyendo tras un reinicio
      completo de Azahar).
   2. Runtime.update() -- que efectivamente llama a
-     reader.read_box() cada ciclo y pasa el resultado a
-     NuzlockeService.update() como `boxed_party`.
+     reader.read_boxes_range() cada ciclo (07/09/2026, antes
+     read_box() sin argumentos -- ver Documento Maestro 07/09/2026,
+     bug real: una captura depositada directo en la Caja 2+ nunca
+     se registraba porque solo se escaneaba la Caja 1) y pasa el
+     resultado a NuzlockeService.update() como `boxed_party`.
 """
 
 import sys
@@ -101,10 +104,50 @@ def test_read_box_sin_respuesta_devuelve_lista_vacia():
     print("OK - sin respuesta de memoria devuelve lista vacía")
 
 
+def test_read_boxes_range_pide_el_bloque_completo_de_7_cajas():
+    """
+    read_boxes_range() (07/09/2026) debe pedir UNA sola lectura
+    UDP que cubra las `box_count` cajas pedidas -- no una lectura
+    por caja -- aprovechando que están confirmadas contiguas (ver
+    get_box_address() en pointers.py).
+    """
+    from app.memory.pointers import BOX_BLOCK_SIZE
+
+    window_size = BOX_BLOCK_SIZE * 7
+    reader = _make_reader(b"\x00" * window_size)
+
+    box = reader.read_boxes_range()
+
+    assert box == []
+    assert reader.memory.last_read == (BOX_BASE_ADDRESS, window_size)
+
+    print(
+        "OK - read_boxes_range() pide el bloque completo de 7 "
+        "cajas en una sola lectura"
+    )
+
+
+def test_read_boxes_range_lectura_incompleta_devuelve_lista_vacia():
+    from app.memory.pointers import BOX_BLOCK_SIZE
+
+    window_size = BOX_BLOCK_SIZE * 7
+    reader = _make_reader(b"\x00" * (window_size - 10))
+
+    box = reader.read_boxes_range()
+
+    assert box == []
+
+    print(
+        "OK - read_boxes_range() con lectura incompleta devuelve "
+        "lista vacía, sin excepción"
+    )
+
+
 class FakeReaderForRuntime:
     """
     Reader falso para probar el wiring de Runtime.update(), no la
-    lógica interna de read_box() (ya cubierta arriba).
+    lógica interna de read_box()/read_boxes_range() (ya cubierta
+    arriba).
     """
 
     def __init__(self):
@@ -121,7 +164,7 @@ class FakeReaderForRuntime:
     def read_party(self):
         return [{"slot": i + 1, "empty": True} for i in range(6)]
 
-    def read_box(self):
+    def read_boxes_range(self, start_box_index=1, box_count=7):
         return self.box_to_return
 
 
@@ -183,8 +226,8 @@ def test_runtime_pasa_boxed_party_a_nuzlocke_service():
     assert nuzlocke.calls[1]["boxed_party"] == []
 
     print(
-        "OK - Runtime.update() llama a reader.read_box() cada "
-        "ciclo y lo pasa como boxed_party a NuzlockeService"
+        "OK - Runtime.update() llama a reader.read_boxes_range() "
+        "cada ciclo y lo pasa como boxed_party a NuzlockeService"
     )
 
 
@@ -192,4 +235,6 @@ if __name__ == "__main__":
     test_read_box_ventana_vacia_devuelve_lista_vacia()
     test_read_box_lectura_incompleta_devuelve_lista_vacia()
     test_read_box_sin_respuesta_devuelve_lista_vacia()
+    test_read_boxes_range_pide_el_bloque_completo_de_7_cajas()
+    test_read_boxes_range_lectura_incompleta_devuelve_lista_vacia()
     test_runtime_pasa_boxed_party_a_nuzlocke_service()

@@ -208,7 +208,7 @@ class GymLeaderCatalog:
     MoveDataCatalog (el archivo no cambia mientras la app corre).
     """
 
-    def __init__(self, data_path=None):
+    def __init__(self, data_path=None, bridge=None):
         self.data_path = (
             data_path
             if data_path is not None
@@ -217,15 +217,33 @@ class GymLeaderCatalog:
         self._leaders = None
 
         # Fase E (09/09/2026): resolución dinámica de nombres en
-        # español, ver punto 5 del docstring del módulo. Instancias
-        # propias -- mismo criterio que el resto de los catálogos
-        # de este proyecto (SpeciesCatalog/ItemCatalog/etc en
-        # api.py), no comparten estado con nada más.
-        self._ability_catalog = AbilityCatalog()
+        # español, ver punto 5 del docstring del módulo.
+        #
+        # CORRECCIÓN REAL (09/09/2026, reportado por el usuario:
+        # "ahora no me salen algunas evoluciones y en algunos
+        # pokemon no me muestra todos los datos" -- síntoma
+        # mezclado entre especies SIN relación con el hackroom,
+        # como Nidorino y Bronzong, que descartó de entrada un bug
+        # de lógica del árbol de evolución): sin un `bridge`
+        # compartido, cada uno de estos 3 catálogos creaba SU
+        # PROPIA instancia de PKHeXBridge -- y como hay DOS
+        # GymLeaderCatalog (vanilla + hackroom, ver
+        # self.gym_leader_catalog/_hackroom en api.py), eso podía
+        # llegar a levantar hasta 6 procesos de dotnet nuevos
+        # compitiendo con self.modal_bridge (el que usa
+        # species_details() para el modal Pokédex) por CPU/memoria
+        # al arrancar -- exactamente el tipo de contención que
+        # explica datos "a veces sí, a veces no" en especies sin
+        # ninguna relación entre sí. Ahora se recibe un bridge ya
+        # existente (típicamente self.modal_bridge, ver api.py) y
+        # se lo pasa a los 3 catálogos -- un solo proceso de dotnet
+        # para toda la app, como debería haber sido desde el
+        # principio.
+        self._ability_catalog = AbilityCatalog(bridge=bridge)
         self._ability_description_catalog = AbilityDescriptionCatalog()
-        self._move_catalog = MoveCatalog()
+        self._move_catalog = MoveCatalog(bridge=bridge)
         self._move_description_catalog = MoveDescriptionCatalog()
-        self._item_catalog = ItemCatalog()
+        self._item_catalog = ItemCatalog(bridge=bridge)
         self._item_description_catalog = ItemDescriptionCatalog()
 
     def _resolve_ability_es(self, ability_name):
