@@ -55,7 +55,60 @@ ARCHIVO_DIRECCIONES_AS_BASE = {
     "BAG_START_ADDRESS": 0x08C6AC80,
     "BAG_END_ADDRESS": 0x08C6B810,
     "MEDICINE_POCKET_START_ADDRESS": 0x08C6B5F0,
+    "BADGES_ADDRESS": 0x08C6DDD4,
+    "TOTAL_CAUGHT_ADDRESS": 0x08C8729C,
 }
+
+# BUG REAL corregido (10/09/2026, reportado por el usuario: "las
+# medallas muestran 0 aunque tengo varias"). BADGES_ADDRESS vivía
+# suelta en badges_service.py como una constante ÚNICA, marcada
+# "compartida entre versiones" -- quedó AFUERA de la migración a
+# Alpha Sapphire 1.4 de la sesión anterior (esa migración tocó
+# pointers.py; esta dirección ni siquiera vivía acá). Con el
+# parche puesto, 0x08C6DDD4 (el valor de AS-base, archivado arriba)
+# ya no apunta a nada -- lee 0x00 siempre, no importa cuántas
+# medallas haya de verdad.
+#
+# CONFIRMADO EN VIVO (10/09/2026, tools/probes/badges/
+# verificar_badges_as_1_4.py): el mismo delta 0x3FF0 ya usado para
+# migrar el resto de las direcciones de AS-base a AS-1.4 aplica
+# también acá (0x08C6DDD4 + 0x3FF0 = 0x08C71DC4) -- verificado
+# contra una partida real con exactamente 1 medalla (Roxanne, bit
+# 0), coincidió exacto.
+#
+# Omega Ruby: la vieja "compartida entre versiones" resultó FALSA
+# -- 0x08C6DDD4 también da 0x00 en OR. Sin confirmar todavía cuál
+# es la dirección real ahí (pendiente, necesita su propia
+# investigación con Cheat Engine -- no se puede extrapolar con el
+# mismo delta 0x3FF0 sin una partida real de OR con medallas para
+# probarlo, ver ARCHIVO_DIRECCIONES_AS_BASE arriba para el criterio
+# de "nunca fijar sin confirmación empírica"). Se deja el valor
+# viejo puesto para OR mientras tanto -- sigue mal, pero no hay
+# nada mejor confirmado todavía; al menos AS ya quedó bien.
+# Omega Ruby: confirmado en vivo (10/09/2026) que usa la MISMA
+# dirección que Alpha Sapphire 1.4 -- mismo patrón de convergencia
+# ya visto con party/box/zone/bag en la migración anterior. 0
+# medallas reales en esa partida coincidió con la lectura (0x00,
+# resultado correcto, no una lectura fallida disfrazada).
+_BADGES_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C71DC4,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C71DC4,
+}
+
+
+def get_badges_address(process_name):
+    """
+    BADGES_ADDRESS para el proceso dado -- ver el comentario largo
+    junto a _BADGES_ADDRESS_BY_PROCESS de arriba. Default a Alpha
+    Sapphire (ya confirmada) si el proceso no matchea ninguna de
+    las dos claves conocidas, mismo criterio que el resto de los
+    getters de este archivo.
+    """
+
+    return _BADGES_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _BADGES_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
 
 # Tabla que contiene el orden lógico de los Pokémon de la party.
 # CONFIRMADO (29/08/2026): esta dirección NO era la misma entre
@@ -212,9 +265,12 @@ LAST_CAUGHT_ADDRESS = 0x08805638
 # Dirección FIJA confirmada empíricamente el 25/08/2026 (con
 # Cheat Engine + puente de traducción calculado con el puntero de
 # party como ancla estable): sube en exactamente 1 cada vez que se
-# captura un Pokémon real, sin importar si termina en la party o
-# en la Caja PC. Verificado en vivo: no cambia con encuentros
-# salvajes sin captura (huir/derrotar), sube justo al capturar.
+# captura un Pokémon real (NO cuenta al inicial, que no es una
+# "captura" -- confirmado el 10/09/2026: 10 capturas reales + 1
+# inicial = 11 Pokémon en el roster, el contador dio 10), sin
+# importar si termina en la party o en la Caja PC. Verificado en
+# vivo: no cambia con encuentros salvajes sin captura (huir/
+# derrotar), sube justo al capturar.
 #
 # Se usa como "disparador" de confianza junto con
 # LAST_CAUGHT_ADDRESS: LAST_CAUGHT_ADDRESS por sí sola resultó ser
@@ -228,12 +284,52 @@ LAST_CAUGHT_ADDRESS = 0x08805638
 # PARTY_ORDER_ADDRESS=0x08CF71F0) -- buena señal de que están todas
 # en la misma región de datos de guardado.
 #
-# NOTA (26-27/08/2026): ya NO se usa activamente para detectar
-# capturas -- reemplazado por el escaneo directo de la Caja PC
-# (BOX_BASE_ADDRESS más abajo), que es más simple y confiable.
-# Se deja definida por si hace falta para otra función a futuro
-# (ej. mostrar "capturados: XX" en la GUI).
-TOTAL_CAUGHT_ADDRESS = 0x08C8729C
+# NOTA (26-27/08/2026, YA NO VÁLIDA): en su momento se dejó de usar
+# para detectar capturas (reemplazado por el escaneo directo de la
+# Caja PC) -- pero volvió a estar en uso activo más tarde, para la
+# detección automática del estado "perdido" del Nuzlocke Tracker
+# (Runtime._update_lost_encounter_tracking(), ver
+# read_total_caught_count() en azahar_reader.py).
+#
+# BUG REAL corregido (10/09/2026, reportado por el usuario: "el
+# Nuzlocke marca perdido aunque atrapé, y se duplica al asignar
+# ruta"). Mismo problema exacto que BADGES_ADDRESS (ver
+# get_badges_address() más abajo): este valor se confirmó contra
+# Alpha Sapphire BASE y quedó afuera de la migración a la
+# actualización 1.4 -- vivía como constante SUELTA (ni siquiera en
+# el diccionario _BY_PROCESS de las demás direcciones), fácil de
+# pasar por alto. Con el parche puesto, 0x08C8729C ya no apunta a
+# nada -- lee 0 siempre, así que la detección de "perdido" (que
+# compara si este contador subió) nunca veía una captura real,
+# daba "perdido" para TODO combate, con o sin captura.
+#
+# CONFIRMADO EN VIVO (10/09/2026, mismo delta 0x3FF0 ya usado para
+# BADGES_ADDRESS y el resto de las direcciones migradas): 0x08C8729C
+# + 0x3FF0 = 0x08C8B28C, verificado contra una partida real (10
+# capturas reales, el candidato dio exacto 10).
+# Omega Ruby: confirmado en vivo (10/09/2026) que usa la MISMA
+# dirección que Alpha Sapphire 1.4 -- mismo patrón de convergencia
+# ya visto con party/box/zone/bag, y con BADGES_ADDRESS arriba.
+_TOTAL_CAUGHT_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C8B28C,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C8B28C,
+}
+
+
+def get_total_caught_address(process_name):
+    """
+    TOTAL_CAUGHT_ADDRESS para el proceso dado -- ver el comentario
+    largo de arriba. Confirmada para las dos versiones (mismo valor,
+    ver el comentario junto a _TOTAL_CAUGHT_ADDRESS_BY_PROCESS).
+    Default a Alpha Sapphire si el proceso no matchea ninguna de
+    las dos claves conocidas, mismo criterio que el resto de los
+    getters de este archivo.
+    """
+
+    return _TOTAL_CAUGHT_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _TOTAL_CAUGHT_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
 
 
 # ============================================================
