@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from app.memory.memory_reader import MemoryReader
+from app.memory.pointers import get_badges_address
 
-
-BADGES_ADDRESS = 0x08C6DDD4
 BADGES_SIZE = 1
 BADGE_COUNT = 8
 
@@ -11,13 +9,31 @@ BADGE_COUNT = 8
 class BadgesService:
     """Reads and interprets the Gen 6 badge bitfield from Azahar memory."""
 
-    def __init__(self, memory_reader: MemoryReader) -> None:
-        self.memory_reader = memory_reader
+    def __init__(self, reader) -> None:
+        # CORRECCIÓN (10/09/2026, bug real: "las medallas muestran 0
+        # aunque tengo varias" -- ver el comentario largo junto a
+        # get_badges_address()/_BADGES_ADDRESS_BY_PROCESS en
+        # pointers.py). Antes se guardaba solo `memory_reader` y se
+        # leía siempre la MISMA dirección fija (BADGES_ADDRESS,
+        # marcada "compartida entre versiones" -- resultó falso).
+        # Ahora se guarda el `reader` completo (AzaharReader) para
+        # poder consultar `reader.process_name` en cada lectura --
+        # no alcanza con guardarlo una sola vez acá en __init__,
+        # porque en el momento en que se construye BadgesService
+        # (Runtime.__init__()) todavía puede no haberse resuelto
+        # qué juego está conectado (modo de detección automática,
+        # ver find_game_process() en azahar_reader.py) -- se resuelve
+        # recién más tarde, la primera vez que el Runtime logra
+        # conectarse.
+        self.reader = reader
 
     def read_value(self) -> int:
         """Read the raw one-byte badge bitfield."""
-        data = self.memory_reader.read(
-            BADGES_ADDRESS,
+
+        address = get_badges_address(self.reader.process_name)
+
+        data = self.reader.memory.read(
+            address,
             BADGES_SIZE,
         )
 

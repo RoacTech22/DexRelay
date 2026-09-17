@@ -24,7 +24,7 @@ class Runtime:
         self.state = state
 
         self.badges_service = BadgesService(
-            self.reader.memory
+            self.reader
         )
 
         self.combat_service = CombatService(
@@ -52,6 +52,41 @@ class Runtime:
         self._lost_encounter_snapshot = None
         self._lost_tracking_resolved = False
         self._combat_was_active = False
+
+        # BUG REAL corregido (10/09/2026, reportado por el usuario
+        # jugando un Nuzlocke real: "me marca como perdido aunque lo
+        # haya atrapado, y cuando le escribo el nombre me lo guarda
+        # como duplicado"). Causa: al terminar el combate se leía
+        # TOTAL_CAUGHT_ADDRESS UNA SOLA VEZ, en el mismo ciclo exacto
+        # en que el puntero de combate vuelve a inactivo, y se
+        # comparaba contra el snapshot ahí mismo -- sin margen. El
+        # juego puede tardar uno o más ciclos de 200ms en terminar de
+        # escribir ese contador después de que el puntero de combate
+        # ya se limpió (la captura recién se termina de resolver
+        # durante la transición de vuelta al mapa) -- mismo tipo de
+        # escritura progresiva que ya obligó al "Intento 3" del
+        # nickname/ruta y al reintento del flag salvaje más abajo.
+        # Leer una sola vez en el instante exacto podía agarrar el
+        # contador todavía viejo y registrar "perdido" para una
+        # captura real -- que después SÍ se detectaba por el camino
+        # normal de party/Caja PC, generando el duplicado reportado
+        # (un encuentro "perdido" fantasma + la captura real pidiendo
+        # nombre/ruta).
+        #
+        # Fix: en vez de decidir en el mismo ciclo, se guarda la
+        # resolución como PENDIENTE (`_pending_lost_resolution`) y se
+        # reintenta cada ciclo (ver _resolve_pending_lost_encounter())
+        # hasta LOST_ENCOUNTER_MAX_RETRIES veces antes de recién ahí
+        # concluir "perdido" -- si el contador sube en cualquiera de
+        # esos reintentos, se descarta el snapshot sin registrar nada
+        # (la captura real ya se encarga sola).
+        self._pending_lost_resolution = None
+
+    # Cuántos ciclos de 200ms se reintenta el contador de capturas
+    # antes de concluir "perdido" -- 1.5s de margen total, suficiente
+    # para la transición de vuelta al mapa tras una captura real sin
+    # demorar de más un "perdido" genuino (huida/derrota).
+    LOST_ENCOUNTER_MAX_RETRIES = 8
 
     def update(self):
         """Actualiza el estado realtime de DexRelay."""
@@ -141,7 +176,70 @@ class Runtime:
         # sigue pendiente confirmar COMBAT_POINTER_ADDRESS/
         # WILD_BATTLE_FLAG_OFFSET en Omega Ruby, que es lo
         # proximo en la lista.
+        self._resolve_pending_lost_encounter()
         self._update_lost_encounter_tracking()
+
+    def _resolve_pending_lost_encounter(self):
+        """
+        Reintento del contador de capturas tras el fin de un combate
+        salvaje (10/09/2026, bug real -- ver el comentario largo
+        junto a `_pending_lost_resolution` en __init__). Se llama
+        TODOS los ciclos, haya o no combate activo -- justo antes de
+        `_update_lost_encounter_tracking()`, para no interferir con
+        el snapshot de un combate nuevo si el jugador ya entró a otro
+        mientras esto seguía pendiente (caso límite improbable en
+        1.5s, pero se resuelve solo: acá abajo se descarta el
+        pendiente ni bien se agotan los reintentos, dejando el
+        camino libre).
+        """
+
+        if self._pending_lost_resolution is None:
+            return
+
+        total_after = self.reader.read_total_caught_count()
+
+        # CORRECCIÓN (10/09/2026, segunda vuelta -- reportado por el
+        # usuario: el bug seguía pasando después del primer arreglo,
+        # justo tras reiniciar/cargar estado en Azahar en medio de la
+        # sesión). Causa: una lectura FALLIDA (total_after es None,
+        # típico durante la reconexión tras un reinicio del
+        # emulador -- ver el WinError 10054 real que reportó el
+        # usuario en el log) gastaba un reintento igual, sin haber
+        # confirmado nada. Si la conexión estuvo inestable varios
+        # ciclos seguidos justo en la ventana de reintento, se podían
+        # agotar los 8 intentos sin haber llegado a leer el contador
+        # ya actualizado ni una sola vez -- concluía "perdido" a
+        # pesar de la captura real, igual que el bug original. Ahora
+        # una lectura fallida NO cuenta como intento: se reintenta el
+        # próximo ciclo sin tocar `retries_left`, mismo criterio que
+        # ya usa el resto del proyecto para lecturas transitorias
+        # fallidas (ver el flag salvaje más abajo, o
+        # read_total_caught_count() mismo).
+        if total_after is None:
+            return
+
+        if total_after > self._pending_lost_resolution["total_caught"]:
+            # Subió de verdad: fue una captura real, que ya se
+            # registra sola por el camino normal de party/Caja PC.
+            # No hace falta (ni corresponde) registrar "perdido".
+            self._pending_lost_resolution = None
+            return
+
+        self._pending_lost_resolution["retries_left"] -= 1
+
+        if self._pending_lost_resolution["retries_left"] > 0:
+            # Todavía no se agotaron los reintentos -- puede ser el
+            # mismo tipo de escritura progresiva ya documentado en
+            # otros lugares del proyecto, se reintenta el próximo
+            # ciclo sin concluir nada todavía.
+            return
+
+        self.nuzlocke_service.register_lost_encounter(
+            self._pending_lost_resolution["location"],
+            self._pending_lost_resolution["species"],
+        )
+
+        self._pending_lost_resolution = None
 
     def _update_lost_encounter_tracking(self):
         """
@@ -171,10 +269,15 @@ class Runtime:
           registrado, se marca resuelto sin snapshot (no hace falta
           reintentar cada ciclo restante del combate).
         - Al terminar el combate (puntero vuelve a inactivo): si
-          había un snapshot pendiente, compara el contador de
-          capturas contra el del snapshot -- si no subió, se
-          perdió. Si subió, no hace falta hacer nada (la captura ya
-          se registra sola por el camino normal de party/Caja PC).
+          había un snapshot pendiente, NO se decide en el momento --
+          se arma una resolución pendiente que
+          _resolve_pending_lost_encounter() reintenta cada ciclo
+          hasta LOST_ENCOUNTER_MAX_RETRIES veces, recién ahí
+          concluyendo "perdido" si el contador nunca subió (bug real
+          corregido 10/09/2026, ver el comentario junto a
+          `_pending_lost_resolution` en __init__: decidir en el
+          mismo ciclo podía agarrar el contador todavía sin
+          actualizar tras una captura real, duplicando el encuentro).
         - `_lost_tracking_resolved` se reinicia a False recién
           cuando el combate termina, así el próximo combate salvaje
           vuelve a tener sus propios intentos.
@@ -253,18 +356,26 @@ class Runtime:
 
             if self._lost_encounter_snapshot is not None:
 
-                total_after = self.reader.read_total_caught_count()
-
-                if (
-                    total_after is not None
-                    and total_after
-                    <= self._lost_encounter_snapshot["total_caught"]
-                ):
-
-                    self.nuzlocke_service.register_lost_encounter(
-                        self._lost_encounter_snapshot["location"],
-                        self._lost_encounter_snapshot["species"],
-                    )
+                # CORRECCIÓN (10/09/2026, ver el comentario largo
+                # junto a `_pending_lost_resolution` en __init__):
+                # antes se decidía "perdido" acá mismo, con una sola
+                # lectura de total_caught en este ciclo exacto. Ahora
+                # solo se arma la resolución PENDIENTE -- quien
+                # decide de verdad es _resolve_pending_lost_encounter(),
+                # que reintenta cada ciclo (llamada desde update(),
+                # antes que este método) hasta LOST_ENCOUNTER_MAX_RETRIES
+                # veces antes de concluir "perdido" -- le da margen
+                # real al juego para terminar de escribir el contador
+                # tras una captura, en vez de fallar en el primer
+                # instante posible.
+                self._pending_lost_resolution = {
+                    "location": self._lost_encounter_snapshot["location"],
+                    "species": self._lost_encounter_snapshot["species"],
+                    "total_caught": self._lost_encounter_snapshot[
+                        "total_caught"
+                    ],
+                    "retries_left": self.LOST_ENCOUNTER_MAX_RETRIES,
+                }
 
             # Se reinicia siempre al terminar el combate (haya
             # habido snapshot o no -- por ejemplo, un combate de

@@ -14,6 +14,20 @@ class FakeMemoryReader:
         return bytes([self.value])
 
 
+class FakeReader:
+    """
+    Actualizado (10/09/2026, ver el bug real corregido en
+    badges_service.py/pointers.py: get_badges_address() ahora
+    depende de process_name) -- BadgesService ya no recibe un
+    MemoryReader suelto, recibe el reader completo (AzaharReader),
+    para poder consultar reader.process_name en cada lectura.
+    """
+
+    def __init__(self, value, process_name="sango-2"):
+        self.memory = FakeMemoryReader(value)
+        self.process_name = process_name
+
+
 def test_badges():
     cases = {
         0x00: 0,
@@ -24,14 +38,17 @@ def test_badges():
     }
 
     for value, expected_count in cases.items():
-        reader = FakeMemoryReader(value)
+        reader = FakeReader(value)
         service = BadgesService(reader)
 
         result = service.read_badges()
 
         assert result["value"] == value
         assert result["count"] == expected_count
-        assert reader.calls == [(0x08C6DDD4, 1)]
+        # Dirección de Alpha Sapphire confirmada el 10/09/2026 (ver
+        # pointers.py) -- ya no la vieja "compartida entre
+        # versiones" (0x08C6DDD4), que resultó ser falsa.
+        assert reader.memory.calls == [(0x08C71DC4, 1)]
 
     print("OK - BadgesService")
 
