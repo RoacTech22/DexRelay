@@ -1,0 +1,835 @@
+{
+  "_source": "Rising Ruby / Sinking Sapphire (Drayano), EvolutionChanges.txt -- parseado 09/09/2026 por build_evolution_changes_hackroom.py.",
+  "overrides": [
+    {
+      "fromSpeciesId": 64,
+      "fromSpecies": "Kadabra",
+      "toSpeciesId": 65,
+      "toSpecies": "Alakazam",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 64,
+      "fromSpecies": "Kadabra",
+      "toSpeciesId": 65,
+      "toSpecies": "Alakazam",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 67,
+      "fromSpecies": "Machoke",
+      "toSpeciesId": 68,
+      "toSpecies": "Machamp",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 67,
+      "fromSpecies": "Machoke",
+      "toSpeciesId": 68,
+      "toSpecies": "Machamp",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 75,
+      "fromSpecies": "Graveler",
+      "toSpeciesId": 76,
+      "toSpecies": "Golem",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 75,
+      "fromSpecies": "Graveler",
+      "toSpeciesId": 76,
+      "toSpecies": "Golem",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 93,
+      "fromSpecies": "Haunter",
+      "toSpeciesId": 94,
+      "toSpecies": "Gengar",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 93,
+      "fromSpecies": "Haunter",
+      "toSpeciesId": 94,
+      "toSpecies": "Gengar",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 525,
+      "fromSpecies": "Boldore",
+      "toSpeciesId": 526,
+      "toSpecies": "Gigalith",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 525,
+      "fromSpecies": "Boldore",
+      "toSpeciesId": 526,
+      "toSpecies": "Gigalith",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 533,
+      "fromSpecies": "Gurdurr",
+      "toSpeciesId": 534,
+      "toSpecies": "Conkeldurr",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 533,
+      "fromSpecies": "Gurdurr",
+      "toSpeciesId": 534,
+      "toSpecies": "Conkeldurr",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 708,
+      "fromSpecies": "Phantump",
+      "toSpeciesId": 709,
+      "toSpecies": "Trevenant",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 708,
+      "fromSpecies": "Phantump",
+      "toSpeciesId": 709,
+      "toSpecies": "Trevenant",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 23,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 710,
+      "fromSpecies": "Pumpkaboo",
+      "toSpeciesId": 711,
+      "toSpecies": "Gourgeist",
+      "mode": "add",
+      "methodKey": "LevelUpFriendship",
+      "level": 0,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 710,
+      "fromSpecies": "Pumpkaboo",
+      "toSpeciesId": 711,
+      "toSpecies": "Gourgeist",
+      "mode": "add",
+      "methodKey": "LevelUp",
+      "level": 23,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 61,
+      "fromSpecies": "Poliwhirl",
+      "toSpeciesId": 186,
+      "toSpecies": "Politoed",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 221
+    },
+    {
+      "fromSpeciesId": 79,
+      "fromSpecies": "Slowpoke",
+      "toSpeciesId": 199,
+      "toSpecies": "Slowking",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 221
+    },
+    {
+      "fromSpeciesId": 95,
+      "fromSpecies": "Onix",
+      "toSpeciesId": 208,
+      "toSpecies": "Steelix",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 233
+    },
+    {
+      "fromSpeciesId": 112,
+      "fromSpecies": "Rhydon",
+      "toSpeciesId": 464,
+      "toSpecies": "Rhyperior",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 321
+    },
+    {
+      "fromSpeciesId": 117,
+      "fromSpecies": "Seadra",
+      "toSpeciesId": 230,
+      "toSpecies": "Kingdra",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 235
+    },
+    {
+      "fromSpeciesId": 123,
+      "fromSpecies": "Scyther",
+      "toSpeciesId": 212,
+      "toSpecies": "Scizor",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 233
+    },
+    {
+      "fromSpeciesId": 125,
+      "fromSpecies": "Electabuzz",
+      "toSpeciesId": 466,
+      "toSpecies": "Electivire",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 322
+    },
+    {
+      "fromSpeciesId": 126,
+      "fromSpecies": "Magmar",
+      "toSpeciesId": 467,
+      "toSpecies": "Magmortar",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 323
+    },
+    {
+      "fromSpeciesId": 137,
+      "fromSpecies": "Porygon",
+      "toSpeciesId": 233,
+      "toSpecies": "Porygon2",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 252
+    },
+    {
+      "fromSpeciesId": 233,
+      "fromSpecies": "Porygon2",
+      "toSpeciesId": 474,
+      "toSpecies": "Porygon-Z",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 324
+    },
+    {
+      "fromSpeciesId": 349,
+      "fromSpecies": "Feebas",
+      "toSpeciesId": 350,
+      "toSpecies": "Milotic",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 537
+    },
+    {
+      "fromSpeciesId": 356,
+      "fromSpecies": "Dusclops",
+      "toSpeciesId": 477,
+      "toSpecies": "Dusknoir",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 325
+    },
+    {
+      "fromSpeciesId": 366,
+      "fromSpecies": "Clamperl",
+      "toSpeciesId": 367,
+      "toSpecies": "Huntail",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 226
+    },
+    {
+      "fromSpeciesId": 366,
+      "fromSpecies": "Clamperl",
+      "toSpeciesId": 368,
+      "toSpecies": "Gorebyss",
+      "mode": "add",
+      "methodKey": "UseItem",
+      "level": 0,
+      "argument": 227
+    },
+    {
+      "fromSpeciesId": 588,
+      "fromSpecies": "Karrablast",
+      "toSpeciesId": 589,
+      "toSpecies": "Escavalier",
+      "mode": "add",
+      "methodKey": "LevelUpWithTeammate",
+      "level": 0,
+      "argument": 616
+    },
+    {
+      "fromSpeciesId": 616,
+      "fromSpecies": "Shelmet",
+      "toSpeciesId": 617,
+      "toSpecies": "Accelgor",
+      "mode": "add",
+      "methodKey": "LevelUpWithTeammate",
+      "level": 0,
+      "argument": 588
+    },
+    {
+      "fromSpeciesId": 77,
+      "fromSpecies": "Ponyta",
+      "toSpeciesId": 78,
+      "toSpecies": "Rapidash",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 79,
+      "fromSpecies": "Slowpoke",
+      "toSpeciesId": 80,
+      "toSpecies": "Slowbro",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 88,
+      "fromSpecies": "Grimer",
+      "toSpeciesId": 89,
+      "toSpecies": "Muk",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 35,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 109,
+      "fromSpecies": "Koffing",
+      "toSpeciesId": 110,
+      "toSpecies": "Weezing",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 111,
+      "fromSpecies": "Rhyhorn",
+      "toSpeciesId": 112,
+      "toSpecies": "Rhydon",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 138,
+      "fromSpecies": "Omanyte",
+      "toSpeciesId": 139,
+      "toSpecies": "Omastar",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 140,
+      "fromSpecies": "Kabuto",
+      "toSpeciesId": 141,
+      "toSpecies": "Kabutops",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 218,
+      "fromSpecies": "Slugma",
+      "toSpeciesId": 219,
+      "toSpecies": "Magcargo",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 307,
+      "fromSpecies": "Meditite",
+      "toSpeciesId": 308,
+      "toSpecies": "Medicham",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 35,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 320,
+      "fromSpecies": "Wailmer",
+      "toSpeciesId": 321,
+      "toSpecies": "Wailord",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 333,
+      "fromSpecies": "Swablu",
+      "toSpeciesId": 334,
+      "toSpecies": "Altaria",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 345,
+      "fromSpecies": "Lileep",
+      "toSpeciesId": 346,
+      "toSpecies": "Cradily",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 347,
+      "fromSpecies": "Anorith",
+      "toSpeciesId": 348,
+      "toSpecies": "Armaldo",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 353,
+      "fromSpecies": "Shuppet",
+      "toSpeciesId": 354,
+      "toSpecies": "Banette",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 355,
+      "fromSpecies": "Duskull",
+      "toSpeciesId": 356,
+      "toSpecies": "Dusclops",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 361,
+      "fromSpecies": "Snorunt",
+      "toSpeciesId": 362,
+      "toSpecies": "Glalie",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 431,
+      "fromSpecies": "Glameow",
+      "toSpeciesId": 432,
+      "toSpecies": "Purugly",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 451,
+      "fromSpecies": "Skorupi",
+      "toSpeciesId": 452,
+      "toSpecies": "Drapion",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 453,
+      "fromSpecies": "Croagunk",
+      "toSpeciesId": 454,
+      "toSpecies": "Toxicroak",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 35,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 559,
+      "fromSpecies": "Scraggy",
+      "toSpeciesId": 560,
+      "toSpecies": "Scrafty",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 568,
+      "fromSpecies": "Trubbish",
+      "toSpeciesId": 569,
+      "toSpecies": "Garbodor",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 574,
+      "fromSpecies": "Gothita",
+      "toSpeciesId": 575,
+      "toSpecies": "Gothorita",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 26,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 575,
+      "fromSpecies": "Gothorita",
+      "toSpeciesId": 576,
+      "toSpecies": "Gothitelle",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 577,
+      "fromSpecies": "Solosis",
+      "toSpeciesId": 578,
+      "toSpecies": "Duosion",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 26,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 578,
+      "fromSpecies": "Duosion",
+      "toSpeciesId": 579,
+      "toSpecies": "Reuniclus",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 582,
+      "fromSpecies": "Vanillite",
+      "toSpeciesId": 583,
+      "toSpecies": "Vanillish",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 583,
+      "fromSpecies": "Vanillish",
+      "toSpeciesId": 584,
+      "toSpecies": "Vanilluxe",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 44,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 580,
+      "fromSpecies": "Ducklett",
+      "toSpeciesId": 581,
+      "toSpecies": "Swanna",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 590,
+      "fromSpecies": "Foongus",
+      "toSpeciesId": 591,
+      "toSpecies": "Amoonguss",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 592,
+      "fromSpecies": "Frillish",
+      "toSpeciesId": 593,
+      "toSpecies": "Jellicent",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 595,
+      "fromSpecies": "Joltik",
+      "toSpeciesId": 596,
+      "toSpecies": "Galvantula",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 597,
+      "fromSpecies": "Ferroseed",
+      "toSpeciesId": 598,
+      "toSpecies": "Ferrothorn",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 599,
+      "fromSpecies": "Klink",
+      "toSpeciesId": 600,
+      "toSpecies": "Klang",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 600,
+      "fromSpecies": "Klang",
+      "toSpeciesId": 601,
+      "toSpecies": "Klinklang",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 44,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 602,
+      "fromSpecies": "Tynamo",
+      "toSpeciesId": 603,
+      "toSpecies": "Eelektrik",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 605,
+      "fromSpecies": "Elgyem",
+      "toSpeciesId": 606,
+      "toSpecies": "Beheeyem",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 607,
+      "fromSpecies": "Litwick",
+      "toSpeciesId": 608,
+      "toSpecies": "Lampent",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 610,
+      "fromSpecies": "Axew",
+      "toSpeciesId": 611,
+      "toSpecies": "Fraxure",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 32,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 619,
+      "fromSpecies": "Mienfoo",
+      "toSpeciesId": 620,
+      "toSpecies": "Mienshao",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 36,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 622,
+      "fromSpecies": "Golett",
+      "toSpeciesId": 623,
+      "toSpecies": "Golurk",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 624,
+      "fromSpecies": "Pawniard",
+      "toSpeciesId": 625,
+      "toSpecies": "Bisharp",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 37,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 627,
+      "fromSpecies": "Rufflet",
+      "toSpeciesId": 628,
+      "toSpecies": "Braviary",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 629,
+      "fromSpecies": "Vullaby",
+      "toSpeciesId": 630,
+      "toSpecies": "Mandibuzz",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 633,
+      "fromSpecies": "Deino",
+      "toSpeciesId": 634,
+      "toSpecies": "Zweilous",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 39,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 634,
+      "fromSpecies": "Zweilous",
+      "toSpeciesId": 635,
+      "toSpecies": "Hydreigon",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 59,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 636,
+      "fromSpecies": "Larvesta",
+      "toSpeciesId": 637,
+      "toSpecies": "Volcarona",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 50,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 667,
+      "fromSpecies": "Litleo",
+      "toSpeciesId": 668,
+      "toSpecies": "Pyroar",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 688,
+      "fromSpecies": "Binacle",
+      "toSpeciesId": 689,
+      "toSpecies": "Barbaracle",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 34,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 690,
+      "fromSpecies": "Skrelp",
+      "toSpeciesId": 691,
+      "toSpecies": "Dragalge",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 35,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 692,
+      "fromSpecies": "Clauncher",
+      "toSpeciesId": 693,
+      "toSpecies": "Clawitzer",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 33,
+      "argument": 0
+    },
+    {
+      "fromSpeciesId": 714,
+      "fromSpecies": "Noibat",
+      "toSpeciesId": 715,
+      "toSpecies": "Noivern",
+      "mode": "replace",
+      "methodKey": "LevelUp",
+      "level": 44,
+      "argument": 0
+    }
+  ]
+}

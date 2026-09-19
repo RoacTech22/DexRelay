@@ -1,0 +1,1257 @@
+{
+  "1": {
+    "name": "stench",
+    "descriptionEs": "Es posible que el rival retroceda por el mal olor.",
+    "source": "ability_flavor_text"
+  },
+  "2": {
+    "name": "drizzle",
+    "descriptionEs": "Hace que llueva cuando entra en combate.",
+    "source": "ability_flavor_text"
+  },
+  "3": {
+    "name": "speed-boost",
+    "descriptionEs": "Aumenta la Velocidad gradualmente.",
+    "source": "ability_flavor_text"
+  },
+  "4": {
+    "name": "battle-armor",
+    "descriptionEs": "Bloquea los golpes críticos.",
+    "source": "ability_flavor_text"
+  },
+  "5": {
+    "name": "sturdy",
+    "descriptionEs": "Evita que el rival pueda debilitarle de un solo golpe.",
+    "source": "ability_flavor_text"
+  },
+  "6": {
+    "name": "damp",
+    "descriptionEs": "Evita que un Pokémon pueda autodestruirse.",
+    "source": "ability_flavor_text"
+  },
+  "7": {
+    "name": "limber",
+    "descriptionEs": "Evita ser paralizado.",
+    "source": "ability_flavor_text"
+  },
+  "8": {
+    "name": "sand-veil",
+    "descriptionEs": "Aumenta la Evasión en las tormentas de arena.",
+    "source": "ability_flavor_text"
+  },
+  "9": {
+    "name": "static",
+    "descriptionEs": "Puede paralizar al mínimo contacto.",
+    "source": "ability_flavor_text"
+  },
+  "10": {
+    "name": "volt-absorb",
+    "descriptionEs": "Recupera PS al recibir ataques de tipo Eléctrico.",
+    "source": "ability_flavor_text"
+  },
+  "11": {
+    "name": "water-absorb",
+    "descriptionEs": "Recupera PS al recibir ataques de tipo Agua.",
+    "source": "ability_flavor_text"
+  },
+  "12": {
+    "name": "oblivious",
+    "descriptionEs": "Evita que el Pokémon sea atraído o provocado.",
+    "source": "ability_flavor_text"
+  },
+  "13": {
+    "name": "cloud-nine",
+    "descriptionEs": "Anula los efectos del tiempo atmosférico.",
+    "source": "ability_flavor_text"
+  },
+  "14": {
+    "name": "compound-eyes",
+    "descriptionEs": "Aumenta la Precisión del Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "15": {
+    "name": "insomnia",
+    "descriptionEs": "Evita el quedarse dormido.",
+    "source": "ability_flavor_text"
+  },
+  "16": {
+    "name": "color-change",
+    "descriptionEs": "Adopta el tipo del último movimiento del que se es blanco.",
+    "source": "ability_flavor_text"
+  },
+  "17": {
+    "name": "immunity",
+    "descriptionEs": "Evita el envenenamiento.",
+    "source": "ability_flavor_text"
+  },
+  "18": {
+    "name": "flash-fire",
+    "descriptionEs": "Potencia movimientos de tipo Fuego si ha sufrido antes alguno.",
+    "source": "ability_flavor_text"
+  },
+  "19": {
+    "name": "shield-dust",
+    "descriptionEs": "Anula el efecto secundario del ataque sufrido.",
+    "source": "ability_flavor_text"
+  },
+  "20": {
+    "name": "own-tempo",
+    "descriptionEs": "Evita ser confundido.",
+    "source": "ability_flavor_text"
+  },
+  "21": {
+    "name": "suction-cups",
+    "descriptionEs": "Anula movimientos y objetos que fuerzan el relevo.",
+    "source": "ability_flavor_text"
+  },
+  "22": {
+    "name": "intimidate",
+    "descriptionEs": "Baja el Ataque del rival.",
+    "source": "ability_flavor_text"
+  },
+  "23": {
+    "name": "shadow-tag",
+    "descriptionEs": "Evita que el enemigo huya.",
+    "source": "ability_flavor_text"
+  },
+  "24": {
+    "name": "rough-skin",
+    "descriptionEs": "Hiere al hacer contacto.",
+    "source": "ability_flavor_text"
+  },
+  "25": {
+    "name": "wonder-guard",
+    "descriptionEs": "Solo le hacen daño los movimientos supereficaces.",
+    "source": "ability_flavor_text"
+  },
+  "26": {
+    "name": "levitate",
+    "descriptionEs": "Proporciona inmunidad frente a los ataques de tipo Tierra.",
+    "source": "ability_flavor_text"
+  },
+  "27": {
+    "name": "effect-spore",
+    "descriptionEs": "Puede dormir, envenenar o paralizar al contacto.",
+    "source": "ability_flavor_text"
+  },
+  "28": {
+    "name": "synchronize",
+    "descriptionEs": "Contagia envenenamiento, parálisis o quemaduras.",
+    "source": "ability_flavor_text"
+  },
+  "29": {
+    "name": "clear-body",
+    "descriptionEs": "Evita que bajen las características.",
+    "source": "ability_flavor_text"
+  },
+  "30": {
+    "name": "natural-cure",
+    "descriptionEs": "Cura problemas de estado al cambiar de Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "31": {
+    "name": "lightning-rod",
+    "descriptionEs": "Atrae y neutraliza movimientos de tipo Eléctrico y sube el At. Esp.",
+    "source": "ability_flavor_text"
+  },
+  "32": {
+    "name": "serene-grace",
+    "descriptionEs": "Aumenta la probabilidad de que haya efectos secundarios.",
+    "source": "ability_flavor_text"
+  },
+  "33": {
+    "name": "swift-swim",
+    "descriptionEs": "Sube la Velocidad cuando hay lluvia.",
+    "source": "ability_flavor_text"
+  },
+  "34": {
+    "name": "chlorophyll",
+    "descriptionEs": "Sube la Velocidad cuando hay sol.",
+    "source": "ability_flavor_text"
+  },
+  "35": {
+    "name": "illuminate",
+    "descriptionEs": "Aumenta la probabilidad de encontrar Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "36": {
+    "name": "trace",
+    "descriptionEs": "Copia la habilidad del rival.",
+    "source": "ability_flavor_text"
+  },
+  "37": {
+    "name": "huge-power",
+    "descriptionEs": "Aumenta el Ataque.",
+    "source": "ability_flavor_text"
+  },
+  "38": {
+    "name": "poison-point",
+    "descriptionEs": "Puede envenenar al mínimo contacto.",
+    "source": "ability_flavor_text"
+  },
+  "39": {
+    "name": "inner-focus",
+    "descriptionEs": "Evita el retroceso.",
+    "source": "ability_flavor_text"
+  },
+  "40": {
+    "name": "magma-armor",
+    "descriptionEs": "Evita la congelación.",
+    "source": "ability_flavor_text"
+  },
+  "41": {
+    "name": "water-veil",
+    "descriptionEs": "Evita las quemaduras.",
+    "source": "ability_flavor_text"
+  },
+  "42": {
+    "name": "magnet-pull",
+    "descriptionEs": "Impide huir a los Pokémon de tipo Acero.",
+    "source": "ability_flavor_text"
+  },
+  "43": {
+    "name": "soundproof",
+    "descriptionEs": "Evita ataques de sonido.",
+    "source": "ability_flavor_text"
+  },
+  "44": {
+    "name": "rain-dish",
+    "descriptionEs": "Recupera PS de forma gradual cuando llueve.",
+    "source": "ability_flavor_text"
+  },
+  "45": {
+    "name": "sand-stream",
+    "descriptionEs": "Crea una tormenta de arena en el combate.",
+    "source": "ability_flavor_text"
+  },
+  "46": {
+    "name": "pressure",
+    "descriptionEs": "Hace que los PP del rival se acaben antes.",
+    "source": "ability_flavor_text"
+  },
+  "47": {
+    "name": "thick-fat",
+    "descriptionEs": "Atenúa los ataques de tipo Fuego y Hielo.",
+    "source": "ability_flavor_text"
+  },
+  "48": {
+    "name": "early-bird",
+    "descriptionEs": "El Pokémon se despierta rápidamente.",
+    "source": "ability_flavor_text"
+  },
+  "49": {
+    "name": "flame-body",
+    "descriptionEs": "Puede quemar al mínimo contacto.",
+    "source": "ability_flavor_text"
+  },
+  "50": {
+    "name": "run-away",
+    "descriptionEs": "Permite escapar de todos los Pokémon salvajes.",
+    "source": "ability_flavor_text"
+  },
+  "51": {
+    "name": "keen-eye",
+    "descriptionEs": "Evita que disminuya la Precisión.",
+    "source": "ability_flavor_text"
+  },
+  "52": {
+    "name": "hyper-cutter",
+    "descriptionEs": "Evita que disminuya el Ataque.",
+    "source": "ability_flavor_text"
+  },
+  "53": {
+    "name": "pickup",
+    "descriptionEs": "El Pokémon puede encontrar objetos.",
+    "source": "ability_flavor_text"
+  },
+  "54": {
+    "name": "truant",
+    "descriptionEs": "El Pokémon no atacará en turnos consecutivos.",
+    "source": "ability_flavor_text"
+  },
+  "55": {
+    "name": "hustle",
+    "descriptionEs": "Aumenta el Ataque, pero reduce la Precisión.",
+    "source": "ability_flavor_text"
+  },
+  "56": {
+    "name": "cute-charm",
+    "descriptionEs": "Tocar al Pokémon puede causar enamoramiento.",
+    "source": "ability_flavor_text"
+  },
+  "57": {
+    "name": "plus",
+    "descriptionEs": "Potencia el At. Esp. si algún otro Pokémon tiene Más o Menos.",
+    "source": "ability_flavor_text"
+  },
+  "58": {
+    "name": "minus",
+    "descriptionEs": "Potencia el At. Esp. si algún otro Pokémon tiene Más o Menos.",
+    "source": "ability_flavor_text"
+  },
+  "59": {
+    "name": "forecast",
+    "descriptionEs": "Se transforma según el tiempo atmosférico.",
+    "source": "ability_flavor_text"
+  },
+  "60": {
+    "name": "sticky-hold",
+    "descriptionEs": "Protege al Pokémon del robo de objetos.",
+    "source": "ability_flavor_text"
+  },
+  "61": {
+    "name": "shed-skin",
+    "descriptionEs": "Cura los problemas de estado mudando la piel.",
+    "source": "ability_flavor_text"
+  },
+  "62": {
+    "name": "guts",
+    "descriptionEs": "Sube el Ataque si sufre un problema de estado.",
+    "source": "ability_flavor_text"
+  },
+  "63": {
+    "name": "marvel-scale",
+    "descriptionEs": "Sube la Defensa si sufre un problema de estado.",
+    "source": "ability_flavor_text"
+  },
+  "64": {
+    "name": "liquid-ooze",
+    "descriptionEs": "Hiere a los Pokémon que drenan PS.",
+    "source": "ability_flavor_text"
+  },
+  "65": {
+    "name": "overgrow",
+    "descriptionEs": "Potencia los ataques de tipo Planta en un apuro.",
+    "source": "ability_flavor_text"
+  },
+  "66": {
+    "name": "blaze",
+    "descriptionEs": "Potencia los ataques de tipo Fuego en un apuro.",
+    "source": "ability_flavor_text"
+  },
+  "67": {
+    "name": "torrent",
+    "descriptionEs": "Potencia los ataques de tipo Agua en un apuro.",
+    "source": "ability_flavor_text"
+  },
+  "68": {
+    "name": "swarm",
+    "descriptionEs": "Potencia los ataques de tipo Bicho en un apuro.",
+    "source": "ability_flavor_text"
+  },
+  "69": {
+    "name": "rock-head",
+    "descriptionEs": "Impide que el Pokémon se dañe con sus movimientos.",
+    "source": "ability_flavor_text"
+  },
+  "70": {
+    "name": "drought",
+    "descriptionEs": "El sol sale si el Pokémon entra en combate.",
+    "source": "ability_flavor_text"
+  },
+  "71": {
+    "name": "arena-trap",
+    "descriptionEs": "Evita que el rival huya.",
+    "source": "ability_flavor_text"
+  },
+  "72": {
+    "name": "vital-spirit",
+    "descriptionEs": "Evita el quedarse dormido.",
+    "source": "ability_flavor_text"
+  },
+  "73": {
+    "name": "white-smoke",
+    "descriptionEs": "Evita que bajen las características.",
+    "source": "ability_flavor_text"
+  },
+  "74": {
+    "name": "pure-power",
+    "descriptionEs": "Aumenta el Ataque.",
+    "source": "ability_flavor_text"
+  },
+  "75": {
+    "name": "shell-armor",
+    "descriptionEs": "Bloquea los golpes críticos.",
+    "source": "ability_flavor_text"
+  },
+  "76": {
+    "name": "air-lock",
+    "descriptionEs": "Anula los efectos del tiempo atmosférico.",
+    "source": "ability_flavor_text"
+  },
+  "77": {
+    "name": "tangled-feet",
+    "descriptionEs": "Sube la Evasión si el Pokémon está confuso.",
+    "source": "ability_flavor_text"
+  },
+  "78": {
+    "name": "motor-drive",
+    "descriptionEs": "Sube la Velocidad si le alcanza un ataque eléctrico.",
+    "source": "ability_flavor_text"
+  },
+  "79": {
+    "name": "rivalry",
+    "descriptionEs": "Si el objetivo es del mismo sexo, inflige más daño.",
+    "source": "ability_flavor_text"
+  },
+  "80": {
+    "name": "steadfast",
+    "descriptionEs": "Cada vez que retrocede sube su Velocidad.",
+    "source": "ability_flavor_text"
+  },
+  "81": {
+    "name": "snow-cloak",
+    "descriptionEs": "Sube la Evasión durante una tormenta de granizo.",
+    "source": "ability_flavor_text"
+  },
+  "82": {
+    "name": "gluttony",
+    "descriptionEs": "Fomenta el uso rápido de la baya que porte.",
+    "source": "ability_flavor_text"
+  },
+  "83": {
+    "name": "anger-point",
+    "descriptionEs": "Sube el Ataque al máximo tras un golpe crítico.",
+    "source": "ability_flavor_text"
+  },
+  "84": {
+    "name": "unburden",
+    "descriptionEs": "Sube la Velocidad si usa o pierde el objeto que lleve.",
+    "source": "ability_flavor_text"
+  },
+  "85": {
+    "name": "heatproof",
+    "descriptionEs": "Disminuye la potencia de los ataques de tipo Fuego.",
+    "source": "ability_flavor_text"
+  },
+  "86": {
+    "name": "simple",
+    "descriptionEs": "Aumenta los cambios en las características.",
+    "source": "ability_flavor_text"
+  },
+  "87": {
+    "name": "dry-skin",
+    "descriptionEs": "Pierde PS si hace calor. Los recupera con agua.",
+    "source": "ability_flavor_text"
+  },
+  "88": {
+    "name": "download",
+    "descriptionEs": "Adapta su fuerza para cada rival.",
+    "source": "ability_flavor_text"
+  },
+  "89": {
+    "name": "iron-fist",
+    "descriptionEs": "Aumenta la fuerza de los puñetazos.",
+    "source": "ability_flavor_text"
+  },
+  "90": {
+    "name": "poison-heal",
+    "descriptionEs": "Recupera PS si el Pokémon ha sido envenenado.",
+    "source": "ability_flavor_text"
+  },
+  "91": {
+    "name": "adaptability",
+    "descriptionEs": "Potencia los movimientos del mismo tipo del Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "92": {
+    "name": "skill-link",
+    "descriptionEs": "Aumenta la frecuencia de los movimientos múltiples.",
+    "source": "ability_flavor_text"
+  },
+  "93": {
+    "name": "hydration",
+    "descriptionEs": "Cura los problemas de estado si está lloviendo.",
+    "source": "ability_flavor_text"
+  },
+  "94": {
+    "name": "solar-power",
+    "descriptionEs": "Si hace sol, baja los PS, pero potencia el At. Esp.",
+    "source": "ability_flavor_text"
+  },
+  "95": {
+    "name": "quick-feet",
+    "descriptionEs": "Potencia la Velocidad si hay problemas de estado.",
+    "source": "ability_flavor_text"
+  },
+  "96": {
+    "name": "normalize",
+    "descriptionEs": "Todos los movimientos se vuelven de tipo Normal.",
+    "source": "ability_flavor_text"
+  },
+  "97": {
+    "name": "sniper",
+    "descriptionEs": "Potencia los movimientos si se vuelven críticos.",
+    "source": "ability_flavor_text"
+  },
+  "98": {
+    "name": "magic-guard",
+    "descriptionEs": "Solo dañan al Pokémon los ataques directos.",
+    "source": "ability_flavor_text"
+  },
+  "99": {
+    "name": "no-guard",
+    "descriptionEs": "El movimiento del Pokémon y el del rival acertarán.",
+    "source": "ability_flavor_text"
+  },
+  "100": {
+    "name": "stall",
+    "descriptionEs": "El Pokémon se mueve tras todos los demás.",
+    "source": "ability_flavor_text"
+  },
+  "101": {
+    "name": "technician",
+    "descriptionEs": "Potencia los movimientos más débiles del Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "102": {
+    "name": "leaf-guard",
+    "descriptionEs": "Evita los problemas de estado si hace sol.",
+    "source": "ability_flavor_text"
+  },
+  "103": {
+    "name": "klutz",
+    "descriptionEs": "El Pokémon no puede usar objetos equipados.",
+    "source": "ability_flavor_text"
+  },
+  "104": {
+    "name": "mold-breaker",
+    "descriptionEs": "Usa movimientos sin que importen las habilidades del objetivo.",
+    "source": "ability_flavor_text"
+  },
+  "105": {
+    "name": "super-luck",
+    "descriptionEs": "Aumenta la probabilidad de dar golpes críticos.",
+    "source": "ability_flavor_text"
+  },
+  "106": {
+    "name": "aftermath",
+    "descriptionEs": "Daña al agresor que le ha dado el golpe de gracia.",
+    "source": "ability_flavor_text"
+  },
+  "107": {
+    "name": "anticipation",
+    "descriptionEs": "Prevé los movimientos peligrosos del rival.",
+    "source": "ability_flavor_text"
+  },
+  "108": {
+    "name": "forewarn",
+    "descriptionEs": "Determina el movimiento más potente del rival.",
+    "source": "ability_flavor_text"
+  },
+  "109": {
+    "name": "unaware",
+    "descriptionEs": "No tiene en cuenta las mejoras en las características del rival.",
+    "source": "ability_flavor_text"
+  },
+  "110": {
+    "name": "tinted-lens",
+    "descriptionEs": "Potencia los movimientos que no son muy eficaces.",
+    "source": "ability_flavor_text"
+  },
+  "111": {
+    "name": "filter",
+    "descriptionEs": "Mitiga los movimientos supereficaces.",
+    "source": "ability_flavor_text"
+  },
+  "112": {
+    "name": "slow-start",
+    "descriptionEs": "Baja a la mitad el Ataque y la Velocidad durante un rato.",
+    "source": "ability_flavor_text"
+  },
+  "113": {
+    "name": "scrappy",
+    "descriptionEs": "Movimientos tipo Normal y Lucha golpean a Pokémon Fantasma.",
+    "source": "ability_flavor_text"
+  },
+  "114": {
+    "name": "storm-drain",
+    "descriptionEs": "Atrae y neutraliza los movimientos de tipo Agua y sube el At. Esp.",
+    "source": "ability_flavor_text"
+  },
+  "115": {
+    "name": "ice-body",
+    "descriptionEs": "Recupera algunos PS cuando hay tormentas de granizo.",
+    "source": "ability_flavor_text"
+  },
+  "116": {
+    "name": "solid-rock",
+    "descriptionEs": "Mitiga los movimientos supereficaces.",
+    "source": "ability_flavor_text"
+  },
+  "117": {
+    "name": "snow-warning",
+    "descriptionEs": "El Pokémon invoca una tormenta de granizo.",
+    "source": "ability_flavor_text"
+  },
+  "118": {
+    "name": "honey-gather",
+    "descriptionEs": "El Pokémon recoge Miel de donde puede.",
+    "source": "ability_flavor_text"
+  },
+  "119": {
+    "name": "frisk",
+    "descriptionEs": "El Pokémon puede ver el objeto que lleva el rival.",
+    "source": "ability_flavor_text"
+  },
+  "120": {
+    "name": "reckless",
+    "descriptionEs": "Potencia los movimientos que dañan al usuario.",
+    "source": "ability_flavor_text"
+  },
+  "121": {
+    "name": "multitype",
+    "descriptionEs": "Cambia el tipo al de la tabla que lleve.",
+    "source": "ability_flavor_text"
+  },
+  "122": {
+    "name": "flower-gift",
+    "descriptionEs": "Potencia a todos los Pokémon del equipo si está soleado.",
+    "source": "ability_flavor_text"
+  },
+  "123": {
+    "name": "bad-dreams",
+    "descriptionEs": "Reduce los PS de cualquier rival que esté dormido.",
+    "source": "ability_flavor_text"
+  },
+  "124": {
+    "name": "pickpocket",
+    "descriptionEs": "Al ser golpeado, roba el objeto del objetivo.",
+    "source": "ability_flavor_text"
+  },
+  "125": {
+    "name": "sheer-force",
+    "descriptionEs": "Sube la potencia y anula los efectos secundarios.",
+    "source": "ability_flavor_text"
+  },
+  "126": {
+    "name": "contrary",
+    "descriptionEs": "Invierte los cambios en las características.",
+    "source": "ability_flavor_text"
+  },
+  "127": {
+    "name": "unnerve",
+    "descriptionEs": "Pone nervioso al rival y le impide usar bayas.",
+    "source": "ability_flavor_text"
+  },
+  "128": {
+    "name": "defiant",
+    "descriptionEs": "Sube el Ataque cuando el rival le baja las características.",
+    "source": "ability_flavor_text"
+  },
+  "129": {
+    "name": "defeatist",
+    "descriptionEs": "Baja las características al llegar a la mitad los PS.",
+    "source": "ability_flavor_text"
+  },
+  "130": {
+    "name": "cursed-body",
+    "descriptionEs": "Puede anular el movimiento usado en su contra.",
+    "source": "ability_flavor_text"
+  },
+  "131": {
+    "name": "healer",
+    "descriptionEs": "A veces cura los cambios de estado de un aliado.",
+    "source": "ability_flavor_text"
+  },
+  "132": {
+    "name": "friend-guard",
+    "descriptionEs": "Reduce el daño que sufren los aliados.",
+    "source": "ability_flavor_text"
+  },
+  "133": {
+    "name": "weak-armor",
+    "descriptionEs": "Un ataque físico baja la Defensa y sube la Velocidad.",
+    "source": "ability_flavor_text"
+  },
+  "134": {
+    "name": "heavy-metal",
+    "descriptionEs": "Duplica el peso del Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "135": {
+    "name": "light-metal",
+    "descriptionEs": "Reduce a la mitad el peso del Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "136": {
+    "name": "multiscale",
+    "descriptionEs": "Reduce el daño sufrido si los PS están al máximo.",
+    "source": "ability_flavor_text"
+  },
+  "137": {
+    "name": "toxic-boost",
+    "descriptionEs": "Aumenta la potencia física si está envenenado.",
+    "source": "ability_flavor_text"
+  },
+  "138": {
+    "name": "flare-boost",
+    "descriptionEs": "Potencia los ataques especiales cuando el Pokémon se quema.",
+    "source": "ability_flavor_text"
+  },
+  "139": {
+    "name": "harvest",
+    "descriptionEs": "Permite reutilizar varias veces una misma baya.",
+    "source": "ability_flavor_text"
+  },
+  "140": {
+    "name": "telepathy",
+    "descriptionEs": "Elude los ataques de aliados en batalla.",
+    "source": "ability_flavor_text"
+  },
+  "141": {
+    "name": "moody",
+    "descriptionEs": "Sube una característica mucho, pero baja otra.",
+    "source": "ability_flavor_text"
+  },
+  "142": {
+    "name": "overcoat",
+    "descriptionEs": "Protege del polvo, la arena y el granizo.",
+    "source": "ability_flavor_text"
+  },
+  "143": {
+    "name": "poison-touch",
+    "descriptionEs": "Puede envenenar al objetivo con solo tocarlo.",
+    "source": "ability_flavor_text"
+  },
+  "144": {
+    "name": "regenerator",
+    "descriptionEs": "Recupera unos pocos PS al cambiar de Pokémon.",
+    "source": "ability_flavor_text"
+  },
+  "145": {
+    "name": "big-pecks",
+    "descriptionEs": "Protege de los ataques que bajan la Defensa.",
+    "source": "ability_flavor_text"
+  },
+  "146": {
+    "name": "sand-rush",
+    "descriptionEs": "Aumenta la Velocidad durante las tormentas de arena.",
+    "source": "ability_flavor_text"
+  },
+  "147": {
+    "name": "wonder-skin",
+    "descriptionEs": "Dificulta que le afecten los ataques de estado.",
+    "source": "ability_flavor_text"
+  },
+  "148": {
+    "name": "analytic",
+    "descriptionEs": "Potencia el movimiento si es el último en atacar.",
+    "source": "ability_flavor_text"
+  },
+  "149": {
+    "name": "illusion",
+    "descriptionEs": "Se convierte en el último Pokémon del equipo.",
+    "source": "ability_flavor_text"
+  },
+  "150": {
+    "name": "imposter",
+    "descriptionEs": "Se transforma en el Pokémon que tiene enfrente.",
+    "source": "ability_flavor_text"
+  },
+  "151": {
+    "name": "infiltrator",
+    "descriptionEs": "Ataca rodeando la barrera del rival.",
+    "source": "ability_flavor_text"
+  },
+  "152": {
+    "name": "mummy",
+    "descriptionEs": "Contagia Momia al rival que lo toque.",
+    "source": "ability_flavor_text"
+  },
+  "153": {
+    "name": "moxie",
+    "descriptionEs": "Potencia el Ataque al debilitar a un objetivo.",
+    "source": "ability_flavor_text"
+  },
+  "154": {
+    "name": "justified",
+    "descriptionEs": "Sube el Ataque al recibir uno de tipo Siniestro.",
+    "source": "ability_flavor_text"
+  },
+  "155": {
+    "name": "rattled",
+    "descriptionEs": "El miedo a algunos ataques sube su Velocidad.",
+    "source": "ability_flavor_text"
+  },
+  "156": {
+    "name": "magic-bounce",
+    "descriptionEs": "Permite devolver los ataques de estado.",
+    "source": "ability_flavor_text"
+  },
+  "157": {
+    "name": "sap-sipper",
+    "descriptionEs": "Neutraliza los movimientos de tipo Planta y sube el Ataque.",
+    "source": "ability_flavor_text"
+  },
+  "158": {
+    "name": "prankster",
+    "descriptionEs": "Permite lanzar ataques de estado en primer lugar.",
+    "source": "ability_flavor_text"
+  },
+  "159": {
+    "name": "sand-force",
+    "descriptionEs": "Potencia algunos movimientos durante las tormentas de arena.",
+    "source": "ability_flavor_text"
+  },
+  "160": {
+    "name": "iron-barbs",
+    "descriptionEs": "Hiere al hacer contacto.",
+    "source": "ability_flavor_text"
+  },
+  "161": {
+    "name": "zen-mode",
+    "descriptionEs": "Cambia de forma en un apuro.",
+    "source": "ability_flavor_text"
+  },
+  "162": {
+    "name": "victory-star",
+    "descriptionEs": "Sube la Precisión de todo el equipo.",
+    "source": "ability_flavor_text"
+  },
+  "163": {
+    "name": "turboblaze",
+    "descriptionEs": "Usa movimientos sin que importen las habilidades del objetivo.",
+    "source": "ability_flavor_text"
+  },
+  "164": {
+    "name": "teravolt",
+    "descriptionEs": "Usa movimientos sin que importen las habilidades del objetivo.",
+    "source": "ability_flavor_text"
+  },
+  "165": {
+    "name": "aroma-veil",
+    "descriptionEs": "Protege al equipo de ataques que impiden elegir movimientos.",
+    "source": "ability_flavor_text"
+  },
+  "166": {
+    "name": "flower-veil",
+    "descriptionEs": "Evita que bajen las características de Pokémon tipo Planta aliados.",
+    "source": "ability_flavor_text"
+  },
+  "167": {
+    "name": "cheek-pouch",
+    "descriptionEs": "Recupera PS al comer bayas.",
+    "source": "ability_flavor_text"
+  },
+  "168": {
+    "name": "protean",
+    "descriptionEs": "Cambia su tipo al del movimiento que acaba de usar.",
+    "source": "ability_flavor_text"
+  },
+  "169": {
+    "name": "fur-coat",
+    "descriptionEs": "Reduce a la mitad el daño recibido por ataques físicos.",
+    "source": "ability_flavor_text"
+  },
+  "170": {
+    "name": "magician",
+    "descriptionEs": "Roba el objeto del Pokémon al que alcance con un movimiento.",
+    "source": "ability_flavor_text"
+  },
+  "171": {
+    "name": "bulletproof",
+    "descriptionEs": "No le afectan las bombas ni algunos proyectiles.",
+    "source": "ability_flavor_text"
+  },
+  "172": {
+    "name": "competitive",
+    "descriptionEs": "Aumenta su At. Esp. cuando disminuyen otras características.",
+    "source": "ability_flavor_text"
+  },
+  "173": {
+    "name": "strong-jaw",
+    "descriptionEs": "Su robusta mandíbula le confiere una potente mordedura.",
+    "source": "ability_flavor_text"
+  },
+  "174": {
+    "name": "refrigerate",
+    "descriptionEs": "Convierte movimientos de tipo Normal en tipo Hielo.",
+    "source": "ability_flavor_text"
+  },
+  "175": {
+    "name": "sweet-veil",
+    "descriptionEs": "Evita que tu equipo Pokémon se duerma.",
+    "source": "ability_flavor_text"
+  },
+  "176": {
+    "name": "stance-change",
+    "descriptionEs": "Cambia de forma según su estilo de combate.",
+    "source": "ability_flavor_text"
+  },
+  "177": {
+    "name": "gale-wings",
+    "descriptionEs": "Da prioridad a los movimientos de tipo Volador.",
+    "source": "ability_flavor_text"
+  },
+  "178": {
+    "name": "mega-launcher",
+    "descriptionEs": "Aumenta la potencia de algunos movimientos de pulsos y auras.",
+    "source": "ability_flavor_text"
+  },
+  "179": {
+    "name": "grass-pelt",
+    "descriptionEs": "Aumenta la Defensa mientras dura el efecto de Campo de Hierba.",
+    "source": "ability_flavor_text"
+  },
+  "180": {
+    "name": "symbiosis",
+    "descriptionEs": "El Pokémon puede pasar su objeto a un aliado.",
+    "source": "ability_flavor_text"
+  },
+  "181": {
+    "name": "tough-claws",
+    "descriptionEs": "Aumenta la potencia de los movimientos de contacto directo.",
+    "source": "ability_flavor_text"
+  },
+  "182": {
+    "name": "pixilate",
+    "descriptionEs": "Convierte movimientos de tipo Normal en tipo Hada.",
+    "source": "ability_flavor_text"
+  },
+  "183": {
+    "name": "gooey",
+    "descriptionEs": "Baja la Velocidad del Pokémon con el que entra en contacto.",
+    "source": "ability_flavor_text"
+  },
+  "184": {
+    "name": "aerilate",
+    "descriptionEs": "Convierte movimientos de tipo Normal en tipo Volador.",
+    "source": "ability_flavor_text"
+  },
+  "185": {
+    "name": "parental-bond",
+    "descriptionEs": "Ataque en familia.",
+    "source": "ability_flavor_text"
+  },
+  "186": {
+    "name": "dark-aura",
+    "descriptionEs": "Aumenta la potencia de todos los movimientos de tipo Siniestro.",
+    "source": "ability_flavor_text"
+  },
+  "187": {
+    "name": "fairy-aura",
+    "descriptionEs": "Aumenta la potencia de todos los movimientos de tipo Hada.",
+    "source": "ability_flavor_text"
+  },
+  "188": {
+    "name": "aura-break",
+    "descriptionEs": "Invierte los efectos que causan las auras.",
+    "source": "ability_flavor_text"
+  },
+  "189": {
+    "name": "primordial-sea",
+    "descriptionEs": "Altera el clima para anular los ataques de tipo Fuego.",
+    "source": "ability_flavor_text"
+  },
+  "190": {
+    "name": "desolate-land",
+    "descriptionEs": "Altera el clima para anular los ataques de tipo Agua.",
+    "source": "ability_flavor_text"
+  },
+  "191": {
+    "name": "delta-stream",
+    "descriptionEs": "Altera el clima para anular las vulnerabilidades del tipo Volador.",
+    "source": "ability_flavor_text"
+  },
+  "10001": {
+    "name": "mountaineer",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10002": {
+    "name": "wave-rider",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10003": {
+    "name": "skater",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10004": {
+    "name": "thrust",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10005": {
+    "name": "perception",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10006": {
+    "name": "parry",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10007": {
+    "name": "instinct",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10008": {
+    "name": "dodge",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10009": {
+    "name": "jagged-edge",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10010": {
+    "name": "frostbite",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10011": {
+    "name": "tenacity",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10012": {
+    "name": "pride",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10013": {
+    "name": "deep-sleep",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10014": {
+    "name": "power-nap",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10015": {
+    "name": "spirit",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10016": {
+    "name": "warm-blanket",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10017": {
+    "name": "gulp",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10018": {
+    "name": "herbivore",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10019": {
+    "name": "sandpit",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10020": {
+    "name": "hot-blooded",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10021": {
+    "name": "medic",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10022": {
+    "name": "life-force",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10023": {
+    "name": "lunchbox",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10024": {
+    "name": "nurse",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10025": {
+    "name": "melee",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10026": {
+    "name": "sponge",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10027": {
+    "name": "bodyguard",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10028": {
+    "name": "hero",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10029": {
+    "name": "last-bastion",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10030": {
+    "name": "stealth",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10031": {
+    "name": "vanguard",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10032": {
+    "name": "nomad",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10033": {
+    "name": "sequence",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10034": {
+    "name": "grass-cloak",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10035": {
+    "name": "celebrate",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10036": {
+    "name": "lullaby",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10037": {
+    "name": "calming",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10038": {
+    "name": "daze",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10039": {
+    "name": "frighten",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10040": {
+    "name": "interference",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10041": {
+    "name": "mood-maker",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10042": {
+    "name": "confidence",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10043": {
+    "name": "fortune",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10044": {
+    "name": "bonanza",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10045": {
+    "name": "explode",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10046": {
+    "name": "omnipotent",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10047": {
+    "name": "share",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10048": {
+    "name": "black-hole",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10049": {
+    "name": "shadow-dash",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10050": {
+    "name": "sprint",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10051": {
+    "name": "disgust",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10052": {
+    "name": "high-rise",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10053": {
+    "name": "climber",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10054": {
+    "name": "flame-boost",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10055": {
+    "name": "aqua-boost",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10056": {
+    "name": "run-up",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10057": {
+    "name": "conqueror",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10058": {
+    "name": "shackle",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10059": {
+    "name": "decoy",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10060": {
+    "name": "shield",
+    "descriptionEs": null,
+    "source": null
+  }
+}

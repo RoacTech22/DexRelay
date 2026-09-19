@@ -53,3 +53,16 @@ data/*.json
 # no algo que se genere ni se edite en runtime.
 !data/gym_leaders.json
 !data/type_chart.json
+
+# Datos estáticos curados y spec de build (versionados a propósito)
+!DexRelay.spec
+!data/ability_descriptions.json
+!data/attack_changes_rrss.json
+!data/evolution_changes_rrss.json
+!data/gym_leaders_rrss.json
+!data/item_descriptions.json
+!data/item_sprite_id_map.json
+!data/move_descriptions.json
+!data/pokemon_changes_rrss.json
+!data/pre_evolution_index.json
+!data/species_extra.json

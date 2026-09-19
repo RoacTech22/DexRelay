@@ -13,7 +13,8 @@ from app.memory.pointers import (
     STAT_DATA_OFFSET,
     STAT_DATA_SIZE,
     LAST_CAUGHT_ADDRESS,
-    TOTAL_CAUGHT_ADDRESS,
+    get_total_caught_address,
+    get_wild_rival_addresses,
     BOX_BASE_ADDRESS,
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
@@ -24,7 +25,7 @@ from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
-from app.memory.structures import Pokemon6
+from app.memory.structures import Pokemon6, decrypt_data
 from app.services.location_resolver import LocationResolver
 from app.services.species_resolver import SpeciesResolver
 
@@ -119,6 +120,20 @@ class AzaharReader:
         # necesidad real.
         self.title_id = None
 
+        # True solo después de que connect() eligió (set_process) el
+        # proceso del juego en ESTA conexión con Azahar. Bug real
+        # (18/09/2026, reportado por el usuario): cerrar Azahar por
+        # completo con DexRelay abierto y volver a abrirlo con el
+        # juego dejaba a DexRelay sin detectarlo hasta reiniciarlo.
+        # Causa: en modo automático `process_name` queda fijado tras
+        # la primera detección, y un Azahar nuevo puede reportar
+        # cualquier proceso como "seleccionado" en get_process() --
+        # is_connected() daba True sin que connect() volviera a
+        # hacer set_process() del juego, y toda lectura iba a un
+        # proceso equivocado. Ahora una conexión solo cuenta como
+        # válida si la seleccionó connect() y sigue siendo la misma.
+        self._process_selected = False
+
     def find_game_process(self):
         """
         Busca el proceso del juego dentro de Azahar.
@@ -200,10 +215,29 @@ class AzaharReader:
         actualización.
         """
 
+        self._process_selected = False
+
         try:
             process_id = (
                 self.find_game_process()
             )
+
+            if process_id is None and self.process_name is not None:
+                # Sesión nueva de Azahar con OTRO juego conocido
+                # (ej. estaba Alpha Sapphire y se abrió Omega Ruby
+                # después de cerrar todo): no quedarse esperando
+                # para siempre el nombre de la sesión anterior.
+                # Application._sync_nuzlocke_storage() re-sincroniza
+                # el Nuzlocke Tracker solo al ver el cambio.
+                other_name = self.detect_process_name()
+
+                if (
+                    other_name is not None
+                    and other_name != self.process_name
+                ):
+                    self.process_name = other_name
+                    self.title_id = None
+                    process_id = self.find_game_process()
 
             if process_id is None:
                 return False
@@ -213,11 +247,25 @@ class AzaharReader:
             )
 
             self.process_id = process_id
+            self._process_selected = True
 
             return True
 
         except Exception:
             return False
+
+    def invalidate_connection(self):
+        """
+        Olvida la conexión actual para que el próximo
+        is_connected() dé False y Runtime vuelva a pasar por
+        connect() (find_game_process + set_process). Usado por
+        Runtime cuando la conexión "parece" activa pero no llega
+        ningún dato (proceso seleccionado equivocado).
+        """
+
+        self._process_selected = False
+        self.process_id = None
+        self.title_id = None
 
     def _refresh_title_id(self):
         """
@@ -285,6 +333,22 @@ class AzaharReader:
                 # -> find_game_process(), que sí busca por nombre.
                 connected = False
 
+            if connected and not self._process_selected:
+                # Azahar reporta un proceso, pero NO lo eligió
+                # connect() en esta conexión (Azahar recién
+                # reabierto, o reconexión tras un corte) -- puede
+                # ser cualquier proceso, no necesariamente el juego.
+                connected = False
+
+            if (
+                connected
+                and self.process_id is not None
+                and process_id != self.process_id
+            ):
+                # El proceso seleccionado cambió por debajo
+                # (juego relanzado dentro del mismo Azahar).
+                connected = False
+
             if connected:
                 self.process_id = process_id
 
@@ -294,6 +358,9 @@ class AzaharReader:
             return connected
 
         except Exception:
+            # Azahar cerrado / sin respuesta: la conexión anterior
+            # ya no vale, hay que volver a seleccionar el juego.
+            self._process_selected = False
             return False
 
     def read_party_order(self):
@@ -766,20 +833,68 @@ class AzaharReader:
             pokemon
         )
 
+    def read_wild_rival_species(self):
+        """
+        Especie (nombre) del Pokémon rival de un combate salvaje, o
+        None si ninguna dirección candidata tiene un PK6 válido
+        (ver _WILD_RIVAL_ADDRESSES_BY_PROCESS en pointers.py).
+
+        Lectura liviana a propósito (se llama cada ciclo mientras
+        dura un combate salvaje): solo lee los 232 bytes, valida el
+        checksum PK6 y resuelve el nombre -- sin pasar por PKHeX ni
+        armar el dict completo de build_pokemon_data().
+
+        Maneja los dos fallos de siempre: excepción de UDP Y valor
+        None devuelto sin lanzar nada.
+        """
+
+        for address in get_wild_rival_addresses(self.process_name):
+
+            try:
+                data = self.memory.read(address, SLOT_DATA_SIZE)
+            except OSError:
+                continue
+
+            if data is None or len(data) != SLOT_DATA_SIZE:
+                continue
+
+            if all(byte == 0 for byte in data[:8]):
+                continue
+
+            decrypted = decrypt_data(data)
+
+            if not decrypted:
+                continue
+
+            species_id = struct.unpack("<H", decrypted[0x08:0x0A])[0]
+
+            if not 1 <= species_id <= 721:
+                continue
+
+            species = self.species_resolver.resolve(species_id)
+
+            if species:
+                return species
+
+        return None
+
     def read_total_caught_count(self):
         """
-        Lee TOTAL_CAUGHT_ADDRESS (ver pointers.py): sube en
+        Lee TOTAL_CAUGHT_ADDRESS (ver get_total_caught_address() en
+        pointers.py -- por proceso desde el 10/09/2026, bug real:
+        el valor viejo, único para las dos versiones, había quedado
+        sin migrar a Alpha Sapphire 1.4 y siempre leía 0): sube en
         exactamente 1 cada vez que se captura un Pokémon real
-        (equipo o Caja PC). Se usa como confirmación de que
-        read_last_caught() refleja una captura de verdad, y no
-        solo un encuentro salvaje sin capturar (ver Documento
-        Maestro, investigación del 25/08/2026).
+        (equipo o Caja PC, sin contar al inicial). Se usa como
+        confirmación de que read_last_caught() refleja una captura
+        de verdad, y no solo un encuentro salvaje sin capturar (ver
+        Documento Maestro, investigación del 25/08/2026).
 
         Devuelve el valor entero, o None si la lectura falló.
         """
 
         data = self.memory.read(
-            TOTAL_CAUGHT_ADDRESS,
+            get_total_caught_address(self.process_name),
             4
         )
 

@@ -1,0 +1,4687 @@
+{
+  "1": {
+    "name": "pound",
+    "descriptionEs": "Golpea con las patas o la cola.",
+    "source": "move_flavor_text"
+  },
+  "2": {
+    "name": "karate-chop",
+    "descriptionEs": "Da un golpe cortante. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "3": {
+    "name": "double-slap",
+    "descriptionEs": "Abofetea de dos a cinco veces seguidas.",
+    "source": "move_flavor_text"
+  },
+  "4": {
+    "name": "comet-punch",
+    "descriptionEs": "Pega de dos a cinco veces seguidas.",
+    "source": "move_flavor_text"
+  },
+  "5": {
+    "name": "mega-punch",
+    "descriptionEs": "Un puñetazo de gran potencia.",
+    "source": "move_flavor_text"
+  },
+  "6": {
+    "name": "pay-day",
+    "descriptionEs": "Arroja monedas al objetivo. Las recupera al final del combate.",
+    "source": "move_flavor_text"
+  },
+  "7": {
+    "name": "fire-punch",
+    "descriptionEs": "Puñetazo ardiente. Puede quemar.",
+    "source": "move_flavor_text"
+  },
+  "8": {
+    "name": "ice-punch",
+    "descriptionEs": "Puñetazo helado. Puede congelar.",
+    "source": "move_flavor_text"
+  },
+  "9": {
+    "name": "thunder-punch",
+    "descriptionEs": "Puñetazo eléctrico. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "10": {
+    "name": "scratch",
+    "descriptionEs": "Araña con afiladas garras.",
+    "source": "move_flavor_text"
+  },
+  "11": {
+    "name": "vice-grip",
+    "descriptionEs": "Atrapa y atenaza al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "12": {
+    "name": "guillotine",
+    "descriptionEs": "Ataque con pinzas que debilita al oponente de un golpe si acierta.",
+    "source": "move_flavor_text"
+  },
+  "13": {
+    "name": "razor-wind",
+    "descriptionEs": "Primero se prepara y en el segundo turno ataca al oponente con ráfagas de viento cortante. Alta probabilidad de ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "14": {
+    "name": "swords-dance",
+    "descriptionEs": "Baile frenético que aumenta mucho el Ataque.",
+    "source": "move_flavor_text"
+  },
+  "15": {
+    "name": "cut",
+    "descriptionEs": "Corta con garras, guadañas, etc. También sirve para cortar árboles finos.",
+    "source": "move_flavor_text"
+  },
+  "16": {
+    "name": "gust",
+    "descriptionEs": "Crea un tornado con las alas y lo lanza contra el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "17": {
+    "name": "wing-attack",
+    "descriptionEs": "Golpea al objetivo con unas grandes alas.",
+    "source": "move_flavor_text"
+  },
+  "18": {
+    "name": "whirlwind",
+    "descriptionEs": "Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.",
+    "source": "move_flavor_text"
+  },
+  "19": {
+    "name": "fly",
+    "descriptionEs": "Primer turno: vuela. Segundo turno: ataca. Fuera de combate, permite ir a sitios ya conocidos.",
+    "source": "move_flavor_text"
+  },
+  "20": {
+    "name": "bind",
+    "descriptionEs": "Ata y oprime de cuatro a cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "21": {
+    "name": "slam",
+    "descriptionEs": "Golpea con las extremidades.",
+    "source": "move_flavor_text"
+  },
+  "22": {
+    "name": "vine-whip",
+    "descriptionEs": "Azota al objetivo con ramas finas.",
+    "source": "move_flavor_text"
+  },
+  "23": {
+    "name": "stomp",
+    "descriptionEs": "Tremendo pisotón que puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "24": {
+    "name": "double-kick",
+    "descriptionEs": "Una patada doble. Golpea dos veces.",
+    "source": "move_flavor_text"
+  },
+  "25": {
+    "name": "mega-kick",
+    "descriptionEs": "Patada de extrema fuerza.",
+    "source": "move_flavor_text"
+  },
+  "26": {
+    "name": "jump-kick",
+    "descriptionEs": "Da un salto y pega una patada. Si falla, se lesiona.",
+    "source": "move_flavor_text"
+  },
+  "27": {
+    "name": "rolling-kick",
+    "descriptionEs": "Da una patada rápida y circular. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "28": {
+    "name": "sand-attack",
+    "descriptionEs": "Arroja arena a la cara y baja la Precisión.",
+    "source": "move_flavor_text"
+  },
+  "29": {
+    "name": "headbutt",
+    "descriptionEs": "Lanza un potente cabezazo que puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "30": {
+    "name": "horn-attack",
+    "descriptionEs": "Ataca al objetivo con una cornada.",
+    "source": "move_flavor_text"
+  },
+  "31": {
+    "name": "fury-attack",
+    "descriptionEs": "Cornea al objetivo de dos a cinco veces.",
+    "source": "move_flavor_text"
+  },
+  "32": {
+    "name": "horn-drill",
+    "descriptionEs": "Ataque con taladro que fulmina en un golpe al objetivo si le toca.",
+    "source": "move_flavor_text"
+  },
+  "33": {
+    "name": "tackle",
+    "descriptionEs": "Embiste con todo el cuerpo.",
+    "source": "move_flavor_text"
+  },
+  "34": {
+    "name": "body-slam",
+    "descriptionEs": "Salta sobre el objetivo con todo su peso. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "35": {
+    "name": "wrap",
+    "descriptionEs": "Oprime al objetivo de cuatro a cinco turnos con ramas o con su cuerpo.",
+    "source": "move_flavor_text"
+  },
+  "36": {
+    "name": "take-down",
+    "descriptionEs": "Carga desmedida que también hiere al agresor.",
+    "source": "move_flavor_text"
+  },
+  "37": {
+    "name": "thrash",
+    "descriptionEs": "Ataca de dos a tres turnos y acaba confundiendo al agresor.",
+    "source": "move_flavor_text"
+  },
+  "38": {
+    "name": "double-edge",
+    "descriptionEs": "Ataque arriesgado que también hiere al agresor.",
+    "source": "move_flavor_text"
+  },
+  "39": {
+    "name": "tail-whip",
+    "descriptionEs": "Agita la cola para bajar la Defensa del equipo rival.",
+    "source": "move_flavor_text"
+  },
+  "40": {
+    "name": "poison-sting",
+    "descriptionEs": "Lanza un aguijón tóxico que puede envenenar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "41": {
+    "name": "twineedle",
+    "descriptionEs": "Pincha dos veces con dos espinas. Puede envenenar.",
+    "source": "move_flavor_text"
+  },
+  "42": {
+    "name": "pin-missile",
+    "descriptionEs": "Lanza finas púas que hieren de dos a cinco veces.",
+    "source": "move_flavor_text"
+  },
+  "43": {
+    "name": "leer",
+    "descriptionEs": "Intimida a los rivales para bajar su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "44": {
+    "name": "bite",
+    "descriptionEs": "Un voraz bocado que puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "45": {
+    "name": "growl",
+    "descriptionEs": "Dulce gruñido que reduce el Ataque del contrincante.",
+    "source": "move_flavor_text"
+  },
+  "46": {
+    "name": "roar",
+    "descriptionEs": "Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.",
+    "source": "move_flavor_text"
+  },
+  "47": {
+    "name": "sing",
+    "descriptionEs": "Cancioncilla que hace dormir profundamente al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "48": {
+    "name": "supersonic",
+    "descriptionEs": "Raras ondas sónicas que confunden al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "49": {
+    "name": "sonic-boom",
+    "descriptionEs": "Lanza ondas de choque que restan 20 PS al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "50": {
+    "name": "disable",
+    "descriptionEs": "Desactiva el último movimiento del objetivo durante cuatro turnos.",
+    "source": "move_flavor_text"
+  },
+  "51": {
+    "name": "acid",
+    "descriptionEs": "Rocía a los enemigos con un ácido corrosivo. Puede bajar la Defensa Especial.",
+    "source": "move_flavor_text"
+  },
+  "52": {
+    "name": "ember",
+    "descriptionEs": "Ataca con llamas pequeñas que pueden causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "53": {
+    "name": "flamethrower",
+    "descriptionEs": "Ataca con una gran ráfaga de fuego que puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "54": {
+    "name": "mist",
+    "descriptionEs": "Rodea de fina niebla al usuario y protege las características de su equipo durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "55": {
+    "name": "water-gun",
+    "descriptionEs": "Ataca disparando agua con gran potencia.",
+    "source": "move_flavor_text"
+  },
+  "56": {
+    "name": "hydro-pump",
+    "descriptionEs": "Lanza una gran masa de agua a presión para atacar.",
+    "source": "move_flavor_text"
+  },
+  "57": {
+    "name": "surf",
+    "descriptionEs": "Inunda el campo de batalla con una ola gigante. Fuera de batalla sirve para moverse sobre el agua.",
+    "source": "move_flavor_text"
+  },
+  "58": {
+    "name": "ice-beam",
+    "descriptionEs": "Rayo de hielo que puede llegar a congelar.",
+    "source": "move_flavor_text"
+  },
+  "59": {
+    "name": "blizzard",
+    "descriptionEs": "Tormenta de hielo que puede llegar a congelar.",
+    "source": "move_flavor_text"
+  },
+  "60": {
+    "name": "psybeam",
+    "descriptionEs": "Extraño rayo que puede causar confusión.",
+    "source": "move_flavor_text"
+  },
+  "61": {
+    "name": "bubble-beam",
+    "descriptionEs": "Diluvio de burbujas que puede bajar la Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "62": {
+    "name": "aurora-beam",
+    "descriptionEs": "Rayo multicolor que puede reducir el Ataque.",
+    "source": "move_flavor_text"
+  },
+  "63": {
+    "name": "hyper-beam",
+    "descriptionEs": "Es eficaz, pero el atacante deberá descansar en el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "64": {
+    "name": "peck",
+    "descriptionEs": "Ensarta al objetivo con un cuerno o pico punzante.",
+    "source": "move_flavor_text"
+  },
+  "65": {
+    "name": "drill-peck",
+    "descriptionEs": "Picotazo giratorio y perforador muy potente.",
+    "source": "move_flavor_text"
+  },
+  "66": {
+    "name": "submission",
+    "descriptionEs": "Tira al objetivo al suelo. También hiere al agresor.",
+    "source": "move_flavor_text"
+  },
+  "67": {
+    "name": "low-kick",
+    "descriptionEs": "Patada baja. Cuanto más pesa el objetivo, más daño causa.",
+    "source": "move_flavor_text"
+  },
+  "68": {
+    "name": "counter",
+    "descriptionEs": "Devuelve un golpe físico por duplicado.",
+    "source": "move_flavor_text"
+  },
+  "69": {
+    "name": "seismic-toss",
+    "descriptionEs": "La gravedad derriba al objetivo. Se restarán tantos PS como nivel tenga el agresor.",
+    "source": "move_flavor_text"
+  },
+  "70": {
+    "name": "strength",
+    "descriptionEs": "Potente puñetazo. Fuera de combate sirve para mover rocas.",
+    "source": "move_flavor_text"
+  },
+  "71": {
+    "name": "absorb",
+    "descriptionEs": "Absorbe la mitad del daño producido en el objetivo para restaurar los PS del usuario.",
+    "source": "move_flavor_text"
+  },
+  "72": {
+    "name": "mega-drain",
+    "descriptionEs": "Absorbe la mitad del daño producido en el objetivo para restaurar los PS del usuario.",
+    "source": "move_flavor_text"
+  },
+  "73": {
+    "name": "leech-seed",
+    "descriptionEs": "Planta semillas que absorben PS para recuperar la salud del usuario en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "74": {
+    "name": "growth",
+    "descriptionEs": "El cuerpo del usuario crece a marchas forzadas y aumenta el Ataque y el Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "75": {
+    "name": "razor-leaf",
+    "descriptionEs": "Corta con hojas afiladas. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "76": {
+    "name": "solar-beam",
+    "descriptionEs": "Primer turno: absorbe luz. Segundo turno: lanza un potente rayo de energía.",
+    "source": "move_flavor_text"
+  },
+  "77": {
+    "name": "poison-powder",
+    "descriptionEs": "Polvo tóxico que envenena al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "78": {
+    "name": "stun-spore",
+    "descriptionEs": "Esparce polvo que paraliza al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "79": {
+    "name": "sleep-powder",
+    "descriptionEs": "Esparce polvo que duerme al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "80": {
+    "name": "petal-dance",
+    "descriptionEs": "Lanza pétalos de dos a tres turnos y acaba confundiendo al atacante.",
+    "source": "move_flavor_text"
+  },
+  "81": {
+    "name": "string-shot",
+    "descriptionEs": "Lanza seda a los rivales y reduce mucho su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "82": {
+    "name": "dragon-rage",
+    "descriptionEs": "Ráfaga de furiosas ondas de choque que quitan 40 PS.",
+    "source": "move_flavor_text"
+  },
+  "83": {
+    "name": "fire-spin",
+    "descriptionEs": "Un aro de fuego que atrapa al objetivo de cuatro a cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "84": {
+    "name": "thunder-shock",
+    "descriptionEs": "Ataque eléctrico que puede paralizar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "85": {
+    "name": "thunderbolt",
+    "descriptionEs": "Potente ataque eléctrico que puede paralizar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "86": {
+    "name": "thunder-wave",
+    "descriptionEs": "Una ligera descarga que paraliza al objetivo si lo alcanza.",
+    "source": "move_flavor_text"
+  },
+  "87": {
+    "name": "thunder",
+    "descriptionEs": "Un poderoso rayo que daña al objetivo y puede paralizarlo.",
+    "source": "move_flavor_text"
+  },
+  "88": {
+    "name": "rock-throw",
+    "descriptionEs": "Tira una pequeña roca al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "89": {
+    "name": "earthquake",
+    "descriptionEs": "Un terremoto que afecta a los Pokémon de alrededor en combate.",
+    "source": "move_flavor_text"
+  },
+  "90": {
+    "name": "fissure",
+    "descriptionEs": "Abre una grieta en el suelo y mete al objetivo en ella. Fulmina en un golpe.",
+    "source": "move_flavor_text"
+  },
+  "91": {
+    "name": "dig",
+    "descriptionEs": "Primer turno: cava. Segundo turno: ataca. También sirve para salir de ciertas zonas.",
+    "source": "move_flavor_text"
+  },
+  "92": {
+    "name": "toxic",
+    "descriptionEs": "Envenena gravemente al objetivo y causa un daño mayor en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "93": {
+    "name": "confusion",
+    "descriptionEs": "Débil ataque telequinético que puede causar confusión.",
+    "source": "move_flavor_text"
+  },
+  "94": {
+    "name": "psychic",
+    "descriptionEs": "Fuerte ataque telequinético que puede bajar la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "95": {
+    "name": "hypnosis",
+    "descriptionEs": "Ataque hipnótico que hace dormir profundamente al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "96": {
+    "name": "meditate",
+    "descriptionEs": "El usuario reposa y medita para potenciar el Ataque.",
+    "source": "move_flavor_text"
+  },
+  "97": {
+    "name": "agility",
+    "descriptionEs": "Relaja el cuerpo para ganar mucha Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "98": {
+    "name": "quick-attack",
+    "descriptionEs": "Ataque rápido que permite golpear en primer lugar.",
+    "source": "move_flavor_text"
+  },
+  "99": {
+    "name": "rage",
+    "descriptionEs": "Al usarse, aumenta el Ataque del usuario cada vez que es golpeado.",
+    "source": "move_flavor_text"
+  },
+  "100": {
+    "name": "teleport",
+    "descriptionEs": "Permite huir al instante de combates contra Pokémon salvajes o viajar al último Centro Pokémon visitado.",
+    "source": "move_flavor_text"
+  },
+  "101": {
+    "name": "night-shade",
+    "descriptionEs": "Produce un espejismo ante el objetivo, que pierde tantos PS como nivel tenga el agresor.",
+    "source": "move_flavor_text"
+  },
+  "102": {
+    "name": "mimic",
+    "descriptionEs": "Copia el último movimiento usado por el objetivo, y puede utilizarlo mientras esté en el combate.",
+    "source": "move_flavor_text"
+  },
+  "103": {
+    "name": "screech",
+    "descriptionEs": "Alarido agudo que reduce mucho la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "104": {
+    "name": "double-team",
+    "descriptionEs": "Crea copias de sí mismo para mejorar la Evasión.",
+    "source": "move_flavor_text"
+  },
+  "105": {
+    "name": "recover",
+    "descriptionEs": "Restaura hasta la mitad de los PS máximos.",
+    "source": "move_flavor_text"
+  },
+  "106": {
+    "name": "harden",
+    "descriptionEs": "Tensa la musculatura del usuario para aumentar la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "107": {
+    "name": "minimize",
+    "descriptionEs": "El usuario mengua para aumentar mucho la Evasión.",
+    "source": "move_flavor_text"
+  },
+  "108": {
+    "name": "smokescreen",
+    "descriptionEs": "Baja la Precisión del objetivo con una nube de humo o tinta.",
+    "source": "move_flavor_text"
+  },
+  "109": {
+    "name": "confuse-ray",
+    "descriptionEs": "Rayo siniestro que confunde al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "110": {
+    "name": "withdraw",
+    "descriptionEs": "El usuario se resguarda en su coraza por lo que le sube la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "111": {
+    "name": "defense-curl",
+    "descriptionEs": "Se enrosca para ocultar su punto débil. Sube la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "112": {
+    "name": "barrier",
+    "descriptionEs": "Crea una barrera que aumenta mucho la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "113": {
+    "name": "light-screen",
+    "descriptionEs": "Pared de luz que reduce durante cinco turnos el daño producido por los ataques especiales.",
+    "source": "move_flavor_text"
+  },
+  "114": {
+    "name": "haze",
+    "descriptionEs": "Neblina que elimina los cambios de características de todos los Pokémon en combate.",
+    "source": "move_flavor_text"
+  },
+  "115": {
+    "name": "reflect",
+    "descriptionEs": "Pared de luz que reduce durante cinco turnos el daño producido por los ataques físicos.",
+    "source": "move_flavor_text"
+  },
+  "116": {
+    "name": "focus-energy",
+    "descriptionEs": "Concentra energía para aumentar las posibilidades de un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "117": {
+    "name": "bide",
+    "descriptionEs": "Espera dos turnos para atacar con el doble de potencia del daño recibido.",
+    "source": "move_flavor_text"
+  },
+  "118": {
+    "name": "metronome",
+    "descriptionEs": "El usuario mueve un dedo y estimula su cerebro para usar al azar casi cualquier movimiento.",
+    "source": "move_flavor_text"
+  },
+  "119": {
+    "name": "mirror-move",
+    "descriptionEs": "Contraataca con el mismo movimiento empleado por el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "120": {
+    "name": "self-destruct",
+    "descriptionEs": "El atacante explota y hiere a todos a su alrededor. El usuario se debilita de inmediato.",
+    "source": "move_flavor_text"
+  },
+  "121": {
+    "name": "egg-bomb",
+    "descriptionEs": "Arroja un huevo al objetivo con gran fuerza.",
+    "source": "move_flavor_text"
+  },
+  "122": {
+    "name": "lick",
+    "descriptionEs": "Una lengua ataca al objetivo. Puede causar parálisis.",
+    "source": "move_flavor_text"
+  },
+  "123": {
+    "name": "smog",
+    "descriptionEs": "El objetivo es atacado con gases tóxicos que pueden llegar a envenenar.",
+    "source": "move_flavor_text"
+  },
+  "124": {
+    "name": "sludge",
+    "descriptionEs": "Arroja residuos al objetivo. Puede llegar a envenenar.",
+    "source": "move_flavor_text"
+  },
+  "125": {
+    "name": "bone-club",
+    "descriptionEs": "Aporrea con un hueso. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "126": {
+    "name": "fire-blast",
+    "descriptionEs": "Llama intensa que chamusca y puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "127": {
+    "name": "waterfall",
+    "descriptionEs": "Embiste con un gran impulso que puede hacer retroceder. También sirve para remontar cascadas.",
+    "source": "move_flavor_text"
+  },
+  "128": {
+    "name": "clamp",
+    "descriptionEs": "Atrapa y atenaza con fuerza durante cuatro o cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "129": {
+    "name": "swift",
+    "descriptionEs": "Lanza rayos en forma de estrella que no fallan nunca.",
+    "source": "move_flavor_text"
+  },
+  "130": {
+    "name": "skull-bash",
+    "descriptionEs": "Primer turno: se prepara y sube la Defensa del usuario. Segundo turno: da el cabezazo.",
+    "source": "move_flavor_text"
+  },
+  "131": {
+    "name": "spike-cannon",
+    "descriptionEs": "Lanza finas púas que hieren de dos a cinco veces.",
+    "source": "move_flavor_text"
+  },
+  "132": {
+    "name": "constrict",
+    "descriptionEs": "Constriñe para herir y puede bajar la Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "133": {
+    "name": "amnesia",
+    "descriptionEs": "El usuario olvida sus preocupaciones y aumenta mucho la Defensa Especial.",
+    "source": "move_flavor_text"
+  },
+  "134": {
+    "name": "kinesis",
+    "descriptionEs": "Dobla una cuchara para distraer al objetivo y bajar su nivel de Precisión.",
+    "source": "move_flavor_text"
+  },
+  "135": {
+    "name": "soft-boiled",
+    "descriptionEs": "Restaura la mitad de los PS máximos del usuario. Fuera de combate se usa para transferir parte de sus PS a un aliado.",
+    "source": "move_flavor_text"
+  },
+  "136": {
+    "name": "high-jump-kick",
+    "descriptionEs": "Salta muy alto y lanza una patada. Si falla, dañará al usuario.",
+    "source": "move_flavor_text"
+  },
+  "137": {
+    "name": "glare",
+    "descriptionEs": "Intimida y asusta al objetivo con la mirada para dejarlo paralizado.",
+    "source": "move_flavor_text"
+  },
+  "138": {
+    "name": "dream-eater",
+    "descriptionEs": "Restaura al usuario la mitad del daño causado a un objetivo dormido.",
+    "source": "move_flavor_text"
+  },
+  "139": {
+    "name": "poison-gas",
+    "descriptionEs": "Lanza una nube de gas tóxico al objetivo. Produce envenenamiento.",
+    "source": "move_flavor_text"
+  },
+  "140": {
+    "name": "barrage",
+    "descriptionEs": "Arroja esferas al objetivo entre dos y cinco veces seguidas.",
+    "source": "move_flavor_text"
+  },
+  "141": {
+    "name": "leech-life",
+    "descriptionEs": "Restaura al usuario la mitad del daño causado al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "142": {
+    "name": "lovely-kiss",
+    "descriptionEs": "Con una cara que asusta, da un beso al objetivo y lo adormece.",
+    "source": "move_flavor_text"
+  },
+  "143": {
+    "name": "sky-attack",
+    "descriptionEs": "Ataque en dos turnos que suele ser crítico. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "144": {
+    "name": "transform",
+    "descriptionEs": "El usuario se transforma en una copia del objetivo, con los mismos movimientos.",
+    "source": "move_flavor_text"
+  },
+  "145": {
+    "name": "bubble",
+    "descriptionEs": "Lanza burbujas a los contrincantes y puede reducir su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "146": {
+    "name": "dizzy-punch",
+    "descriptionEs": "Rítmicos puñetazos que pueden causar confusión.",
+    "source": "move_flavor_text"
+  },
+  "147": {
+    "name": "spore",
+    "descriptionEs": "Esparce esporas que inducen al sueño.",
+    "source": "move_flavor_text"
+  },
+  "148": {
+    "name": "flash",
+    "descriptionEs": "Luz cegadora que baja la Precisión del objetivo. También puede usarse para iluminar lugares oscuros.",
+    "source": "move_flavor_text"
+  },
+  "149": {
+    "name": "psywave",
+    "descriptionEs": "Ataque con una onda de energía de intensidad variable.",
+    "source": "move_flavor_text"
+  },
+  "150": {
+    "name": "splash",
+    "descriptionEs": "No tiene ningún efecto. Solo salpica.",
+    "source": "move_flavor_text"
+  },
+  "151": {
+    "name": "acid-armor",
+    "descriptionEs": "Transforma la estructura celular para hacerse líquido y aumenta mucho la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "152": {
+    "name": "crabhammer",
+    "descriptionEs": "Golpea con fuerza con una pinza enorme. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "153": {
+    "name": "explosion",
+    "descriptionEs": "El atacante causa una grandísima explosión y hiere a todos a su alrededor. El usuario se debilita de inmediato.",
+    "source": "move_flavor_text"
+  },
+  "154": {
+    "name": "fury-swipes",
+    "descriptionEs": "Araña rápidamente de dos a cinco veces.",
+    "source": "move_flavor_text"
+  },
+  "155": {
+    "name": "bonemerang",
+    "descriptionEs": "Lanza un hueso a modo de bumerán que golpea dos veces.",
+    "source": "move_flavor_text"
+  },
+  "156": {
+    "name": "rest",
+    "descriptionEs": "Restaura todos los PS y cura todos los problemas de estado del usuario. Duerme los dos próximos turnos.",
+    "source": "move_flavor_text"
+  },
+  "157": {
+    "name": "rock-slide",
+    "descriptionEs": "Lanza grandes pedruscos. Puede hacer retroceder a los rivales.",
+    "source": "move_flavor_text"
+  },
+  "158": {
+    "name": "hyper-fang",
+    "descriptionEs": "Ataque con finos colmillos. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "159": {
+    "name": "sharpen",
+    "descriptionEs": "El perfil del usuario se hace más afilado y su Ataque mejora.",
+    "source": "move_flavor_text"
+  },
+  "160": {
+    "name": "conversion",
+    "descriptionEs": "Cambia el tipo del usuario por el del primero de sus movimientos.",
+    "source": "move_flavor_text"
+  },
+  "161": {
+    "name": "tri-attack",
+    "descriptionEs": "Ataque triple que puede paralizar, quemar o congelar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "162": {
+    "name": "super-fang",
+    "descriptionEs": "Finos colmillos que reducen a la mitad los PS del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "163": {
+    "name": "slash",
+    "descriptionEs": "Ataca con cuchillas o con pinzas. Suele dar un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "164": {
+    "name": "substitute",
+    "descriptionEs": "Utiliza parte de los PS propios para crear un sustituto que actúa como señuelo.",
+    "source": "move_flavor_text"
+  },
+  "165": {
+    "name": "struggle",
+    "descriptionEs": "Solo se usa como último recurso al acabarse los PP. Hiere un poco al agresor.",
+    "source": "move_flavor_text"
+  },
+  "166": {
+    "name": "sketch",
+    "descriptionEs": "Aprende de forma permanente el último movimiento utilizado por el objetivo. Es de un solo uso.",
+    "source": "move_flavor_text"
+  },
+  "167": {
+    "name": "triple-kick",
+    "descriptionEs": "Patea hasta tres veces seguidas y cada vez más fuerte.",
+    "source": "move_flavor_text"
+  },
+  "168": {
+    "name": "thief",
+    "descriptionEs": "Ataca y le quita el objeto al objetivo siempre y cuando el agresor no lleve ninguno.",
+    "source": "move_flavor_text"
+  },
+  "169": {
+    "name": "spider-web",
+    "descriptionEs": "Enreda al objetivo para evitar que abandone la batalla.",
+    "source": "move_flavor_text"
+  },
+  "170": {
+    "name": "mind-reader",
+    "descriptionEs": "El usuario adivina los movimientos del objetivo para hacer que su siguiente ataque no falle.",
+    "source": "move_flavor_text"
+  },
+  "171": {
+    "name": "nightmare",
+    "descriptionEs": "El objetivo dormido sufre una pesadilla que le hace perder PS en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "172": {
+    "name": "flame-wheel",
+    "descriptionEs": "Ataca envuelto en fuego. Puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "173": {
+    "name": "snore",
+    "descriptionEs": "Fuerte ronquido que solo puede usarse dormido. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "174": {
+    "name": "curse",
+    "descriptionEs": "Un movimiento que tiene efectos distintos si el usuario es de tipo Fantasma o no.",
+    "source": "move_flavor_text"
+  },
+  "175": {
+    "name": "flail",
+    "descriptionEs": "Ataque frenético. Cuantos menos PS tenga el usuario, más daño producirá.",
+    "source": "move_flavor_text"
+  },
+  "176": {
+    "name": "conversion-2",
+    "descriptionEs": "El usuario cambia de tipo para hacerse resistente al último tipo de movimiento usado por el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "177": {
+    "name": "aeroblast",
+    "descriptionEs": "Lanza un chorro de aire que suele dar un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "178": {
+    "name": "cotton-spore",
+    "descriptionEs": "Adhiere esporas a los rivales para reducir mucho su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "179": {
+    "name": "reversal",
+    "descriptionEs": "Ataque desesperado que causa más daño cuantos menos PS tenga el usuario.",
+    "source": "move_flavor_text"
+  },
+  "180": {
+    "name": "spite",
+    "descriptionEs": "Da rienda suelta a su rencor para reducir cuatro PP del último movimiento usado por el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "181": {
+    "name": "powder-snow",
+    "descriptionEs": "Lanza nieve que puede llegar a congelar.",
+    "source": "move_flavor_text"
+  },
+  "182": {
+    "name": "protect",
+    "descriptionEs": "Frena todos los ataques, pero puede fallar si se usa repetidamente.",
+    "source": "move_flavor_text"
+  },
+  "183": {
+    "name": "mach-punch",
+    "descriptionEs": "Puñetazo que se da rápido para golpear primero.",
+    "source": "move_flavor_text"
+  },
+  "184": {
+    "name": "scary-face",
+    "descriptionEs": "Asusta al objetivo para reducir mucho su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "185": {
+    "name": "feint-attack",
+    "descriptionEs": "Engaña al objetivo para acercarse y dar un puñetazo que no falla.",
+    "source": "move_flavor_text"
+  },
+  "186": {
+    "name": "sweet-kiss",
+    "descriptionEs": "Da un beso con tal dulzura que causa confusión.",
+    "source": "move_flavor_text"
+  },
+  "187": {
+    "name": "belly-drum",
+    "descriptionEs": "Reduce la mitad de los PS máximos para mejorar al máximo el Ataque.",
+    "source": "move_flavor_text"
+  },
+  "188": {
+    "name": "sludge-bomb",
+    "descriptionEs": "Arroja residuos al objetivo. Puede llegar a envenenar.",
+    "source": "move_flavor_text"
+  },
+  "189": {
+    "name": "mud-slap",
+    "descriptionEs": "Echa lodo en la cara para bajar la Precisión.",
+    "source": "move_flavor_text"
+  },
+  "190": {
+    "name": "octazooka",
+    "descriptionEs": "Dispara tinta a la cara. Puede bajar la Precisión.",
+    "source": "move_flavor_text"
+  },
+  "191": {
+    "name": "spikes",
+    "descriptionEs": "Esparce púas alrededor del equipo rival que hieren a los Pokémon rivales que entran en combate.",
+    "source": "move_flavor_text"
+  },
+  "192": {
+    "name": "zap-cannon",
+    "descriptionEs": "Dispara una descarga eléctrica que causa daño y parálisis.",
+    "source": "move_flavor_text"
+  },
+  "193": {
+    "name": "foresight",
+    "descriptionEs": "Permite atacar con cualquier movimiento a objetivos de tipo Fantasma y golpear a Pokémon evasivos.",
+    "source": "move_flavor_text"
+  },
+  "194": {
+    "name": "destiny-bond",
+    "descriptionEs": "Si el usuario se debilita por un ataque rival antes de usar otro movimiento, el Pokémon rival se debilitará también.",
+    "source": "move_flavor_text"
+  },
+  "195": {
+    "name": "perish-song",
+    "descriptionEs": "Si un Pokémon escucha este canto y no es cambiado por otro en tres turnos, acaba debilitándose.",
+    "source": "move_flavor_text"
+  },
+  "196": {
+    "name": "icy-wind",
+    "descriptionEs": "Ataque con aire helado que baja la Velocidad de los rivales.",
+    "source": "move_flavor_text"
+  },
+  "197": {
+    "name": "detect",
+    "descriptionEs": "Frena todos los ataques, pero puede fallar si se usa repetidamente.",
+    "source": "move_flavor_text"
+  },
+  "198": {
+    "name": "bone-rush",
+    "descriptionEs": "Hueso en ristre, aporrea al objetivo de dos a cinco veces.",
+    "source": "move_flavor_text"
+  },
+  "199": {
+    "name": "lock-on",
+    "descriptionEs": "Fija el blanco para que el siguiente ataque no falle.",
+    "source": "move_flavor_text"
+  },
+  "200": {
+    "name": "outrage",
+    "descriptionEs": "Ataca de dos a tres turnos y acaba confundiendo al agresor.",
+    "source": "move_flavor_text"
+  },
+  "201": {
+    "name": "sandstorm",
+    "descriptionEs": "Tormenta de arena que dura cinco turnos y hiere a todos, excepto a los de tipo Roca, Tierra y Acero.",
+    "source": "move_flavor_text"
+  },
+  "202": {
+    "name": "giga-drain",
+    "descriptionEs": "Un ataque que absorbe nutrientes. Quien lo usa recupera la mitad de los PS del daño que produce.",
+    "source": "move_flavor_text"
+  },
+  "203": {
+    "name": "endure",
+    "descriptionEs": "Resiste cualquier ataque y deja al menos 1 PS. Puede fallar si se usa repetidamente.",
+    "source": "move_flavor_text"
+  },
+  "204": {
+    "name": "charm",
+    "descriptionEs": "Engatusa al objetivo y reduce bastante su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "205": {
+    "name": "rollout",
+    "descriptionEs": "El atacante rueda contra el objetivo durante cinco turnos, cada vez con mayor fuerza.",
+    "source": "move_flavor_text"
+  },
+  "206": {
+    "name": "false-swipe",
+    "descriptionEs": "Ataque moderado que no debilita al objetivo y le deja al menos 1 PS.",
+    "source": "move_flavor_text"
+  },
+  "207": {
+    "name": "swagger",
+    "descriptionEs": "Provoca confusión en el objetivo, pero también sube mucho su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "208": {
+    "name": "milk-drink",
+    "descriptionEs": "Restaura la mitad de los PS máximos del usuario. Fuera de combate se usa para transferir parte de sus PS a un aliado.",
+    "source": "move_flavor_text"
+  },
+  "209": {
+    "name": "spark",
+    "descriptionEs": "Ataque eléctrico que puede llegar a paralizar.",
+    "source": "move_flavor_text"
+  },
+  "210": {
+    "name": "fury-cutter",
+    "descriptionEs": "Ataque con garras o guadaña que crece en intensidad si se usa repetidas veces.",
+    "source": "move_flavor_text"
+  },
+  "211": {
+    "name": "steel-wing",
+    "descriptionEs": "Alas macizas que golpean al objetivo y pueden subir la Defensa del usuario.",
+    "source": "move_flavor_text"
+  },
+  "212": {
+    "name": "mean-look",
+    "descriptionEs": "Mal de ojo que impide al objetivo huir de la batalla.",
+    "source": "move_flavor_text"
+  },
+  "213": {
+    "name": "attract",
+    "descriptionEs": "Si el objetivo es del sexo opuesto, se enamorará y bajará la posibilidad de que ataque.",
+    "source": "move_flavor_text"
+  },
+  "214": {
+    "name": "sleep-talk",
+    "descriptionEs": "Mientras duerme, usa uno de sus movimientos elegido al azar.",
+    "source": "move_flavor_text"
+  },
+  "215": {
+    "name": "heal-bell",
+    "descriptionEs": "Tañido que cura los problemas de estado de todos los Pokémon del equipo.",
+    "source": "move_flavor_text"
+  },
+  "216": {
+    "name": "return",
+    "descriptionEs": "Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque.",
+    "source": "move_flavor_text"
+  },
+  "217": {
+    "name": "present",
+    "descriptionEs": "Quien lo usa ataca al objetivo dándole un regalo con bomba trampa. Sin embargo, a veces restaura sus PS.",
+    "source": "move_flavor_text"
+  },
+  "218": {
+    "name": "frustration",
+    "descriptionEs": "Cuanto menor sea la amistad con el Entrenador, más poderoso será este ataque.",
+    "source": "move_flavor_text"
+  },
+  "219": {
+    "name": "safeguard",
+    "descriptionEs": "Un escudo que protege de problemas de estado, como el sueño o la parálisis, durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "220": {
+    "name": "pain-split",
+    "descriptionEs": "Suma los PS del usuario a los del objetivo y los reparte a partes iguales.",
+    "source": "move_flavor_text"
+  },
+  "221": {
+    "name": "sacred-fire",
+    "descriptionEs": "Fuego místico de gran intensidad que puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "222": {
+    "name": "magnitude",
+    "descriptionEs": "Sacudida sísmica de intensidad variable que afecta a todos los Pokémon a su alrededor.",
+    "source": "move_flavor_text"
+  },
+  "223": {
+    "name": "dynamic-punch",
+    "descriptionEs": "Puñetazo con toda la fuerza concentrada. Causa confusión si atina.",
+    "source": "move_flavor_text"
+  },
+  "224": {
+    "name": "megahorn",
+    "descriptionEs": "Violenta embestida con cuernos imponentes.",
+    "source": "move_flavor_text"
+  },
+  "225": {
+    "name": "dragon-breath",
+    "descriptionEs": "Poderosa ráfaga de aliento que golpea al objetivo y puede paralizarlo.",
+    "source": "move_flavor_text"
+  },
+  "226": {
+    "name": "baton-pass",
+    "descriptionEs": "Cambia el puesto con un compañero y le pasa los cambios de características.",
+    "source": "move_flavor_text"
+  },
+  "227": {
+    "name": "encore",
+    "descriptionEs": "El objetivo repite su último movimiento durante tres turnos.",
+    "source": "move_flavor_text"
+  },
+  "228": {
+    "name": "pursuit",
+    "descriptionEs": "Hace el doble de daño al objetivo que pide el relevo.",
+    "source": "move_flavor_text"
+  },
+  "229": {
+    "name": "rapid-spin",
+    "descriptionEs": "Ataque giratorio que puede eliminar movimientos como Atadura, Constricción, Drenadoras y Púas.",
+    "source": "move_flavor_text"
+  },
+  "230": {
+    "name": "sweet-scent",
+    "descriptionEs": "Un dulce aroma engatusa al objetivo, por lo que se reduce mucho su Evasión. En la hierba alta sirve para atraer a Pokémon salvajes.",
+    "source": "move_flavor_text"
+  },
+  "231": {
+    "name": "iron-tail",
+    "descriptionEs": "Ataca con una cola férrea y puede bajar la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "232": {
+    "name": "metal-claw",
+    "descriptionEs": "Ataque con garras de acero que puede aumentar el Ataque del usuario.",
+    "source": "move_flavor_text"
+  },
+  "233": {
+    "name": "vital-throw",
+    "descriptionEs": "El usuario ataca el último, pero no falla.",
+    "source": "move_flavor_text"
+  },
+  "234": {
+    "name": "morning-sun",
+    "descriptionEs": "Restaura PS del usuario. La cantidad varía según el tiempo que haga.",
+    "source": "move_flavor_text"
+  },
+  "235": {
+    "name": "synthesis",
+    "descriptionEs": "Restaura PS del usuario. La cantidad varía según el tiempo que haga.",
+    "source": "move_flavor_text"
+  },
+  "236": {
+    "name": "moonlight",
+    "descriptionEs": "Restaura PS del usuario. La cantidad varía según el tiempo que haga.",
+    "source": "move_flavor_text"
+  },
+  "237": {
+    "name": "hidden-power",
+    "descriptionEs": "Movimiento cuyo tipo varía en función del Pokémon que lo usa.",
+    "source": "move_flavor_text"
+  },
+  "238": {
+    "name": "cross-chop",
+    "descriptionEs": "Corte doble que suele propinar un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "239": {
+    "name": "twister",
+    "descriptionEs": "Crea un violento tornado para hacer trizas al enemigo. Puede hacerlo retroceder.",
+    "source": "move_flavor_text"
+  },
+  "240": {
+    "name": "rain-dance",
+    "descriptionEs": "Genera una fuerte lluvia que refuerza los movimientos de tipo Agua durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "241": {
+    "name": "sunny-day",
+    "descriptionEs": "Quien lo usa intensifica el efecto del sol durante cinco turnos, lo que potencia los movimientos de tipo Fuego.",
+    "source": "move_flavor_text"
+  },
+  "242": {
+    "name": "crunch",
+    "descriptionEs": "Tritura con afilados colmillos y puede bajar la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "243": {
+    "name": "mirror-coat",
+    "descriptionEs": "Responde a un ataque especial ocasionando el doble del daño recibido.",
+    "source": "move_flavor_text"
+  },
+  "244": {
+    "name": "psych-up",
+    "descriptionEs": "Quien lo usa se sume en un trance y copia cualquier cambio que haya en las características de su objetivo.",
+    "source": "move_flavor_text"
+  },
+  "245": {
+    "name": "extreme-speed",
+    "descriptionEs": "Ataque muy rápido que siempre se realiza el primero.",
+    "source": "move_flavor_text"
+  },
+  "246": {
+    "name": "ancient-power",
+    "descriptionEs": "Ataque prehistórico que puede subir todas las características.",
+    "source": "move_flavor_text"
+  },
+  "247": {
+    "name": "shadow-ball",
+    "descriptionEs": "Lanza una bola oscura que puede bajar la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "248": {
+    "name": "future-sight",
+    "descriptionEs": "Concentra energía psíquica para golpear al objetivo dos turnos después.",
+    "source": "move_flavor_text"
+  },
+  "249": {
+    "name": "rock-smash",
+    "descriptionEs": "Ataque con los puños. Puede bajar la Defensa del objetivo. Puede romper rocas fuera del combate.",
+    "source": "move_flavor_text"
+  },
+  "250": {
+    "name": "whirlpool",
+    "descriptionEs": "Una tromba de agua atrapa al objetivo durante cuatro o cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "251": {
+    "name": "beat-up",
+    "descriptionEs": "Ataque de todo el equipo Pokémon. Cuantos más haya, más veces se atacará.",
+    "source": "move_flavor_text"
+  },
+  "252": {
+    "name": "fake-out",
+    "descriptionEs": "Ataca primero y, además, hace retroceder al objetivo. Solo sirve en el primer turno.",
+    "source": "move_flavor_text"
+  },
+  "253": {
+    "name": "uproar",
+    "descriptionEs": "Ataca de forma alborotada durante tres turnos. Mantiene despiertos a todos.",
+    "source": "move_flavor_text"
+  },
+  "254": {
+    "name": "stockpile",
+    "descriptionEs": "Acumula energía y sube la Defensa y la Defensa Especial. Puede utilizarse hasta tres veces.",
+    "source": "move_flavor_text"
+  },
+  "255": {
+    "name": "spit-up",
+    "descriptionEs": "Libera de una vez la energía acumulada con Reserva.",
+    "source": "move_flavor_text"
+  },
+  "256": {
+    "name": "swallow",
+    "descriptionEs": "Absorbe la energía acumulada con Reserva y restaura PS.",
+    "source": "move_flavor_text"
+  },
+  "257": {
+    "name": "heat-wave",
+    "descriptionEs": "Provoca un viento abrasador que puede quemar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "258": {
+    "name": "hail",
+    "descriptionEs": "Tormenta de granizo que dura cinco turnos. Hiere a todos los Pokémon excepto a los de tipo Hielo.",
+    "source": "move_flavor_text"
+  },
+  "259": {
+    "name": "torment",
+    "descriptionEs": "Atormenta y enfurece al objetivo, que no puede usar dos veces seguidas el mismo movimiento.",
+    "source": "move_flavor_text"
+  },
+  "260": {
+    "name": "flatter",
+    "descriptionEs": "Halaga al objetivo y lo confunde, pero también sube su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "261": {
+    "name": "will-o-wisp",
+    "descriptionEs": "Siniestra llama morada que produce quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "262": {
+    "name": "memento",
+    "descriptionEs": "El usuario se debilita, pero baja mucho tanto el Ataque como el Ataque Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "263": {
+    "name": "facade",
+    "descriptionEs": "Ataca con el doble de potencia si el usuario está quemado, paralizado o envenenado.",
+    "source": "move_flavor_text"
+  },
+  "264": {
+    "name": "focus-punch",
+    "descriptionEs": "Se concentra para dar un puñetazo. Falla si se sufre un golpe antes de su uso.",
+    "source": "move_flavor_text"
+  },
+  "265": {
+    "name": "smelling-salts",
+    "descriptionEs": "Hace el doble de daño a objetivos paralizados, pero también cura la parálisis.",
+    "source": "move_flavor_text"
+  },
+  "266": {
+    "name": "follow-me",
+    "descriptionEs": "Llama la atención para concentrar todos los ataques de todos los del equipo rival hacia sí mismo.",
+    "source": "move_flavor_text"
+  },
+  "267": {
+    "name": "nature-power",
+    "descriptionEs": "Usa el poder de la naturaleza para atacar. Su efecto varía según el entorno de combate.",
+    "source": "move_flavor_text"
+  },
+  "268": {
+    "name": "charge",
+    "descriptionEs": "Recarga energía para potenciar el siguiente movimiento de tipo Eléctrico. También sube la Defensa Especial.",
+    "source": "move_flavor_text"
+  },
+  "269": {
+    "name": "taunt",
+    "descriptionEs": "Enfurece al objetivo para que solo use movimientos de ataque durante tres turnos.",
+    "source": "move_flavor_text"
+  },
+  "270": {
+    "name": "helping-hand",
+    "descriptionEs": "El usuario ayuda a un aliado reforzando la potencia de su ataque.",
+    "source": "move_flavor_text"
+  },
+  "271": {
+    "name": "trick",
+    "descriptionEs": "Engaña al objetivo desprevenido e intercambia objetos.",
+    "source": "move_flavor_text"
+  },
+  "272": {
+    "name": "role-play",
+    "descriptionEs": "Imita al objetivo por completo y copia su habilidad.",
+    "source": "move_flavor_text"
+  },
+  "273": {
+    "name": "wish",
+    "descriptionEs": "Restaura la mitad de los PS máximos en el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "274": {
+    "name": "assist",
+    "descriptionEs": "Usa un movimiento de un miembro del equipo elegido al azar.",
+    "source": "move_flavor_text"
+  },
+  "275": {
+    "name": "ingrain",
+    "descriptionEs": "Echa raíces para recuperar PS en cada turno, pero impide el relevo.",
+    "source": "move_flavor_text"
+  },
+  "276": {
+    "name": "superpower",
+    "descriptionEs": "Ataque de gran potencia, pero que reduce el Ataque y la Defensa del agresor.",
+    "source": "move_flavor_text"
+  },
+  "277": {
+    "name": "magic-coat",
+    "descriptionEs": "Barrera capaz de devolver al agresor movimientos como Drenadoras y otros que alteran el estado o las características.",
+    "source": "move_flavor_text"
+  },
+  "278": {
+    "name": "recycle",
+    "descriptionEs": "Recicla y así recupera un objeto equipado de un solo uso que ya haya sido empleado durante el combate.",
+    "source": "move_flavor_text"
+  },
+  "279": {
+    "name": "revenge",
+    "descriptionEs": "Ataque que produce el doble de daño si el usuario es herido en el mismo turno.",
+    "source": "move_flavor_text"
+  },
+  "280": {
+    "name": "brick-break",
+    "descriptionEs": "Potente ataque que también es capaz de destruir barreras como Pantalla de Luz y Reflejo.",
+    "source": "move_flavor_text"
+  },
+  "281": {
+    "name": "yawn",
+    "descriptionEs": "Gran bostezo que induce al sueño al objetivo en el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "282": {
+    "name": "knock-off",
+    "descriptionEs": "Impide al objetivo usar el objeto que lleva durante el combate. La potencia del movimiento se multiplica si el objetivo lleva un objeto.",
+    "source": "move_flavor_text"
+  },
+  "283": {
+    "name": "endeavor",
+    "descriptionEs": "Reduce los PS del objetivo para que igualen a los del atacante.",
+    "source": "move_flavor_text"
+  },
+  "284": {
+    "name": "eruption",
+    "descriptionEs": "Furia explosiva. Cuanto menor sea el número de PS del usuario, menos daño hará el ataque.",
+    "source": "move_flavor_text"
+  },
+  "285": {
+    "name": "skill-swap",
+    "descriptionEs": "Usa el poder psíquico para intercambiar habilidades con el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "286": {
+    "name": "imprison",
+    "descriptionEs": "Impide a los contrincantes usar ataques conocidos por el usuario durante el combate.",
+    "source": "move_flavor_text"
+  },
+  "287": {
+    "name": "refresh",
+    "descriptionEs": "Descansa para curar parálisis, envenenamiento o quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "288": {
+    "name": "grudge",
+    "descriptionEs": "Si el usuario se debilita al recibir un ataque, todos los PP de este último ataque serán eliminados.",
+    "source": "move_flavor_text"
+  },
+  "289": {
+    "name": "snatch",
+    "descriptionEs": "Roba el efecto de los movimientos de curación o de cambio de características que se usen.",
+    "source": "move_flavor_text"
+  },
+  "290": {
+    "name": "secret-power",
+    "descriptionEs": "Ataque cuyos efectos secundarios varían según el entorno de combate. También se puede utilizar para construir una Base Secreta.",
+    "source": "move_flavor_text"
+  },
+  "291": {
+    "name": "dive",
+    "descriptionEs": "El usuario se sumerge en el primer turno y ataca en el segundo. Permite sumergirse hasta aguas profundas.",
+    "source": "move_flavor_text"
+  },
+  "292": {
+    "name": "arm-thrust",
+    "descriptionEs": "Fuertes empujones que golpean de dos a cinco veces seguidas.",
+    "source": "move_flavor_text"
+  },
+  "293": {
+    "name": "camouflage",
+    "descriptionEs": "Modifica el tipo del Pokémon según el terreno de combate donde esté.",
+    "source": "move_flavor_text"
+  },
+  "294": {
+    "name": "tail-glow",
+    "descriptionEs": "Se concentra en una ráfaga de luz que sube muchísimo el Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "295": {
+    "name": "luster-purge",
+    "descriptionEs": "Fogonazo de luz que puede bajar la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "296": {
+    "name": "mist-ball",
+    "descriptionEs": "Banco de niebla que puede bajar el Ataque Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "297": {
+    "name": "feather-dance",
+    "descriptionEs": "Envuelve al objetivo con un manto de plumas para reducir mucho su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "298": {
+    "name": "teeter-dance",
+    "descriptionEs": "Danza histérica que confunde a los Pokémon que están alrededor del usuario.",
+    "source": "move_flavor_text"
+  },
+  "299": {
+    "name": "blaze-kick",
+    "descriptionEs": "Patada que suele ser un golpe crítico y puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "300": {
+    "name": "mud-sport",
+    "descriptionEs": "El usuario esparce lodo a su alrededor, lo que debilita los movimientos de tipo Eléctrico durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "301": {
+    "name": "ice-ball",
+    "descriptionEs": "El atacante rueda contra el objetivo durante cinco turnos, cada vez con mayor fuerza.",
+    "source": "move_flavor_text"
+  },
+  "302": {
+    "name": "needle-arm",
+    "descriptionEs": "Pega con brazos de pinchos y puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "303": {
+    "name": "slack-off",
+    "descriptionEs": "El usuario se relaja y restaura la mitad de sus PS máximos.",
+    "source": "move_flavor_text"
+  },
+  "304": {
+    "name": "hyper-voice",
+    "descriptionEs": "Grito desgarrador que inflige daño al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "305": {
+    "name": "poison-fang",
+    "descriptionEs": "Colmillos tóxicos que pueden envenenar gravemente al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "306": {
+    "name": "crush-claw",
+    "descriptionEs": "Hace trizas al objetivo con garras afiladas y puede bajar su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "307": {
+    "name": "blast-burn",
+    "descriptionEs": "Explosión de fuego. El atacante debe descansar el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "308": {
+    "name": "hydro-cannon",
+    "descriptionEs": "Disparo de agua. El atacante debe descansar el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "309": {
+    "name": "meteor-mash",
+    "descriptionEs": "Puñetazo que impacta como un meteorito y puede subir el Ataque del agresor.",
+    "source": "move_flavor_text"
+  },
+  "310": {
+    "name": "astonish",
+    "descriptionEs": "Impresiona tanto que puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "311": {
+    "name": "weather-ball",
+    "descriptionEs": "El tipo y fuerza del ataque varían según el tiempo que haga.",
+    "source": "move_flavor_text"
+  },
+  "312": {
+    "name": "aromatherapy",
+    "descriptionEs": "Cura todos los problemas de estado del equipo con un suave aroma.",
+    "source": "move_flavor_text"
+  },
+  "313": {
+    "name": "fake-tears",
+    "descriptionEs": "Lágrimas de cocodrilo que bajan mucho la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "314": {
+    "name": "air-cutter",
+    "descriptionEs": "Viento cortante que azota. Suele ser un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "315": {
+    "name": "overheat",
+    "descriptionEs": "Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "316": {
+    "name": "odor-sleuth",
+    "descriptionEs": "Permite atacar con cualquier movimiento a objetivos de tipo Fantasma y golpear a Pokémon evasivos.",
+    "source": "move_flavor_text"
+  },
+  "317": {
+    "name": "rock-tomb",
+    "descriptionEs": "Tira rocas que detienen al objetivo y bajan su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "318": {
+    "name": "silver-wind",
+    "descriptionEs": "Fuerte viento con polvo de escamas. Puede subir todas las características de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "319": {
+    "name": "metal-sound",
+    "descriptionEs": "Horrible chirrido metálico que baja mucho la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "320": {
+    "name": "grass-whistle",
+    "descriptionEs": "Agradable melodía que adormece al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "321": {
+    "name": "tickle",
+    "descriptionEs": "Hace reír al objetivo para bajar su Ataque y Defensa.",
+    "source": "move_flavor_text"
+  },
+  "322": {
+    "name": "cosmic-power",
+    "descriptionEs": "Sube la Defensa y la Defensa Especial propias con energía mística.",
+    "source": "move_flavor_text"
+  },
+  "323": {
+    "name": "water-spout",
+    "descriptionEs": "Chorro de agua. Cuantos menos PS tenga el usuario, menos dañino será.",
+    "source": "move_flavor_text"
+  },
+  "324": {
+    "name": "signal-beam",
+    "descriptionEs": "Ataca con un rayo de luz siniestro. Puede confundir al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "325": {
+    "name": "shadow-punch",
+    "descriptionEs": "Puñetazo ineludible procedente de las sombras.",
+    "source": "move_flavor_text"
+  },
+  "326": {
+    "name": "extrasensory",
+    "descriptionEs": "Energía muy extraña que puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "327": {
+    "name": "sky-uppercut",
+    "descriptionEs": "Gancho ascendente de gran ímpetu.",
+    "source": "move_flavor_text"
+  },
+  "328": {
+    "name": "sand-tomb",
+    "descriptionEs": "Enreda al objetivo en un remolino de arena de cuatro a cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "329": {
+    "name": "sheer-cold",
+    "descriptionEs": "Ataque de frío polar que debilita al objetivo si le alcanza.",
+    "source": "move_flavor_text"
+  },
+  "330": {
+    "name": "muddy-water",
+    "descriptionEs": "Ataque con agua lodosa que puede bajar la Precisión del equipo rival.",
+    "source": "move_flavor_text"
+  },
+  "331": {
+    "name": "bullet-seed",
+    "descriptionEs": "Dispara rápido de dos a cinco ráfagas de semillas de manera consecutiva.",
+    "source": "move_flavor_text"
+  },
+  "332": {
+    "name": "aerial-ace",
+    "descriptionEs": "El usuario lanza un ataque muy rápido e ineludible.",
+    "source": "move_flavor_text"
+  },
+  "333": {
+    "name": "icicle-spear",
+    "descriptionEs": "Ataca lanzando de dos a cinco ráfagas consecutivas de carámbanos.",
+    "source": "move_flavor_text"
+  },
+  "334": {
+    "name": "iron-defense",
+    "descriptionEs": "Fortalece el cuerpo como si fuera de hierro y sube mucho la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "335": {
+    "name": "block",
+    "descriptionEs": "Le corta el paso al objetivo para que no pueda escapar.",
+    "source": "move_flavor_text"
+  },
+  "336": {
+    "name": "howl",
+    "descriptionEs": "Aullido que sube el ánimo y aumenta el Ataque.",
+    "source": "move_flavor_text"
+  },
+  "337": {
+    "name": "dragon-claw",
+    "descriptionEs": "Araña al objetivo con garras afiladas.",
+    "source": "move_flavor_text"
+  },
+  "338": {
+    "name": "frenzy-plant",
+    "descriptionEs": "Golpea con una enorme planta. Quien lo usa no puede moverse en el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "339": {
+    "name": "bulk-up",
+    "descriptionEs": "Robustece el cuerpo para subir el Ataque y la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "340": {
+    "name": "bounce",
+    "descriptionEs": "Primer turno: bota. Segundo turno: golpea. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "341": {
+    "name": "mud-shot",
+    "descriptionEs": "El usuario lanza lodo al objetivo y reduce su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "342": {
+    "name": "poison-tail",
+    "descriptionEs": "Puede envenenar y dar un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "343": {
+    "name": "covet",
+    "descriptionEs": "Se acerca con ternura al objetivo, pero le ataca y le roba el objeto que lleve.",
+    "source": "move_flavor_text"
+  },
+  "344": {
+    "name": "volt-tackle",
+    "descriptionEs": "Quien lo usa electrifica su cuerpo para luego atacar. Se hiere mucho a sí mismo, pero puede paralizar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "345": {
+    "name": "magical-leaf",
+    "descriptionEs": "Esparce extrañas hojas que persiguen al objetivo. No se puede esquivar.",
+    "source": "move_flavor_text"
+  },
+  "346": {
+    "name": "water-sport",
+    "descriptionEs": "El usuario se empapa en agua, lo que debilita los movimientos de tipo Fuego durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "347": {
+    "name": "calm-mind",
+    "descriptionEs": "Aumenta la concentración y calma el espíritu para subir el Ataque Especial y la Defensa Especial.",
+    "source": "move_flavor_text"
+  },
+  "348": {
+    "name": "leaf-blade",
+    "descriptionEs": "Acuchilla con una hoja fina. Suele dar un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "349": {
+    "name": "dragon-dance",
+    "descriptionEs": "Danza mística que sube el Ataque y la Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "350": {
+    "name": "rock-blast",
+    "descriptionEs": "Lanza pedruscos al objetivo de dos a cinco veces consecutivas.",
+    "source": "move_flavor_text"
+  },
+  "351": {
+    "name": "shock-wave",
+    "descriptionEs": "Ataque eléctrico muy rápido e ineludible.",
+    "source": "move_flavor_text"
+  },
+  "352": {
+    "name": "water-pulse",
+    "descriptionEs": "Ataca con un potente chorro de agua. Puede confundir al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "353": {
+    "name": "doom-desire",
+    "descriptionEs": "Concentra un haz de luz y ataca dos turnos después.",
+    "source": "move_flavor_text"
+  },
+  "354": {
+    "name": "psycho-boost",
+    "descriptionEs": "Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "355": {
+    "name": "roost",
+    "descriptionEs": "Aterriza sobre la superficie para descansar. Recupera hasta la mitad del total de sus PS.",
+    "source": "move_flavor_text"
+  },
+  "356": {
+    "name": "gravity",
+    "descriptionEs": "La gravedad aumenta durante cinco turnos, lo que impide acciones que impliquen volar o levitar.",
+    "source": "move_flavor_text"
+  },
+  "357": {
+    "name": "miracle-eye",
+    "descriptionEs": "Permite atacar con cualquier movimiento a objetivos de tipo Siniestro y golpear a Pokémon evasivos.",
+    "source": "move_flavor_text"
+  },
+  "358": {
+    "name": "wake-up-slap",
+    "descriptionEs": "Inflige gran daño a objetivos dormidos. Sin embargo, los bofetones también los despiertan.",
+    "source": "move_flavor_text"
+  },
+  "359": {
+    "name": "hammer-arm",
+    "descriptionEs": "Gira con fuerza el puño y da un gran golpe. No obstante, baja la Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "360": {
+    "name": "gyro-ball",
+    "descriptionEs": "Embiste al objetivo con un potente ataque giratorio. Cuanto más lento es el usuario, más daño causa.",
+    "source": "move_flavor_text"
+  },
+  "361": {
+    "name": "healing-wish",
+    "descriptionEs": "El Pokémon cae debilitado, pero su sustituto recupera su estado y los PS.",
+    "source": "move_flavor_text"
+  },
+  "362": {
+    "name": "brine",
+    "descriptionEs": "Si al objetivo le queda la mitad o menos de sus PS, el ataque será el doble de fuerte.",
+    "source": "move_flavor_text"
+  },
+  "363": {
+    "name": "natural-gift",
+    "descriptionEs": "La baya que lleva presta su fuerza para atacar. El tipo de ataque y su fuerza dependen de la baya.",
+    "source": "move_flavor_text"
+  },
+  "364": {
+    "name": "feint",
+    "descriptionEs": "Permite golpear a objetivos que usan Protección o Detección y anula dichos movimientos.",
+    "source": "move_flavor_text"
+  },
+  "365": {
+    "name": "pluck",
+    "descriptionEs": "Picotea al objetivo. Si este sostiene una baya, la picotea también y obtiene sus efectos.",
+    "source": "move_flavor_text"
+  },
+  "366": {
+    "name": "tailwind",
+    "descriptionEs": "Crea un fuerte remolino que aumenta la Velocidad de los Pokémon de tu equipo durante cuatro turnos.",
+    "source": "move_flavor_text"
+  },
+  "367": {
+    "name": "acupressure",
+    "descriptionEs": "Aplica presión en puntos clave de su cuerpo o de los aliados para potenciar un parámetro de sus características.",
+    "source": "move_flavor_text"
+  },
+  "368": {
+    "name": "metal-burst",
+    "descriptionEs": "Devuelve al rival el último ataque recibido, pero con mucha más fuerza.",
+    "source": "move_flavor_text"
+  },
+  "369": {
+    "name": "u-turn",
+    "descriptionEs": "Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.",
+    "source": "move_flavor_text"
+  },
+  "370": {
+    "name": "close-combat",
+    "descriptionEs": "Lucha abiertamente contra el objetivo sin protegerse. También reduce la Defensa y la Defensa Especial del usuario.",
+    "source": "move_flavor_text"
+  },
+  "371": {
+    "name": "payback",
+    "descriptionEs": "El usuario contraataca con el doble de fuerza si el objetivo usa un movimiento antes.",
+    "source": "move_flavor_text"
+  },
+  "372": {
+    "name": "assurance",
+    "descriptionEs": "Si el objetivo ya ha sufrido daño en ese turno, la fuerza del ataque se duplica.",
+    "source": "move_flavor_text"
+  },
+  "373": {
+    "name": "embargo",
+    "descriptionEs": "Impide al objetivo usar el objeto que lleva. Su Entrenador tampoco puede usar objetos con él.",
+    "source": "move_flavor_text"
+  },
+  "374": {
+    "name": "fling",
+    "descriptionEs": "Lanza contra el objetivo el objeto que lleva. La fuerza del ataque y su efecto varían según el objeto.",
+    "source": "move_flavor_text"
+  },
+  "375": {
+    "name": "psycho-shift",
+    "descriptionEs": "Usa su poder mental para transferir al objetivo sus problemas de estado.",
+    "source": "move_flavor_text"
+  },
+  "376": {
+    "name": "trump-card",
+    "descriptionEs": "Cuantos menos PP tenga el movimiento, mayor será la fuerza para atacar.",
+    "source": "move_flavor_text"
+  },
+  "377": {
+    "name": "heal-block",
+    "descriptionEs": "Impide al objetivo usar movimientos, habilidades y objetos equipados que recuperan PS durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "378": {
+    "name": "wring-out",
+    "descriptionEs": "Estruja con fuerza al objetivo. Cuantos más PS tenga el objetivo, más fuerza tendrá el ataque.",
+    "source": "move_flavor_text"
+  },
+  "379": {
+    "name": "power-trick",
+    "descriptionEs": "Usa sus poderes mentales para intercambiar su característica de Ataque por Defensa.",
+    "source": "move_flavor_text"
+  },
+  "380": {
+    "name": "gastro-acid",
+    "descriptionEs": "El usuario arroja sus jugos biliares al objetivo, lo que anula el efecto de la habilidad en uso.",
+    "source": "move_flavor_text"
+  },
+  "381": {
+    "name": "lucky-chant",
+    "descriptionEs": "Lanza al cielo un conjuro que protege a todo su equipo de golpes críticos.",
+    "source": "move_flavor_text"
+  },
+  "382": {
+    "name": "me-first",
+    "descriptionEs": "Se adelanta al movimiento que pretende usar el objetivo y lo lanza antes con más fuerza. Si el usuario es más lento, falla.",
+    "source": "move_flavor_text"
+  },
+  "383": {
+    "name": "copycat",
+    "descriptionEs": "Imita el movimiento usado justo antes. El movimiento falla si no se ha usado aún ninguno.",
+    "source": "move_flavor_text"
+  },
+  "384": {
+    "name": "power-swap",
+    "descriptionEs": "El usuario emplea su poder mental para intercambiar los cambios en Ataque y Ataque Especial con el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "385": {
+    "name": "guard-swap",
+    "descriptionEs": "El usuario emplea su poder mental para intercambiar los cambios en Defensa y Defensa Especial con el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "386": {
+    "name": "punishment",
+    "descriptionEs": "La fuerza del ataque aumenta cuanto más se ha fortalecido el objetivo con cambios de características.",
+    "source": "move_flavor_text"
+  },
+  "387": {
+    "name": "last-resort",
+    "descriptionEs": "Este movimiento solo puede utilizarse tras haber usado al menos una vez todos los demás conocidos por el Pokémon.",
+    "source": "move_flavor_text"
+  },
+  "388": {
+    "name": "worry-seed",
+    "descriptionEs": "Se planta una semilla en el objetivo que le causa pesar. Evita el sueño gracias a la habilidad Insomnio.",
+    "source": "move_flavor_text"
+  },
+  "389": {
+    "name": "sucker-punch",
+    "descriptionEs": "Permite atacar primero. Falla si el objetivo no está preparando ningún ataque.",
+    "source": "move_flavor_text"
+  },
+  "390": {
+    "name": "toxic-spikes",
+    "descriptionEs": "Lanza una trampa de púas tóxicas a los pies del objetivo. El veneno afecta a los Pokémon que entran en combate.",
+    "source": "move_flavor_text"
+  },
+  "391": {
+    "name": "heart-swap",
+    "descriptionEs": "Usa la fuerza mental para intercambiar con el objetivo los cambios en las características.",
+    "source": "move_flavor_text"
+  },
+  "392": {
+    "name": "aqua-ring",
+    "descriptionEs": "Un manto de agua cubre al Pokémon que lo usa. Recupera algunos PS en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "393": {
+    "name": "magnet-rise",
+    "descriptionEs": "Levita gracias a un campo magnético generado por electricidad durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "394": {
+    "name": "flare-blitz",
+    "descriptionEs": "El Pokémon se cubre de llamas y carga contra el objetivo, aunque él también recibe daños. Puede quemar.",
+    "source": "move_flavor_text"
+  },
+  "395": {
+    "name": "force-palm",
+    "descriptionEs": "Ataca al objetivo con una onda de choque y puede llegar a paralizarlo.",
+    "source": "move_flavor_text"
+  },
+  "396": {
+    "name": "aura-sphere",
+    "descriptionEs": "Libera una descarga de la fuerza del aura desde su interior. Es infalible.",
+    "source": "move_flavor_text"
+  },
+  "397": {
+    "name": "rock-polish",
+    "descriptionEs": "Reduce la resistencia puliendo su cuerpo. Aumenta la Velocidad considerablemente.",
+    "source": "move_flavor_text"
+  },
+  "398": {
+    "name": "poison-jab",
+    "descriptionEs": "Pincha al objetivo con un tentáculo o brazo envenenado. Puede llegar a envenenar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "399": {
+    "name": "dark-pulse",
+    "descriptionEs": "Libera una horrible aura llena de malos pensamientos y puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "400": {
+    "name": "night-slash",
+    "descriptionEs": "Ataca al objetivo a la primera oportunidad. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "401": {
+    "name": "aqua-tail",
+    "descriptionEs": "Ataca agitando la cola como si fuera una ola rabiosa en una tormenta devastadora.",
+    "source": "move_flavor_text"
+  },
+  "402": {
+    "name": "seed-bomb",
+    "descriptionEs": "Lanza al objetivo una descarga de semillas explosivas desde arriba.",
+    "source": "move_flavor_text"
+  },
+  "403": {
+    "name": "air-slash",
+    "descriptionEs": "Ataca con una hoja de aire que incluso corta el cielo. También puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "404": {
+    "name": "x-scissor",
+    "descriptionEs": "Cruza las guadañas o las garras para atacar al objetivo como si fueran unas tijeras.",
+    "source": "move_flavor_text"
+  },
+  "405": {
+    "name": "bug-buzz",
+    "descriptionEs": "El usuario crea una onda sónica dañina moviendo su cuerpo que también puede disminuir la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "406": {
+    "name": "dragon-pulse",
+    "descriptionEs": "Abre mucho la boca y libera una onda de choque que ataca al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "407": {
+    "name": "dragon-rush",
+    "descriptionEs": "Ataca de forma brutal mientras intimida al objetivo. También puede hacerlo retroceder.",
+    "source": "move_flavor_text"
+  },
+  "408": {
+    "name": "power-gem",
+    "descriptionEs": "Ataca con un rayo de luz que centellea como si lo formaran miles de joyas.",
+    "source": "move_flavor_text"
+  },
+  "409": {
+    "name": "drain-punch",
+    "descriptionEs": "Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "410": {
+    "name": "vacuum-wave",
+    "descriptionEs": "Gira los puños y libera una onda de vacío contra el objetivo. Este movimiento siempre va primero.",
+    "source": "move_flavor_text"
+  },
+  "411": {
+    "name": "focus-blast",
+    "descriptionEs": "Agudiza la concentración mental y libera su poder. Puede disminuir la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "412": {
+    "name": "energy-ball",
+    "descriptionEs": "Aúna fuerzas de la naturaleza y libera su ataque. Puede disminuir la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "413": {
+    "name": "brave-bird",
+    "descriptionEs": "Pliega sus alas y ataca con un vuelo rasante. El Pokémon que lo usa también resulta seriamente dañado.",
+    "source": "move_flavor_text"
+  },
+  "414": {
+    "name": "earth-power",
+    "descriptionEs": "La tierra a los pies del objetivo erupciona violentamente. Puede disminuir la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "415": {
+    "name": "switcheroo",
+    "descriptionEs": "Intercambia con el objetivo los objetos que llevan tan rápido que es imposible verlo a simple vista.",
+    "source": "move_flavor_text"
+  },
+  "416": {
+    "name": "giga-impact",
+    "descriptionEs": "Carga contra el objetivo usando toda la fuerza que tiene. El Pokémon descansa el turno siguiente.",
+    "source": "move_flavor_text"
+  },
+  "417": {
+    "name": "nasty-plot",
+    "descriptionEs": "Estimula su cerebro pensando en cosas malas. Aumenta considerablemente el Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "418": {
+    "name": "bullet-punch",
+    "descriptionEs": "Ataca con fuertes puñetazos tan rápidos como proyectiles. Este movimiento siempre va primero.",
+    "source": "move_flavor_text"
+  },
+  "419": {
+    "name": "avalanche",
+    "descriptionEs": "Este ataque inflige el doble de daño a un objetivo que haya golpeado al usuario en ese mismo turno.",
+    "source": "move_flavor_text"
+  },
+  "420": {
+    "name": "ice-shard",
+    "descriptionEs": "Crea bolas de hielo y las lanza a gran velocidad. Este movimiento siempre va primero.",
+    "source": "move_flavor_text"
+  },
+  "421": {
+    "name": "shadow-claw",
+    "descriptionEs": "Ataca con una garra afilada hecha de sombras. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "422": {
+    "name": "thunder-fang",
+    "descriptionEs": "Usa colmillos electrificados para morder. Puede hacer que el objetivo retroceda o se paralice.",
+    "source": "move_flavor_text"
+  },
+  "423": {
+    "name": "ice-fang",
+    "descriptionEs": "Usa colmillos helados para morder. Puede hacer que el objetivo retroceda o se congele.",
+    "source": "move_flavor_text"
+  },
+  "424": {
+    "name": "fire-fang",
+    "descriptionEs": "Usa colmillos en llamas para morder. Puede hacer que el objetivo retroceda o reciba quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "425": {
+    "name": "shadow-sneak",
+    "descriptionEs": "Extiende su sombra y ataca al objetivo por la espalda. Este movimiento siempre va primero.",
+    "source": "move_flavor_text"
+  },
+  "426": {
+    "name": "mud-bomb",
+    "descriptionEs": "Ataca lanzando una compacta bola de fango. Puede bajar la Precisión del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "427": {
+    "name": "psycho-cut",
+    "descriptionEs": "Ataca al objetivo con cuchillas formadas por energía psíquica. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "428": {
+    "name": "zen-headbutt",
+    "descriptionEs": "Concentra su energía psíquica en la cabeza para golpear. Puede hacer que el objetivo retroceda.",
+    "source": "move_flavor_text"
+  },
+  "429": {
+    "name": "mirror-shot",
+    "descriptionEs": "El usuario libera un haz de energía desde su pulido cuerpo. Puede bajar la Precisión.",
+    "source": "move_flavor_text"
+  },
+  "430": {
+    "name": "flash-cannon",
+    "descriptionEs": "El usuario concentra toda la luz del cuerpo y la libera. Puede bajar la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "431": {
+    "name": "rock-climb",
+    "descriptionEs": "Ataca con una gran embestida. Puede confundir al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "432": {
+    "name": "defog",
+    "descriptionEs": "Potente viento que barre el Reflejo o Pantalla de Luz del objetivo y puede reducir su Evasión.",
+    "source": "move_flavor_text"
+  },
+  "433": {
+    "name": "trick-room",
+    "descriptionEs": "Se crea un espacio extraño en el que los Pokémon lentos se mueven primero durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "434": {
+    "name": "draco-meteor",
+    "descriptionEs": "Hace que grandes cometas caigan del cielo sobre el objetivo. Baja mucho el Ataque Especial del que lo usa.",
+    "source": "move_flavor_text"
+  },
+  "435": {
+    "name": "discharge",
+    "descriptionEs": "Una deslumbradora onda eléctrica afecta a los Pokémon que hay combatiendo alrededor. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "436": {
+    "name": "lava-plume",
+    "descriptionEs": "Un infierno de llamas daña a los Pokémon adyacentes en combate. Puede quemar.",
+    "source": "move_flavor_text"
+  },
+  "437": {
+    "name": "leaf-storm",
+    "descriptionEs": "Cae una lluvia de hojas afiladas. Baja mucho el Ataque Especial de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "438": {
+    "name": "power-whip",
+    "descriptionEs": "El usuario agita violentamente sus lianas o tentáculos para golpear al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "439": {
+    "name": "rock-wrecker",
+    "descriptionEs": "Lanza una piedra enorme contra el objetivo, pero tiene que descansar el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "440": {
+    "name": "cross-poison",
+    "descriptionEs": "Tajo que puede envenenar al objetivo. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "441": {
+    "name": "gunk-shot",
+    "descriptionEs": "Lanza contra el objetivo basura asquerosa. Puede envenenar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "442": {
+    "name": "iron-head",
+    "descriptionEs": "Ataca con su dura cabeza de hierro. Puede hacer que el objetivo retroceda.",
+    "source": "move_flavor_text"
+  },
+  "443": {
+    "name": "magnet-bomb",
+    "descriptionEs": "Lanza unas bombas de hierro que se pegan al adversario. No se puede esquivar.",
+    "source": "move_flavor_text"
+  },
+  "444": {
+    "name": "stone-edge",
+    "descriptionEs": "Clava piedras muy afiladas al objetivo. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "445": {
+    "name": "captivate",
+    "descriptionEs": "Si el objetivo es del sexo opuesto, queda embelesado y baja mucho su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "446": {
+    "name": "stealth-rock",
+    "descriptionEs": "Una trampa de rocas que flota en el aire y daña a los objetivos que entran en combate.",
+    "source": "move_flavor_text"
+  },
+  "447": {
+    "name": "grass-knot",
+    "descriptionEs": "Enreda al objetivo con hierba y lo derriba. Cuanto más pesado es el objetivo, más daño inflige.",
+    "source": "move_flavor_text"
+  },
+  "448": {
+    "name": "chatter",
+    "descriptionEs": "Ataca con una onda de sonido muy ruidosa compuesta  por palabras y confunde al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "449": {
+    "name": "judgment",
+    "descriptionEs": "Emite incontables haces de luz. Varía según el tipo de tabla que lleve el usuario.",
+    "source": "move_flavor_text"
+  },
+  "450": {
+    "name": "bug-bite",
+    "descriptionEs": "Pica al objetivo. Si el objetivo lleva una baya, el usuario se la come y se beneficia de su efecto.",
+    "source": "move_flavor_text"
+  },
+  "451": {
+    "name": "charge-beam",
+    "descriptionEs": "Lanza un rayo eléctrico contra el objetivo. Puede subir el Ataque Especial de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "452": {
+    "name": "wood-hammer",
+    "descriptionEs": "Arremete contra el objetivo con su robusto cuerpo. El agresor también sufre bastante daño.",
+    "source": "move_flavor_text"
+  },
+  "453": {
+    "name": "aqua-jet",
+    "descriptionEs": "Ataque rápido que permite golpear en primer lugar.",
+    "source": "move_flavor_text"
+  },
+  "454": {
+    "name": "attack-order",
+    "descriptionEs": "El usuario llama a sus súbditos para que ataquen al objetivo. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "455": {
+    "name": "defend-order",
+    "descriptionEs": "El usuario llama a sus súbditos para que formen un escudo viviente. Sube la Defensa y la Defensa Especial.",
+    "source": "move_flavor_text"
+  },
+  "456": {
+    "name": "heal-order",
+    "descriptionEs": "El usuario llama a sus súbditos para que lo curen. Recupera hasta la mitad de los PS máximos.",
+    "source": "move_flavor_text"
+  },
+  "457": {
+    "name": "head-smash",
+    "descriptionEs": "El usuario arriesga su vida y lanza un cabezazo con toda su fuerza. El agresor resulta seriamente dañado.",
+    "source": "move_flavor_text"
+  },
+  "458": {
+    "name": "double-hit",
+    "descriptionEs": "Golpea al objetivo dos veces seguidas con la cola u otras partes de su cuerpo.",
+    "source": "move_flavor_text"
+  },
+  "459": {
+    "name": "roar-of-time",
+    "descriptionEs": "Ataca al objetivo usando tal energía que el tiempo se distorsiona. El usuario descansa el siguiente turno.",
+    "source": "move_flavor_text"
+  },
+  "460": {
+    "name": "spacial-rend",
+    "descriptionEs": "Desgarra al objetivo y el espacio a su alrededor. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "461": {
+    "name": "lunar-dance",
+    "descriptionEs": "El usuario se debilita, pero el Pokémon que lo sustituye recupera su estado, los PS y los PP.",
+    "source": "move_flavor_text"
+  },
+  "462": {
+    "name": "crush-grip",
+    "descriptionEs": "Estruja al objetivo con gran fuerza. Cuantos más PS le queden al objetivo, más fuerte será el ataque.",
+    "source": "move_flavor_text"
+  },
+  "463": {
+    "name": "magma-storm",
+    "descriptionEs": "El objetivo queda atrapado en una tormenta de fuego que dura de cuatro a cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "464": {
+    "name": "dark-void",
+    "descriptionEs": "El objetivo es enviado a un mundo de tinieblas que lo hace dormir.",
+    "source": "move_flavor_text"
+  },
+  "465": {
+    "name": "seed-flare",
+    "descriptionEs": "Una onda de choque se libera del cuerpo. Puede bajar mucho la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "466": {
+    "name": "ominous-wind",
+    "descriptionEs": "Produce un viento horripilante. Puede subir de golpe todas las características del usuario.",
+    "source": "move_flavor_text"
+  },
+  "467": {
+    "name": "shadow-force",
+    "descriptionEs": "En el primer turno, desaparece. En el segundo, golpea al objetivo aunque se esté protegiendo.",
+    "source": "move_flavor_text"
+  },
+  "468": {
+    "name": "hone-claws",
+    "descriptionEs": "El usuario se afila las garras para aumentar su Ataque y Precisión.",
+    "source": "move_flavor_text"
+  },
+  "469": {
+    "name": "wide-guard",
+    "descriptionEs": "Bloquea los ataques de objetivo múltiple lanzados contra tu equipo durante un turno.",
+    "source": "move_flavor_text"
+  },
+  "470": {
+    "name": "guard-split",
+    "descriptionEs": "El usuario emplea sus poderes para hacer la media de su Defensa y Defensa Especial con las de su objetivo y compartirlas.",
+    "source": "move_flavor_text"
+  },
+  "471": {
+    "name": "power-split",
+    "descriptionEs": "El usuario emplea sus poderes para hacer la media de su Ataque y Ataque Especial con los de su objetivo y compartirlos.",
+    "source": "move_flavor_text"
+  },
+  "472": {
+    "name": "wonder-room",
+    "descriptionEs": "Crea una zona misteriosa donde se intercambian la Defensa y la Defensa Especial de todos los Pokémon durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "473": {
+    "name": "psyshock",
+    "descriptionEs": "Crea una onda psíquica que causa daño físico al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "474": {
+    "name": "venoshock",
+    "descriptionEs": "Ataca cubriendo al objetivo con un líquido venenoso. El daño será doble si este ya está envenenado.",
+    "source": "move_flavor_text"
+  },
+  "475": {
+    "name": "autotomize",
+    "descriptionEs": "El usuario se sacude para hacerse más ligero y aumentar mucho su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "476": {
+    "name": "rage-powder",
+    "descriptionEs": "Usa un polvo que irrita y centra en el usuario la atención y los ataques de los rivales.",
+    "source": "move_flavor_text"
+  },
+  "477": {
+    "name": "telekinesis",
+    "descriptionEs": "El usuario emplea su poder mental para hacer flotar al objetivo, y lo convierte en un blanco fácil durante tres turnos.",
+    "source": "move_flavor_text"
+  },
+  "478": {
+    "name": "magic-room",
+    "descriptionEs": "Crea un espacio misterioso que inutiliza todos los objetos de los Pokémon durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "479": {
+    "name": "smack-down",
+    "descriptionEs": "El usuario ataca lanzando una piedra o un proyectil. Puede estrellar contra el suelo al objetivo si vuela.",
+    "source": "move_flavor_text"
+  },
+  "480": {
+    "name": "storm-throw",
+    "descriptionEs": "Lanza un golpe fulminante. Siempre resulta en un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "481": {
+    "name": "flame-burst",
+    "descriptionEs": "Golpea al objetivo con una llamarada que afecta también a los Pokémon adyacentes.",
+    "source": "move_flavor_text"
+  },
+  "482": {
+    "name": "sludge-wave",
+    "descriptionEs": "Una onda tóxica que daña a los Pokémon de alrededor. Puede envenenar.",
+    "source": "move_flavor_text"
+  },
+  "483": {
+    "name": "quiver-dance",
+    "descriptionEs": "Danza mística que sube el Ataque Especial, la Defensa Especial y la Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "484": {
+    "name": "heavy-slam",
+    "descriptionEs": "El usuario golpea con todo su cuerpo. Cuanto mayor sea su peso comparado con el del objetivo, más daño causará.",
+    "source": "move_flavor_text"
+  },
+  "485": {
+    "name": "synchronoise",
+    "descriptionEs": "Una extraña onda que daña a todos los Pokémon adyacentes del mismo tipo que el que la ejecuta.",
+    "source": "move_flavor_text"
+  },
+  "486": {
+    "name": "electro-ball",
+    "descriptionEs": "Lanza una bola eléctrica. Cuanto mayor sea la Velocidad del usuario en comparación con la del objetivo, mayor será el daño causado.",
+    "source": "move_flavor_text"
+  },
+  "487": {
+    "name": "soak",
+    "descriptionEs": "Potente lluvia que transforma al objetivo en un Pokémon de tipo Agua.",
+    "source": "move_flavor_text"
+  },
+  "488": {
+    "name": "flame-charge",
+    "descriptionEs": "Llamas que golpean al objetivo y aumentan la Velocidad del atacante.",
+    "source": "move_flavor_text"
+  },
+  "489": {
+    "name": "coil",
+    "descriptionEs": "El usuario se concentra, lo que le permite aumentar su Ataque, Defensa y Precisión.",
+    "source": "move_flavor_text"
+  },
+  "490": {
+    "name": "low-sweep",
+    "descriptionEs": "Ataque rápido dirigido a los pies del objetivo que le hace perder Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "491": {
+    "name": "acid-spray",
+    "descriptionEs": "Ataca con un líquido corrosivo, reduciendo mucho la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "492": {
+    "name": "foul-play",
+    "descriptionEs": "El usuario emplea la fuerza del objetivo para atacarlo. Cuanto mayor es el Ataque del objetivo, más daño provoca.",
+    "source": "move_flavor_text"
+  },
+  "493": {
+    "name": "simple-beam",
+    "descriptionEs": "Lanza una onda psíquica que hace que la habilidad del objetivo pase a ser Simple.",
+    "source": "move_flavor_text"
+  },
+  "494": {
+    "name": "entrainment",
+    "descriptionEs": "Una extraña danza que hace que el usuario y el objetivo tengan la misma habilidad.",
+    "source": "move_flavor_text"
+  },
+  "495": {
+    "name": "after-you",
+    "descriptionEs": "Si el usuario es el más rápido, permite al objetivo usar un movimiento justo tras él, adelantándose a Pokémon más rápidos.",
+    "source": "move_flavor_text"
+  },
+  "496": {
+    "name": "round",
+    "descriptionEs": "Un canto que ataca al objetivo. Cuantos más Pokémon lo usan, más aumenta de potencia.",
+    "source": "move_flavor_text"
+  },
+  "497": {
+    "name": "echoed-voice",
+    "descriptionEs": "Un susurro que aumenta de potencia conforme el usuario y otros Pokémon lo van utilizando.",
+    "source": "move_flavor_text"
+  },
+  "498": {
+    "name": "chip-away",
+    "descriptionEs": "Un ataque que busca los puntos débiles del objetivo y puede causarle daño aunque cambien sus características.",
+    "source": "move_flavor_text"
+  },
+  "499": {
+    "name": "clear-smog",
+    "descriptionEs": "Ataca al objetivo con una extraña niebla que elimina sus cambios de características.",
+    "source": "move_flavor_text"
+  },
+  "500": {
+    "name": "stored-power",
+    "descriptionEs": "Acumula poder para golpear. Cuanto más suban las características del usuario, mayor será el daño.",
+    "source": "move_flavor_text"
+  },
+  "501": {
+    "name": "quick-guard",
+    "descriptionEs": "Protege a todo el equipo de los movimientos que se adelantan y atacan primero.",
+    "source": "move_flavor_text"
+  },
+  "502": {
+    "name": "ally-switch",
+    "descriptionEs": "Extraño poder que intercambia la posición del usuario con la de un aliado sobre el terreno de combate.",
+    "source": "move_flavor_text"
+  },
+  "503": {
+    "name": "scald",
+    "descriptionEs": "Ataca arrojando agua hirviendo al objetivo. Puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "504": {
+    "name": "shell-smash",
+    "descriptionEs": "El usuario rompe su coraza y baja su Defensa y Defensa Especial, pero aumenta mucho su Ataque, Ataque Especial y Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "505": {
+    "name": "heal-pulse",
+    "descriptionEs": "Una onda curativa restaura los PS del objetivo a la mitad de su máximo.",
+    "source": "move_flavor_text"
+  },
+  "506": {
+    "name": "hex",
+    "descriptionEs": "Ataque que causa un gran daño a los objetivos que sufren problemas de estado.",
+    "source": "move_flavor_text"
+  },
+  "507": {
+    "name": "sky-drop",
+    "descriptionEs": "Primer turno: lanza al objetivo al aire. Segundo turno: lo hace caer. Mientras está en el aire, no lo deja moverse.",
+    "source": "move_flavor_text"
+  },
+  "508": {
+    "name": "shift-gear",
+    "descriptionEs": "Al hacer girar los engranajes, el usuario mejora su Ataque y aumenta su Velocidad espectacularmente.",
+    "source": "move_flavor_text"
+  },
+  "509": {
+    "name": "circle-throw",
+    "descriptionEs": "Lanza por los aires al objetivo y hace que salga otro Pokémon. Si es uno salvaje, acaba el combate.",
+    "source": "move_flavor_text"
+  },
+  "510": {
+    "name": "incinerate",
+    "descriptionEs": "Llamas que golpean a los objetivos adyacentes. Si estos llevan bayas u otros objetos, estos se quemarán y ya no se podrán usar.",
+    "source": "move_flavor_text"
+  },
+  "511": {
+    "name": "quash",
+    "descriptionEs": "Consigue que el objetivo sea el último en moverse.",
+    "source": "move_flavor_text"
+  },
+  "512": {
+    "name": "acrobatics",
+    "descriptionEs": "Golpea ágilmente. Si el usuario no porta ningún objeto, el objetivo resulta seriamente dañado.",
+    "source": "move_flavor_text"
+  },
+  "513": {
+    "name": "reflect-type",
+    "descriptionEs": "Cambia el tipo del Pokémon al mismo tipo que el del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "514": {
+    "name": "retaliate",
+    "descriptionEs": "Venga a los amigos derrotados. Si en el turno anterior han derrotado a uno, la potencia del ataque aumentará.",
+    "source": "move_flavor_text"
+  },
+  "515": {
+    "name": "final-gambit",
+    "descriptionEs": "El usuario se sacrifica causándole un daño al objetivo equivalente a sus propios PS perdidos.",
+    "source": "move_flavor_text"
+  },
+  "516": {
+    "name": "bestow",
+    "descriptionEs": "Entrega el objeto que lleva al objetivo en caso de que este no tenga ninguno.",
+    "source": "move_flavor_text"
+  },
+  "517": {
+    "name": "inferno",
+    "descriptionEs": "Ataca con una gran ráfaga de fuego que causa quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "518": {
+    "name": "water-pledge",
+    "descriptionEs": "Ataca con columnas de agua. Combinado con Voto Fuego, crea un arcoíris y aumenta su potencia.",
+    "source": "move_flavor_text"
+  },
+  "519": {
+    "name": "fire-pledge",
+    "descriptionEs": "Ataca con columnas de fuego. Combinado con Voto Planta, crea un mar de llamas y aumenta su potencia.",
+    "source": "move_flavor_text"
+  },
+  "520": {
+    "name": "grass-pledge",
+    "descriptionEs": "Ataca con columnas de hojas. Combinado con Voto Agua, crea un pantano y aumenta su potencia.",
+    "source": "move_flavor_text"
+  },
+  "521": {
+    "name": "volt-switch",
+    "descriptionEs": "Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.",
+    "source": "move_flavor_text"
+  },
+  "522": {
+    "name": "struggle-bug",
+    "descriptionEs": "El usuario opone resistencia y ataca a los oponentes. También reduce su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "523": {
+    "name": "bulldoze",
+    "descriptionEs": "Sacudida sísmica que afecta a los demás Pokémon adyacentes y también reduce su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "524": {
+    "name": "frost-breath",
+    "descriptionEs": "Quien lo usa ataca lanzando un aliento gélido. Siempre resulta en un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "525": {
+    "name": "dragon-tail",
+    "descriptionEs": "Ataca al objetivo y lo obliga a cambiarse por otro Pokémon. Si es uno salvaje, acaba el combate.",
+    "source": "move_flavor_text"
+  },
+  "526": {
+    "name": "work-up",
+    "descriptionEs": "Quien lo usa se concentra y potencia su Ataque y su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "527": {
+    "name": "electroweb",
+    "descriptionEs": "Atrapa y ataca a los objetivos con una telaraña eléctrica. También reduce su Velocidad.",
+    "source": "move_flavor_text"
+  },
+  "528": {
+    "name": "wild-charge",
+    "descriptionEs": "Carga eléctrica muy potente que también hiere ligeramente a quien la usa.",
+    "source": "move_flavor_text"
+  },
+  "529": {
+    "name": "drill-run",
+    "descriptionEs": "El usuario golpea usando su cuerpo como un taladro. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "530": {
+    "name": "dual-chop",
+    "descriptionEs": "Golpea dos veces seguidas con la cola u otras partes de su cuerpo.",
+    "source": "move_flavor_text"
+  },
+  "531": {
+    "name": "heart-stamp",
+    "descriptionEs": "Grácil gesto que asesta un golpe tremendo al objetivo y puede hacerlo retroceder.",
+    "source": "move_flavor_text"
+  },
+  "532": {
+    "name": "horn-leech",
+    "descriptionEs": "Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "533": {
+    "name": "sacred-sword",
+    "descriptionEs": "El usuario ataca con una espada, ignorando cualquier cambio en las características del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "534": {
+    "name": "razor-shell",
+    "descriptionEs": "Una afilada vieira ataca al objetivo. También puede hacer disminuir su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "535": {
+    "name": "heat-crash",
+    "descriptionEs": "El usuario ataca con su cuerpo ardiente. Cuanto mayor sea su peso comparado con el del objetivo, más daño causará.",
+    "source": "move_flavor_text"
+  },
+  "536": {
+    "name": "leaf-tornado",
+    "descriptionEs": "Tritura con afiladas hojas y puede bajar la Precisión del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "537": {
+    "name": "steamroller",
+    "descriptionEs": "El usuario se hace una bola y arrolla al objetivo con su cuerpo. Puede hacerlo retroceder.",
+    "source": "move_flavor_text"
+  },
+  "538": {
+    "name": "cotton-guard",
+    "descriptionEs": "Cubre al Pokémon con una madeja protectora. Aumenta muchísimo la Defensa.",
+    "source": "move_flavor_text"
+  },
+  "539": {
+    "name": "night-daze",
+    "descriptionEs": "Ataca al objetivo con una onda siniestra. Puede bajar su Precisión.",
+    "source": "move_flavor_text"
+  },
+  "540": {
+    "name": "psystrike",
+    "descriptionEs": "Crea una onda psíquica que causa daño físico al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "541": {
+    "name": "tail-slap",
+    "descriptionEs": "Golpea con la cola u otras partes de su cuerpo de dos a cinco veces seguidas.",
+    "source": "move_flavor_text"
+  },
+  "542": {
+    "name": "hurricane",
+    "descriptionEs": "Golpea al objetivo con un fuerte torbellino que envuelve al rival y puede confundirlo.",
+    "source": "move_flavor_text"
+  },
+  "543": {
+    "name": "head-charge",
+    "descriptionEs": "Propina un tremendo cabezazo. También daña al usuario un poco.",
+    "source": "move_flavor_text"
+  },
+  "544": {
+    "name": "gear-grind",
+    "descriptionEs": "Rota dos engranajes de hierro sobre el objetivo. Golpea dos veces.",
+    "source": "move_flavor_text"
+  },
+  "545": {
+    "name": "searing-shot",
+    "descriptionEs": "Un infierno de llamas daña a los Pokémon adyacentes en combate. Puede quemar.",
+    "source": "move_flavor_text"
+  },
+  "546": {
+    "name": "techno-blast",
+    "descriptionEs": "Ataca al objetivo con un gran láser. El tipo del ataque lo determina el cartucho que porta el usuario.",
+    "source": "move_flavor_text"
+  },
+  "547": {
+    "name": "relic-song",
+    "descriptionEs": "Ataca conmoviendo a los rivales de alrededor con un antiguo canto. Puede dormirlos.",
+    "source": "move_flavor_text"
+  },
+  "548": {
+    "name": "secret-sword",
+    "descriptionEs": "Ensarta al objetivo con un sable, hiriéndolo con su místico poder. Produce daño físico.",
+    "source": "move_flavor_text"
+  },
+  "549": {
+    "name": "glaciate",
+    "descriptionEs": "Ataque con aire helado que baja la Velocidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "550": {
+    "name": "bolt-strike",
+    "descriptionEs": "Ataca envolviéndose de una gran carga eléctrica y embistiendo al objetivo con ella. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "551": {
+    "name": "blue-flare",
+    "descriptionEs": "Ataca con una bella pero potente llama azul que rodea al objetivo. Puede quemarlo.",
+    "source": "move_flavor_text"
+  },
+  "552": {
+    "name": "fiery-dance",
+    "descriptionEs": "Envuelve en llamas y daña al objetivo. Puede aumentar el Ataque Especial de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "553": {
+    "name": "freeze-shock",
+    "descriptionEs": "El usuario carga un bloque de hielo con electricidad en el primer turno y ataca con él en el segundo. Puede paralizar.",
+    "source": "move_flavor_text"
+  },
+  "554": {
+    "name": "ice-burn",
+    "descriptionEs": "Ataca al objetivo en el segundo turno rodeándolo de un aire gélido. Puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "555": {
+    "name": "snarl",
+    "descriptionEs": "Ataca con un chillido desagradable que baja el Ataque Especial del rival.",
+    "source": "move_flavor_text"
+  },
+  "556": {
+    "name": "icicle-crash",
+    "descriptionEs": "Lanza grandes carámbanos. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "557": {
+    "name": "v-create",
+    "descriptionEs": "Golpea con una V de llamas al objetivo. Baja la Defensa, la Defensa Especial y la Velocidad de quien lo usa.",
+    "source": "move_flavor_text"
+  },
+  "558": {
+    "name": "fusion-flare",
+    "descriptionEs": "Ataca con una llamarada gigantesca. Aumenta su potencia si es influenciada por una gran energía eléctrica.",
+    "source": "move_flavor_text"
+  },
+  "559": {
+    "name": "fusion-bolt",
+    "descriptionEs": "Ataca con una enorme descarga eléctrica. Aumenta su potencia si es influenciada por una gigantesca llamarada.",
+    "source": "move_flavor_text"
+  },
+  "560": {
+    "name": "flying-press",
+    "descriptionEs": "El Pokémon que lo usa se lanza sobre su oponente. Este movimiento es de tipo Lucha y tipo Volador al mismo tiempo.",
+    "source": "move_flavor_text"
+  },
+  "561": {
+    "name": "mat-block",
+    "descriptionEs": "El usuario usa un tatami para escudarse de los movimientos enemigos. Protege también a los aliados. No funciona contra ataques de estado.",
+    "source": "move_flavor_text"
+  },
+  "562": {
+    "name": "belch",
+    "descriptionEs": "El Pokémon causa daño a su oponente lanzándole un eructo. Para poder utilizar este movimiento tiene que llevar una baya y comérsela.",
+    "source": "move_flavor_text"
+  },
+  "563": {
+    "name": "rototiller",
+    "descriptionEs": "Labra la tierra haciendo que sea más fácil cultivarla y consigue que aumente el Ataque y el Ataque Especial de los Pokémon de tipo Planta.",
+    "source": "move_flavor_text"
+  },
+  "564": {
+    "name": "sticky-web",
+    "descriptionEs": "Coloca una red pegajosa alrededor del equipo rival, haciendo que baje la Velocidad de cualquier Pokémon adversario que entre al combate.",
+    "source": "move_flavor_text"
+  },
+  "565": {
+    "name": "fell-stinger",
+    "descriptionEs": "Al derrotar al objetivo utilizando este movimiento, aumenta mucho el Ataque del usuario.",
+    "source": "move_flavor_text"
+  },
+  "566": {
+    "name": "phantom-force",
+    "descriptionEs": "El usuario desaparece en el primer turno y ataca a su objetivo en el segundo. Permite acertar aunque el objetivo esté protegiéndose.",
+    "source": "move_flavor_text"
+  },
+  "567": {
+    "name": "trick-or-treat",
+    "descriptionEs": "Invita al objetivo a celebrar Halloween, haciendo que pase a ser también de tipo Fantasma además de conservar sus propios tipos.",
+    "source": "move_flavor_text"
+  },
+  "568": {
+    "name": "noble-roar",
+    "descriptionEs": "Intimida a su oponente con un rugido de guerra, haciendo que disminuyan tanto su Ataque como su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "569": {
+    "name": "ion-deluge",
+    "descriptionEs": "El Pokémon disemina partículas con carga eléctrica que convierten los movimientos de tipo Normal en tipo Eléctrico.",
+    "source": "move_flavor_text"
+  },
+  "570": {
+    "name": "parabolic-charge",
+    "descriptionEs": "Inflige daño a todos los Pokémon a su alrededor. El usuario absorbe la mitad del daño producido para restaurar sus propios PS.",
+    "source": "move_flavor_text"
+  },
+  "571": {
+    "name": "forests-curse",
+    "descriptionEs": "El objetivo es presa de la maldición del bosque, por lo que pasa a ser un Pokémon de tipo Planta, además de conservar sus tipos habituales.",
+    "source": "move_flavor_text"
+  },
+  "572": {
+    "name": "petal-blizzard",
+    "descriptionEs": "El usuario desata un intenso vendaval de pétalos que daña a los Pokémon a su alrededor.",
+    "source": "move_flavor_text"
+  },
+  "573": {
+    "name": "freeze-dry",
+    "descriptionEs": "Enfría súbitamente al objetivo e incluso puede congelarlo. Es supereficaz contra Pokémon de tipo Agua.",
+    "source": "move_flavor_text"
+  },
+  "574": {
+    "name": "disarming-voice",
+    "descriptionEs": "Obnubila a los oponentes con su fascinante voz y les provoca daños emocionales. Siempre acierta al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "575": {
+    "name": "parting-shot",
+    "descriptionEs": "El usuario se cambia por otro Pokémon de su equipo, pero antes amedrenta a su oponente y hace que disminuyan su Ataque y Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "576": {
+    "name": "topsy-turvy",
+    "descriptionEs": "Invierte por completo los cambios en las características del Pokémon objetivo.",
+    "source": "move_flavor_text"
+  },
+  "577": {
+    "name": "draining-kiss",
+    "descriptionEs": "Absorbe PS del objetivo con un beso y restaura su propia energía en una cantidad igual o superior a la mitad del daño infligido.",
+    "source": "move_flavor_text"
+  },
+  "578": {
+    "name": "crafty-shield",
+    "descriptionEs": "Usa unos misteriosos poderes para protegerse a sí mismo y a sus aliados de ataques de estado, pero no de otro tipo de ataques.",
+    "source": "move_flavor_text"
+  },
+  "579": {
+    "name": "flower-shield",
+    "descriptionEs": "Aumenta la Defensa de todos los Pokémon de tipo Planta que hay en el combate usando unos misteriosos poderes.",
+    "source": "move_flavor_text"
+  },
+  "580": {
+    "name": "grassy-terrain",
+    "descriptionEs": "Convierte el terreno de combate en un campo de hierba durante cinco turnos. Los Pokémon que estén en el suelo recuperan PS en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "581": {
+    "name": "misty-terrain",
+    "descriptionEs": "Cubre de niebla el terreno de combate durante cinco turnos. Los Pokémon que estén en el suelo no se ven afectados por cambios de estado.",
+    "source": "move_flavor_text"
+  },
+  "582": {
+    "name": "electrify",
+    "descriptionEs": "Si el Pokémon objetivo queda electrificado antes de usar un movimiento, este será de tipo Eléctrico.",
+    "source": "move_flavor_text"
+  },
+  "583": {
+    "name": "play-rough",
+    "descriptionEs": "El Pokémon que lo usa le hace cucamonas al objetivo y lo ataca. Puede disminuir el Ataque del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "584": {
+    "name": "fairy-wind",
+    "descriptionEs": "El Pokémon que lo usa desata un vendaval feérico que arremete contra el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "585": {
+    "name": "moonblast",
+    "descriptionEs": "Invoca el poder de la luna para atacar al objetivo. Puede disminuir el Ataque Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "586": {
+    "name": "boomburst",
+    "descriptionEs": "Ataca a todos los Pokémon a su alrededor con una potentísima onda sonora.",
+    "source": "move_flavor_text"
+  },
+  "587": {
+    "name": "fairy-lock",
+    "descriptionEs": "Consigue que ningún Pokémon pueda huir en el siguiente turno echando un cerrojo.",
+    "source": "move_flavor_text"
+  },
+  "588": {
+    "name": "kings-shield",
+    "descriptionEs": "Asume una estrategia defensiva a la par que se protege de cualquier daño. Disminuye mucho el Ataque de cualquier Pokémon que lo toque.",
+    "source": "move_flavor_text"
+  },
+  "589": {
+    "name": "play-nice",
+    "descriptionEs": "Se hace amigo de su oponente y consigue que a este se le quiten las ganas de combatir. Además, reduce su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "590": {
+    "name": "confide",
+    "descriptionEs": "Hace que el objetivo pierda la concentración contándole un secreto. Disminuye el Ataque Especial del oponente.",
+    "source": "move_flavor_text"
+  },
+  "591": {
+    "name": "diamond-storm",
+    "descriptionEs": "Desata un devastador vendaval de diamantes para dañar a los oponentes. Puede aumentar la Defensa del usuario.",
+    "source": "move_flavor_text"
+  },
+  "592": {
+    "name": "steam-eruption",
+    "descriptionEs": "Envuelve al Pokémon oponente con vapor extremadamente caliente que puede llegar a quemarlo.",
+    "source": "move_flavor_text"
+  },
+  "593": {
+    "name": "hyperspace-hole",
+    "descriptionEs": "El usuario aparece junto a su objetivo usando un agujero interdimensional y le asesta un golpe que no puede esquivarse con Protección ni Detección.",
+    "source": "move_flavor_text"
+  },
+  "594": {
+    "name": "water-shuriken",
+    "descriptionEs": "Golpea al oponente de 2 a 5 veces con estrellas arrojadizas hechas de mucosidad. El que lo usa siempre ataca primero.",
+    "source": "move_flavor_text"
+  },
+  "595": {
+    "name": "mystical-fire",
+    "descriptionEs": "Lanza por su boca una singular llama a gran temperatura con la que ataca a su oponente y baja su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "596": {
+    "name": "spiky-shield",
+    "descriptionEs": "Protege al usuario de ataques, e inflige daño a quien se los lance si entra en contacto con él.",
+    "source": "move_flavor_text"
+  },
+  "597": {
+    "name": "aromatic-mist",
+    "descriptionEs": "Consigue aumentar la Defensa Especial de un Pokémon de su equipo con una fragancia misteriosa.",
+    "source": "move_flavor_text"
+  },
+  "598": {
+    "name": "eerie-impulse",
+    "descriptionEs": "Su cuerpo irradia unas raras ondas que, al alcanzar a un oponente, hacen que disminuya mucho su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "599": {
+    "name": "venom-drench",
+    "descriptionEs": "Impregna a su objetivo con un líquido venenoso que disminuye el Ataque, el At. Esp. y la Velocidad. Solo afecta a Pokémon ya envenenados.",
+    "source": "move_flavor_text"
+  },
+  "600": {
+    "name": "powder",
+    "descriptionEs": "Esparce un polvo sobre el Pokémon objetivo. Si este usa un movimiento de tipo Fuego en el mismo turno, el polvo explota y le inflige daño.",
+    "source": "move_flavor_text"
+  },
+  "601": {
+    "name": "geomancy",
+    "descriptionEs": "Concentra energía durante el primer turno, de forma que su Velocidad, Ataque Especial y Defensa Especial aumenten mucho en el segundo.",
+    "source": "move_flavor_text"
+  },
+  "602": {
+    "name": "magnetic-flux",
+    "descriptionEs": "Manipula el campo magnético y logra aumentar la Defensa y la Def. Esp. de los Pokémon aliados que cuenten con las habilidades Más y Menos.",
+    "source": "move_flavor_text"
+  },
+  "603": {
+    "name": "happy-hour",
+    "descriptionEs": "Al usar este movimiento se consigue duplicar la recompensa recibida tras el combate.",
+    "source": "move_flavor_text"
+  },
+  "604": {
+    "name": "electric-terrain",
+    "descriptionEs": "Durante cinco turnos, crea un campo eléctrico en el terreno de combate que impide dormirse a los Pokémon que estén en contacto con el suelo.",
+    "source": "move_flavor_text"
+  },
+  "605": {
+    "name": "dazzling-gleam",
+    "descriptionEs": "Inflige daño a los oponentes con una potente luz.",
+    "source": "move_flavor_text"
+  },
+  "606": {
+    "name": "celebrate",
+    "descriptionEs": "El Pokémon te felicita en un día muy especial para ti.",
+    "source": "move_flavor_text"
+  },
+  "607": {
+    "name": "hold-hands",
+    "descriptionEs": "El Pokémon le da la mano a un aliado y ambos se sienten muy felices.",
+    "source": "move_flavor_text"
+  },
+  "608": {
+    "name": "baby-doll-eyes",
+    "descriptionEs": "Lanza una mirada al Pokémon objetivo con ojos acaramelados, con lo que logra que su Ataque se reduzca. El que lo usa siempre ataca primero.",
+    "source": "move_flavor_text"
+  },
+  "609": {
+    "name": "nuzzle",
+    "descriptionEs": "Quien lo usa frota sus mofletes cargados de electricidad contra el Pokémon objetivo y consigue paralizarlo.",
+    "source": "move_flavor_text"
+  },
+  "610": {
+    "name": "hold-back",
+    "descriptionEs": "El usuario se contiene a la hora de atacar y deja al Pokémon objetivo con al menos 1 PS.",
+    "source": "move_flavor_text"
+  },
+  "611": {
+    "name": "infestation",
+    "descriptionEs": "Hostiga al Pokémon objetivo durante cuatro o cinco turnos e impide que pueda huir mientras tanto.",
+    "source": "move_flavor_text"
+  },
+  "612": {
+    "name": "power-up-punch",
+    "descriptionEs": "Cada vez que golpea a un oponente se endurecen sus puños. Si acierta al objetivo, el Ataque del usuario aumenta.",
+    "source": "move_flavor_text"
+  },
+  "613": {
+    "name": "oblivion-wing",
+    "descriptionEs": "El usuario absorbe energía del Pokémon objetivo y aumenta sus PS en una cantidad igual o superior a la mitad del daño infligido.",
+    "source": "move_flavor_text"
+  },
+  "614": {
+    "name": "thousand-arrows",
+    "descriptionEs": "Acierta incluso a Pokémon que estén en el aire y los hace caer al suelo.",
+    "source": "move_flavor_text"
+  },
+  "615": {
+    "name": "thousand-waves",
+    "descriptionEs": "El usuario genera ondas sísmicas que se propagan por el suelo y sacuden a los oponentes. Los Pokémon alcanzados no podrán huir del combate.",
+    "source": "move_flavor_text"
+  },
+  "616": {
+    "name": "lands-wrath",
+    "descriptionEs": "Acumula energía de la corteza terrestre y la concentra contra los oponentes, dañándolos.",
+    "source": "move_flavor_text"
+  },
+  "617": {
+    "name": "light-of-ruin",
+    "descriptionEs": "El usuario emplea el poder de la Flor Eterna para lanzar un potente rayo de luz, pero sufre bastante daño al hacerlo.",
+    "source": "move_flavor_text"
+  },
+  "618": {
+    "name": "origin-pulse",
+    "descriptionEs": "Ataca al objetivo con una infinidad de rayos de luz azulada.",
+    "source": "move_flavor_text"
+  },
+  "619": {
+    "name": "precipice-blades",
+    "descriptionEs": "Hace que el poder latente de la tierra se manifieste en forma de hojas afiladas y ataca al objetivo con ellas.",
+    "source": "move_flavor_text"
+  },
+  "620": {
+    "name": "dragon-ascent",
+    "descriptionEs": "El usuario se precipita desde el cielo a una velocidad de vértigo para atacar al objetivo, pero hace que bajen la Defensa y la Defensa Especial del usuario.",
+    "source": "move_flavor_text"
+  },
+  "621": {
+    "name": "hyperspace-fury",
+    "descriptionEs": "Ataca al objetivo con una ráfaga de golpes que pasan por alto los efectos de movimientos como Protección o Detección. Hace que baje la Defensa del usuario.",
+    "source": "move_flavor_text"
+  },
+  "622": {
+    "name": "breakneck-blitz--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para coger carrerilla y arremeter contra el objetivo con gran fuerza. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "623": {
+    "name": "breakneck-blitz--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "624": {
+    "name": "all-out-pummeling--physical",
+    "descriptionEs": "Emplea el Poder Z para lanzar una sarta de golpes demoledores contra el objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "625": {
+    "name": "all-out-pummeling--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "626": {
+    "name": "supersonic-skystrike--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para volar muy alto y abalanzarse en picado sobre el objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "627": {
+    "name": "supersonic-skystrike--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "628": {
+    "name": "acid-downpour--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para crear una ciénaga venenosa en la que sumerge al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "629": {
+    "name": "acid-downpour--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "630": {
+    "name": "tectonic-rage--physical",
+    "descriptionEs": "Emplea el Poder Z para abrir una profunda grieta en el suelo que se traga al oponente. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "631": {
+    "name": "tectonic-rage--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "632": {
+    "name": "continental-crush--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para crear una montaña rocosa con la que aplasta al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "633": {
+    "name": "continental-crush--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "634": {
+    "name": "savage-spin-out--physical",
+    "descriptionEs": "Emplea el Poder Z para encerrar a su oponente en un capullo contra el que arremete con fuerza. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "635": {
+    "name": "savage-spin-out--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "636": {
+    "name": "never-ending-nightmare--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para invocar a unos espectros encolerizados que apresan al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "637": {
+    "name": "never-ending-nightmare--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "638": {
+    "name": "corkscrew-crash--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para girar a toda velocidad y perforar al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "639": {
+    "name": "corkscrew-crash--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "640": {
+    "name": "inferno-overdrive--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para lanzar una enorme llamarada con la que calcina a su objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "641": {
+    "name": "inferno-overdrive--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "642": {
+    "name": "hydro-vortex--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para crear un potente torbellino de agua que engulle al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "643": {
+    "name": "hydro-vortex--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "644": {
+    "name": "bloom-doom--physical",
+    "descriptionEs": "Emplea el Poder Z para concentrar la energía de la vegetación que lo rodea y atacar al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "645": {
+    "name": "bloom-doom--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "646": {
+    "name": "gigavolt-havoc--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para generar una fuerte descarga eléctrica con la que electrocuta al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "647": {
+    "name": "gigavolt-havoc--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "648": {
+    "name": "shattered-psyche--physical",
+    "descriptionEs": "Emplea el Poder Z para manipular la mente del objetivo, infligiéndole un daño ingente. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "649": {
+    "name": "shattered-psyche--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "650": {
+    "name": "subzero-slammer--physical",
+    "descriptionEs": "Emplea el Poder Z para lanzar un rayo de hielo que baja la temperatura de golpe y congela al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "651": {
+    "name": "subzero-slammer--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "652": {
+    "name": "devastating-drake--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para materializar su aura y golpear al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "653": {
+    "name": "devastating-drake--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "654": {
+    "name": "black-hole-eclipse--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para generar un agujero negro que absorbe al objetivo. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "655": {
+    "name": "black-hole-eclipse--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "656": {
+    "name": "twinkle-tackle--physical",
+    "descriptionEs": "El usuario emplea el Poder Z para crear una dimensión fascinante que deja al rival a su merced. Su potencia depende de la del movimiento original.",
+    "source": "move_flavor_text"
+  },
+  "657": {
+    "name": "twinkle-tackle--special",
+    "descriptionEs": "Dummy data",
+    "source": "move_flavor_text"
+  },
+  "658": {
+    "name": "catastropika",
+    "descriptionEs": "Pikachu emplea el Poder Z para acumular una gran cantidad de electricidad en su cuerpo y arremeter contra el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "659": {
+    "name": "shore-up",
+    "descriptionEs": "Restaura la mitad de los PS máximos del usuario. Durante las tormentas de arena, restaura aún más PS.",
+    "source": "move_flavor_text"
+  },
+  "660": {
+    "name": "first-impression",
+    "descriptionEs": "Movimiento de gran potencia que solo puede usarse en el turno en que el usuario sale al combate.",
+    "source": "move_flavor_text"
+  },
+  "661": {
+    "name": "baneful-bunker",
+    "descriptionEs": "Protege de los ataques y, al mismo tiempo, envenena al Pokémon que use un movimiento de contacto contra el usuario.",
+    "source": "move_flavor_text"
+  },
+  "662": {
+    "name": "spirit-shackle",
+    "descriptionEs": "Ataca al oponente y, al mismo tiempo, fija su sombra al terreno, impidiendo su huida.",
+    "source": "move_flavor_text"
+  },
+  "663": {
+    "name": "darkest-lariat",
+    "descriptionEs": "Gira sobre sí mismo y golpea al oponente con ambos brazos. Ignora los cambios en las características del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "664": {
+    "name": "sparkling-aria",
+    "descriptionEs": "Libera burbujas al cantar. Este movimiento cura las quemaduras de los Pokémon que reciban daño.",
+    "source": "move_flavor_text"
+  },
+  "665": {
+    "name": "ice-hammer",
+    "descriptionEs": "Un terrible puño golpea al contrincante, pero la Velocidad del usuario se ve reducida.",
+    "source": "move_flavor_text"
+  },
+  "666": {
+    "name": "floral-healing",
+    "descriptionEs": "Restaura la mitad de los PS máximos del objetivo. Es más efectivo cuando se usa en conjunción con Campo de Hierba.",
+    "source": "move_flavor_text"
+  },
+  "667": {
+    "name": "high-horsepower",
+    "descriptionEs": "Asesta un golpe devastador usando todo su cuerpo.",
+    "source": "move_flavor_text"
+  },
+  "668": {
+    "name": "strength-sap",
+    "descriptionEs": "Restaura una cantidad de PS equivalente al valor de Ataque del rival, que además verá reducida esta característica.",
+    "source": "move_flavor_text"
+  },
+  "669": {
+    "name": "solar-blade",
+    "descriptionEs": "El usuario dedica un turno a absorber energía lumínica y concentrarla en forma de cuchilla con la que ataca al rival al turno siguiente.",
+    "source": "move_flavor_text"
+  },
+  "670": {
+    "name": "leafage",
+    "descriptionEs": "Ataca al oponente lanzando hojas.",
+    "source": "move_flavor_text"
+  },
+  "671": {
+    "name": "spotlight",
+    "descriptionEs": "Convierte a uno de los Pokémon que están combatiendo en el foco de atención, de modo que todos los ataques se dirijan hacia él.",
+    "source": "move_flavor_text"
+  },
+  "672": {
+    "name": "toxic-thread",
+    "descriptionEs": "Ataca al oponente con hilillos venenosos que reducen su Velocidad y lo envenenan.",
+    "source": "move_flavor_text"
+  },
+  "673": {
+    "name": "laser-focus",
+    "descriptionEs": "El usuario se concentra para que el siguiente ataque propine un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "674": {
+    "name": "gear-up",
+    "descriptionEs": "Cambia de marcha y logra aumentar el Ataque y el Ataque Especial de los Pokémon aliados que cuenten con las habilidades Más y Menos.",
+    "source": "move_flavor_text"
+  },
+  "675": {
+    "name": "throat-chop",
+    "descriptionEs": "Inflige al rival un dolor tan abrumador que le impide utilizar durante dos turnos ataques que se sirven del sonido.",
+    "source": "move_flavor_text"
+  },
+  "676": {
+    "name": "pollen-puff",
+    "descriptionEs": "Ataca al oponente con una bola explosiva. Si esta alcanza a un aliado, le hará recuperar PS.",
+    "source": "move_flavor_text"
+  },
+  "677": {
+    "name": "anchor-shot",
+    "descriptionEs": "Ataca lanzando un ancla al oponente, que queda atrapado y no puede huir.",
+    "source": "move_flavor_text"
+  },
+  "678": {
+    "name": "psychic-terrain",
+    "descriptionEs": "Durante cinco turnos, se potencian los movimientos de tipo Psíquico y los Pokémon que están en el suelo quedan protegidos contra movimientos con prioridad.",
+    "source": "move_flavor_text"
+  },
+  "679": {
+    "name": "lunge",
+    "descriptionEs": "Ataca al oponente abalanzándose sobre él con todas sus fuerzas y reduce su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "680": {
+    "name": "fire-lash",
+    "descriptionEs": "Golpea al oponente con un látigo incandescente y reduce su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "681": {
+    "name": "power-trip",
+    "descriptionEs": "Ataca al oponente presumiendo de su fuerza. Cuanto más hayan subido las características del usuario, mayor será el daño.",
+    "source": "move_flavor_text"
+  },
+  "682": {
+    "name": "burn-up",
+    "descriptionEs": "Utiliza hasta el último resquicio de llamas de su cuerpo para infligir un grave daño al oponente. Tras el ataque, el usuario deja de ser de tipo Fuego.",
+    "source": "move_flavor_text"
+  },
+  "683": {
+    "name": "speed-swap",
+    "descriptionEs": "Intercambia su Velocidad por la del oponente.",
+    "source": "move_flavor_text"
+  },
+  "684": {
+    "name": "smart-strike",
+    "descriptionEs": "Ensarta al adversario con su afilada cornamenta. Este movimiento acierta siempre.",
+    "source": "move_flavor_text"
+  },
+  "685": {
+    "name": "purify",
+    "descriptionEs": "Cura los problemas de estado del Pokémon rival y a cambio recupera PS propios.",
+    "source": "move_flavor_text"
+  },
+  "686": {
+    "name": "revelation-dance",
+    "descriptionEs": "Ataque que consiste en un baile muy enérgico. El tipo de este ataque se corresponde con el del Pokémon que lo ejecuta.",
+    "source": "move_flavor_text"
+  },
+  "687": {
+    "name": "core-enforcer",
+    "descriptionEs": "Inflige daño al rival, y si este ya ha hecho uso de algún movimiento, pierde su habilidad.",
+    "source": "move_flavor_text"
+  },
+  "688": {
+    "name": "trop-kick",
+    "descriptionEs": "Lanza una patada con la fuerza del trópico que golpea al rival y reduce su Ataque.",
+    "source": "move_flavor_text"
+  },
+  "689": {
+    "name": "instruct",
+    "descriptionEs": "Fuerza al objetivo a repetir inmediatamente su último movimiento.",
+    "source": "move_flavor_text"
+  },
+  "690": {
+    "name": "beak-blast",
+    "descriptionEs": "Primero aumenta la temperatura de su pico y luego ejecuta un ataque. Quema al rival si este le propina un ataque físico mientras está calentando el pico.",
+    "source": "move_flavor_text"
+  },
+  "691": {
+    "name": "clanging-scales",
+    "descriptionEs": "Frota todas las escamas de su cuerpo para crear un fuerte sonido con el que ataca. Cuando el ataque termina, su Defensa se ve reducida.",
+    "source": "move_flavor_text"
+  },
+  "692": {
+    "name": "dragon-hammer",
+    "descriptionEs": "Usa el cuerpo como un martillo para abalanzarse sobre su rival y causarle daño.",
+    "source": "move_flavor_text"
+  },
+  "693": {
+    "name": "brutal-swing",
+    "descriptionEs": "Hace pivotar su cuerpo para infligir daño a su rival.",
+    "source": "move_flavor_text"
+  },
+  "694": {
+    "name": "aurora-veil",
+    "descriptionEs": "Reduce el daño de los ataques físicos y especiales que ejecuta el rival durante cinco turnos. Solo puede usarse cuando está granizando.",
+    "source": "move_flavor_text"
+  },
+  "695": {
+    "name": "sinister-arrow-raid",
+    "descriptionEs": "Decidueye usa el Poder Z para proyectar multitud de flechas potentísimas que atraviesan a su oponente.",
+    "source": "move_flavor_text"
+  },
+  "696": {
+    "name": "malicious-moonsault",
+    "descriptionEs": "Incineroar refuerza sus músculos con el Poder Z para golpear con todas sus fuerzas a su oponente.",
+    "source": "move_flavor_text"
+  },
+  "697": {
+    "name": "oceanic-operetta",
+    "descriptionEs": "Primarina invoca ingentes cantidades de agua con el Poder Z para atacar con gran potencia a su rival.",
+    "source": "move_flavor_text"
+  },
+  "698": {
+    "name": "guardian-of-alola",
+    "descriptionEs": "Los Pokémon Dios Nativo canalizan la energía de Alola gracias al Poder Z y atacan con gran fuerza a sus rivales reduciendo un gran porcentaje de sus PS.",
+    "source": "move_flavor_text"
+  },
+  "699": {
+    "name": "soul-stealing-7-star-strike",
+    "descriptionEs": "Cuando Marshadow obtiene el Poder Z, lanza una potente y continua oleada de puñetazos y patadas con la que castiga a su rival.",
+    "source": "move_flavor_text"
+  },
+  "700": {
+    "name": "stoked-sparksurfer",
+    "descriptionEs": "Cuando un Raichu de Alola obtiene el Poder Z, lanza un potente ataque contra su enemigo y lo deja paralizado.",
+    "source": "move_flavor_text"
+  },
+  "701": {
+    "name": "pulverizing-pancake",
+    "descriptionEs": "Gracias al Poder Z, Snorlax puede mover su enorme cuerpo con gran agilidad y determinación, cargando sobre el oponente con todas sus fuerzas.",
+    "source": "move_flavor_text"
+  },
+  "702": {
+    "name": "extreme-evoboost",
+    "descriptionEs": "Cuando Eevee obtiene el Poder Z, toma prestada la energía de sus amigos evolucionados para potenciar enormemente sus características.",
+    "source": "move_flavor_text"
+  },
+  "703": {
+    "name": "genesis-supernova",
+    "descriptionEs": "Mew usa el Poder Z para realizar un potente ataque contra su adversario y crear un Campo Psíquico sobre el terreno.",
+    "source": "move_flavor_text"
+  },
+  "704": {
+    "name": "shell-trap",
+    "descriptionEs": "El caparazón del Pokémon se convierte en una trampa. Si le alcanza un ataque físico, la trampa estalla y el atacante sufre daño.",
+    "source": "move_flavor_text"
+  },
+  "705": {
+    "name": "fleur-cannon",
+    "descriptionEs": "El usuario emite un potente rayo, pero su Ataque Especial se reduce mucho.",
+    "source": "move_flavor_text"
+  },
+  "706": {
+    "name": "psychic-fangs",
+    "descriptionEs": "Ataca a sus rivales con poderes psíquicos que además destruyen barreras como Pantalla de Luz y Reflejo.",
+    "source": "move_flavor_text"
+  },
+  "707": {
+    "name": "stomping-tantrum",
+    "descriptionEs": "Usa la frustración como revulsivo para atacar. La potencia de Pataleta se duplica si el usuario ha fallado el último movimiento usado.",
+    "source": "move_flavor_text"
+  },
+  "708": {
+    "name": "shadow-bone",
+    "descriptionEs": "Ataca al oponente golpeándole con un hueso poseído por un espíritu. Puede reducir la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "709": {
+    "name": "accelerock",
+    "descriptionEs": "El usuario se lanza contra el objetivo a gran velocidad. Siempre ataca primero.",
+    "source": "move_flavor_text"
+  },
+  "710": {
+    "name": "liquidation",
+    "descriptionEs": "Ataca golpeando gracias a la fuerza del agua. También puede reducir la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "711": {
+    "name": "prismatic-laser",
+    "descriptionEs": "El usuario utiliza un prisma para emitir un rayo de gran potencia, pero no puede moverse en el turno siguiente.",
+    "source": "move_flavor_text"
+  },
+  "712": {
+    "name": "spectral-thief",
+    "descriptionEs": "El usuario se esconde en la sombra del objetivo y lo ataca tras robarle las mejoras en sus características.",
+    "source": "move_flavor_text"
+  },
+  "713": {
+    "name": "sunsteel-strike",
+    "descriptionEs": "Ataca al objetivo con la potencia de un meteoro, ignorando su habilidad.",
+    "source": "move_flavor_text"
+  },
+  "714": {
+    "name": "moongeist-beam",
+    "descriptionEs": "Ataca con un rayo misterioso que ignora la habilidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "715": {
+    "name": "tearful-look",
+    "descriptionEs": "Mira al objetivo con ojos llorosos para hacerle perder su espíritu combativo y reduce su Ataque y Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "716": {
+    "name": "zing-zap",
+    "descriptionEs": "El usuario se lanza contra el objetivo y le suelta una potente descarga eléctrica que puede hacerlo retroceder.",
+    "source": "move_flavor_text"
+  },
+  "717": {
+    "name": "natures-madness",
+    "descriptionEs": "Golpea al objetivo con la furia de la naturaleza y reduce sus PS a la mitad.",
+    "source": "move_flavor_text"
+  },
+  "718": {
+    "name": "multi-attack",
+    "descriptionEs": "El Pokémon se rodea de una potente energía con la que golpea al rival. El tipo del movimiento depende del disco que lleva el usuario.",
+    "source": "move_flavor_text"
+  },
+  "719": {
+    "name": "10-000-000-volt-thunderbolt",
+    "descriptionEs": "Los Pikachu con gorra acumulan una carga eléctrica descomunal gracias al Poder Z y la lanzan contra el objetivo. Suele ser crítico.",
+    "source": "move_flavor_text"
+  },
+  "720": {
+    "name": "mind-blown",
+    "descriptionEs": "El usuario hace explotar su cabeza para atacar a todos los Pokémon que se hallan a su alrededor, aunque también se hiere a sí mismo.",
+    "source": "move_flavor_text"
+  },
+  "721": {
+    "name": "plasma-fists",
+    "descriptionEs": "El usuario ataca con puños cargados de electricidad. Convierte los movimientos de tipo Normal en movimientos de tipo Eléctrico.",
+    "source": "move_flavor_text"
+  },
+  "722": {
+    "name": "photon-geyser",
+    "descriptionEs": "El usuario ataca con una gran columna de luz. Compara sus valores de Ataque y Ataque Especial para infligir daño con el más alto de los dos.",
+    "source": "move_flavor_text"
+  },
+  "723": {
+    "name": "light-that-burns-the-sky",
+    "descriptionEs": "Necrozma escoge la característica que tenga el valor más alto entre el Ataque y el Ataque Especial para infligir daño, ignorando la habilidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "724": {
+    "name": "searing-sunraze-smash",
+    "descriptionEs": "Solgaleo ataca con toda su fuerza tras imbuirse del Poder Z. Este movimiento ignora la habilidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "725": {
+    "name": "menacing-moonraze-maelstrom",
+    "descriptionEs": "Lunala ataca con toda su fuerza tras imbuirse del Poder Z. Este movimiento ignora la habilidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "726": {
+    "name": "lets-snuggle-forever",
+    "descriptionEs": "Mimikyu ataca con toda su fuerza tras imbuirse del Poder Z y asesta una lluvia de golpes.",
+    "source": "move_flavor_text"
+  },
+  "727": {
+    "name": "splintered-stormshards",
+    "descriptionEs": "Lycanroc ataca con toda su fuerza tras imbuirse del Poder Z y neutraliza el campo que esté activo.",
+    "source": "move_flavor_text"
+  },
+  "728": {
+    "name": "clangorous-soulblaze",
+    "descriptionEs": "Kommo-o ataca con toda su fuerza al objetivo tras imbuirse del Poder Z. Además, potencia sus propias características.",
+    "source": "move_flavor_text"
+  },
+  "729": {
+    "name": "zippy-zap",
+    "descriptionEs": "Ataque eléctrico a la velocidad del rayo. Este movimiento tiene prioridad alta y propina golpes críticos.",
+    "source": "move_flavor_text"
+  },
+  "730": {
+    "name": "splishy-splash",
+    "descriptionEs": "Golpea al adversario con una ola gigante electrificada, que también puede paralizarlo.",
+    "source": "move_flavor_text"
+  },
+  "731": {
+    "name": "floaty-fall",
+    "descriptionEs": "El usuario se suspende en el aire para, a continuación, abalanzarse súbitamente sobre el rival. Puede hacer retroceder al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "732": {
+    "name": "pika-papow",
+    "descriptionEs": "Lanza una descarga eléctrica infalible que resulta más potente cuanto mayor es el cariño que siente Pikachu hacia su Entrenador.",
+    "source": "move_flavor_text"
+  },
+  "733": {
+    "name": "bouncy-bubble",
+    "descriptionEs": "Ataca lanzando proyectiles de agua y recupera una cantidad de PS equivalente a la mitad del daño causado.",
+    "source": "move_flavor_text"
+  },
+  "734": {
+    "name": "buzzy-buzz",
+    "descriptionEs": "Lanza una potente descarga eléctrica sobre el rival y lo deja paralizado.",
+    "source": "move_flavor_text"
+  },
+  "735": {
+    "name": "sizzly-slide",
+    "descriptionEs": "Tras envolver su cuerpo en llamas, el usuario arrolla con fuerza al rival y le provoca quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "736": {
+    "name": "glitzy-glow",
+    "descriptionEs": "Envuelve al rival con ondas psíquicas y alza un extraño muro que debilita los ataques especiales del adversario.",
+    "source": "move_flavor_text"
+  },
+  "737": {
+    "name": "baddy-bad",
+    "descriptionEs": "Lanza un ataque haciendo gala de su faceta más umbría y alza un extraño muro que mitiga los ataques físicos del adversario.",
+    "source": "move_flavor_text"
+  },
+  "738": {
+    "name": "sappy-seed",
+    "descriptionEs": "Hace brotar un tallo gigante que bombardea al rival con unas semillas que le drenan PS en cada turno.",
+    "source": "move_flavor_text"
+  },
+  "739": {
+    "name": "freezy-frost",
+    "descriptionEs": "Ataca al rival con negros cristales de niebla congelada. Revierte los cambios en las características de todos los Pokémon presentes.",
+    "source": "move_flavor_text"
+  },
+  "740": {
+    "name": "sparkly-swirl",
+    "descriptionEs": "Ataca al rival envolviéndolo en un remolino de aroma asfixiante. Cura a los aliados de cualquier problema de estado.",
+    "source": "move_flavor_text"
+  },
+  "741": {
+    "name": "veevee-volley",
+    "descriptionEs": "Un placaje infalible que resulta más potente cuanto mayor es el cariño que siente Eevee hacia su Entrenador.",
+    "source": "move_flavor_text"
+  },
+  "742": {
+    "name": "double-iron-bash",
+    "descriptionEs": "Usando la tuerca del pecho como eje, el usuario gira sobre sí mismo y golpea con los brazos dos veces seguidas. Puede hacer retroceder al rival.",
+    "source": "move_flavor_text"
+  },
+  "743": {
+    "name": "max-guard",
+    "descriptionEs": "Frena todos los ataques, pero puede fallar si se usa repetidamente.",
+    "source": "move_flavor_text"
+  },
+  "744": {
+    "name": "dynamax-cannon",
+    "descriptionEs": "El usuario ataca emitiendo un rayo desde su núcleo. El daño infligido se duplica si el objetivo ha alcanzado el estado Dinamax.",
+    "source": "move_flavor_text"
+  },
+  "745": {
+    "name": "snipe-shot",
+    "descriptionEs": "Permite atacar al objetivo seleccionado ignorando las habilidades o movimientos que permiten a un rival centrar la atención sobre sí.",
+    "source": "move_flavor_text"
+  },
+  "746": {
+    "name": "jaw-lock",
+    "descriptionEs": "Impide que tanto el atacante como el defensor puedan ser intercambiados hasta que uno de ellos se debilite o abandone el terreno de combate.",
+    "source": "move_flavor_text"
+  },
+  "747": {
+    "name": "stuff-cheeks",
+    "descriptionEs": "El usuario ingiere la baya que lleva equipada para aumentar mucho su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "748": {
+    "name": "no-retreat",
+    "descriptionEs": "El usuario aumenta todas sus características, pero ya no puede huir ni ser cambiado por otro.",
+    "source": "move_flavor_text"
+  },
+  "749": {
+    "name": "tar-shot",
+    "descriptionEs": "Cubre al objetivo de un alquitrán pegajoso que reduce su Velocidad y lo vuelve débil contra el fuego.",
+    "source": "move_flavor_text"
+  },
+  "750": {
+    "name": "magic-powder",
+    "descriptionEs": "Cubre al objetivo con unos polvos mágicos que le hacen adquirir el tipo Psíquico.",
+    "source": "move_flavor_text"
+  },
+  "751": {
+    "name": "dragon-darts",
+    "descriptionEs": "El usuario ataca propulsando a ambos Dreepy. En caso de haber dos adversarios, cada Dreepy golpea a su propio objetivo por separado.",
+    "source": "move_flavor_text"
+  },
+  "752": {
+    "name": "teatime",
+    "descriptionEs": "El usuario invita a tomar el té a todos los presentes en el terreno de combate, lo que hace que ingieran las bayas que lleven equipadas.",
+    "source": "move_flavor_text"
+  },
+  "753": {
+    "name": "octolock",
+    "descriptionEs": "Retiene al objetivo para impedir su huida, a la vez que reduce su Defensa y Defensa Especial cada turno.",
+    "source": "move_flavor_text"
+  },
+  "754": {
+    "name": "bolt-beak",
+    "descriptionEs": "El usuario ensarta al objetivo con su pico cargado de electricidad. Si ataca en primer lugar, la potencia del movimiento se duplica.",
+    "source": "move_flavor_text"
+  },
+  "755": {
+    "name": "fishious-rend",
+    "descriptionEs": "El usuario agarra al objetivo con sus duras branquias. En caso de atacar antes que este último, la potencia del movimiento se duplica.",
+    "source": "move_flavor_text"
+  },
+  "756": {
+    "name": "court-change",
+    "descriptionEs": "Extraño poder que intercambia los efectos en el terreno de combate de ambos bandos.",
+    "source": "move_flavor_text"
+  },
+  "757": {
+    "name": "max-flare",
+    "descriptionEs": "Ataque de tipo Fuego ejecutado por un Pokémon Dinamax. Hace que se intensifique el efecto del sol durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "758": {
+    "name": "max-flutterby",
+    "descriptionEs": "Ataque de tipo Bicho ejecutado por un Pokémon Dinamax. Reduce el Ataque Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "759": {
+    "name": "max-lightning",
+    "descriptionEs": "Ataque de tipo Eléctrico ejecutado por un Pokémon Dinamax. Crea un campo eléctrico durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "760": {
+    "name": "max-strike",
+    "descriptionEs": "Ataque de tipo Normal ejecutado por un Pokémon Dinamax. Reduce la Velocidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "761": {
+    "name": "max-knuckle",
+    "descriptionEs": "Ataque de tipo Lucha ejecutado por un Pokémon Dinamax. Aumenta el Ataque de tu bando.",
+    "source": "move_flavor_text"
+  },
+  "762": {
+    "name": "max-phantasm",
+    "descriptionEs": "Ataque de tipo Fantasma ejecutado por un Pokémon Dinamax. Reduce la Defensa de los rivales.",
+    "source": "move_flavor_text"
+  },
+  "763": {
+    "name": "max-hailstorm",
+    "descriptionEs": "Ataque de tipo Hielo ejecutado por un Pokémon Dinamax. Crea una tormenta de granizo que dura cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "764": {
+    "name": "max-ooze",
+    "descriptionEs": "Ataque de tipo Veneno ejecutado por un Pokémon Dinamax. Aumenta el Ataque Especial de tu bando.",
+    "source": "move_flavor_text"
+  },
+  "765": {
+    "name": "max-geyser",
+    "descriptionEs": "Ataque de tipo Agua ejecutado por un Pokémon Dinamax. Desata un aguacero que dura cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "766": {
+    "name": "max-airstream",
+    "descriptionEs": "Ataque de tipo Volador ejecutado por un Pokémon Dinamax. Aumenta la Velocidad de tu bando.",
+    "source": "move_flavor_text"
+  },
+  "767": {
+    "name": "max-starfall",
+    "descriptionEs": "Ataque de tipo Hada ejecutado por un Pokémon Dinamax. Crea un campo de niebla durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "768": {
+    "name": "max-wyrmwind",
+    "descriptionEs": "Ataque de tipo Dragón ejecutado por un Pokémon Dinamax. Reduce el Ataque del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "769": {
+    "name": "max-mindstorm",
+    "descriptionEs": "Ataque de tipo Psíquico ejecutado por un Pokémon Dinamax. Crea un campo psíquico durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "770": {
+    "name": "max-rockfall",
+    "descriptionEs": "Ataque de tipo Roca ejecutado por un Pokémon Dinamax. Levanta una tormenta de arena que dura cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "771": {
+    "name": "max-quake",
+    "descriptionEs": "Ataque de tipo Tierra ejecutado por un Pokémon Dinamax. Aumenta la Defensa Especial de tu bando.",
+    "source": "move_flavor_text"
+  },
+  "772": {
+    "name": "max-darkness",
+    "descriptionEs": "Ataque de tipo Siniestro ejecutado por un Pokémon Dinamax. Reduce la Defensa Especial del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "773": {
+    "name": "max-overgrowth",
+    "descriptionEs": "Ataque de tipo Planta ejecutado por un Pokémon Dinamax. Crea un campo de hierba durante cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "774": {
+    "name": "max-steelspike",
+    "descriptionEs": "Ataque de tipo Acero ejecutado por un Pokémon Dinamax. Aumenta la Defensa de tu bando.",
+    "source": "move_flavor_text"
+  },
+  "775": {
+    "name": "clangorous-soul",
+    "descriptionEs": "Utiliza parte de los PS propios para subir sus características.",
+    "source": "move_flavor_text"
+  },
+  "776": {
+    "name": "body-press",
+    "descriptionEs": "El usuario usa el cuerpo para lanzar su ataque e infligir un daño directamente proporcional a su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "777": {
+    "name": "decorate",
+    "descriptionEs": "Aumenta mucho el Ataque y el Ataque Especial del objetivo al decorarlo.",
+    "source": "move_flavor_text"
+  },
+  "778": {
+    "name": "drum-beating",
+    "descriptionEs": "El usuario controla un tocón mediante la percusión y al atacar reduce la Velocidad del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "779": {
+    "name": "snap-trap",
+    "descriptionEs": "Cepo que atrapa al objetivo durante cuatro o cinco turnos y le causa daño mientras se encuentra preso.",
+    "source": "move_flavor_text"
+  },
+  "780": {
+    "name": "pyro-ball",
+    "descriptionEs": "El usuario prende una pequeña piedra para crear una bola de fuego con la que ataca al rival. Puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "781": {
+    "name": "behemoth-blade",
+    "descriptionEs": "El usuario se convierte en una espada gigante para rebanar al objetivo. Si este ha alcanzado el estado Dinamax, se duplica el daño infligido.",
+    "source": "move_flavor_text"
+  },
+  "782": {
+    "name": "behemoth-bash",
+    "descriptionEs": "El usuario se convierte en un escudo gigante para golpear al objetivo. Si este ha alcanzado el estado Dinamax, se duplica el daño infligido.",
+    "source": "move_flavor_text"
+  },
+  "783": {
+    "name": "aura-wheel",
+    "descriptionEs": "La energía que acumula en las mejillas le sirve para atacar y aumentar su Velocidad. Este movimiento cambia de tipo según la forma que adopte Morpeko.",
+    "source": "move_flavor_text"
+  },
+  "784": {
+    "name": "breaking-swipe",
+    "descriptionEs": "El usuario sacude violentamente su enorme cola para golpear a todos los rivales y reducir su Ataque a la par.",
+    "source": "move_flavor_text"
+  },
+  "785": {
+    "name": "branch-poke",
+    "descriptionEs": "Ataca pinchando al objetivo con una rama afilada.",
+    "source": "move_flavor_text"
+  },
+  "786": {
+    "name": "overdrive",
+    "descriptionEs": "El usuario rasguea la guitarra o el bajo para generar enormes vibraciones de intensa reverberación con las que ataca al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "787": {
+    "name": "apple-acid",
+    "descriptionEs": "Ataca al objetivo con el fluido corrosivo que desprende una manzana ácida, lo que también disminuye la Defensa Especial de este.",
+    "source": "move_flavor_text"
+  },
+  "788": {
+    "name": "grav-apple",
+    "descriptionEs": "El usuario ataca haciendo caer una manzana desde gran altura. Disminuye la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "789": {
+    "name": "spirit-break",
+    "descriptionEs": "El usuario ataca al objetivo con tal ímpetu que acaba minando su moral y, en consecuencia, reduce su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "790": {
+    "name": "strange-steam",
+    "descriptionEs": "Desprende un humo con el que ataca al objetivo, que puede acabar confundido.",
+    "source": "move_flavor_text"
+  },
+  "791": {
+    "name": "life-dew",
+    "descriptionEs": "Vierte un agua misteriosa y balsámica que restaura tanto sus propios PS como los de aquellos aliados presentes en el terreno de combate.",
+    "source": "move_flavor_text"
+  },
+  "792": {
+    "name": "obstruct",
+    "descriptionEs": "Frena todos los ataques, pero puede fallar si se usa repetidamente. Reduce mucho la Defensa de quien ejecute un movimiento de contacto contra el usuario.",
+    "source": "move_flavor_text"
+  },
+  "793": {
+    "name": "false-surrender",
+    "descriptionEs": "El usuario finge hacer una reverencia y aprovecha la ocasión para ensartar al objetivo con su cabello alborotado. Siempre acierta.",
+    "source": "move_flavor_text"
+  },
+  "794": {
+    "name": "meteor-assault",
+    "descriptionEs": "El usuario agita violentamente su grueso puerro para atacar, pero el mareo que le provocan las sacudidas le impide moverse en el turno siguiente.",
+    "source": "move_flavor_text"
+  },
+  "795": {
+    "name": "eternabeam",
+    "descriptionEs": "Este es el mayor ataque de Eternatus una vez adquirida su forma original. No puede moverse en el turno siguiente.",
+    "source": "move_flavor_text"
+  },
+  "796": {
+    "name": "steel-beam",
+    "descriptionEs": "Utiliza el acero de su cuerpo para disparar un potente rayo. También hiere al agresor.",
+    "source": "move_flavor_text"
+  },
+  "797": {
+    "name": "expanding-force",
+    "descriptionEs": "El usuario ataca al objetivo con sus poderes psíquicos. Cuando se usa en conjunción con un campo psíquico, aumenta su potencia e inflige daño a todos los rivales.",
+    "source": "move_flavor_text"
+  },
+  "798": {
+    "name": "steel-roller",
+    "descriptionEs": "El usuario lanza su ataque y destruye el campo activo en el terreno de combate, y falla si no hay ninguno en ese momento.",
+    "source": "move_flavor_text"
+  },
+  "799": {
+    "name": "scale-shot",
+    "descriptionEs": "Lanza escamas al objetivo de dos a cinco veces seguidas. Aumenta la Velocidad del usuario, pero reduce su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "800": {
+    "name": "meteor-beam",
+    "descriptionEs": "El usuario dedica el primer turno a aumentar su Ataque Especial acumulando energía cósmica y lanza su ofensiva contra el objetivo en el segundo.",
+    "source": "move_flavor_text"
+  },
+  "801": {
+    "name": "shell-side-arm",
+    "descriptionEs": "El usuario lanza un ataque físico o especial en función de cuál inflija más daño. Puede envenenar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "802": {
+    "name": "misty-explosion",
+    "descriptionEs": "El usuario ataca a todos a su alrededor, pero se debilita de inmediato. La potencia del movimiento aumenta si el terreno está cubierto por un campo de niebla.",
+    "source": "move_flavor_text"
+  },
+  "803": {
+    "name": "grassy-glide",
+    "descriptionEs": "Ataca al objetivo deslizándose sobre el terreno de combate. Este movimiento tiene prioridad alta cuando el terreno está cubierto por un campo de hierba.",
+    "source": "move_flavor_text"
+  },
+  "804": {
+    "name": "rising-voltage",
+    "descriptionEs": "Ataca con una descarga eléctrica que surge del terreno de combate. La potencia del movimiento se duplica si el rival se ve afectado por un campo eléctrico.",
+    "source": "move_flavor_text"
+  },
+  "805": {
+    "name": "terrain-pulse",
+    "descriptionEs": "El usuario ataca aprovechando la energía del campo activo, que determina tanto el tipo como la potencia del movimiento.",
+    "source": "move_flavor_text"
+  },
+  "806": {
+    "name": "skitter-smack",
+    "descriptionEs": "Ataca al objetivo por la espalda de forma subrepticia y además reduce su Ataque Especial.",
+    "source": "move_flavor_text"
+  },
+  "807": {
+    "name": "burning-jealousy",
+    "descriptionEs": "Ataca al objetivo con la energía generada por la envidia y causa quemaduras a los Pokémon cuyas características hayan aumentado en ese turno.",
+    "source": "move_flavor_text"
+  },
+  "808": {
+    "name": "lash-out",
+    "descriptionEs": "Ataca al rival presa de la rabia. Si el usuario ha sufrido una reducción de características en ese turno, la potencia del movimiento se duplica.",
+    "source": "move_flavor_text"
+  },
+  "809": {
+    "name": "poltergeist",
+    "descriptionEs": "El usuario ataca utilizando el objeto que lleva el rival. Si no tiene ninguno equipado, el movimiento falla.",
+    "source": "move_flavor_text"
+  },
+  "810": {
+    "name": "corrosive-gas",
+    "descriptionEs": "El usuario libera un gas cáustico que envuelve a todos los que se encuentren alrededor y derrite por completo los objetos que lleven equipados.",
+    "source": "move_flavor_text"
+  },
+  "811": {
+    "name": "coaching",
+    "descriptionEs": "El usuario imparte indicaciones precisas a sus aliados, que ven aumentados su Ataque y su Defensa.",
+    "source": "move_flavor_text"
+  },
+  "812": {
+    "name": "flip-turn",
+    "descriptionEs": "Tras atacar, el usuario da paso a toda prisa a otro Pokémon del equipo.",
+    "source": "move_flavor_text"
+  },
+  "813": {
+    "name": "triple-axel",
+    "descriptionEs": "Patea hasta tres veces seguidas y cada vez más fuerte.",
+    "source": "move_flavor_text"
+  },
+  "814": {
+    "name": "dual-wingbeat",
+    "descriptionEs": "Ataca al adversario golpeándolo dos veces con las alas.",
+    "source": "move_flavor_text"
+  },
+  "815": {
+    "name": "scorching-sands",
+    "descriptionEs": "Ataca al objetivo arrojándole arena a temperaturas muy elevadas. Puede causar quemaduras.",
+    "source": "move_flavor_text"
+  },
+  "816": {
+    "name": "jungle-healing",
+    "descriptionEs": "Al entrar en plena armonía con la selva, el usuario cura problemas de estado y restaura PS no solo de sí mismo, sino también de los aliados presentes en el terreno.",
+    "source": "move_flavor_text"
+  },
+  "817": {
+    "name": "wicked-blow",
+    "descriptionEs": "Golpe devastador que requiere un absoluto dominio de las artes siniestras. Siempre asesta un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "818": {
+    "name": "surging-strikes",
+    "descriptionEs": "El usuario, dominador absoluto del líquido elemento, golpea hasta tres veces con movimientos fluidos. Siempre asesta un golpe crítico.",
+    "source": "move_flavor_text"
+  },
+  "819": {
+    "name": "thunder-cage",
+    "descriptionEs": "El objetivo queda atrapado en una jaula electrificada que permanece en el terreno de cuatro a cinco turnos.",
+    "source": "move_flavor_text"
+  },
+  "820": {
+    "name": "dragon-energy",
+    "descriptionEs": "El usuario convierte su fuerza vital en una energía con la que ataca al objetivo. Cuantos menos PS tenga el usuario, menor será la potencia del movimiento.",
+    "source": "move_flavor_text"
+  },
+  "821": {
+    "name": "freezing-glare",
+    "descriptionEs": "A través de sus ojos emite poderes psíquicos con los que ataca al objetivo, al que puede llegar a congelar.",
+    "source": "move_flavor_text"
+  },
+  "822": {
+    "name": "fiery-wrath",
+    "descriptionEs": "El usuario convierte su ira en un aura flamígera para lanzar su ataque. Puede amedrentar al objetivo.",
+    "source": "move_flavor_text"
+  },
+  "823": {
+    "name": "thunderous-kick",
+    "descriptionEs": "El usuario desconcierta al rival con movimientos centelleantes y le propina una patada. Baja la Defensa del objetivo.",
+    "source": "move_flavor_text"
+  },
+  "824": {
+    "name": "glacial-lance",
+    "descriptionEs": "El usuario ataca al objetivo lanzándole un carámbano de hielo envuelto en una ventisca.",
+    "source": "move_flavor_text"
+  },
+  "825": {
+    "name": "astral-barrage",
+    "descriptionEs": "El usuario ataca al objetivo lanzándole una ingente cantidad de pequeños fantasmas.",
+    "source": "move_flavor_text"
+  },
+  "826": {
+    "name": "eerie-spell",
+    "descriptionEs": "El usuario ataca con un poder psíquico de inmensa potencia y elimina 3 PP del último movimiento que haya usado el objetivo.",
+    "source": "move_flavor_text"
+  },
+  "827": {
+    "name": "dire-claw",
+    "descriptionEs": null,
+    "source": null
+  },
+  "828": {
+    "name": "psyshield-bash",
+    "descriptionEs": null,
+    "source": null
+  },
+  "829": {
+    "name": "power-shift",
+    "descriptionEs": null,
+    "source": null
+  },
+  "830": {
+    "name": "stone-axe",
+    "descriptionEs": null,
+    "source": null
+  },
+  "831": {
+    "name": "springtide-storm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "832": {
+    "name": "mystical-power",
+    "descriptionEs": null,
+    "source": null
+  },
+  "833": {
+    "name": "raging-fury",
+    "descriptionEs": null,
+    "source": null
+  },
+  "834": {
+    "name": "wave-crash",
+    "descriptionEs": null,
+    "source": null
+  },
+  "835": {
+    "name": "chloroblast",
+    "descriptionEs": null,
+    "source": null
+  },
+  "836": {
+    "name": "mountain-gale",
+    "descriptionEs": null,
+    "source": null
+  },
+  "837": {
+    "name": "victory-dance",
+    "descriptionEs": null,
+    "source": null
+  },
+  "838": {
+    "name": "headlong-rush",
+    "descriptionEs": null,
+    "source": null
+  },
+  "839": {
+    "name": "barb-barrage",
+    "descriptionEs": null,
+    "source": null
+  },
+  "840": {
+    "name": "esper-wing",
+    "descriptionEs": null,
+    "source": null
+  },
+  "841": {
+    "name": "bitter-malice",
+    "descriptionEs": null,
+    "source": null
+  },
+  "842": {
+    "name": "shelter",
+    "descriptionEs": null,
+    "source": null
+  },
+  "843": {
+    "name": "triple-arrows",
+    "descriptionEs": null,
+    "source": null
+  },
+  "844": {
+    "name": "infernal-parade",
+    "descriptionEs": null,
+    "source": null
+  },
+  "845": {
+    "name": "ceaseless-edge",
+    "descriptionEs": null,
+    "source": null
+  },
+  "846": {
+    "name": "bleakwind-storm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "847": {
+    "name": "wildbolt-storm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "848": {
+    "name": "sandsear-storm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "849": {
+    "name": "lunar-blessing",
+    "descriptionEs": null,
+    "source": null
+  },
+  "850": {
+    "name": "take-heart",
+    "descriptionEs": null,
+    "source": null
+  },
+  "851": {
+    "name": "tera-blast",
+    "descriptionEs": null,
+    "source": null
+  },
+  "852": {
+    "name": "silk-trap",
+    "descriptionEs": null,
+    "source": null
+  },
+  "853": {
+    "name": "axe-kick",
+    "descriptionEs": null,
+    "source": null
+  },
+  "854": {
+    "name": "last-respects",
+    "descriptionEs": null,
+    "source": null
+  },
+  "855": {
+    "name": "lumina-crash",
+    "descriptionEs": null,
+    "source": null
+  },
+  "856": {
+    "name": "order-up",
+    "descriptionEs": null,
+    "source": null
+  },
+  "857": {
+    "name": "jet-punch",
+    "descriptionEs": null,
+    "source": null
+  },
+  "858": {
+    "name": "spicy-extract",
+    "descriptionEs": null,
+    "source": null
+  },
+  "859": {
+    "name": "spin-out",
+    "descriptionEs": null,
+    "source": null
+  },
+  "860": {
+    "name": "population-bomb",
+    "descriptionEs": null,
+    "source": null
+  },
+  "861": {
+    "name": "ice-spinner",
+    "descriptionEs": null,
+    "source": null
+  },
+  "862": {
+    "name": "glaive-rush",
+    "descriptionEs": null,
+    "source": null
+  },
+  "863": {
+    "name": "revival-blessing",
+    "descriptionEs": null,
+    "source": null
+  },
+  "864": {
+    "name": "salt-cure",
+    "descriptionEs": null,
+    "source": null
+  },
+  "865": {
+    "name": "triple-dive",
+    "descriptionEs": null,
+    "source": null
+  },
+  "866": {
+    "name": "mortal-spin",
+    "descriptionEs": null,
+    "source": null
+  },
+  "867": {
+    "name": "doodle",
+    "descriptionEs": null,
+    "source": null
+  },
+  "868": {
+    "name": "fillet-away",
+    "descriptionEs": null,
+    "source": null
+  },
+  "869": {
+    "name": "kowtow-cleave",
+    "descriptionEs": null,
+    "source": null
+  },
+  "870": {
+    "name": "flower-trick",
+    "descriptionEs": null,
+    "source": null
+  },
+  "871": {
+    "name": "torch-song",
+    "descriptionEs": null,
+    "source": null
+  },
+  "872": {
+    "name": "aqua-step",
+    "descriptionEs": null,
+    "source": null
+  },
+  "873": {
+    "name": "raging-bull",
+    "descriptionEs": null,
+    "source": null
+  },
+  "874": {
+    "name": "make-it-rain",
+    "descriptionEs": null,
+    "source": null
+  },
+  "875": {
+    "name": "psyblade",
+    "descriptionEs": null,
+    "source": null
+  },
+  "876": {
+    "name": "hydro-steam",
+    "descriptionEs": null,
+    "source": null
+  },
+  "877": {
+    "name": "ruination",
+    "descriptionEs": null,
+    "source": null
+  },
+  "878": {
+    "name": "collision-course",
+    "descriptionEs": null,
+    "source": null
+  },
+  "879": {
+    "name": "electro-drift",
+    "descriptionEs": null,
+    "source": null
+  },
+  "880": {
+    "name": "shed-tail",
+    "descriptionEs": null,
+    "source": null
+  },
+  "881": {
+    "name": "chilly-reception",
+    "descriptionEs": null,
+    "source": null
+  },
+  "882": {
+    "name": "tidy-up",
+    "descriptionEs": null,
+    "source": null
+  },
+  "883": {
+    "name": "snowscape",
+    "descriptionEs": null,
+    "source": null
+  },
+  "884": {
+    "name": "pounce",
+    "descriptionEs": null,
+    "source": null
+  },
+  "885": {
+    "name": "trailblaze",
+    "descriptionEs": null,
+    "source": null
+  },
+  "886": {
+    "name": "chilling-water",
+    "descriptionEs": null,
+    "source": null
+  },
+  "887": {
+    "name": "hyper-drill",
+    "descriptionEs": null,
+    "source": null
+  },
+  "888": {
+    "name": "twin-beam",
+    "descriptionEs": null,
+    "source": null
+  },
+  "889": {
+    "name": "rage-fist",
+    "descriptionEs": null,
+    "source": null
+  },
+  "890": {
+    "name": "armor-cannon",
+    "descriptionEs": null,
+    "source": null
+  },
+  "891": {
+    "name": "bitter-blade",
+    "descriptionEs": null,
+    "source": null
+  },
+  "892": {
+    "name": "double-shock",
+    "descriptionEs": null,
+    "source": null
+  },
+  "893": {
+    "name": "gigaton-hammer",
+    "descriptionEs": null,
+    "source": null
+  },
+  "894": {
+    "name": "comeuppance",
+    "descriptionEs": null,
+    "source": null
+  },
+  "895": {
+    "name": "aqua-cutter",
+    "descriptionEs": null,
+    "source": null
+  },
+  "896": {
+    "name": "blazing-torque",
+    "descriptionEs": null,
+    "source": null
+  },
+  "897": {
+    "name": "wicked-torque",
+    "descriptionEs": null,
+    "source": null
+  },
+  "898": {
+    "name": "noxious-torque",
+    "descriptionEs": null,
+    "source": null
+  },
+  "899": {
+    "name": "combat-torque",
+    "descriptionEs": null,
+    "source": null
+  },
+  "900": {
+    "name": "magical-torque",
+    "descriptionEs": null,
+    "source": null
+  },
+  "901": {
+    "name": "blood-moon",
+    "descriptionEs": null,
+    "source": null
+  },
+  "902": {
+    "name": "matcha-gotcha",
+    "descriptionEs": null,
+    "source": null
+  },
+  "903": {
+    "name": "syrup-bomb",
+    "descriptionEs": null,
+    "source": null
+  },
+  "904": {
+    "name": "ivy-cudgel",
+    "descriptionEs": null,
+    "source": null
+  },
+  "905": {
+    "name": "electro-shot",
+    "descriptionEs": null,
+    "source": null
+  },
+  "906": {
+    "name": "tera-starstorm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "907": {
+    "name": "fickle-beam",
+    "descriptionEs": null,
+    "source": null
+  },
+  "908": {
+    "name": "burning-bulwark",
+    "descriptionEs": null,
+    "source": null
+  },
+  "909": {
+    "name": "thunderclap",
+    "descriptionEs": null,
+    "source": null
+  },
+  "910": {
+    "name": "mighty-cleave",
+    "descriptionEs": null,
+    "source": null
+  },
+  "911": {
+    "name": "tachyon-cutter",
+    "descriptionEs": null,
+    "source": null
+  },
+  "912": {
+    "name": "hard-press",
+    "descriptionEs": null,
+    "source": null
+  },
+  "913": {
+    "name": "dragon-cheer",
+    "descriptionEs": null,
+    "source": null
+  },
+  "914": {
+    "name": "alluring-voice",
+    "descriptionEs": null,
+    "source": null
+  },
+  "915": {
+    "name": "temper-flare",
+    "descriptionEs": null,
+    "source": null
+  },
+  "916": {
+    "name": "supercell-slam",
+    "descriptionEs": null,
+    "source": null
+  },
+  "917": {
+    "name": "psychic-noise",
+    "descriptionEs": null,
+    "source": null
+  },
+  "918": {
+    "name": "upper-hand",
+    "descriptionEs": null,
+    "source": null
+  },
+  "919": {
+    "name": "malignant-chain",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10001": {
+    "name": "shadow-rush",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10002": {
+    "name": "shadow-blast",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10003": {
+    "name": "shadow-blitz",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10004": {
+    "name": "shadow-bolt",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10005": {
+    "name": "shadow-break",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10006": {
+    "name": "shadow-chill",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10007": {
+    "name": "shadow-end",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10008": {
+    "name": "shadow-fire",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10009": {
+    "name": "shadow-rave",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10010": {
+    "name": "shadow-storm",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10011": {
+    "name": "shadow-wave",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10012": {
+    "name": "shadow-down",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10013": {
+    "name": "shadow-half",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10014": {
+    "name": "shadow-hold",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10015": {
+    "name": "shadow-mist",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10016": {
+    "name": "shadow-panic",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10017": {
+    "name": "shadow-shed",
+    "descriptionEs": null,
+    "source": null
+  },
+  "10018": {
+    "name": "shadow-sky",
+    "descriptionEs": null,
+    "source": null
+  }
+}

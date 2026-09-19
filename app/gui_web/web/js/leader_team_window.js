@@ -191,7 +191,9 @@
           return (
             '<div class="pokemon-move-row" data-move-name="' + escapeHtml(name) + '">' +
               '<span class="pokemon-move-name">' + escapeHtml(nameEs) + "</span>" +
-              '<span class="pokemon-move-type" style="' + typeStyleVars(moveType) + '">' + typeIconSvg(moveType, 16) + "</span>" +
+              '<span class="pokemon-move-type" style="' + typeStyleVars(moveType) + '"' +
+                (typeInfo(moveType) ? "" : ' title="Tipo no disponible (depende de los IV)"') + ">" +
+                (typeInfo(moveType) ? typeIconSvg(moveType, 16) : "?") + "</span>" +
             "</div>"
           );
         }).join("")

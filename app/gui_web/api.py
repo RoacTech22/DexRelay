@@ -287,6 +287,14 @@ class Api:
             self._load_hackroom_attack_changes()
         )
 
+        # Tipo de movimiento resuelto vía bridge, por move_id (bug
+        # 18/09/2026: movesTypeKeys de los equipos de líder del
+        # hackroom salían vacíos porque MOVE_TYPE_KEYS de
+        # gym_leaders.py solo cubre los 64 movimientos del juego
+        # base). Solo se guardan resultados exitosos -- un fallo del
+        # bridge no debe quedar cacheado como "sin tipo".
+        self._move_type_key_cache = {}
+
     def _load_hackroom_attack_changes(self):
 
         changes_path = paths.path("data", "attack_changes_rrss.json")
@@ -1817,13 +1825,116 @@ class Api:
             # gym_leaders.json vanilla, no se pisa ni se vuelve a
             # pedir al bridge).
             team = [
-                self._with_resolved_type_keys(member)
+                self._with_resolved_move_type_keys(
+                    self._with_resolved_type_keys(member)
+                )
                 for member in leader.get("team", [])
             ]
 
             gym_leaders.append({**leader, "team": team, "earned": earned})
 
         return gym_leaders
+
+    def _resolve_move_type_key(self, move_name):
+        """
+        Tipo (clave en inglés, enum MoveType de PKHeX) de un
+        movimiento a partir de su NOMBRE en inglés, o None si no se
+        pudo resolver -- nunca inventa uno. Camino: nombre ->
+        move_id (MoveDescriptionCatalog) -> bridge.move_details()
+        (mismo camino que el modal de movimiento) -> override del
+        hackroom (AttackChanges) si está activo.
+
+        "Hidden Power" se deja sin tipo a propósito: PKHeX devuelve
+        Normal como tipo base, pero el tipo real depende de los IV
+        del Pokémon y el dataset de líderes no los trae -- mostrar
+        Normal sería un dato inventado.
+        """
+
+        if not move_name or move_name.strip().lower() == "hidden power":
+            return None
+
+        move_id = self.move_description_catalog.get_id_by_name(
+            move_name
+        )
+
+        if move_id is None:
+            return None
+
+        type_key = self._move_type_key_cache.get(move_id)
+
+        if type_key is None:
+            try:
+                response = self.modal_bridge.move_details(move_id)
+            except Exception:
+                return None
+
+            if not isinstance(response, dict) or "error" in response:
+                return None
+
+            type_key = response.get("typeKey") or None
+
+            if type_key is None:
+                return None
+
+            self._move_type_key_cache[move_id] = type_key
+
+        if self.app.config.get("hackroom", "enabled", default=False):
+            move_changes = self._hackroom_attack_changes_by_move.get(
+                move_id
+            )
+
+            if move_changes and "typeKey" in move_changes:
+                return move_changes["typeKey"]
+
+        return type_key
+
+    def _apply_hackroom_move_type(self, move_name, type_key):
+        """Override de tipo del hackroom sobre un tipo ya conocido."""
+
+        if not self.app.config.get("hackroom", "enabled", default=False):
+            return type_key
+
+        move_id = self.move_description_catalog.get_id_by_name(
+            move_name
+        )
+
+        move_changes = self._hackroom_attack_changes_by_move.get(
+            move_id
+        )
+
+        if move_changes and "typeKey" in move_changes:
+            return move_changes["typeKey"]
+
+        return type_key
+
+    def _with_resolved_move_type_keys(self, member):
+        """
+        Completa `moveTypeKeys` de un miembro de equipo de líder
+        para los movimientos que MOVE_TYPE_KEYS (gym_leaders.py) no
+        cubre -- 81 de los 113 movimientos distintos del hackroom
+        Rising Ruby/Sinking Sapphire. Los que ya vienen resueltos se
+        respetan tal cual, salvo el override de tipo del hackroom.
+        """
+
+        moves = member.get("moves") or []
+        current = list(member.get("moveTypeKeys") or [])
+
+        # Alinear el largo por si algún dataset trae la lista corta.
+        current += [None] * (len(moves) - len(current))
+
+        resolved = []
+
+        for move_name, type_key in zip(moves, current):
+            if type_key is None:
+                type_key = self._resolve_move_type_key(move_name)
+            else:
+                type_key = self._apply_hackroom_move_type(
+                    move_name, type_key
+                )
+
+            resolved.append(type_key)
+
+        return {**member, "moveTypeKeys": resolved}
 
     def _with_resolved_type_keys(self, member):
 

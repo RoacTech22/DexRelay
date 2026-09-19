@@ -82,11 +82,57 @@ class Runtime:
         # (la captura real ya se encarga sola).
         self._pending_lost_resolution = None
 
+        # Diagnóstico de la detección de "perdido" (18/09/2026,
+        # reportado por el usuario: el registro de perdidos no
+        # funcionaba jugando una partida larga y desde el código
+        # solo no se puede saber qué eslabón de la cadena falla --
+        # combate/flag salvaje, zona, contador de capturas o
+        # especie del rival). Cada eslabón deja UNA línea por
+        # combate en el buffer de la página Logs (ver _log_lost()),
+        # sin spamear cada ciclo de 200ms.
+        self._lost_log_seen = set()
+        self._combat_wild_seen = False
+        self._empty_party_cycles = 0
+
+    # Ciclos seguidos con party vacía estando "conectado" antes de
+    # forzar una reconexión (25 ciclos de 200ms ≈ 5s).
+    EMPTY_PARTY_RECONNECT_CYCLES = 25
+
+    def _reset_connection_dependent_state(self):
+        """
+        Al perder la conexión con Azahar se descarta todo lo que
+        depende de una lectura continua del combate: si se cerró
+        Azahar en medio de un combate salvaje, al reconectar NO debe
+        interpretarse como "fin de combate" y registrar un perdido
+        falso con el snapshot viejo.
+        """
+
+        self._empty_party_cycles = 0
+        self._combat_was_active = False
+        self._combat_wild_seen = False
+        self._lost_encounter_snapshot = None
+        self._lost_tracking_resolved = False
+        self._pending_lost_resolution = None
+        self._lost_log_seen = set()
+
+    def _log_lost(self, key, message):
+        """print() de una sola vez por combate por `key`."""
+
+        if key in self._lost_log_seen:
+            return
+
+        self._lost_log_seen.add(key)
+        print(f"[Perdido] {message}", flush=True)
+
     # Cuántos ciclos de 200ms se reintenta el contador de capturas
     # antes de concluir "perdido" -- 1.5s de margen total, suficiente
     # para la transición de vuelta al mapa tras una captura real sin
     # demorar de más un "perdido" genuino (huida/derrota).
     LOST_ENCOUNTER_MAX_RETRIES = 8
+
+    # Especie/nickname provisional de un "perdido" cuando no se pudo
+    # leer el rival (editable después desde el panel).
+    UNKNOWN_LOST_SPECIES = "Desconocido"
 
     def update(self):
         """Actualiza el estado realtime de DexRelay."""
@@ -97,6 +143,7 @@ class Runtime:
             if not connected:
                 self.state.azahar_connected = False
                 self.state.reader_active = False
+                self._reset_connection_dependent_state()
                 return
 
         self.state.azahar_connected = True
@@ -105,7 +152,27 @@ class Runtime:
 
         if not party:
             self.state.reader_active = False
+
+            # Red de seguridad (18/09/2026): "conectado" pero sin
+            # ningún dato durante ~5s puede ser un proceso
+            # seleccionado equivocado tras reabrir Azahar. Forzar
+            # una reconexión completa (find_game_process +
+            # set_process). Con el juego en el menú y sin Pokémon
+            # todavía es inofensivo: solo repite la búsqueda.
+            self._empty_party_cycles += 1
+
+            if self._empty_party_cycles >= self.EMPTY_PARTY_RECONNECT_CYCLES:
+                self._empty_party_cycles = 0
+                print(
+                    "[Runtime] Sin datos de party hace un rato: "
+                    "se fuerza una reconexión con el juego.",
+                    flush=True,
+                )
+                self.reader.invalidate_connection()
+
             return
+
+        self._empty_party_cycles = 0
 
         self.state.team = party
         self.state.reader_active = True
@@ -222,6 +289,13 @@ class Runtime:
             # Subió de verdad: fue una captura real, que ya se
             # registra sola por el camino normal de party/Caja PC.
             # No hace falta (ni corresponde) registrar "perdido".
+            print(
+                "[Perdido] contador de capturas subió "
+                f"({self._pending_lost_resolution['total_caught']} -> "
+                f"{total_after}): captura real, no se registra "
+                "perdido.",
+                flush=True,
+            )
             self._pending_lost_resolution = None
             return
 
@@ -234,9 +308,29 @@ class Runtime:
             # ciclo sin concluir nada todavía.
             return
 
+        species = self._pending_lost_resolution["species"]
+
+        if not species:
+            # Última chance: el buffer del rival puede haberse
+            # poblado durante el combate. Si no, placeholder
+            # honesto (nunca se inventa una especie).
+            species = (
+                self.reader.read_wild_rival_species()
+                or self.UNKNOWN_LOST_SPECIES
+            )
+
+        print(
+            "[Perdido] contador sin cambios tras "
+            f"{self.LOST_ENCOUNTER_MAX_RETRIES} reintentos "
+            f"(total={total_after}): registrando "
+            f"{self._pending_lost_resolution['location']} como "
+            f"perdido ({species}).",
+            flush=True,
+        )
+
         self.nuzlocke_service.register_lost_encounter(
             self._pending_lost_resolution["location"],
-            self._pending_lost_resolution["species"],
+            species,
         )
 
         self._pending_lost_resolution = None
@@ -297,6 +391,19 @@ class Runtime:
 
         combat_active_now = wild_result is not None
 
+        if combat_active_now and not self._combat_was_active:
+            self._log_lost(
+                "combat_start",
+                "combate detectado (puntero de combate activo).",
+            )
+
+        if wild_result is True:
+            self._combat_wild_seen = True
+            self._log_lost(
+                "wild_flag",
+                "flag salvaje = SALVAJE.",
+            )
+
         if (
             combat_active_now
             and wild_result is True
@@ -318,9 +425,18 @@ class Runtime:
                 # Lectura de zona fallida -- no marcar resuelto,
                 # reintentar el próximo ciclo (podría ser
                 # transitorio, igual que el flag salvaje).
-                pass
+                self._log_lost(
+                    "zone_none",
+                    "no se pudo leer la zona actual "
+                    f"(zone_id={zone_id}); se reintenta.",
+                )
 
             elif already_registered:
+                self._log_lost(
+                    f"already:{location}",
+                    f"{location} ya tiene un encuentro registrado: "
+                    "no se toma snapshot.",
+                )
                 # Esta ruta ya tiene un resultado -- no tomar
                 # snapshot, y no hace falta reintentar el resto de
                 # este combate (la ruta no va a "desregistrarse" a
@@ -330,15 +446,18 @@ class Runtime:
             else:
 
                 total_caught = self.reader.read_total_caught_count()
-                last_caught = self.reader.read_last_caught()
+                species = self.reader.read_wild_rival_species()
 
-                species = (
-                    last_caught.get("species")
-                    if last_caught
-                    else None
-                )
-
-                if total_caught is not None and species:
+                # 18/09/2026 (log real del usuario: combate salvaje en
+                # Pueblo Azuliza con total_caught=9 y
+                # last_caught.species=None): la ESPECIE del rival
+                # dejó de ser requisito del snapshot. Solo se usa como
+                # nickname/especie provisional del "perdido" (que el
+                # usuario puede editar), y LAST_CAUGHT_ADDRESS no
+                # devuelve un Pokémon válido en su partida -- exigirla
+                # bloqueaba TODA la detección. Lo que decide si hubo
+                # captura es el contador, no la especie.
+                if total_caught is not None:
 
                     self._lost_encounter_snapshot = {
                         "location": location,
@@ -346,13 +465,70 @@ class Runtime:
                         "total_caught": total_caught,
                     }
 
+                    self._log_lost(
+                        "snapshot",
+                        f"snapshot tomado: {location}, rival="
+                        f"{species!r}, total_caught={total_caught}.",
+                    )
+
+                else:
+                    self._log_lost(
+                        "snapshot_wait",
+                        f"sin snapshot en {location}: "
+                        f"total_caught={total_caught} "
+                        "(se reintenta cada ciclo).",
+                    )
+
                 # Si total_caught/species vinieron None, no se
                 # marca resuelto -- se reintenta el próximo ciclo
                 # (mismo criterio que el flag salvaje: puede ser
                 # una escritura progresiva del juego, no un dato
                 # definitivo).
 
+        # La especie del rival puede tardar unos ciclos en escribirse
+        # (o el buffer traer al rival del combate ANTERIOR al
+        # principio), así que mientras dura el combate salvaje se
+        # sigue actualizando: la última lectura válida es la buena.
+        if (
+            wild_result is True
+            and self._lost_encounter_snapshot is not None
+        ):
+            latest_species = self.reader.read_wild_rival_species()
+
+            if (
+                latest_species
+                and latest_species
+                != self._lost_encounter_snapshot["species"]
+            ):
+                self._lost_encounter_snapshot["species"] = latest_species
+                print(
+                    f"[Perdido] rival actualizado: {latest_species}.",
+                    flush=True,
+                )
+
         if not combat_active_now and self._combat_was_active:
+
+            if self._lost_encounter_snapshot is not None:
+                print(
+                    "[Perdido] fin de combate con snapshot de "
+                    f"{self._lost_encounter_snapshot['location']}: "
+                    "esperando el contador de capturas.",
+                    flush=True,
+                )
+            elif self._combat_wild_seen:
+                print(
+                    "[Perdido] fin de combate salvaje SIN snapshot: "
+                    "no se registra nada (ver líneas anteriores "
+                    "para el motivo).",
+                    flush=True,
+                )
+            else:
+                print(
+                    "[Perdido] fin de combate (el flag salvaje "
+                    "nunca dio SALVAJE: entrenador o flag no "
+                    "detectado).",
+                    flush=True,
+                )
 
             if self._lost_encounter_snapshot is not None:
 
@@ -385,5 +561,7 @@ class Runtime:
             # intentos).
             self._lost_encounter_snapshot = None
             self._lost_tracking_resolved = False
+            self._combat_wild_seen = False
+            self._lost_log_seen = set()
 
         self._combat_was_active = combat_active_now

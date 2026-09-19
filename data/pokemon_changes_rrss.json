@@ -1,0 +1,1404 @@
+{
+  "1": {
+    "ability2": "Effect Spore"
+  },
+  "2": {
+    "ability2": "Effect Spore"
+  },
+  "3": {
+    "ability2": "Thick Fat"
+  },
+  "4": {
+    "ability2": "Tough Claws"
+  },
+  "5": {
+    "ability2": "Tough Claws"
+  },
+  "6": {
+    "ability2": "Tough Claws"
+  },
+  "7": {
+    "ability2": "Shell Armor"
+  },
+  "8": {
+    "ability2": "Shell Armor"
+  },
+  "9": {
+    "ability2": "Mega Launcher"
+  },
+  "10": {
+    "ability2": "Run Away"
+  },
+  "12": {
+    "ability2": "Tinted Lens",
+    "baseStats": {
+      "attack": 25,
+      "spAttack": 115,
+      "spDefense": 105,
+      "speed": 95
+    }
+  },
+  "13": {
+    "ability2": "Run Away"
+  },
+  "15": {
+    "ability2": "Sniper",
+    "baseStats": {
+      "attack": 115,
+      "spAttack": 30,
+      "spDefense": 110,
+      "speed": 100,
+      "defense": 50
+    }
+  },
+  "20": {
+    "baseStats": {
+      "hp": 60,
+      "attack": 100,
+      "spAttack": 35,
+      "speed": 115
+    }
+  },
+  "21": {
+    "ability2": "Sniper"
+  },
+  "22": {
+    "ability2": "Sniper",
+    "baseStats": {
+      "attack": 100,
+      "spAttack": 60,
+      "spDefense": 60
+    }
+  },
+  "24": {
+    "baseStats": {
+      "attack": 95,
+      "defense": 70,
+      "spAttack": 55,
+      "spDefense": 85,
+      "speed": 85
+    }
+  },
+  "25": {
+    "ability2": "Lighting Rod"
+  },
+  "26": {
+    "ability2": "Lighting Rod",
+    "baseStats": {
+      "attack": 100,
+      "spAttack": 100
+    }
+  },
+  "27": {
+    "ability2": "Sand Rush"
+  },
+  "28": {
+    "ability2": "Sand Rush"
+  },
+  "37": {
+    "ability2": "Drought"
+  },
+  "38": {
+    "ability2": "Drought"
+  },
+  "39": {
+    "baseStats": {
+      "defense": 40,
+      "spAttack": 60,
+      "spDefense": 40
+    }
+  },
+  "40": {
+    "baseStats": {
+      "hp": 150,
+      "attack": 80,
+      "defense": 55,
+      "spAttack": 95,
+      "spDefense": 60
+    }
+  },
+  "41": {
+    "ability2": "Infiltrator"
+  },
+  "42": {
+    "ability2": "Infiltrator"
+  },
+  "43": {
+    "ability2": "Run Away"
+  },
+  "44": {
+    "ability2": "Stench"
+  },
+  "45": {
+    "ability2": "Effect Spore"
+  },
+  "46": {
+    "baseStats": {
+      "attack": 80
+    }
+  },
+  "47": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 115,
+      "defense": 90,
+      "spAttack": 45,
+      "spDefense": 90
+    }
+  },
+  "49": {
+    "baseStats": {
+      "attack": 55,
+      "spAttack": 100,
+      "speed": 100
+    }
+  },
+  "51": {
+    "baseStats": {
+      "hp": 45,
+      "attack": 100,
+      "defense": 60,
+      "spDefense": 80
+    }
+  },
+  "53": {
+    "baseStats": {
+      "attack": 85,
+      "spAttack": 75
+    }
+  },
+  "69": {
+    "ability2": "Gluttony"
+  },
+  "70": {
+    "ability2": "Gluttony"
+  },
+  "71": {
+    "ability2": "Gluttony"
+  },
+  "83": {
+    "type1": "Fighting",
+    "type2": "Flying",
+    "baseStats": {
+      "hp": 65,
+      "attack": 130,
+      "defense": 65,
+      "spAttack": 30,
+      "spDefense": 65,
+      "speed": 120
+    }
+  },
+  "87": {
+    "baseStats": {
+      "attack": 80,
+      "spAttack": 80,
+      "speed": 60
+    }
+  },
+  "95": {
+    "baseStats": {
+      "hp": 65,
+      "attack": 75,
+      "speed": 100
+    }
+  },
+  "102": {
+    "ability2": "Harvest"
+  },
+  "103": {
+    "ability2": "Harvest"
+  },
+  "105": {
+    "baseStats": {
+      "hp": 70,
+      "speed": 60
+    }
+  },
+  "119": {
+    "baseStats": {
+      "attack": 100,
+      "defense": 80,
+      "spAttack": 40,
+      "speed": 80
+    }
+  },
+  "125": {
+    "ability2": "Vital Spirit"
+  },
+  "126": {
+    "ability2": "Vital Spirit"
+  },
+  "129": {
+    "ability2": "Rattled"
+  },
+  "130": {
+    "ability2": "Moxie"
+  },
+  "132": {
+    "ability2": "Imposter"
+  },
+  "134": {
+    "ability2": "Hydration"
+  },
+  "135": {
+    "ability2": "Quick Feet"
+  },
+  "136": {
+    "ability2": "Guts",
+    "baseStats": {
+      "spAttack": 65,
+      "speed": 95
+    }
+  },
+  "144": {
+    "ability2": "Snow Cloak"
+  },
+  "145": {
+    "ability2": "Static"
+  },
+  "146": {
+    "ability2": "Flame Body"
+  },
+  "147": {
+    "ability2": "Marvel Scale"
+  },
+  "148": {
+    "ability2": "Marvel Scale"
+  },
+  "149": {
+    "ability2": "Multiscale"
+  },
+  "150": {
+    "ability2": "Unnerve"
+  },
+  "152": {
+    "ability2": "Natural Cure"
+  },
+  "153": {
+    "ability2": "Natural Cure"
+  },
+  "154": {
+    "ability2": "Natural Cure"
+  },
+  "155": {
+    "ability2": "Flash Fire"
+  },
+  "156": {
+    "ability2": "Flash Fire"
+  },
+  "157": {
+    "ability2": "Flash Fire"
+  },
+  "158": {
+    "ability2": "Sheer Force"
+  },
+  "159": {
+    "ability2": "Sheer Force"
+  },
+  "160": {
+    "ability2": "Sheer Force"
+  },
+  "162": {
+    "ability1": "Limber",
+    "baseStats": {
+      "hp": 95,
+      "attack": 85,
+      "defense": 65,
+      "spAttack": 40,
+      "speed": 100
+    }
+  },
+  "163": {
+    "baseStats": {
+      "attack": 25,
+      "defense": 25,
+      "spAttack": 45,
+      "spDefense": 65
+    }
+  },
+  "164": {
+    "ability2": "Analytic",
+    "type1": "Psychic",
+    "type2": "Flying",
+    "baseStats": {
+      "attack": 30,
+      "defense": 60,
+      "spAttack": 90,
+      "spDefense": 110,
+      "speed": 75
+    }
+  },
+  "165": {
+    "baseStats": {
+      "attack": 50,
+      "spAttack": 20
+    }
+  },
+  "166": {
+    "baseStats": {
+      "attack": 110,
+      "spAttack": 40
+    }
+  },
+  "167": {
+    "baseStats": {
+      "attack": 70,
+      "speed": 40
+    }
+  },
+  "168": {
+    "baseStats": {
+      "attack": 120,
+      "spAttack": 50,
+      "speed": 80
+    }
+  },
+  "169": {
+    "ability2": "Infiltrator"
+  },
+  "172": {
+    "ability2": "Lightning Rod"
+  },
+  "182": {
+    "ability2": "Healer"
+  },
+  "184": {
+    "baseStats": {
+      "spAttack": 80
+    }
+  },
+  "185": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 110,
+      "defense": 125,
+      "spAttack": 40,
+      "spDefense": 75
+    }
+  },
+  "187": {
+    "baseStats": {
+      "attack": 50,
+      "spAttack": 50,
+      "spDefense": 60,
+      "speed": 55
+    }
+  },
+  "188": {
+    "baseStats": {
+      "attack": 65,
+      "spAttack": 65,
+      "spDefense": 75
+    }
+  },
+  "189": {
+    "baseStats": {
+      "attack": 75,
+      "spAttack": 75
+    }
+  },
+  "192": {
+    "baseStats": {
+      "hp": 95,
+      "attack": 55,
+      "defense": 95,
+      "spAttack": 125,
+      "spDefense": 105
+    }
+  },
+  "194": {
+    "baseStats": {
+      "attack": 55,
+      "defense": 55
+    }
+  },
+  "195": {
+    "baseStats": {
+      "attack": 95,
+      "defense": 95
+    }
+  },
+  "196": {
+    "ability2": "Magic Bounce"
+  },
+  "197": {
+    "ability2": "Poison Touch"
+  },
+  "200": {
+    "type1": "Ghost",
+    "type2": "Fairy"
+  },
+  "201": {
+    "baseStats": {
+      "hp": 50,
+      "attack": 150,
+      "defense": 50,
+      "spAttack": 150,
+      "spDefense": 50,
+      "speed": 50
+    }
+  },
+  "202": {
+    "baseStats": {
+      "hp": 240,
+      "attack": 30,
+      "defense": 60,
+      "spAttack": 30,
+      "spDefense": 60,
+      "speed": 30
+    }
+  },
+  "204": {
+    "ability2": "Overcoat"
+  },
+  "205": {
+    "ability2": "Overcoat"
+  },
+  "206": {
+    "ability2": "Pixilate",
+    "type1": "Normal",
+    "type2": "Fairy",
+    "baseStats": {
+      "hp": 110,
+      "attack": 80,
+      "defense": 80,
+      "speed": 55
+    }
+  },
+  "211": {
+    "baseStats": {
+      "attack": 100,
+      "speed": 90
+    }
+  },
+  "215": {
+    "ability2": "Technician"
+  },
+  "218": {
+    "baseStats": {
+      "hp": 50,
+      "attack": 50,
+      "defense": 50,
+      "spAttack": 80,
+      "spDefense": 50
+    }
+  },
+  "219": {
+    "ability1": "Solid Rock",
+    "baseStats": {
+      "hp": 80,
+      "spAttack": 115,
+      "spDefense": 110
+    }
+  },
+  "222": {
+    "ability1": "Regenerator",
+    "baseStats": {
+      "hp": 75,
+      "defense": 105,
+      "spAttack": 85,
+      "spDefense": 105
+    }
+  },
+  "225": {
+    "ability2": "Aerilate",
+    "baseStats": {
+      "hp": 65,
+      "attack": 80,
+      "defense": 65,
+      "spAttack": 110,
+      "spDefense": 65,
+      "speed": 120
+    }
+  },
+  "231": {
+    "ability2": "Sand Veil"
+  },
+  "232": {
+    "ability2": "Sand Veil"
+  },
+  "239": {
+    "ability2": "Vital Spirit"
+  },
+  "240": {
+    "ability2": "Vital Spirit"
+  },
+  "243": {
+    "ability2": "Volt Absorb"
+  },
+  "244": {
+    "ability2": "Flash Fire"
+  },
+  "245": {
+    "ability2": "Water Absorb"
+  },
+  "246": {
+    "ability2": "Sand Veil"
+  },
+  "248": {
+    "ability2": "Unnerve"
+  },
+  "249": {
+    "ability2": "Multiscale"
+  },
+  "250": {
+    "ability2": "Regenerator"
+  },
+  "252": {
+    "ability2": "Unburden"
+  },
+  "253": {
+    "ability2": "Unburden"
+  },
+  "254": {
+    "ability2": "Unburden"
+  },
+  "255": {
+    "ability2": "Speed Boost"
+  },
+  "256": {
+    "ability2": "Speed Boost"
+  },
+  "257": {
+    "ability2": "Speed Boost"
+  },
+  "258": {
+    "ability2": "Damp"
+  },
+  "259": {
+    "ability2": "Damp"
+  },
+  "260": {
+    "ability2": "Damp"
+  },
+  "262": {
+    "baseStats": {
+      "attack": 110,
+      "speed": 80
+    }
+  },
+  "263": {
+    "baseStats": {
+      "attack": 40,
+      "spAttack": 20
+    }
+  },
+  "264": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 90,
+      "defense": 60,
+      "spAttack": 40,
+      "spDefense": 60,
+      "speed": 110
+    }
+  },
+  "265": {
+    "ability2": "Run Away"
+  },
+  "267": {
+    "ability2": "Rivalry",
+    "baseStats": {
+      "hp": 65,
+      "defense": 55,
+      "spAttack": 120,
+      "spDefense": 55,
+      "speed": 85
+    }
+  },
+  "269": {
+    "ability2": "Compound Eyes",
+    "baseStats": {
+      "spAttack": 85,
+      "spDefense": 120
+    }
+  },
+  "276": {
+    "ability2": "Scrappy"
+  },
+  "277": {
+    "ability2": "Scrappy",
+    "baseStats": {
+      "attack": 95,
+      "spDefense": 60
+    }
+  },
+  "278": {
+    "ability2": "Rain Dish"
+  },
+  "279": {
+    "ability2": "Rain Dish",
+    "baseStats": {
+      "hp": 80
+    }
+  },
+  "280": {
+    "baseStats": {
+      "spAttack": 65,
+      "spDefense": 55
+    }
+  },
+  "281": {
+    "baseStats": {
+      "spAttack": 85,
+      "spDefense": 75
+    }
+  },
+  "283": {
+    "ability2": "Speed Boost",
+    "baseStats": {
+      "attack": 60,
+      "spAttack": 62
+    }
+  },
+  "284": {
+    "ability2": "Levitate",
+    "type1": "Bug",
+    "type2": "Water",
+    "baseStats": {
+      "attack": 50,
+      "defense": 65,
+      "spAttack": 105,
+      "spDefense": 105,
+      "speed": 85
+    }
+  },
+  "290": {
+    "ability2": "Run Away"
+  },
+  "291": {
+    "ability2": "Infiltrator"
+  },
+  "293": {
+    "ability2": "Rattled"
+  },
+  "294": {
+    "ability2": "Scrappy"
+  },
+  "295": {
+    "ability2": "Scrappy"
+  },
+  "300": {
+    "baseStats": {
+      "spAttack": 45,
+      "spDefense": 45
+    }
+  },
+  "301": {
+    "baseStats": {
+      "hp": 80,
+      "spAttack": 100,
+      "spDefense": 65,
+      "speed": 80
+    }
+  },
+  "302": {
+    "baseStats": {
+      "hp": 55,
+      "attack": 90,
+      "defense": 130,
+      "spAttack": 90,
+      "spDefense": 120,
+      "speed": 25
+    }
+  },
+  "303": {
+    "baseStats": {
+      "hp": 55,
+      "attack": 110,
+      "defense": 130,
+      "spAttack": 60,
+      "spDefense": 100,
+      "speed": 55
+    }
+  },
+  "311": {
+    "ability2": "Victory Star",
+    "baseStats": {
+      "hp": 70,
+      "attack": 60,
+      "defense": 50,
+      "spAttack": 95,
+      "spDefense": 85,
+      "speed": 105
+    }
+  },
+  "312": {
+    "ability2": "Victory Star",
+    "baseStats": {
+      "hp": 70,
+      "attack": 50,
+      "defense": 60,
+      "spAttack": 85,
+      "spDefense": 95,
+      "speed": 105
+    }
+  },
+  "313": {
+    "type1": "Bug",
+    "type2": "Fairy",
+    "baseStats": {
+      "attack": 105,
+      "defense": 60,
+      "spAttack": 45,
+      "spDefense": 80,
+      "speed": 95
+    }
+  },
+  "314": {
+    "type1": "Bug",
+    "type2": "Fairy",
+    "baseStats": {
+      "attack": 45,
+      "defense": 60,
+      "spAttack": 105,
+      "spDefense": 80,
+      "speed": 95
+    }
+  },
+  "318": {
+    "ability2": "Speed Boost"
+  },
+  "319": {
+    "ability2": "Speed Boost"
+  },
+  "324": {
+    "ability2": "Shell Armor"
+  },
+  "327": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 80,
+      "defense": 80,
+      "spAttack": 80,
+      "spDefense": 80,
+      "speed": 80
+    }
+  },
+  "330": {
+    "baseStats": {
+      "attack": 110,
+      "spAttack": 90,
+      "speed": 110
+    }
+  },
+  "331": {
+    "ability2": "Water Absorb"
+  },
+  "332": {
+    "ability2": "Water Absorb"
+  },
+  "333": {
+    "ability2": "Cloud Nine"
+  },
+  "334": {
+    "ability2": "Cloud Nine"
+  },
+  "335": {
+    "ability2": "Toxic Boost"
+  },
+  "336": {
+    "ability2": "Infiltrator"
+  },
+  "337": {
+    "baseStats": {
+      "hp": 80,
+      "defense": 80,
+      "spAttack": 110,
+      "spDefense": 100
+    }
+  },
+  "338": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 110,
+      "defense": 100,
+      "spDefense": 80
+    }
+  },
+  "345": {
+    "ability2": "Storm Drain"
+  },
+  "346": {
+    "ability2": "Storm Drain"
+  },
+  "347": {
+    "ability2": "Swift Swim"
+  },
+  "348": {
+    "ability2": "Swift Swim"
+  },
+  "351": {
+    "baseStats": {
+      "hp": 60,
+      "attack": 60,
+      "defense": 60,
+      "spAttack": 100,
+      "spDefense": 100,
+      "speed": 100
+    }
+  },
+  "352": {
+    "ability2": "Protean",
+    "baseStats": {
+      "hp": 80,
+      "attack": 100,
+      "defense": 80
+    }
+  },
+  "355": {
+    "ability2": "Frisk"
+  },
+  "356": {
+    "ability2": "Frisk"
+  },
+  "357": {
+    "baseStats": {
+      "hp": 105,
+      "attack": 75,
+      "defense": 105,
+      "spAttack": 85,
+      "spDefense": 105,
+      "speed": 60
+    }
+  },
+  "358": {
+    "baseStats": {
+      "hp": 80,
+      "attack": 35,
+      "defense": 85,
+      "speed": 80
+    }
+  },
+  "366": {
+    "ability2": "Rattled"
+  },
+  "367": {
+    "ability2": "Water Veil"
+  },
+  "368": {
+    "ability2": "Hydration"
+  },
+  "370": {
+    "ability2": "Cute Charm",
+    "type1": "Water",
+    "type2": "Fairy",
+    "baseStats": {
+      "hp": 45,
+      "spAttack": 100,
+      "spDefense": 90,
+      "speed": 145
+    }
+  },
+  "371": {
+    "ability2": "Sheer Force"
+  },
+  "372": {
+    "ability2": "Overcoat"
+  },
+  "373": {
+    "ability2": "Moxie"
+  },
+  "374": {
+    "ability2": "Light Metal"
+  },
+  "375": {
+    "ability2": "Light Metal"
+  },
+  "376": {
+    "ability2": "Light Metal"
+  },
+  "377": {
+    "ability2": "Sturdy"
+  },
+  "378": {
+    "ability2": "Ice Body"
+  },
+  "379": {
+    "ability2": "Light Metal"
+  },
+  "387": {
+    "ability2": "Shell Armor"
+  },
+  "388": {
+    "ability2": "Shell Armor"
+  },
+  "389": {
+    "ability2": "Shell Armor"
+  },
+  "390": {
+    "ability2": "Iron Fist"
+  },
+  "391": {
+    "ability2": "Iron Fist"
+  },
+  "392": {
+    "ability2": "Iron Fist"
+  },
+  "393": {
+    "ability2": "Defiant"
+  },
+  "394": {
+    "ability2": "Defiant"
+  },
+  "395": {
+    "ability2": "Defiant"
+  },
+  "396": {
+    "ability2": "Reckless"
+  },
+  "397": {
+    "ability2": "Reckless"
+  },
+  "398": {
+    "ability2": "Reckless"
+  },
+  "400": {
+    "baseStats": {
+      "hp": 90,
+      "attack": 95,
+      "defense": 65,
+      "speed": 75
+    }
+  },
+  "401": {
+    "ability2": "Run Away"
+  },
+  "402": {
+    "ability2": "Technician",
+    "baseStats": {
+      "hp": 80,
+      "attack": 110,
+      "defense": 65,
+      "spDefense": 65
+    }
+  },
+  "405": {
+    "type1": "Electric",
+    "type2": "Dark"
+  },
+  "408": {
+    "ability2": "Sheer Force"
+  },
+  "409": {
+    "ability2": "Sheer Force"
+  },
+  "410": {
+    "ability2": "Soundproof"
+  },
+  "411": {
+    "ability2": "Soundproof"
+  },
+  "412": {
+    "ability2": "Overcoat"
+  },
+  "413": {
+    "ability2": "Overcoat",
+    "baseStats": {
+      "hp": 80,
+      "attack": 50,
+      "defense": 100,
+      "spAttack": 90,
+      "spDefense": 110,
+      "speed": 30
+    }
+  },
+  "414": {
+    "ability2": "Tinted Lens",
+    "baseStats": {
+      "hp": 80,
+      "attack": 100,
+      "spAttack": 100,
+      "speed": 80
+    }
+  },
+  "415": {
+    "ability2": "Hustle"
+  },
+  "416": {
+    "ability2": "Unnerve"
+  },
+  "417": {
+    "ability1": "Adaptability",
+    "baseStats": {
+      "hp": 70,
+      "attack": 60,
+      "defense": 90,
+      "spAttack": 60
+    }
+  },
+  "418": {
+    "ability2": "Water Veil"
+  },
+  "419": {
+    "ability2": "Water Veil"
+  },
+  "421": {
+    "baseStats": {
+      "spAttack": 120,
+      "spDefense": 110,
+      "defense": 80,
+      "speed": 115
+    }
+  },
+  "429": {
+    "type1": "Ghost",
+    "type2": "Fairy"
+  },
+  "441": {
+    "ability1": "Gale Wings",
+    "baseStats": {
+      "hp": 80,
+      "defense": 55,
+      "spAttack": 110,
+      "spDefense": 55,
+      "speed": 110
+    }
+  },
+  "442": {
+    "ability2": "Infiltrator"
+  },
+  "443": {
+    "ability2": "Rough Skin"
+  },
+  "444": {
+    "ability2": "Rough Skin"
+  },
+  "445": {
+    "ability2": "Rough Skin"
+  },
+  "449": {
+    "ability2": "Sand Force"
+  },
+  "450": {
+    "ability2": "Sand Force"
+  },
+  "457": {
+    "baseStats": {
+      "hp": 75,
+      "attack": 80,
+      "defense": 85,
+      "spAttack": 80,
+      "spDefense": 90,
+      "speed": 95
+    }
+  },
+  "459": {
+    "ability2": "Soundproof"
+  },
+  "460": {
+    "ability2": "Soundproof"
+  },
+  "461": {
+    "ability2": "Technician"
+  },
+  "466": {
+    "ability2": "Vital Spirit",
+    "type1": "Electric",
+    "type2": "Fighting"
+  },
+  "467": {
+    "ability2": "Vital Spirit"
+  },
+  "470": {
+    "ability2": "Chlorophyll"
+  },
+  "471": {
+    "ability2": "Ice Body"
+  },
+  "475": {
+    "ability2": "Justified"
+  },
+  "477": {
+    "ability2": "Frisk"
+  },
+  "478": {
+    "ability2": "Cursed Body"
+  },
+  "480": {
+    "type1": "Psychic",
+    "type2": "Fairy"
+  },
+  "481": {
+    "type1": "Psychic",
+    "type2": "Fairy"
+  },
+  "482": {
+    "type1": "Psychic",
+    "type2": "Fairy"
+  },
+  "483": {
+    "ability2": "Telepathy"
+  },
+  "484": {
+    "ability2": "Telepathy"
+  },
+  "485": {
+    "ability2": "Flame Body"
+  },
+  "487": {
+    "ability2": "Telepathy"
+  },
+  "495": {
+    "ability2": "Contrary"
+  },
+  "496": {
+    "ability2": "Contrary"
+  },
+  "497": {
+    "ability2": "Contrary",
+    "type1": "Grass",
+    "type2": "Dragon",
+    "baseStats": {
+      "attack": 80,
+      "spAttack": 80
+    }
+  },
+  "498": {
+    "ability2": "Thick Fat"
+  },
+  "499": {
+    "ability2": "Thick Fat"
+  },
+  "500": {
+    "ability2": "Reckless",
+    "baseStats": {
+      "attack": 128
+    }
+  },
+  "501": {
+    "ability2": "Shell Armor"
+  },
+  "502": {
+    "ability2": "Shell Armor",
+    "type1": "Water",
+    "type2": "Fighting"
+  },
+  "503": {
+    "ability2": "Shell Armor",
+    "type1": "Water",
+    "type2": "Fighting",
+    "baseStats": {
+      "spAttack": 113
+    }
+  },
+  "505": {
+    "baseStats": {
+      "hp": 65,
+      "attack": 95,
+      "defense": 70,
+      "spDefense": 70,
+      "speed": 80
+    }
+  },
+  "510": {
+    "baseStats": {
+      "hp": 65,
+      "attack": 90,
+      "spAttack": 90,
+      "speed": 115
+    }
+  },
+  "511": {
+    "ability2": "Overgrow"
+  },
+  "512": {
+    "ability2": "Overgrow"
+  },
+  "513": {
+    "ability2": "Blaze"
+  },
+  "514": {
+    "ability2": "Blaze"
+  },
+  "515": {
+    "ability2": "Torrent"
+  },
+  "516": {
+    "ability2": "Torrent"
+  },
+  "524": {
+    "ability2": "Sand Force"
+  },
+  "525": {
+    "ability2": "Sand Force"
+  },
+  "526": {
+    "ability2": "Sand Force"
+  },
+  "528": {
+    "baseStats": {
+      "hp": 75,
+      "attack": 60,
+      "defense": 60,
+      "spAttack": 95,
+      "spDefense": 60,
+      "speed": 115
+    }
+  },
+  "554": {
+    "ability2": "Inner Focus"
+  },
+  "555": {
+    "ability2": "Zen Mode"
+  },
+  "582": {
+    "ability2": "Weak Armor"
+  },
+  "583": {
+    "ability2": "Weak Armor"
+  },
+  "584": {
+    "ability2": "Weak Armor"
+  },
+  "587": {
+    "ability2": "Motor Drive",
+    "baseStats": {
+      "hp": 60,
+      "attack": 85,
+      "defense": 65,
+      "spAttack": 85,
+      "spDefense": 65,
+      "speed": 105
+    }
+  },
+  "590": {
+    "ability2": "Regenerator"
+  },
+  "591": {
+    "ability2": "Regenerator"
+  },
+  "613": {
+    "ability2": "Rattled"
+  },
+  "614": {
+    "ability2": "Tough Claws",
+    "type1": "Ice",
+    "type2": "Fighting"
+  },
+  "636": {
+    "ability2": "Swarm"
+  },
+  "637": {
+    "ability2": "Swarm"
+  },
+  "641": {
+    "ability2": "Defiant"
+  },
+  "642": {
+    "ability2": "Defiant"
+  },
+  "645": {
+    "ability2": "Sheer Force"
+  },
+  "650": {
+    "ability2": "Bulletproof"
+  },
+  "651": {
+    "ability2": "Bulletproof"
+  },
+  "652": {
+    "ability2": "Bulletproof"
+  },
+  "653": {
+    "ability2": "Magician"
+  },
+  "654": {
+    "ability2": "Magician"
+  },
+  "655": {
+    "ability2": "Magician"
+  },
+  "656": {
+    "ability2": "Protean"
+  },
+  "657": {
+    "ability2": "Protean"
+  },
+  "658": {
+    "ability2": "Protean"
+  },
+  "660": {
+    "baseStats": {
+      "hp": 96,
+      "defense": 80,
+      "spDefense": 80
+    }
+  },
+  "661": {
+    "ability2": "Gale Wings"
+  },
+  "662": {
+    "ability2": "Gale Wings"
+  },
+  "663": {
+    "ability2": "Gale Wings"
+  },
+  "666": {
+    "baseStats": {
+      "attack": 50,
+      "defense": 55,
+      "spAttack": 115,
+      "spDefense": 55,
+      "speed": 100
+    }
+  },
+  "669": {
+    "ability2": "Symbiosis"
+  },
+  "670": {
+    "ability2": "Symbiosis"
+  },
+  "671": {
+    "ability2": "Symbiosis"
+  },
+  "672": {
+    "ability2": "Grass Pelt"
+  },
+  "673": {
+    "ability2": "Grass Pelt"
+  },
+  "682": {
+    "ability2": "Aroma Veil"
+  },
+  "683": {
+    "ability2": "Aroma Veil"
+  },
+  "684": {
+    "ability2": "Unburden"
+  },
+  "685": {
+    "ability2": "Unburden"
+  },
+  "696": {
+    "ability2": "Sturdy"
+  },
+  "697": {
+    "ability2": "Rock Head"
+  },
+  "698": {
+    "ability2": "Snow Warning"
+  },
+  "699": {
+    "ability2": "Snow Warning"
+  },
+  "700": {
+    "ability2": "Pixilate"
+  },
+  "702": {
+    "baseStats": {
+      "hp": 75,
+      "attack": 60,
+      "defense": 60,
+      "spAttack": 90,
+      "spDefense": 70,
+      "speed": 110
+    }
+  },
+  "703": {
+    "ability2": "Sturdy"
+  },
+  "707": {
+    "ability2": "Magician"
+  }
+}

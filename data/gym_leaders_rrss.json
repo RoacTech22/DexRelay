@@ -1,0 +1,797 @@
+{
+  "_source": "Rising Ruby / Sinking Sapphire (Drayano), AreaChanges.txt -- parseado 09/09/2026 por build_gym_leaders_hackroom.py. typeKeys por Pokémon vacío a propósito (pendiente: cruzar con PokemonChanges.txt en la próxima parte de la Fase E).",
+  "leaders": [
+    {
+      "order": 1,
+      "name": "Roxanne",
+      "typeKey": "Rock",
+      "badgeName": "Stone Badge",
+      "gymLocation": "Rustboro City",
+      "team": [
+        {
+          "speciesId": 566,
+          "species": "Archen",
+          "level": 14,
+          "typeKeys": [],
+          "moves": [
+            "Rock Tomb",
+            "Wing Attack",
+            "Double Team",
+            "Quick Attack"
+          ],
+          "item": "Sharp Beak",
+          "isAce": false,
+          "ability": "Defeatist"
+        },
+        {
+          "speciesId": 138,
+          "species": "Omanyte",
+          "level": 14,
+          "typeKeys": [],
+          "moves": [
+            "Ancient Power",
+            "Bubble Beam",
+            "Icy Wind",
+            "Tickle"
+          ],
+          "item": "Mystic Water",
+          "isAce": false,
+          "ability": "Weak Armor"
+        },
+        {
+          "speciesId": 696,
+          "species": "Tyrunt",
+          "level": 14,
+          "typeKeys": [],
+          "moves": [
+            "Rock Tomb",
+            "Dragon Pulse",
+            "Bite",
+            "Stealth Rock"
+          ],
+          "item": "Dragon Fang",
+          "isAce": false,
+          "ability": "Strong Jaw"
+        },
+        {
+          "speciesId": 347,
+          "species": "Anorith",
+          "level": 14,
+          "typeKeys": [],
+          "moves": [
+            "Rock Tomb",
+            "Bug Bite",
+            "Aqua Jet",
+            "Sandstorm"
+          ],
+          "item": "SilverPowder",
+          "isAce": false,
+          "ability": "Battle Armor"
+        },
+        {
+          "speciesId": 345,
+          "species": "Lileep",
+          "level": 14,
+          "typeKeys": [],
+          "moves": [
+            "Rock Tomb",
+            "Bullet Seed",
+            "Acid",
+            "Sandstorm"
+          ],
+          "item": "Miracle Seed",
+          "isAce": false,
+          "ability": "Storm Drain"
+        },
+        {
+          "speciesId": 299,
+          "species": "Nosepass",
+          "level": 16,
+          "typeKeys": [],
+          "moves": [
+            "Rock Tomb",
+            "Magnitude",
+            "Zap Cannon",
+            "Lock-On"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": true,
+          "ability": "Sand Force"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Brawly",
+      "typeKey": "Fighting",
+      "badgeName": "Knuckle Badge",
+      "gymLocation": "Dewford Town",
+      "team": [
+        {
+          "speciesId": 66,
+          "species": "Machop",
+          "level": 17,
+          "typeKeys": [],
+          "moves": [
+            "Bulk Up",
+            "Low Sweep",
+            "Bullet Punch",
+            "Rock Tomb"
+          ],
+          "item": "Berry Juice",
+          "isAce": false,
+          "ability": "No Guard"
+        },
+        {
+          "speciesId": 307,
+          "species": "Meditite",
+          "level": 17,
+          "typeKeys": [],
+          "moves": [
+            "Substitute",
+            "Focus Punch",
+            "Psyshock",
+            "Shadow Ball"
+          ],
+          "item": "Black Belt",
+          "isAce": false,
+          "ability": "Pure Power"
+        },
+        {
+          "speciesId": 674,
+          "species": "Pancham",
+          "level": 17,
+          "typeKeys": [],
+          "moves": [
+            "Bulk Up",
+            "Power-Up Punch",
+            "Shadow Claw",
+            "Aerial Ace"
+          ],
+          "item": "Muscle Band",
+          "isAce": false,
+          "ability": "Iron Fist"
+        },
+        {
+          "speciesId": 559,
+          "species": "Scraggy",
+          "level": 17,
+          "typeKeys": [],
+          "moves": [
+            "Headbutt",
+            "Drain Punch",
+            "Feint Attack",
+            "Fake Out"
+          ],
+          "item": "Assault Vest",
+          "isAce": false,
+          "ability": "Intimidate"
+        },
+        {
+          "speciesId": 619,
+          "species": "Mienfoo",
+          "level": 17,
+          "typeKeys": [],
+          "moves": [
+            "Calm Mind",
+            "Fake Out",
+            "Aura Sphere",
+            "Hidden Power"
+          ],
+          "item": "Wise Glasses",
+          "isAce": false,
+          "ability": "Inner Focus"
+        },
+        {
+          "speciesId": 297,
+          "species": "Hariyama",
+          "level": 19,
+          "typeKeys": [],
+          "moves": [
+            "Bulk Up",
+            "Arm Thrust",
+            "Bullet Punch",
+            "Smack Down"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": true,
+          "ability": "Sheer Force"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Wattson",
+      "typeKey": "Electric",
+      "badgeName": "Dynamo Badge",
+      "gymLocation": "Mauville City",
+      "team": [
+        {
+          "speciesId": 101,
+          "species": "Electrode",
+          "level": 26,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Electro Ball",
+            "Thunder Wave",
+            "Light Screen"
+          ],
+          "item": "Magnet",
+          "isAce": false,
+          "ability": "Aftermath"
+        },
+        {
+          "speciesId": 82,
+          "species": "Magneton",
+          "level": 26,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Mirror Shot",
+            "Electric Terrain",
+            "Supersonic"
+          ],
+          "item": "Air Balloon",
+          "isAce": false,
+          "ability": "Sturdy"
+        },
+        {
+          "speciesId": 180,
+          "species": "Flaaffy",
+          "level": 26,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Thunder Wave",
+            "Fire Punch",
+            "Electric Terrain"
+          ],
+          "item": "Leftovers",
+          "isAce": false,
+          "ability": "Static"
+        },
+        {
+          "speciesId": 479,
+          "species": "Rotom",
+          "level": 26,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Ominous Wind",
+            "Thunder Wave",
+            "Confuse Ray"
+          ],
+          "item": "Spell Tag",
+          "isAce": false,
+          "ability": "Levitate"
+        },
+        {
+          "speciesId": 404,
+          "species": "Luxio",
+          "level": 26,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Night Slash",
+            "Ice Fang",
+            "Baby-Doll Eyes"
+          ],
+          "item": "Muscle Band",
+          "isAce": false,
+          "ability": "Intimidate"
+        },
+        {
+          "speciesId": 310,
+          "species": "Manectric",
+          "level": 28,
+          "typeKeys": [],
+          "moves": [
+            "Volt Switch",
+            "Flame Burst",
+            "Snarl",
+            "Electric Terrain"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": true,
+          "ability": "Static"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Flannery",
+      "typeKey": "Fire",
+      "badgeName": "Heat Badge",
+      "gymLocation": "Lavaridge Town",
+      "team": [
+        {
+          "speciesId": 38,
+          "species": "Ninetales",
+          "level": 36,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Solar Beam",
+            "Extrasensory",
+            "Hypnosis"
+          ],
+          "item": "Heat Rock",
+          "isAce": false,
+          "ability": "Drought"
+        },
+        {
+          "speciesId": 229,
+          "species": "Houndoom",
+          "level": 36,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Dark Pulse",
+            "Sludge Bomb",
+            "Solar Beam"
+          ],
+          "item": "White Herb",
+          "isAce": false,
+          "ability": "Flash Fire"
+        },
+        {
+          "speciesId": 655,
+          "species": "Delphox",
+          "level": 36,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Psyshock",
+            "Shadow Ball",
+            "Dazzling Gleam"
+          ],
+          "item": "White Herb",
+          "isAce": false,
+          "ability": "Blaze"
+        },
+        {
+          "speciesId": 219,
+          "species": "Magcargo",
+          "level": 36,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Earth Power",
+            "Rock Slide",
+            "Sunny Day"
+          ],
+          "item": "White Herb",
+          "isAce": false,
+          "ability": "Flame Body"
+        },
+        {
+          "speciesId": 323,
+          "species": "Camerupt",
+          "level": 36,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Earth Power",
+            "Flash Cannon",
+            "Rock Slide"
+          ],
+          "item": "White Herb",
+          "isAce": false,
+          "ability": "Solid Rock"
+        },
+        {
+          "speciesId": 324,
+          "species": "Torkoal",
+          "level": 38,
+          "typeKeys": [],
+          "moves": [
+            "Overheat",
+            "Earthquake",
+            "Rock Slide",
+            "Shell Smash"
+          ],
+          "item": "White Herb",
+          "isAce": true,
+          "ability": "White Smoke"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Norman",
+      "typeKey": "Normal",
+      "badgeName": "Balance Badge",
+      "gymLocation": "Petalburg City",
+      "team": [
+        {
+          "speciesId": 424,
+          "species": "Ambipom",
+          "level": 40,
+          "typeKeys": [],
+          "moves": [
+            "Fake Out",
+            "Double Hit",
+            "Acrobatics",
+            "Knock Off"
+          ],
+          "item": "Normal Gem",
+          "isAce": false,
+          "ability": "Technician"
+        },
+        {
+          "speciesId": 295,
+          "species": "Exploud",
+          "level": 40,
+          "typeKeys": [],
+          "moves": [
+            "Boomburst",
+            "Flamethrower",
+            "Ice Beam",
+            "Thunderbolt"
+          ],
+          "item": "Wise Glasses",
+          "isAce": false,
+          "ability": "Scrappy"
+        },
+        {
+          "speciesId": 398,
+          "species": "Staraptor",
+          "level": 40,
+          "typeKeys": [],
+          "moves": [
+            "Retaliate",
+            "Close Combat",
+            "U-turn",
+            "Sky Attack"
+          ],
+          "item": "Power Herb",
+          "isAce": false,
+          "ability": "Intimidate"
+        },
+        {
+          "speciesId": 586,
+          "species": "Sawsbuck",
+          "level": 40,
+          "typeKeys": [],
+          "moves": [
+            "Retaliate",
+            "Horn Leech",
+            "Jump Kick",
+            "Megahorn"
+          ],
+          "item": "Assault Vest",
+          "isAce": false,
+          "ability": "Sap Sipper"
+        },
+        {
+          "speciesId": 626,
+          "species": "Bouffalant",
+          "level": 40,
+          "typeKeys": [],
+          "moves": [
+            "Head Charge",
+            "Zen Headbutt",
+            "Megahorn",
+            "Revenge"
+          ],
+          "item": "Silk Scarf",
+          "isAce": false,
+          "ability": "Sap Sipper"
+        },
+        {
+          "speciesId": 289,
+          "species": "Slaking",
+          "level": 42,
+          "typeKeys": [],
+          "moves": [
+            "Retaliate",
+            "Rock Slide",
+            "Play Rough",
+            "Slack Off"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": true,
+          "ability": "Truant"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "Winona",
+      "typeKey": "Flying",
+      "badgeName": "Feather Badge",
+      "gymLocation": "Fortree City",
+      "team": [
+        {
+          "speciesId": 227,
+          "species": "Skarmory",
+          "level": 48,
+          "typeKeys": [],
+          "moves": [
+            "Iron Head",
+            "Brave Bird",
+            "Stealth Rock",
+            "Roost"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": false,
+          "ability": "Sturdy"
+        },
+        {
+          "speciesId": 430,
+          "species": "Honchkrow",
+          "level": 48,
+          "typeKeys": [],
+          "moves": [
+            "Night Slash",
+            "Brave Bird",
+            "Steel Wing",
+            "Thunder Wave"
+          ],
+          "item": "Scope Lens",
+          "isAce": false,
+          "ability": "Super Luck"
+        },
+        {
+          "speciesId": 561,
+          "species": "Sigilyph",
+          "level": 48,
+          "typeKeys": [],
+          "moves": [
+            "Psychic",
+            "Hurricane",
+            "Dazzling Gleam",
+            "Ice Beam"
+          ],
+          "item": "Magic Guard",
+          "isAce": false,
+          "ability": "Life Orb"
+        },
+        {
+          "speciesId": 130,
+          "species": "Gyarados",
+          "level": 48,
+          "typeKeys": [],
+          "moves": [
+            "Dragon Dance",
+            "Waterfall",
+            "Bounce",
+            "Earthquake"
+          ],
+          "item": "Wacan Berry",
+          "isAce": false,
+          "ability": "Intimidate"
+        },
+        {
+          "speciesId": 663,
+          "species": "Talonflame",
+          "level": 48,
+          "typeKeys": [],
+          "moves": [
+            "Brave Bird",
+            "Flare Blitz",
+            "Will-O-Wisp",
+            "Roost"
+          ],
+          "item": "Sharp Beak",
+          "isAce": false,
+          "ability": "Gale Wings"
+        },
+        {
+          "speciesId": 334,
+          "species": "Altaria",
+          "level": 50,
+          "typeKeys": [],
+          "moves": [
+            "Dragon Dance",
+            "Body Slam",
+            "Earthquake",
+            "Roost"
+          ],
+          "item": "Altarianite",
+          "isAce": true,
+          "ability": "Natural Cure"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "Tate & Liza",
+      "typeKey": "Psychic",
+      "badgeName": "Mind Badge",
+      "gymLocation": "Mossdeep City",
+      "team": [
+        {
+          "speciesId": 338,
+          "species": "Solrock",
+          "level": 60,
+          "typeKeys": [],
+          "moves": [
+            "Light Screen",
+            "Protect",
+            "Stone Edge",
+            "Flare Blitz"
+          ],
+          "item": "Focus Sash",
+          "isAce": false,
+          "ability": "Levitate"
+        },
+        {
+          "speciesId": 337,
+          "species": "Lunatone",
+          "level": 60,
+          "typeKeys": [],
+          "moves": [
+            "Reflect",
+            "Protect",
+            "Psychic",
+            "Moonblast"
+          ],
+          "item": "Focus Sash",
+          "isAce": false,
+          "ability": "Levitate"
+        },
+        {
+          "speciesId": 437,
+          "species": "Bronzong",
+          "level": 60,
+          "typeKeys": [],
+          "moves": [
+            "Reflect",
+            "Hypnosis",
+            "Gyro Ball",
+            "Earthquake"
+          ],
+          "item": "Sitrus Berry",
+          "isAce": false,
+          "ability": "Levitate"
+        },
+        {
+          "speciesId": 199,
+          "species": "Slowking",
+          "level": 60,
+          "typeKeys": [],
+          "moves": [
+            "Scald",
+            "Focus Blast",
+            "Psychic",
+            "Fire Blast"
+          ],
+          "item": "Assault Vest",
+          "isAce": false,
+          "ability": "Own Tempo"
+        },
+        {
+          "speciesId": 475,
+          "species": "Gallade",
+          "level": 62,
+          "typeKeys": [],
+          "moves": [
+            "Close Combat",
+            "Zen Headbutt",
+            "Knock Off",
+            "Leaf Blade"
+          ],
+          "item": "Life Orb",
+          "isAce": false,
+          "ability": "Justified"
+        },
+        {
+          "speciesId": 282,
+          "species": "Gardevoir",
+          "level": 62,
+          "typeKeys": [],
+          "moves": [
+            "Hyper Voice",
+            "Psychic",
+            "Thunderbolt",
+            "Protect"
+          ],
+          "item": "Gardevoirite",
+          "isAce": true,
+          "ability": "Trace"
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Wallace",
+      "typeKey": "Water",
+      "badgeName": "Rain Badge",
+      "gymLocation": "Sootopolis City",
+      "team": [
+        {
+          "speciesId": 186,
+          "species": "Politoed",
+          "level": 65,
+          "typeKeys": [],
+          "moves": [
+            "Hydro Pump",
+            "Ice Beam",
+            "Focus Blast",
+            "Hypnosis"
+          ],
+          "item": "Damp Rock",
+          "isAce": false,
+          "ability": "Drizzle"
+        },
+        {
+          "speciesId": 272,
+          "species": "Ludicolo",
+          "level": 65,
+          "typeKeys": [],
+          "moves": [
+            "Hydro Pump",
+            "Giga Drain",
+            "Ice Beam",
+            "Rain Dance"
+          ],
+          "item": "Life Orb",
+          "isAce": false,
+          "ability": "Swift Swim"
+        },
+        {
+          "speciesId": 230,
+          "species": "Kingdra",
+          "level": 65,
+          "typeKeys": [],
+          "moves": [
+            "Hydro Pump",
+            "Ice Beam",
+            "Dragon Pulse",
+            "Rain Dance"
+          ],
+          "item": "Mystic Water",
+          "isAce": false,
+          "ability": "Swift Swim"
+        },
+        {
+          "speciesId": 121,
+          "species": "Starmie",
+          "level": 65,
+          "typeKeys": [],
+          "moves": [
+            "Hydro Pump",
+            "Ice Beam",
+            "Thunder",
+            "Psychic"
+          ],
+          "item": "Expert Belt",
+          "isAce": false,
+          "ability": "Analytic"
+        },
+        {
+          "speciesId": 350,
+          "species": "Milotic",
+          "level": 67,
+          "typeKeys": [],
+          "moves": [
+            "Hydro Pump",
+            "Ice Beam",
+            "Recover",
+            "Protect"
+          ],
+          "item": "Leftovers",
+          "isAce": false,
+          "ability": "Cute Charm"
+        },
+        {
+          "speciesId": 260,
+          "species": "Swampert",
+          "level": 67,
+          "typeKeys": [],
+          "moves": [
+            "Waterfall",
+            "Ice Punch",
+            "Earthquake",
+            "Stone Edge"
+          ],
+          "item": "Swampertite",
+          "isAce": true,
+          "ability": "Torrent"
+        }
+      ]
+    }
+  ]
+}

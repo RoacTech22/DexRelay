@@ -257,6 +257,53 @@ CAPTURE_BUFFER_ENTRY_STRIDE = 0x1E4
 
 LAST_CAUGHT_ADDRESS = 0x08805638
 
+# ------------------------------------------------------------
+# RIVAL SALVAJE EN COMBATE (18/09/2026)
+# ------------------------------------------------------------
+# Dónde guarda el juego, como estructura PK6 cifrada completa, al
+# Pokémon rival de un combate salvaje. Sirve para saber la ESPECIE
+# de un encuentro que no se captura (Nuzlocke: "perdido").
+#
+# Confirmado en Omega Ruby 1.4 (proceso sango-1) con
+# tools/probes/memory/buscar_rival_pk6_absoluto.py en 5 combates
+# reales con especies distintas (Abra, Makuhita, Axew, Magikarp,
+# Taillow): 0x081FEEC8 y 0x081FFA6C contuvieron al rival en LOS 5;
+# LAST_CAUGHT_ADDRESS en 4 de 5 (falló en Magikarp), por eso va
+# última. Cada candidato se valida por checksum PK6, así que un
+# valor viejo o roto se descarta solo.
+#
+# Alpha Sapphire 1.4: NO se probó en vivo con este probe, pero se
+# usan las mismas direcciones por decisión del usuario (18/09/2026):
+# ya está confirmado en este proyecto que OR y AS 1.4 comparten
+# direcciones (badges, party, contador de capturas). Si en Alpha
+# Sapphire la especie del rival sale "Desconocido", correr el probe
+# en esa versión y separar las tuplas.
+_WILD_RIVAL_ADDRESSES_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: (
+        0x081FEEC8,
+        0x081FFA6C,
+        LAST_CAUGHT_ADDRESS,
+    ),
+    PROCESS_NAME_OMEGA_RUBY: (
+        0x081FEEC8,
+        0x081FFA6C,
+        LAST_CAUGHT_ADDRESS,
+    ),
+}
+
+
+def get_wild_rival_addresses(process_name):
+    """
+    Direcciones candidatas (en orden de prioridad) del PK6 del rival
+    salvaje para el proceso dado. Default a Alpha Sapphire, mismo
+    criterio que el resto de los getters de este archivo.
+    """
+
+    return _WILD_RIVAL_ADDRESSES_BY_PROCESS.get(
+        process_name,
+        _WILD_RIVAL_ADDRESSES_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
+
 
 # ============================================================
 # CONTADOR DE POKÉMON CAPTURADOS EN TOTAL
