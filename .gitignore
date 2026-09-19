@@ -66,3 +66,5 @@ data/*.json
 !data/pokemon_changes_rrss.json
 !data/pre_evolution_index.json
 !data/species_extra.json
+
+assets/pokemon/
