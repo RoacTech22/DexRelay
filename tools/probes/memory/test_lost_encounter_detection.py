@@ -48,6 +48,9 @@ class FakeReader:
     def read_total_caught_count(self):
         return self.total_caught
 
+    def read_wild_rival_species(self):
+        return self.last_caught_species
+
     def read_last_caught(self):
         if self.last_caught_species is None:
             return None
@@ -91,10 +94,26 @@ def _make_runtime(wild_flag_sequence):
     }
     runtime.combat_service.read = lambda: None
 
-    sequence = iter(wild_flag_sequence)
+    # Después de la secuencia dada, "sin combate" para siempre -- la
+    # resolución de "perdido" ahora es con reintentos (ver
+    # Runtime.LOST_ENCOUNTER_MAX_RETRIES, 10/09/2026), así que hacen
+    # falta ciclos extra después del fin de combate.
+    def _flags():
+        yield from wild_flag_sequence
+        while True:
+            yield None
+
+    sequence = _flags()
     runtime.combat_service.read_wild_flag = lambda: next(sequence)
 
     return runtime, reader, nuzlocke
+
+
+def _settle(runtime):
+    """Ciclos extra para que se agoten los reintentos del contador."""
+
+    for _ in range(Runtime.LOST_ENCOUNTER_MAX_RETRIES + 1):
+        runtime.update()
 
 
 def test_combate_salvaje_sin_captura_se_registra_perdido():
@@ -120,6 +139,7 @@ def test_combate_salvaje_sin_captura_se_registra_perdido():
     assert runtime._lost_encounter_snapshot["total_caught"] == 5
 
     runtime.update()  # salvaje -> inactivo, sin captura nueva
+    _settle(runtime)
     assert nuzlocke.lost_calls == [("Ruta 101", "Zigzagoon")]
     assert runtime._lost_encounter_snapshot is None
 
@@ -199,6 +219,7 @@ def test_combate_entrenador_no_dispara_snapshot_pero_no_rompe_tracking():
     assert nuzlocke.lost_calls == []
 
     runtime.update()  # entrenador -> inactivo: recién ahí finaliza
+    _settle(runtime)
     assert nuzlocke.lost_calls == [("Ruta 101", "Zigzagoon")]
 
     print(
@@ -226,6 +247,7 @@ def test_lectura_descartada_no_toca_el_estado():
     assert runtime._combat_was_active is True
 
     runtime.update()  # inactivo real: ahora sí finaliza
+    _settle(runtime)
     assert nuzlocke.lost_calls == [("Ruta 101", "Zigzagoon")]
 
     print(
@@ -252,6 +274,7 @@ def test_zona_sin_mapear_usa_placeholder():
     )
 
     runtime.update()
+    _settle(runtime)
     assert nuzlocke.lost_calls == [("Zona 999", "Zigzagoon")]
 
     print("OK - zona sin mapear usa placeholder 'Zona {id}'")
@@ -291,6 +314,7 @@ def test_flag_salvaje_tarda_varios_ciclos_en_poblarse():
     }
 
     runtime.update()  # fin de combate, sin captura
+    _settle(runtime)
     assert nuzlocke.lost_calls == [("Ruta 101", "Zigzagoon")]
 
     print(
@@ -328,6 +352,47 @@ def test_entrenador_genuino_nunca_toma_snapshot():
     )
 
 
+def test_sin_especie_rival_igual_registra_perdido():
+    """
+    Log real 18/09/2026: last_caught.species=None (LAST_CAUGHT_ADDRESS
+    no devuelve un Pokémon válido). Antes bloqueaba TODA la detección.
+    """
+
+    runtime, reader, nuzlocke = _make_runtime([True, True, None])
+
+    reader.last_caught_species = None
+
+    runtime.update()
+    assert runtime._lost_encounter_snapshot is not None
+    assert runtime._lost_encounter_snapshot["species"] is None
+
+    runtime.update()
+    runtime.update()  # fin de combate
+    _settle(runtime)
+    assert nuzlocke.lost_calls == [("Ruta 101", "Desconocido")]
+
+    print("OK - sin especie del rival igual registra 'perdido'")
+
+
+def test_especie_se_actualiza_durante_el_combate():
+    """El buffer puede traer al rival anterior al principio."""
+
+    runtime, reader, nuzlocke = _make_runtime([True, True, True, None])
+
+    reader.last_caught_species = "Wurmple"  # rival del combate anterior
+    runtime.update()
+    assert runtime._lost_encounter_snapshot["species"] == "Wurmple"
+
+    reader.last_caught_species = "Makuhita"  # ya se pobló el real
+    runtime.update()
+    runtime.update()
+    runtime.update()  # fin de combate
+    _settle(runtime)
+    assert nuzlocke.lost_calls == [("Ruta 101", "Makuhita")]
+
+    print("OK - la especie del rival se actualiza durante el combate")
+
+
 if __name__ == "__main__":
     test_combate_salvaje_sin_captura_se_registra_perdido()
     test_combate_salvaje_con_captura_no_registra_perdido()
@@ -337,3 +402,5 @@ if __name__ == "__main__":
     test_zona_sin_mapear_usa_placeholder()
     test_flag_salvaje_tarda_varios_ciclos_en_poblarse()
     test_entrenador_genuino_nunca_toma_snapshot()
+    test_sin_especie_rival_igual_registra_perdido()
+    test_especie_se_actualiza_durante_el_combate()
