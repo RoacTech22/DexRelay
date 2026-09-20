@@ -33,6 +33,7 @@ from app.core import log_capture
 log_capture.install()
 
 from app.core.app import Application
+from app.services.pkhex.bridge import PKHeXBridge
 
 # GUI v2 (pywebview), reemplaza a la Tkinter/ttkbootstrap
 # (app/gui/) como punto de entrada por defecto -- ver
@@ -57,6 +58,10 @@ def main():
         window.run()
     finally:
         app.stop()
+
+        # Cada servicio puede tener su propio proceso del bridge PKHeX;
+        # sin esto quedaban corriendo (huérfanos) tras cerrar la app.
+        PKHeXBridge.stop_all()
 
 
 if __name__ == "__main__":

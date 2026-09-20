@@ -1,10 +1,148 @@
+import atexit
 import json
 import subprocess
 import sys
 import threading
+import weakref
 from pathlib import Path
 
 from app.core import paths
+
+
+# Todas las instancias de PKHeXBridge con vida (cada servicio del
+# proyecto puede crear la suya). Bug real (18/09/2026, primer build
+# empaquetado): al cerrar DexRelay nadie llamaba a stop() de ningún
+# bridge, así que DexRelay.PKHeX.exe seguía corriendo. Se detienen
+# todos al salir (ver stop_all() y el atexit de abajo).
+_LIVE_BRIDGES = weakref.WeakSet()
+
+_kill_on_close_job = None
+
+
+def _get_kill_on_close_job():
+    """
+    Job Object de Windows con KILL_ON_JOB_CLOSE: si DexRelay muere de
+    forma abrupta (crash, "Finalizar tarea", corte de luz del proceso),
+    Windows mata solo a los bridges asignados -- no queda ningún
+    huérfano aunque no llegue a correr el atexit. Devuelve None si no
+    es Windows o algo falla (en ese caso queda la protección normal:
+    stop_all() + el fin de stdin que ahora sí termina el bridge).
+    """
+
+    global _kill_on_close_job
+
+    if sys.platform != "win32":
+        return None
+
+    if _kill_on_close_job is not None:
+        return _kill_on_close_job
+
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class _BasicLimits(ctypes.Structure):
+            _fields_ = [
+                ("PerProcessUserTimeLimit", ctypes.c_int64),
+                ("PerJobUserTimeLimit", ctypes.c_int64),
+                ("LimitFlags", wintypes.DWORD),
+                ("MinimumWorkingSetSize", ctypes.c_size_t),
+                ("MaximumWorkingSetSize", ctypes.c_size_t),
+                ("ActiveProcessLimit", wintypes.DWORD),
+                ("Affinity", ctypes.c_size_t),
+                ("PriorityClass", wintypes.DWORD),
+                ("SchedulingClass", wintypes.DWORD),
+            ]
+
+        class _IoCounters(ctypes.Structure):
+            _fields_ = [
+                (name, ctypes.c_uint64)
+                for name in (
+                    "ReadOperationCount",
+                    "WriteOperationCount",
+                    "OtherOperationCount",
+                    "ReadTransferCount",
+                    "WriteTransferCount",
+                    "OtherTransferCount",
+                )
+            ]
+
+        class _ExtendedLimits(ctypes.Structure):
+            _fields_ = [
+                ("BasicLimitInformation", _BasicLimits),
+                ("IoInfo", _IoCounters),
+                ("ProcessMemoryLimit", ctypes.c_size_t),
+                ("JobMemoryLimit", ctypes.c_size_t),
+                ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                ("PeakJobMemoryUsed", ctypes.c_size_t),
+            ]
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.CreateJobObjectW.restype = wintypes.HANDLE
+        kernel32.CreateJobObjectW.argtypes = [
+            wintypes.LPVOID,
+            wintypes.LPCWSTR,
+        ]
+        kernel32.SetInformationJobObject.restype = wintypes.BOOL
+        kernel32.SetInformationJobObject.argtypes = [
+            wintypes.HANDLE,
+            ctypes.c_int,
+            wintypes.LPVOID,
+            wintypes.DWORD,
+        ]
+
+        job = kernel32.CreateJobObjectW(None, None)
+
+        if not job:
+            return None
+
+        limits = _ExtendedLimits()
+        # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        limits.BasicLimitInformation.LimitFlags = 0x2000
+
+        ok = kernel32.SetInformationJobObject(
+            job,
+            9,  # JobObjectExtendedLimitInformation
+            ctypes.byref(limits),
+            ctypes.sizeof(limits),
+        )
+
+        if not ok:
+            return None
+
+        _kill_on_close_job = (kernel32, job)
+
+        return _kill_on_close_job
+
+    except Exception:
+        return None
+
+
+def _attach_to_kill_on_close_job(process):
+    job = _get_kill_on_close_job()
+
+    if job is None:
+        return
+
+    kernel32, handle = job
+
+    try:
+        from ctypes import wintypes
+
+        kernel32.AssignProcessToJobObject.restype = wintypes.BOOL
+        kernel32.AssignProcessToJobObject.argtypes = [
+            wintypes.HANDLE,
+            wintypes.HANDLE,
+        ]
+
+        kernel32.AssignProcessToJobObject(
+            handle, int(process._handle)
+        )
+
+    except Exception:
+        # Sin el job igual queda stop_all() al salir -- nunca romper
+        # el arranque del bridge por esto.
+        pass
 
 
 class PKHeXBridge:
@@ -33,6 +171,8 @@ class PKHeXBridge:
 
     def __init__(self):
         self.process = None
+
+        _LIVE_BRIDGES.add(self)
 
         # CORRECCIÓN REAL (09/09/2026, reportado por el usuario:
         # "ahora no me salen algunas evoluciones y en algunos
@@ -123,6 +263,8 @@ class PKHeXBridge:
             bufsize=1,
             creationflags=creationflags,
         )
+
+        _attach_to_kill_on_close_job(self.process)
 
     def is_running(self):
         """
@@ -430,6 +572,19 @@ class PKHeXBridge:
             }
         )
 
+    @classmethod
+    def stop_all(cls):
+        """
+        Detiene TODOS los bridges con vida (uno por servicio que haya
+        creado el suyo). Se llama al cerrar DexRelay.
+        """
+
+        for bridge in list(_LIVE_BRIDGES):
+            try:
+                bridge.stop()
+            except Exception:
+                pass
+
     def stop(self):
         """
         Detiene el proceso del bridge.
@@ -467,3 +622,6 @@ class PKHeXBridge:
 
         except OSError:
             pass
+
+
+atexit.register(PKHeXBridge.stop_all)

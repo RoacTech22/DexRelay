@@ -41,6 +41,17 @@ while (true)
 {
     string? input = Console.ReadLine();
 
+    // Bug real (18/09/2026, primer build empaquetado): ReadLine()
+    // devuelve null cuando Python cierra el pipe de stdin (cierre de
+    // DexRelay o proceso padre muerto). null es fin de entrada, NO una
+    // línea vacía: con el `continue` de abajo el bridge quedaba girando
+    // en un bucle infinito (100% de un núcleo) para siempre, como
+    // proceso huérfano. Terminar es lo correcto.
+    if (input is null)
+    {
+        break;
+    }
+
     if (string.IsNullOrWhiteSpace(input))
     {
         continue;
