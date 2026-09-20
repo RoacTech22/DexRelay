@@ -1,6 +1,29 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
+# NOTA (19/09/2026, primer build v0.3.0-alpha): el spec copiaba el
+# config.json PERSONAL del desarrollador al build (con
+# hackroom.enabled=true, que es solo para su ROM hack). Ahora se genera
+# una config de distribución limpia, con los defaults reales, y se
+# empaqueta como config.json -- el config.json de desarrollo no se
+# toca ni se distribuye. hackroom queda en false: quien use el ROM hack
+# lo activa desde Configuración (surte efecto sin reiniciar).
+import json
+import os
+
+_RELEASE_CONFIG = {
+    "azahar": {"process_name": "sango-2"},
+    "server": {"host": "localhost", "port": 8080},
+    "realtime": {"refresh_ms": 200},
+    "hackroom": {"enabled": False},
+}
+
+os.makedirs("releases/release_config", exist_ok=True)
+_RELEASE_CONFIG_PATH = "releases/release_config/config.json"
+
+with open(_RELEASE_CONFIG_PATH, "w", encoding="utf-8") as _f:
+    json.dump(_RELEASE_CONFIG, _f, indent=4)
+
 # NOTA (05/09/2026, junto con app/core/version.py): antes de correr
 # `pyinstaller DexRelay.spec`, generar el archivo VERSION en la raíz
 # del proyecto con el tag real de Git -- NO escribirlo a mano:
@@ -23,7 +46,7 @@ from PyInstaller.utils.hooks import collect_all
 # mostrar ninguna pantalla. Los sprites (assets/pokemon_full,
 # assets/gym_leaders, assets/pokemon_shuffle) sí estaban cubiertos
 # porque cuelgan de `assets/`, que ya estaba en la lista.
-datas = [('config.json', '.'), ('VERSION', '.'), ('assets', 'assets'), ('overlays', 'overlays'), ('panels', 'panels'), ('app/gui_web/web', 'app/gui_web/web'), ('releases/pkhex-bridge', 'releases/pkhex-bridge')]
+datas = [(_RELEASE_CONFIG_PATH, '.'), ('VERSION', '.'), ('assets', 'assets'), ('overlays', 'overlays'), ('panels', 'panels'), ('app/gui_web/web', 'app/gui_web/web'), ('releases/pkhex-bridge', 'releases/pkhex-bridge')]
 
 # NOTA (18/09/2026, revisión previa al tag v0.3.0-alpha): faltaba
 # empaquetar data/. Los catálogos estáticos curados (type_chart,
