@@ -36,6 +36,7 @@ prolijo", eso sería empezar a inventar de nuevo.
 from __future__ import annotations
 
 import subprocess
+import sys
 
 from app.core import paths
 
@@ -70,6 +71,13 @@ def _git_describe() -> str | None:
             capture_output=True,
             text=True,
             timeout=3,
+            # Sin esto, en el build empaquetado (console=False)
+            # Windows abre una ventana de terminal por cada llamada.
+            creationflags=(
+                subprocess.CREATE_NO_WINDOW
+                if sys.platform == "win32"
+                else 0
+            ),
         )
     except (OSError, subprocess.SubprocessError):
         # Git no instalado, no está en PATH, o tardó demasiado --

@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 import threading
 from pathlib import Path
 
@@ -99,6 +100,19 @@ class PKHeXBridge:
 
             self.process = None
 
+        # Bug real (18/09/2026, primer build empaquetado v0.3.0-alpha):
+        # el bridge es una app de CONSOLA, y como DexRelay.exe se
+        # empaqueta con console=False, Windows le abría una ventana
+        # de terminal propia cada vez que se lanzaba el proceso
+        # (al navegar a una página que lo usa por primera vez, o al
+        # reiniciarse). CREATE_NO_WINDOW lo evita sin afectar el
+        # stdin/stdout por pipes. Solo existe en Windows.
+        creationflags = (
+            subprocess.CREATE_NO_WINDOW
+            if sys.platform == "win32"
+            else 0
+        )
+
         self.process = subprocess.Popen(
             self._build_command(),
             stdin=subprocess.PIPE,
@@ -107,6 +121,7 @@ class PKHeXBridge:
             text=True,
             encoding="utf-8",
             bufsize=1,
+            creationflags=creationflags,
         )
 
     def is_running(self):
