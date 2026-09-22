@@ -17,12 +17,22 @@ Dos cosas se prueban acá:
      se confirmó en el juego real con tools/probes/party/
      buscar_caja_pc.py, tres veces, incluyendo tras un reinicio
      completo de Azahar).
-  2. Runtime.update() -- que efectivamente llama a
-     reader.read_boxes_range() cada ciclo (07/09/2026, antes
-     read_box() sin argumentos -- ver Documento Maestro 07/09/2026,
-     bug real: una captura depositada directo en la Caja 2+ nunca
-     se registraba porque solo se escaneaba la Caja 1) y pasa el
-     resultado a NuzlockeService.update() como `boxed_party`.
+  2. Runtime.update() -- que llama a reader.read_boxes_range() y
+     pasa el resultado a NuzlockeService.update() como
+     `boxed_party` (07/09/2026, antes read_box() sin argumentos --
+     ver Documento Maestro 07/09/2026, bug real: una captura
+     depositada directo en la Caja 2+ nunca se registraba porque
+     solo se escaneaba la Caja 1).
+
+     Actualizado (Bloque 1.1, 22/09/2026, guía siguiente versión):
+     ya NO se relee en cada ciclo -- se cachea y se releen las 7
+     cajas cada Runtime.BOX_SCAN_INTERVAL_SECONDS (antes competía
+     por el lock de citra.py con party/badges/combate en cada
+     ciclo de 200ms sin necesidad real de esa frecuencia). El test
+     de abajo usa un `time_source` falso inyectado en Runtime para
+     probar tanto el cacheo (mismo resultado si no pasó el
+     intervalo) como la relectura real (resultado nuevo una vez que
+     sí pasó), sin depender de time.sleep() real.
 """
 
 import sys
@@ -184,7 +194,18 @@ def test_runtime_pasa_boxed_party_a_nuzlocke_service():
     state = ApplicationState()
     nuzlocke = FakeNuzlockeService()
 
-    runtime = Runtime(reader, state, nuzlocke_service=nuzlocke)
+    # Bloque 1.1 (22/09/2026): reloj falso e inyectable, controlado
+    # a mano por este test -- avanza `clock["now"]` para simular
+    # que pasó (o no) Runtime.BOX_SCAN_INTERVAL_SECONDS entre dos
+    # llamadas a update(), sin depender de time.sleep() real.
+    clock = {"now": 1_000.0}
+
+    runtime = Runtime(
+        reader,
+        state,
+        nuzlocke_service=nuzlocke,
+        time_source=lambda: clock["now"],
+    )
     runtime.badges_service.read_badges = lambda: {
         "value": 0,
         "count": 0,
@@ -218,16 +239,26 @@ def test_runtime_pasa_boxed_party_a_nuzlocke_service():
     assert len(nuzlocke.calls) == 1
     assert nuzlocke.calls[0]["boxed_party"] == box_contents
 
-    # Caja vacía en el ciclo siguiente -- se sigue pasando (lista
-    # vacía), no None ni se omite el argumento.
+    # Caja vacía "en el juego" ya, pero sin que haya pasado
+    # BOX_SCAN_INTERVAL_SECONDS de reloj todavía -- Bloque 1.1: se
+    # sigue pasando el último resultado CACHEADO (no vacío
+    # todavía), en vez de reescanear en cada ciclo.
     reader.box_to_return = []
     runtime.update()
 
-    assert nuzlocke.calls[1]["boxed_party"] == []
+    assert nuzlocke.calls[1]["boxed_party"] == box_contents
+
+    # Ahora sí pasó el intervalo -- recién acá se relee de verdad y
+    # se refleja la caja vacía.
+    clock["now"] += Runtime.BOX_SCAN_INTERVAL_SECONDS
+    runtime.update()
+
+    assert nuzlocke.calls[2]["boxed_party"] == []
 
     print(
-        "OK - Runtime.update() llama a reader.read_boxes_range() "
-        "cada ciclo y lo pasa como boxed_party a NuzlockeService"
+        "OK - Runtime.update() cachea read_boxes_range() entre "
+        "ciclos y solo relee tras BOX_SCAN_INTERVAL_SECONDS, "
+        "pasando siempre el resultado a NuzlockeService"
     )
 
 

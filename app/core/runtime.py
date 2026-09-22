@@ -21,9 +21,23 @@ class Runtime:
         reader: AzaharReader,
         state: ApplicationState,
         nuzlocke_service: NuzlockeService | None = None,
+        time_source=None,
     ):
         self.reader = reader
         self.state = state
+
+        # Bloque 1.1 (22/09/2026) / fix del mismo bloque
+        # (22/09/2026, bug real de regresión reportado corriendo
+        # tools/probes/memory/test_box_scan_capture.py bajo pytest:
+        # dos llamadas a update() seguidas, sin que pase tiempo de
+        # reloj real entre medio, esperaban ver reflejado un cambio
+        # en boxed_party de inmediato -- con BOX_SCAN_INTERVAL_
+        # SECONDS de por medio, la segunda lectura quedaba
+        # cacheada). Inyectable para que los tests puedan simular
+        # el paso del tiempo con un reloj falso en vez de depender
+        # de time.sleep() real; en producción (time_source=None)
+        # se usa time.monotonic() como siempre.
+        self._time_source = time_source or time.monotonic
 
         self.badges_service = BadgesService(
             self.reader
@@ -239,7 +253,7 @@ class Runtime:
         # ver el comentario junto a BOX_SCAN_INTERVAL_SECONDS en
         # __init__ -- se relee solo cada BOX_SCAN_INTERVAL_SECONDS,
         # reutilizando el último resultado el resto de los ciclos.
-        now = time.monotonic()
+        now = self._time_source()
 
         if (
             now - self._last_box_scan_time

@@ -17,11 +17,21 @@ tabla de 6 punteros) -- confirmada en vivo bajando de 6 a 2
 exactamente en cada depósito.
 
 Multi-versión (29/08/2026, mismo día): se confirmó que Alpha
-Sapphire y Omega Ruby usan direcciones DISTINTAS para esto (la de
-AS da 0x0 en Omega Ruby) -- `read_party_order()` ahora elige el
-par correcto según `self.process_name`. Los tests de acá cubren
+Sapphire (todavía en la versión base, sin el parche) y Omega Ruby
+usaban direcciones DISTINTAS para esto (la de AS daba 0x0 en Omega
+Ruby) -- `read_party_order()` elige el par correcto según
+`self.process_name`. Los tests de acá cubren
 las dos versiones para asegurarse de que la selección funciona
 bien y no se cruzan los valores.
+
+ACTUALIZADO (09/09/2026, ver el comentario junto a
+_PARTY_ORDER_ADDRESS_BY_PROCESS en pointers.py): tras migrar Alpha
+Sapphire a la actualización 1.4, esta dirección CONVERGIÓ -- AS
+1.4 y Omega Ruby ahora usan el mismo valor (0x08CFB1E0), confirmado
+en vivo. `test_las_direcciones_de_las_dos_versiones_convergen_
+desde_1_4` (antes `..._no_se_mezclan`, con la premisa opuesta e
+inválida desde este cambio) prueba eso -- no que sigan siendo
+distintas.
 """
 
 import sys
@@ -201,12 +211,17 @@ def test_lectura_de_party_count_fallida_no_vacia_nada():
 
 def test_omega_ruby_usa_sus_propias_direcciones():
     """
-    29/08/2026: confirmado en el juego real que Omega Ruby usa
-    PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS DISTINTAS de Alpha
-    Sapphire. Mismo comportamiento (deposita del medio, el slot
-    sobrante se vacía), pero pasando process_name="sango-1" --
-    confirma que read_party_order() elige el par de direcciones
-    correcto y no mezcla nada entre versiones.
+    29/08/2026: en ese momento, confirmado en el juego real que
+    Omega Ruby usaba PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS
+    DISTINTAS de Alpha Sapphire base. Desde que AS migró a la
+    actualización 1.4 (09/09/2026), ambas direcciones convergieron
+    al mismo valor -- ver test_las_direcciones_de_las_dos_
+    versiones_convergen_desde_1_4 más abajo. Este test sigue
+    siendo válido igual: confirma que pasando
+    process_name="sango-1" explícito, read_party_order() resuelve
+    bien sus propias direcciones (aunque hoy sean las mismas que
+    las de AS) y el comportamiento (deposita del medio, el slot
+    sobrante se vacía) funciona igual.
     """
 
     reader = _reader_with(
@@ -228,21 +243,50 @@ def test_omega_ruby_usa_sus_propias_direcciones():
     )
 
 
-def test_las_direcciones_de_las_dos_versiones_no_se_mezclan():
+def test_las_direcciones_de_las_dos_versiones_convergen_desde_1_4():
     """
-    Control cruzado: un AzaharReader con process_name de Omega
-    Ruby, pero una memoria falsa que SOLO tiene datos válidos en
-    las direcciones de Alpha Sapphire (simulando el bug real que
-    motivó todo esto: si el código mezclara mal las direcciones,
-    leería mal). Tiene que devolver todo vacío -- confirma que
-    jamás intenta leer las direcciones de la otra versión.
+    Antes (`..._no_se_mezclan`, hasta el 09/09/2026): control
+    cruzado que esperaba que mezclar el process_name de Omega Ruby
+    con una memoria que solo entendía direcciones de Alpha
+    Sapphire diera vacío -- válido mientras las dos versiones
+    tenían PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS distintas.
+
+    Ahora (ver pointers.py, comentario junto a
+    _PARTY_ORDER_ADDRESS_BY_PROCESS, 09/09/2026): tras migrar
+    Alpha Sapphire a la actualización 1.4, esa premisa dejó de ser
+    cierta -- las dos versiones usan EXACTAMENTE la misma
+    dirección (0x08CFB1E0/0x08CFB1F8), confirmado en vivo. Mezclar
+    process_name="sango-1" con una memoria "de Alpha Sapphire" ya
+    no puede dar vacío, porque para estas dos direcciones ya no
+    hay nada que mezclar -- son la misma tabla.
+
+    Este test prueba eso en cambio: que get_party_order_address()/
+    get_party_count_address() devuelven el mismo valor para las
+    dos versiones (protege contra reintroducir sin querer un par
+    de direcciones separadas sin haber confirmado antes, con un
+    probe real, que hizo falta -- regla 1/11 del Documento
+    Maestro), y que el fallback ante un process_name desconocido
+    sigue devolviendo el valor de Alpha Sapphire documentado.
     """
 
+    assert get_party_order_address(
+        PROCESS_NAME_OMEGA_RUBY
+    ) == get_party_order_address(PROCESS_NAME_ALPHA_SAPPHIRE)
+
+    assert get_party_count_address(
+        PROCESS_NAME_OMEGA_RUBY
+    ) == get_party_count_address(PROCESS_NAME_ALPHA_SAPPHIRE)
+
+    assert get_party_order_address("proceso-desconocido") == (
+        get_party_order_address(PROCESS_NAME_ALPHA_SAPPHIRE)
+    )
+
+    # Con las direcciones convergidas, una memoria que solo
+    # entiende Alpha Sapphire responde igual sin importar qué
+    # process_name traiga el reader -- ya no hay nada que
+    # "mezclar" para estas dos direcciones en particular.
     reader = AzaharReader.__new__(AzaharReader)
     reader.process_name = PROCESS_NAME_OMEGA_RUBY
-    # Memoria que solo entiende las direcciones de AS -- si
-    # read_party_order() se equivocara de versión, leería datos
-    # de acá por error.
     reader.memory = FakeMemoryReader(
         PROCESS_NAME_ALPHA_SAPPHIRE,
         [0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000],
@@ -251,15 +295,15 @@ def test_las_direcciones_de_las_dos_versiones_no_se_mezclan():
 
     result = reader.read_party_order()
 
-    # Ni un solo puntero real -- la memoria falsa no tiene nada
-    # en las direcciones de Omega Ruby, así que debería devolver
-    # una lectura fallida (lista vacía) en vez de leer por
-    # accidente las direcciones de la otra versión.
-    assert result == []
+    assert result == [
+        0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000
+    ]
 
     print(
-        "OK - las direcciones de las dos versiones no se mezclan "
-        "nunca, aunque el process_name no coincida con la memoria"
+        "OK - PARTY_ORDER_ADDRESS/PARTY_COUNT_ADDRESS convergieron "
+        "entre las dos versiones desde Alpha Sapphire 1.4, y el "
+        "fallback de process_name desconocido sigue apuntando a "
+        "Alpha Sapphire"
     )
 
 
@@ -269,4 +313,5 @@ if __name__ == "__main__":
     test_varios_depositos_seguidos()
     test_lectura_de_party_count_fallida_no_vacia_nada()
     test_omega_ruby_usa_sus_propias_direcciones()
-    test_las_direcciones_de_las_dos_versiones_no_se_mezclan()
+    test_las_direcciones_de_las_dos_versiones_convergen_desde_1_4()
+    print("OK - todos los tests de party_count_fix pasaron")
