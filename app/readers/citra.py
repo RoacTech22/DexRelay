@@ -144,25 +144,40 @@ class Citra:
         >>> c.read_memory(0x100000, 4)
         b'\\x07\\x00\\x00\\xeb'
         """
+        # Bloque 1.2 (22/09/2026, guía siguiente versión): el lock
+        # envolvía cada fragmento de MAX_REQUEST_DATA_SIZE bytes por
+        # separado, no la lectura completa -- una lectura larga (ej.
+        # el equipo completo, o el bloque de 7 cajas de
+        # read_boxes_range()) tarda varias idas y vueltas UDP, y
+        # entre un fragmento y el siguiente otro hilo podía
+        # intercalar su propia ida y vuelta. Cada fragmento sigue
+        # validando su request_id, así que esto nunca corrompía una
+        # respuesta -- pero sí permitía que una lectura larga se
+        # alargara de más compitiendo fragmento a fragmento contra
+        # el otro hilo, en vez de completarse de corrido. Mover el
+        # lock para que cubra el `while` entero soluciona eso, con
+        # el mismo criterio de "una operación completa a la vez" que
+        # ya se aplicaba a process_list()/get_process()/set_process().
         result = bytes()
-        while read_size > 0:
-            temp_read_size = min(read_size, MAX_REQUEST_DATA_SIZE)
-            request_data = struct.pack("II", read_address, temp_read_size)
-            request, request_id = self._generate_header(RequestType.ReadMemory, len(request_data))
-            request += request_data
 
-            with self._lock:
+        with self._lock:
+            while read_size > 0:
+                temp_read_size = min(read_size, MAX_REQUEST_DATA_SIZE)
+                request_data = struct.pack("II", read_address, temp_read_size)
+                request, request_id = self._generate_header(RequestType.ReadMemory, len(request_data))
+                request += request_data
+
                 self.socket.sendto(request, (self.address, CITRA_PORT))
                 raw_reply = self.socket.recv(MAX_PACKET_SIZE)
 
-            reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.ReadMemory)
+                reply_data = self._read_and_validate_header(raw_reply, request_id, RequestType.ReadMemory)
 
-            if reply_data:
-                result += reply_data
-                read_size -= len(reply_data)
-                read_address += len(reply_data)
-            else:
-                return None
+                if reply_data:
+                    result += reply_data
+                    read_size -= len(reply_data)
+                    read_address += len(reply_data)
+                else:
+                    return None
 
         return result
 

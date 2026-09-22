@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BadgesService
@@ -94,9 +96,33 @@ class Runtime:
         self._combat_wild_seen = False
         self._empty_party_cycles = 0
 
+        # Bloque 1.1 (22/09/2026, guía siguiente versión -- ver
+        # DexRelay_Guia_Siguiente_Version): read_boxes_range() lee
+        # 7×30×232 = 48.720 bytes por UDP y competía por el mismo
+        # lock de citra.py que party/badges/combate en CADA ciclo de
+        # 200ms, sin ninguna necesidad real de esa frecuencia (una
+        # captura a Caja PC no aparece más rápido por escanear más
+        # seguido). Se desacopla a un intervalo propio en segundos
+        # de reloj (no en cantidad de ciclos, para no depender de
+        # `refresh_ms`) -- entre escaneos se sigue usando el último
+        # resultado cacheado, así que NuzlockeService.update() nunca
+        # se queda sin `boxed_party` y la detección de capturas a
+        # Caja PC no se pierde, solo se vuelve un poco menos
+        # inmediata (hasta BOX_SCAN_INTERVAL_SECONDS de demora).
+        self._last_box_scan_time = 0.0
+        self._cached_boxed_party = []
+
     # Ciclos seguidos con party vacía estando "conectado" antes de
     # forzar una reconexión (25 ciclos de 200ms ≈ 5s).
     EMPTY_PARTY_RECONNECT_CYCLES = 25
+
+    # Intervalo mínimo, en segundos de reloj, entre dos escaneos de
+    # las 7 Cajas PC (Bloque 1.1) -- 1.5s es un punto intermedio
+    # dentro del rango 1-2s sugerido en la guía: suficientemente
+    # espaciado para dejar de competir por el lock de citra.py en
+    # cada ciclo de 200ms, sin demorar de más la detección de una
+    # captura depositada directo en caja.
+    BOX_SCAN_INTERVAL_SECONDS = 1.5
 
     def _reset_connection_dependent_state(self):
         """
@@ -114,6 +140,13 @@ class Runtime:
         self._lost_tracking_resolved = False
         self._pending_lost_resolution = None
         self._lost_log_seen = set()
+
+        # Bloque 1.1: forzar un escaneo de cajas fresco en el
+        # próximo ciclo tras reconectar, en vez de esperar hasta
+        # BOX_SCAN_INTERVAL_SECONDS con el último resultado cacheado
+        # de la conexión anterior (podría corresponder a otro juego
+        # si Azahar cambió de proceso).
+        self._last_box_scan_time = 0.0
 
     def _log_lost(self, key, message):
         """print() de una sola vez por combate por `key`."""
@@ -201,7 +234,21 @@ class Runtime:
         # su docstring en azahar_reader.py) -- comprar más cajas es
         # opcional y no todos los Nuzlocke lo necesitan, así que no
         # se escanea más allá de esto por defecto.
-        box = self.reader.read_boxes_range()
+        #
+        # Bloque 1.1 (22/09/2026): desacoplada del ciclo de 200ms,
+        # ver el comentario junto a BOX_SCAN_INTERVAL_SECONDS en
+        # __init__ -- se relee solo cada BOX_SCAN_INTERVAL_SECONDS,
+        # reutilizando el último resultado el resto de los ciclos.
+        now = time.monotonic()
+
+        if (
+            now - self._last_box_scan_time
+            >= self.BOX_SCAN_INTERVAL_SECONDS
+        ):
+            self._cached_boxed_party = self.reader.read_boxes_range()
+            self._last_box_scan_time = now
+
+        box = self._cached_boxed_party
 
         self.state.nuzlocke = self.nuzlocke_service.update(
             party,
