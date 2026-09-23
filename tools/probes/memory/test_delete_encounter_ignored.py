@@ -35,6 +35,15 @@ class FakeStorage:
     def save(self, data):
         self.saved = data
 
+    def backup(self):
+        # Bloque 4.2 (23/09/2026): NuzlockeService.delete_encounter()
+        # ahora llama a storage.backup() antes de guardar -- no-op
+        # acá, este test no necesita verificar el respaldo en sí
+        # (eso lo cubre tests/test_atomic_write.py y un test nuevo
+        # dedicado si hiciera falta), solo que delete_encounter()
+        # no explote por no encontrarlo.
+        pass
+
 
 def _team_with(*slots):
     padded = list(slots) + [

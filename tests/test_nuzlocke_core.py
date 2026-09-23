@@ -44,6 +44,14 @@ class FakeStorage:
     def save(self, data):
         self.saved = data
 
+    def backup(self):
+        # Bloque 4.2 (23/09/2026): NuzlockeService.reset_all()/
+        # delete_encounter() ahora llaman a storage.backup() antes
+        # de guardar -- no-op acá, ver tests/test_nuzlocke_backup.py
+        # para la lógica de respaldo en sí (contra NuzlockeStorage
+        # real, no este fake).
+        pass
+
 
 def _mon(
     slot,

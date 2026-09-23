@@ -50,6 +50,48 @@ WILD_BATTLE_FLAG_OFFSET = 0x87F
 # siempre, en vez de reportar que ya no hay combate.
 COMBAT_INACTIVE_POINTER = COMBAT_POINTER_ADDRESS - 4
 
+# Guard de plausibilidad (23/09/2026, log real del usuario: un
+# "perdido" se registró solo con el jugador ni siquiera dentro de
+# una partida cargada -- puntero de combate = 0x01023445, flag
+# salvaje leído como SALVAJE). No es una dirección confirmada con
+# un probe dedicado (regla 1/11 del Documento Maestro) -- es un
+# chequeo de plausibilidad: TODAS las direcciones ya confirmadas en
+# todo este proyecto (party, cajas, medallas, rival salvaje, el
+# propio COMBAT_POINTER_ADDRESS -- ver pointers.py) caen en
+# 0x08000000 o más arriba (el heap lineal/FCRAM del 3DS emulado que
+# expone Azahar). 0x01023445 está muy por debajo de ese rango --
+# consistente con memoria sin inicializar en ese slot antes de que
+# el juego escriba una estructura de combate real ahí, no con un
+# combate real. Si algún combate real confirmado alguna vez cae por
+# debajo de este piso, HAY QUE subirlo o sacarlo -- no bajarlo a
+# ciegas sin evidencia nueva.
+MIN_PLAUSIBLE_COMBAT_POINTER = 0x08000000
+
+# Dedup del print de abajo -- un valor de puntero implausible se
+# puede repetir varios ciclos seguidos (200ms) mientras el juego
+# sigue sin escribir nada real ahí; avisar una sola vez por valor
+# distinto alcanza, no hace falta spamear la consola/Logs.
+_warned_implausible_pointers: set[int] = set()
+
+
+def _looks_like_real_combat_pointer(base_address: int) -> bool:
+    if base_address >= MIN_PLAUSIBLE_COMBAT_POINTER:
+        return True
+
+    if base_address not in _warned_implausible_pointers:
+        _warned_implausible_pointers.add(base_address)
+        print(
+            "[CombatService] Puntero de combate implausible "
+            f"({hex(base_address)}, por debajo de "
+            f"{hex(MIN_PLAUSIBLE_COMBAT_POINTER)}) -- se trata "
+            "como 'sin combate'. Si esto rechaza un combate REAL "
+            "alguna vez, avisar para revisar el piso.",
+            flush=True,
+        )
+
+    return False
+
+
 LECTURA_DESCARTADA = object()
 
 
@@ -80,7 +122,9 @@ class CombatService:
             pointer_before,
         )[0]
 
-        if base_address in (0, COMBAT_INACTIVE_POINTER):
+        if base_address in (0, COMBAT_INACTIVE_POINTER) or not (
+            _looks_like_real_combat_pointer(base_address)
+        ):
             return None
 
         hp_data = self.memory_reader.read(
@@ -103,6 +147,42 @@ class CombatService:
             "<H",
             hp_data,
         )[0]
+
+    def read_combat_base_pointer(self):
+        """
+        Diagnóstico agregado el 23/09/2026 (log real del usuario:
+        un "perdido" se registró solo -- flag salvaje = SALVAJE,
+        snapshot en Pueblo Azuliza con total_caught=9 -- sin que
+        hubiera ningún combate real en curso). Devuelve el valor
+        CRUDO del puntero de combate (o None si la lectura falla),
+        solo para loguearlo -- no decide nada, `read()`/
+        `read_wild_flag()` siguen siendo la única fuente de verdad
+        para eso.
+
+        Hipótesis a confirmar con el próximo log real (no se toca
+        la lógica de detección todavía, regla 1/11 del Documento
+        Maestro -- no inventar sin confirmar en la instancia real):
+        hoy solo se excluye UN valor conocido de "puntero en
+        reposo" (COMBAT_INACTIVE_POINTER). Si el juego puede dejar
+        el puntero en OTROS valores de reposo además de ese, un
+        combate falso positivo como el reportado tendría sentido.
+        Este método deja ver, la próxima vez que pase, exactamente
+        qué valor tenía el puntero -- con eso se puede confirmar o
+        descartar la hipótesis antes de tocar nada más.
+        """
+
+        if self.memory_reader is None:
+            return None
+
+        pointer_data = self.memory_reader.read(
+            COMBAT_POINTER_ADDRESS,
+            4,
+        )
+
+        if pointer_data is None or len(pointer_data) != 4:
+            return None
+
+        return struct.unpack("<I", pointer_data)[0]
 
     def read_wild_flag(self):
         """
@@ -135,7 +215,9 @@ class CombatService:
             pointer_before,
         )[0]
 
-        if base_address in (0, COMBAT_INACTIVE_POINTER):
+        if base_address in (0, COMBAT_INACTIVE_POINTER) or not (
+            _looks_like_real_combat_pointer(base_address)
+        ):
             return None
 
         flag_data = self.memory_reader.read(
