@@ -51,6 +51,21 @@
   var connectedSince = null;
   var uptimeTimer = null;
 
+  // Bloque 3.1 (22/09/2026, guía siguiente versión): página
+  // actualmente visible del shell principal -- switchToPage() la
+  // mantiene al día. Se usa para no hacer el trabajo de render de
+  // una sección mientras su página no está a la vista (ver
+  // renderIfChanged() más abajo). Arranca en "dashboard" porque es
+  // la página activa por defecto en el HTML (class="page active").
+  var currentPage = "dashboard";
+
+  // Último payload completo de get_dashboard_data() -- usado por
+  // switchToPage() para forzar un render inmediato con datos
+  // frescos al volver a Dashboard/Medallas, sin esperar el próximo
+  // tick de pollMain() (ver Bloque 3.1).
+  var lastDashboardData = null;
+
+
   // Base URL del HTTPServer (ej. "http://127.0.0.1:8080"),
   // resuelta la primera vez que llega get_dashboard_data() y
   // reutilizada para armar las URLs de los sprites de Pokémon y
@@ -60,8 +75,209 @@
   // api.py).
   var spriteBaseUrl = "";
 
+  // ===================== Bloque 3.2: wrapper único para llamadas
+  // a Python =====================
+  //
+  // Antes: ~54 llamadas a api().algo().then(...) en todo el
+  // archivo, con un solo .catch() en total -- una excepción del
+  // lado de Python (o el puente de pywebview colgado) dejaba esa
+  // promesa colgada para siempre, sin aviso, y la UI parecía
+  // "trabada" sin ningún error visible. Los setInterval de poll
+  // tampoco evitaban solaparse con una llamada anterior todavía en
+  // vuelo (grave en Pokémon, que golpea el bridge PKHeX cada 2s).
+  //
+  // api() sigue devolviendo exactamente lo mismo que antes
+  // (window.pywebview.api) así que NINGÚN call site existente
+  // (api().metodo(x).then(...)) necesita cambiar -- pero ahora
+  // envuelto en un Proxy: cada método expuesto por Python queda
+  // automáticamente cubierto por catch + timeout + registro del
+  // último error, sin tener que tocar los ~54 call sites uno por
+  // uno ni arriesgarse a olvidar alguno.
+  var API_CALL_TIMEOUT_MS = 15000;
+
+  // Último error de una llamada a Python, por método -- consultado
+  // por isApiCallInFlight()/withPollGuard() de más abajo y
+  // disponible para un futuro aviso global (Bloque 6.3, todavía no
+  // implementado acá a propósito -- ver guía, "definir con el
+  // banner de 6.3 cómo conviven").
+  var lastApiError = null;
+  var consecutiveApiFailures = 0;
+
+  function recordApiSuccess() {
+    consecutiveApiFailures = 0;
+  }
+
+  function recordApiFailure(methodName, error) {
+    consecutiveApiFailures++;
+    lastApiError = {
+      method: methodName,
+      message: (error && error.message) || String(error),
+      at: Date.now(),
+    };
+
+    // eslint-disable-next-line no-console
+    console.error(
+      "[DexRelay] api()." + methodName + "() falló"
+        + (consecutiveApiFailures > 1
+          ? " (" + consecutiveApiFailures + " veces seguidas)"
+          : "") + ":",
+      error
+    );
+
+    // Aviso discreto tras varios ciclos fallidos seguidos -- sin
+    // banner propio todavía (eso es el Bloque 6.3, que decide cómo
+    // convive con el resto de los avisos globales). Por ahora, el
+    // aviso "discreto" es la consola del navegador (visible con
+    // F12, que es donde ya se mira hoy ante un problema, según
+    // Logs/console.log existentes en el proyecto) más la marca de
+    // pestaña -- suficiente para no fingir una UI silenciosamente
+    // rota, sin construir un sistema de notificaciones nuevo que
+    // el Bloque 6.3 va a tener que rehacer/fusionar de todos modos.
+    if (consecutiveApiFailures === 3) {
+      document.title = "⚠ DexRelay — sin respuesta";
+    }
+  }
+
+  function withApiTimeout(promise, methodName) {
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+
+      var timer = setTimeout(function () {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        reject(
+          new Error(
+            "Sin respuesta de " + methodName + " tras "
+              + API_CALL_TIMEOUT_MS + "ms"
+          )
+        );
+      }, API_CALL_TIMEOUT_MS);
+
+      promise.then(
+        function (value) {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          clearTimeout(timer);
+          resolve(value);
+        },
+        function (error) {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        }
+      );
+    });
+  }
+
+  var wrappedApiRef = null;
+  var wrappedApiTarget = null;
+
+  function wrapApi(realApi) {
+    // typeof Proxy === "undefined" no debería pasar en el WebView2/
+    // WebKit que usa pywebview, pero por las dudas: sin Proxy
+    // disponible, se devuelve el objeto real tal cual (mismo
+    // comportamiento que antes de este bloque) en vez de romper
+    // toda la GUI.
+    if (typeof Proxy === "undefined") {
+      return realApi;
+    }
+
+    return new Proxy(realApi, {
+      get: function (target, prop) {
+        var value = target[prop];
+
+        if (typeof value !== "function") {
+          return value;
+        }
+
+        return function () {
+          var methodName = String(prop);
+          var result;
+
+          try {
+            result = value.apply(target, arguments);
+          } catch (syncError) {
+            recordApiFailure(methodName, syncError);
+            return Promise.reject(syncError);
+          }
+
+          if (!result || typeof result.then !== "function") {
+            return result;
+          }
+
+          return withApiTimeout(result, methodName).then(
+            function (value2) {
+              recordApiSuccess();
+              return value2;
+            },
+            function (error) {
+              recordApiFailure(methodName, error);
+              throw error;
+            }
+          );
+        };
+      },
+    });
+  }
+
   function api() {
-    return window.pywebview.api;
+    var realApi = window.pywebview.api;
+
+    if (!realApi) {
+      return realApi;
+    }
+
+    if (wrappedApiTarget !== realApi) {
+      wrappedApiTarget = realApi;
+      wrappedApiRef = wrapApi(realApi);
+    }
+
+    return wrappedApiRef;
+  }
+
+  // ===================== Bloque 3.1: render solo cuando cambian
+  // los datos =====================
+  //
+  // Antes: applyDashboard() (poll de 1s, corre siempre sin
+  // importar qué página esté activa porque también alimenta el
+  // sidebar) reconstruía el equipo y las medallas del Dashboard
+  // desde cero en cada ciclo (innerHTML = "" + reconstrucción
+  // completa), aunque los datos fueran idénticos al ciclo anterior
+  // y aunque el Dashboard ni siquiera estuviera a la vista. Mismo
+  // problema en la grilla de Medallas. Efecto real: un click puede
+  // caer justo entre el innerHTML viejo y el nuevo (se pierde el
+  // click), tooltips nativos que parpadean.
+  //
+  // `renderIfChanged` guarda la última huella (JSON.stringify) de
+  // los datos renderizados por sección bajo `key`, y solo llama a
+  // `renderFn(data)` si cambió de verdad. Quedan gateados además
+  // por `currentPage` (ver applyDashboard() y switchToPage() más
+  // abajo) -- no se renderiza nada de una sección cuya página no
+  // está activa, y switchToPage() fuerza un render con el último
+  // dato conocido al volver a una página gateada, para que no se
+  // vea vacía/vieja el primer instante.
+  //
+  // Patrón ya correcto que esto generaliza: renderOverlaysPage()
+  // con su bandera ovOverlaysBuilt (más abajo) -- ese no se toca,
+  // sigue igual.
+  var lastRenderedSnapshots = {};
+
+  function renderIfChanged(key, data, renderFn) {
+    var snapshot = JSON.stringify(data);
+
+    if (lastRenderedSnapshots[key] === snapshot) {
+      return;
+    }
+
+    lastRenderedSnapshots[key] = snapshot;
+    renderFn(data);
   }
 
   function showView(id) {
@@ -268,6 +484,30 @@
     return String(value).padStart(2, "0");
   }
 
+  // Bloque 3.3 (22/09/2026, guía siguiente versión): antes,
+  // onEnterClicked() reinicializaba los listeners de casi todas
+  // las páginas cada vez que se entraba -- solo initDashboardActions()/
+  // initNuzlockeActions() tenían su propia bandera de "ya
+  // inicializado" (dashboardActionsInitialized/
+  // nuzlockeActionsInitialized, ver más abajo). Tras un ciclo
+  // Salir -> Comenzar -> Entrar, el resto de los init*() volvía a
+  // agregar los mismos event listeners una vez más sobre los
+  // mismos elementos -- una acción como "Guardar" en Configuración
+  // se dispararía dos veces (una por cada listener acumulado).
+  //
+  // En vez de agregar una bandera *Initialized por cada una de las
+  // 9 funciones que todavía no la tenían (initSidebarNav, initTabs,
+  // initPokemonPageActions, initNuzlockeLeadersTabActions,
+  // initSpeciesModalActions, initOverlaysActions,
+  // initHerramientasActions, initConfiguracionActions,
+  // initLogsActions), se usa una única bandera acá: onEnterClicked()
+  // es el único lugar del archivo que llama a estas funciones, así
+  // que alcanza con no repetir ESE bloque de llamadas. showView()
+  // y startMainPoll() quedan afuera del guard a propósito -- esas
+  // sí tienen que correr cada vez que se entra (mostrar la vista,
+  // reanudar el poll que onExitClicked() para).
+  var mainInitActionsInitialized = false;
+
   function onEnterClicked() {
     if (uptimeTimer) {
       clearInterval(uptimeTimer);
@@ -275,17 +515,22 @@
     }
 
     showView("view-main");
-    initSidebarNav();
-    initTabs();
-    initDashboardActions();
-    initNuzlockeActions();
-    initPokemonPageActions();
-    initNuzlockeLeadersTabActions();
-    initSpeciesModalActions();
-    initOverlaysActions();
-    initHerramientasActions();
-    initConfiguracionActions();
-    initLogsActions();
+
+    if (!mainInitActionsInitialized) {
+      mainInitActionsInitialized = true;
+      initSidebarNav();
+      initTabs();
+      initDashboardActions();
+      initNuzlockeActions();
+      initPokemonPageActions();
+      initNuzlockeLeadersTabActions();
+      initSpeciesModalActions();
+      initOverlaysActions();
+      initHerramientasActions();
+      initConfiguracionActions();
+      initLogsActions();
+    }
+
     startMainPoll();
   }
 
@@ -304,6 +549,8 @@
   // Pokémon con la misma lógica exacta que un click en el
   // sidebar -- no una versión aparte a medias.
   function switchToPage(page) {
+    currentPage = page;
+
     document.querySelectorAll(".nav-item").forEach(function (el) {
       el.classList.toggle("active", el.dataset.page === page);
     });
@@ -312,6 +559,16 @@
       el.classList.remove("active");
     });
     document.getElementById("page-" + page).classList.add("active");
+
+    // Bloque 3.1: Dashboard/Medallas quedan gateados por
+    // currentPage dentro de applyDashboard() (no se renderizan
+    // mientras su página no está activa). Al volver a cualquiera
+    // de las dos, se fuerza un render con el último dato conocido
+    // en vez de esperar hasta 1s (el próximo tick de pollMain) --
+    // si no, la página se ve vacía/vieja un instante.
+    if ((page === "dashboard" || page === "medallas") && lastDashboardData) {
+      applyDashboard(lastDashboardData);
+    }
 
     // Poll propio de la página Pokémon (golpea el bridge
     // PKHeX) -- solo corre mientras esa página está a la
@@ -503,6 +760,16 @@
   }
 
   function startMainPoll() {
+    // Bloque 3.3: mismo patrón defensivo que startPokemonPoll()/
+    // startNuzlockePoll()/startLogsPoll() (paran su propio timer
+    // antes de crear uno nuevo) -- startMainPoll() era la única
+    // que no lo tenía, quedaba a merced de que nadie la llamara
+    // dos veces sin pasar por onExitClicked() en el medio.
+    if (mainPollTimer) {
+      clearInterval(mainPollTimer);
+      mainPollTimer = null;
+    }
+
     pollMain();
     mainPollTimer = setInterval(pollMain, MAIN_POLL_MS);
   }
@@ -540,6 +807,11 @@
   var overlaysRendered = false;
 
   function applyDashboard(data) {
+    // Bloque 3.1: guardado para que switchToPage() pueda forzar un
+    // render inmediato al volver a Dashboard/Medallas, con el
+    // último dato real en vez de esperar el próximo poll.
+    lastDashboardData = data;
+
     if (data.http_server) {
       spriteBaseUrl = data.http_server.base_url;
     }
@@ -578,8 +850,25 @@
       );
     }
 
-    renderDashTeam(data.team || [], data.graveyard_nicknames || []);
-    renderDashBadges(data.badges);
+    // Bloque 3.1: equipo y medallas del Dashboard son los dos
+    // casos que la guía nombra explícitamente ("reconstruye
+    // equipo y medallas aunque la página esté oculta") -- antes se
+    // reconstruían enteros (innerHTML = "" + N elementos nuevos)
+    // en CADA poll de 1s, sin importar si cambió algo ni si el
+    // Dashboard estaba siquiera a la vista. Ahora: nada de trabajo
+    // si la página no está activa, y solo se toca el DOM si la
+    // huella de los datos cambió de verdad.
+    if (currentPage === "dashboard") {
+      renderIfChanged(
+        "dash-team",
+        { team: data.team || [], graveyard: data.graveyard_nicknames || [] },
+        function (snapshotData) {
+          renderDashTeam(snapshotData.team, snapshotData.graveyard);
+        }
+      );
+
+      renderIfChanged("dash-badges", data.badges, renderDashBadges);
+    }
 
     if (!overlaysRendered && data.http_server) {
       renderDashOverlays(data.http_server.base_url);
@@ -590,13 +879,33 @@
     // este poll de 1s (data.badges) -- no hace falta ninguna
     // llamada extra a Python, badges_service.py ya es la fuente de
     // verdad y ya viaja acá en cada ciclo.
-    renderMedallasPage(data.badges, data.http_server && data.http_server.base_url);
+    //
+    // Bloque 3.1: mismo gateo por página + huella que el equipo/
+    // medallas del Dashboard de arriba -- la grilla de 8 medallas
+    // (con sus <img>) se reconstruía entera cada 1s sin importar
+    // si la página Medallas estaba siquiera abierta.
+    if (currentPage === "medallas") {
+      renderIfChanged(
+        "medallas-page",
+        {
+          badges: data.badges,
+          baseUrl: data.http_server && data.http_server.base_url,
+        },
+        function (snapshotData) {
+          renderMedallasPage(snapshotData.badges, snapshotData.baseUrl);
+        }
+      );
+    }
 
     // Overlays (Bloque 4, 05/09/2026): mismo criterio -- reusa
     // data.http_server/data.http_running de este mismo poll, no
-    // pide nada nuevo a Python.
+    // pide nada nuevo a Python. No se gatea por página ni se le
+    // suma renderIfChanged en este bloque -- ya sigue el patrón
+    // correcto (bandera ovOverlaysBuilt, reconstruye el DOM una
+    // sola vez y después solo actualiza lo dinámico).
     renderOverlaysPage(data);
   }
+
 
   function setToggleButton(id, running) {
     var btn = document.getElementById(id);
@@ -717,13 +1026,27 @@
   // "Salir" del sidebar (02/09/2026): misma acción que "Cancelar"
   // en Espera (api().cancel() ya detiene Runtime+HTTPServer) --
   // vuelve a Bienvenida en vez de cerrar la app entera.
-  function onExitClicked() {
+  //
+  // Bloque 3.3 (22/09/2026): antes solo paraba mainPollTimer y el
+  // poll de Pokémon -- los de Nuzlocke y Logs seguían corriendo de
+  // fondo aunque la vista volviera a Bienvenida (invisibles, pero
+  // igual pegándole a Python cada 2s/1s sin necesidad).
+  // stopAllPolls() centraliza los cuatro en un solo lugar, para no
+  // tener que acordarse de sumar uno nuevo acá cada vez que se
+  // agregue un poll de página en el futuro.
+  function stopAllPolls() {
     if (mainPollTimer) {
       clearInterval(mainPollTimer);
       mainPollTimer = null;
     }
 
     stopPokemonPoll();
+    stopNuzlockePoll();
+    stopLogsPoll();
+  }
+
+  function onExitClicked() {
+    stopAllPolls();
 
     api()
       .cancel()
@@ -2738,8 +3061,20 @@
     api()
       .get_logs()
       .then(function (entries) {
-        logsAllEntries = entries;
-        renderLogsList();
+        // Bloque 3.1 (continuación, 23/09/2026): antes reconstruía
+        // la lista entera (innerHTML) en cada tick de 1s aunque el
+        // buffer no hubiera cambiado -- imposible seleccionar
+        // texto, autoscroll saltando de más. Ojo: renderLogsList()
+        // también se llama directo desde el input de búsqueda
+        // (initLogsActions(), filtra mientras se escribe) -- ESE
+        // call site no se toca ni se gatea, tiene que responder a
+        // cada tecla sin importar si logsAllEntries cambió. Solo
+        // se gatea acá, el único lugar donde entra un dato nuevo
+        // de verdad.
+        renderIfChanged("logs-entries", entries, function (freshEntries) {
+          logsAllEntries = freshEntries;
+          renderLogsList();
+        });
       });
   }
 
@@ -3098,21 +3433,53 @@
       }
     });
 
-    renderNuzlockeSummary(data.stats);
-    renderNuzlockeTeam(
-      data.team || [],
-      graveyard.map(function (entry) {
-        return entry.nickname;
-      })
+    // Bloque 3.1 (22/09/2026, continuación): las 10 sub-secciones
+    // de Nuzlocke se reconstruían enteras (innerHTML="" + rearmado
+    // completo) en CADA tick de pollNuzlockePage() (2s), aunque el
+    // dato de esa sección en particular no hubiera cambiado desde
+    // el ciclo anterior -- clics perdidos en el tacho de borrar
+    // encuentro, tooltips que parpadean, justo el ejemplo que
+    // nombra la guía. A diferencia del Dashboard (Bloque 3.1
+    // original), acá NO hace falta gatear por currentPage: esta
+    // función ya solo corre mientras la página Nuzlocke está
+    // activa (pollNuzlockePage() se arranca/para en switchToPage())
+    // -- alcanza con renderIfChanged() por sección, cada una con
+    // su propia porción de `data` como huella.
+    renderIfChanged("nz-summary", data.stats, renderNuzlockeSummary);
+
+    renderIfChanged(
+      "nz-team",
+      {
+        team: data.team || [],
+        graveyard: graveyard.map(function (entry) {
+          return entry.nickname;
+        }),
+      },
+      function (snapshotData) {
+        renderNuzlockeTeam(snapshotData.team, snapshotData.graveyard);
+      }
     );
-    renderNuzlockeEncounters(data.encounters || []);
-    renderNuzlockeSummaryEncounters(data.encounters || []);
-    renderNuzlockePending(data.pendingEncounters || []);
-    renderNuzlockeGraveyard(graveyard);
-    renderNuzlockeRuleset(data.ruleset || []);
-    renderNuzlockeStats(data.stats, data.playtime, data.nextLeader || null);
-    renderNuzlockeNextLeader(data.nextLeader || null);
-    renderNuzlockeLeaders(data.gymLeaders || []);
+
+    renderIfChanged("nz-encounters", data.encounters || [], renderNuzlockeEncounters);
+    renderIfChanged(
+      "nz-summary-encounters",
+      data.encounters || [],
+      renderNuzlockeSummaryEncounters
+    );
+    renderIfChanged("nz-pending", data.pendingEncounters || [], renderNuzlockePending);
+    renderIfChanged("nz-graveyard", graveyard, renderNuzlockeGraveyard);
+    renderIfChanged("nz-ruleset", data.ruleset || [], renderNuzlockeRuleset);
+
+    renderIfChanged(
+      "nz-stats",
+      { stats: data.stats, playtime: data.playtime, nextLeader: data.nextLeader || null },
+      function (snapshotData) {
+        renderNuzlockeStats(snapshotData.stats, snapshotData.playtime, snapshotData.nextLeader);
+      }
+    );
+
+    renderIfChanged("nz-next-leader", data.nextLeader || null, renderNuzlockeNextLeader);
+    renderIfChanged("nz-leaders", data.gymLeaders || [], renderNuzlockeLeaders);
   }
 
   function setBarWidth(id, percent) {
