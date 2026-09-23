@@ -982,11 +982,30 @@
       });
     }
 
+    // Bloque 4.3 (23/09/2026): "Detener" corta el servidor HTTP
+    // sin avisar -- eso apaga los 3 overlays de OBS (y el panel
+    // web del Nuzlocke) al toque, en medio de un stream real. Solo
+    // se confirma al DETENER, no al iniciar (eso no tiene ningún
+    // efecto destructivo).
     var serverBtn = document.getElementById("dash-btn-server-toggle");
     if (serverBtn) {
       serverBtn.addEventListener("click", function () {
-        var action = serverBtn.dataset.running === "true" ? "stop_http_server" : "start_http_server";
-        api()[action]().then(pollMain);
+        var isRunning = serverBtn.dataset.running === "true";
+
+        if (!isRunning) {
+          api().start_http_server().then(pollMain);
+          return;
+        }
+
+        showConfirmModal({
+          title: "Detener servidor HTTP",
+          message: "Esto corta el servidor HTTP -- los 3 overlays de OBS (Team/Badges/Nuzlocke) y el panel web del Nuzlocke van a dejar de mostrarse hasta que lo reinicies.",
+          confirmLabel: "Detener",
+          danger: true,
+          onConfirm: function () {
+            api().stop_http_server().then(pollMain);
+          },
+        });
       });
     }
 
@@ -998,8 +1017,22 @@
     var ovServerBtn = document.getElementById("ov-btn-server-toggle");
     if (ovServerBtn) {
       ovServerBtn.addEventListener("click", function () {
-        var action = ovServerBtn.dataset.running === "true" ? "stop_http_server" : "start_http_server";
-        api()[action]().then(pollMain);
+        var isRunning = ovServerBtn.dataset.running === "true";
+
+        if (!isRunning) {
+          api().start_http_server().then(pollMain);
+          return;
+        }
+
+        showConfirmModal({
+          title: "Detener servidor HTTP",
+          message: "Esto corta el servidor HTTP -- los 3 overlays de OBS (Team/Badges/Nuzlocke) y el panel web del Nuzlocke van a dejar de mostrarse hasta que lo reinicies.",
+          confirmLabel: "Detener",
+          danger: true,
+          onConfirm: function () {
+            api().stop_http_server().then(pollMain);
+          },
+        });
       });
     }
 
@@ -2881,6 +2914,22 @@
       return;
     }
 
+    // Bloque 4.3 (23/09/2026): única función de ESCRITURA de
+    // memoria de todo el proyecto (ver sección 4.6 del Documento
+    // Maestro) -- confirmación previa mostrando la cantidad exacta
+    // que se va a escribir, sumada a la nota pasiva que ya existía
+    // en la página.
+    showConfirmModal({
+      title: "Agregar Caramelo Raro",
+      message: "Esto escribe " + cantidad + " Caramelo(s) Raro(s) en el bolsillo de Medicina de tu bolsa, en la partida real. Confirmá la cantidad antes de continuar.",
+      confirmLabel: "Agregar",
+      onConfirm: function () {
+        addRareCandyConfirmed(cantidad);
+      },
+    });
+  }
+
+  function addRareCandyConfirmed(cantidad) {
     var button = document.getElementById("herr-btn-add-candy");
     button.disabled = true;
 
@@ -3230,6 +3279,7 @@
     document.getElementById("nz-btn-add-rule").addEventListener("click", onAddRuleClicked);
     document.getElementById("nz-form-status").addEventListener("change", onEncounterStatusChanged);
     document.getElementById("nz-btn-reset-run").addEventListener("click", onResetRunClicked);
+    document.getElementById("nz-btn-restore-backup").addEventListener("click", onRestoreBackupClicked);
 
     // Botón "Ver equipo completo" de la tarjeta de líder siguiente
     // (Seguimiento) -> pestaña Líderes. Se simula un clic sobre el
@@ -3284,6 +3334,18 @@
       });
     });
 
+    // Bloque 4.3: botón "Confirmar" del modal genérico -- ejecuta
+    // el callback que haya dejado showConfirmModal() y cierra. Un
+    // solo listener alcanza para cualquier acción de toda la app,
+    // el callback cambia en cada showConfirmModal(), no el botón.
+    document.getElementById("confirm-modal-confirm").addEventListener("click", function () {
+      var handler = confirmModalConfirmHandler;
+      closeModal("confirm-modal");
+      if (handler) {
+        handler();
+      }
+    });
+
     // Clic en el fondo oscuro (fuera de la tarjeta del modal)
     // cierra igual que el botón "X" -- patrón estándar de modal,
     // no hace falta que el usuario apunte exacto al botón.
@@ -3308,6 +3370,45 @@
 
   function closeModal(id) {
     document.getElementById(id).hidden = true;
+
+    if (id === "confirm-modal") {
+      confirmModalConfirmHandler = null;
+    }
+  }
+
+  // ===================== Bloque 4.3: modal de confirmación
+  // genérico =====================
+  //
+  // Reemplaza a window.confirm() en toda la app -- mismo
+  // componente visual que el resto de los modales
+  // (.nz-modal-overlay/.nz-modal), pero como toda confirmación
+  // real acá dispara una acción asíncrona (api().algo().then(...)),
+  // showConfirmModal() recibe un callback en vez de devolver un
+  // booleano como hacía window.confirm(): se llama recién cuando
+  // el usuario aprieta "Confirmar", nunca si cancela o cierra el
+  // modal de cualquier otra forma.
+  //
+  // options:
+  //   title        -- opcional, "Confirmar" por defecto
+  //   message      -- texto del cuerpo (obligatorio)
+  //   confirmLabel -- opcional, "Confirmar" por defecto
+  //   danger       -- true para las acciones destructivas (colorea
+  //                   el botón de confirmar en rojo, mismo criterio
+  //                   visual que .dash-btn-sm-danger)
+  //   onConfirm    -- función a ejecutar si el usuario confirma
+  var confirmModalConfirmHandler = null;
+
+  function showConfirmModal(options) {
+    document.getElementById("confirm-modal-title").textContent = options.title || "Confirmar";
+    document.getElementById("confirm-modal-message").textContent = options.message;
+
+    var confirmBtn = document.getElementById("confirm-modal-confirm");
+    confirmBtn.textContent = options.confirmLabel || "Confirmar";
+    confirmBtn.classList.toggle("dash-btn-sm-danger", !!options.danger);
+
+    confirmModalConfirmHandler = options.onConfirm;
+
+    openModal("confirm-modal");
   }
 
   function escapeHtml(value) {
@@ -3844,12 +3945,17 @@
 
     list.querySelectorAll("[data-discard]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        if (!window.confirm("¿Descartar esta captura de los encuentros por ruta? El Pokémon se queda en tu equipo igual, solo deja de contar para el tracker.")) {
-          return;
-        }
-        api()
-          .nuzlocke_discard_pending(btn.dataset.discard)
-          .then(pollNuzlockePage);
+        var nickname = btn.dataset.discard;
+        showConfirmModal({
+          title: "Descartar captura",
+          message: "¿Descartar esta captura de los encuentros por ruta? El Pokémon se queda en tu equipo igual, solo deja de contar para el tracker.",
+          confirmLabel: "Descartar",
+          onConfirm: function () {
+            api()
+              .nuzlocke_discard_pending(nickname)
+              .then(pollNuzlockePage);
+          },
+        });
       });
     });
   }
@@ -4253,19 +4359,46 @@
   // vacían, el ruleset (las reglas de la casa que el jugador eligió)
   // NO se toca.
   function onResetRunClicked() {
-    if (
-      !window.confirm(
-        "Esto borra TODO el progreso de este Nuzlocke (equipo, cementerio, encuentros y capturas pendientes) para volver a empezar de cero. Las reglas de la partida no se borran. No se puede deshacer. ¿Continuar?"
-      )
-    ) {
-      return;
-    }
+    showConfirmModal({
+      title: "Reiniciar partida",
+      message: "Esto borra TODO el progreso de este Nuzlocke (equipo, cementerio, encuentros y capturas pendientes) para volver a empezar de cero. Las reglas de la partida no se borran. Se guarda un respaldo del estado actual antes de borrar (ver \"Restaurar último respaldo\").",
+      confirmLabel: "Reiniciar partida",
+      danger: true,
+      onConfirm: function () {
+        api()
+          .nuzlocke_reset_all()
+          .then(function () {
+            pollNuzlockePage();
+          });
+      },
+    });
+  }
 
-    api()
-      .nuzlocke_reset_all()
-      .then(function () {
-        pollNuzlockePage();
-      });
+  // Bloque 4.2 (23/09/2026, guía siguiente versión): "Restaurar
+  // último respaldo" -- deshace la última operación destructiva
+  // (borrar un encuentro o "Reiniciar partida"). Reemplaza TODO lo
+  // que haya cambiado desde ese respaldo, así que tiene su propia
+  // confirmación aparte -- no es solo un "deshacer" del último
+  // click, también se pierde cualquier captura nueva registrada
+  // después del respaldo.
+  function onRestoreBackupClicked() {
+    showConfirmModal({
+      title: "Restaurar último respaldo",
+      message: "Esto reemplaza el Nuzlocke actual por el último respaldo guardado (de antes del último borrado o reinicio) -- cualquier captura o cambio registrado DESPUÉS de ese respaldo se pierde.",
+      confirmLabel: "Restaurar",
+      danger: true,
+      onConfirm: function () {
+        api()
+          .nuzlocke_restore_backup()
+          .then(function (result) {
+            if (result && result.error) {
+              window.alert(result.error);
+              return;
+            }
+            pollNuzlockePage();
+          });
+      },
+    });
   }
 
   // Borrado directo de fila (05/09/2026, a pedido del usuario):
@@ -4275,19 +4408,23 @@
   // directo (con la misma confirmación de antes). "Inicial" ni
   // siquiera recibe el botón (ver renderNuzlockeEncounters()).
   function deleteEncounterRow(location) {
-    if (!window.confirm('Esto borra el registro de "' + location + '" Y el Pokémon capturado ahí (roster/cementerio). No se puede deshacer. ¿Continuar?')) {
-      return;
-    }
-
-    api()
-      .nuzlocke_delete_encounter(location)
-      .then(function (result) {
-        if (result && result.error) {
-          window.alert(result.error);
-          return;
-        }
-        pollNuzlockePage();
-      });
+    showConfirmModal({
+      title: "Borrar encuentro",
+      message: 'Esto borra el registro de "' + location + '" Y el Pokémon capturado ahí (roster/cementerio). Se guarda un respaldo del estado actual antes de borrar (ver "Restaurar último respaldo").',
+      confirmLabel: "Borrar",
+      danger: true,
+      onConfirm: function () {
+        api()
+          .nuzlocke_delete_encounter(location)
+          .then(function (result) {
+            if (result && result.error) {
+              window.alert(result.error);
+              return;
+            }
+            pollNuzlockePage();
+          });
+      },
+    });
   }
 
   // ---------- Modal: ¿Pokémon Especial? ----------

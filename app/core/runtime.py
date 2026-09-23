@@ -264,9 +264,21 @@ class Runtime:
 
         box = self._cached_boxed_party
 
+        # Bloque 4.4 (23/09/2026, guía siguiente versión): solo se
+        # lee la bolsa (400 casilleros, una UDP extra) mientras el
+        # Nuzlocke todavía no arrancó -- una vez que
+        # NuzlockeService confirma `nuzlocke_started`, se deja de
+        # gastar esa lectura para siempre (ver
+        # NuzlockeService.is_started()/update()).
+        has_pokeballs = None
+
+        if not self.nuzlocke_service.is_started():
+            has_pokeballs = self.reader.read_has_pokeballs()
+
         self.state.nuzlocke = self.nuzlocke_service.update(
             party,
             boxed_party=box,
+            has_pokeballs=has_pokeballs,
         )
 
         badges = self.badges_service.read_badges()
@@ -442,6 +454,16 @@ class Runtime:
         activo" para no confundir la transición de fin de combate.
         """
 
+        # Bloque 4.4 (23/09/2026): sin sentido gastar la lectura de
+        # memoria del flag salvaje (ni ensuciar Logs con "[Perdido]
+        # ...") mientras el Nuzlocke todavía no arrancó -- ver el
+        # guard real y autoritativo en
+        # NuzlockeService.register_lost_encounter(), este es solo
+        # para no hacer trabajo de más ni confundir con líneas de
+        # log que de todos modos no iban a terminar en nada.
+        if not self.nuzlocke_service.is_started():
+            return
+
         wild_result = self.combat_service.read_wild_flag()
 
         if wild_result is LECTURA_DESCARTADA:
@@ -453,9 +475,19 @@ class Runtime:
         combat_active_now = wild_result is not None
 
         if combat_active_now and not self._combat_was_active:
+            # Diagnóstico (23/09/2026, ver read_combat_base_pointer()
+            # en combat_service.py): logueamos el valor crudo del
+            # puntero -- no cambia ninguna decisión, es para tener
+            # evidencia dura la próxima vez que se sospeche un
+            # falso positivo como el reportado por el usuario.
+            base_pointer = self.combat_service.read_combat_base_pointer()
+            base_pointer_hex = (
+                hex(base_pointer) if base_pointer is not None else "?"
+            )
             self._log_lost(
                 "combat_start",
-                "combate detectado (puntero de combate activo).",
+                "combate detectado (puntero de combate activo, "
+                f"base={base_pointer_hex}).",
             )
 
         if wild_result is True:

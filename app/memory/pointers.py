@@ -784,3 +784,72 @@ def get_medicine_pocket_start_address(process_name):
         process_name,
         _MEDICINE_POCKET_START_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
     )
+
+
+# ============================================================
+# BOLSILLO DE OBJETOS (las Poké Balls viven ACÁ, no en un
+# bolsillo propio -- Bloque 4.4, guía siguiente versión)
+# ============================================================
+#
+# Hipótesis original (guía siguiente versión, Bloque 4.4): que
+# existía un bolsillo de Poké Balls separado, contiguo al de
+# Medicina. INCORRECTA -- confirmado en vivo por el usuario el
+# 23/09/2026 con investigar_bolsillo_pokeballs.py: las Poké Balls
+# (Poké Ball id=4, Super Ball id=3, Premier Ball id=12, todas
+# confirmadas contra una partida real) están MEZCLADAS dentro del
+# bolsillo general de "Objetos", junto con ítems comunes sin
+# relación (usar solo item_id, nunca la posición dentro del
+# bolsillo, para decidir si algo es una Poké Ball).
+#
+# CONFIRMADO EN VIVO (Alpha Sapphire 1.4, proceso sango-2,
+# 23/09/2026): el bolsillo de Objetos arranca en BAG_START_ADDRESS
+# y tiene 400 casilleros de capacidad -- el límite real se ve
+# clarísimo en el dump: termina justo donde empieza el bolsillo de
+# Objetos Claves (7 ítems reales + 393 casilleros vacíos = 400,
+# después arranca ese otro bolsillo con datos reales de nuevo, sin
+# ninguna ambigüedad). Verificación cruzada en el mismo dump:
+# item_id=50 (RARE_CANDY_ITEM_ID, confirmado por otro camino
+# totalmente distinto) aparece exactamente al principio del
+# bolsillo de Medicina, con la cantidad que el usuario venía
+# agregando con la Herramienta -- coincide.
+#
+# Omega Ruby: BAG_START_ADDRESS ya está confirmado COMPARTIDO con
+# Alpha Sapphire 1.4 (ver _BAG_START_ADDRESS_BY_PROCESS más arriba,
+# ambos 0x08C6EC70). Se asume el mismo layout completo de bolsillos
+# (Objetos/Objetos Claves/MT-MO/Medicina) por el mismo patrón de
+# convergencia ya confirmado reiteradas veces en este proyecto
+# (medallas, total_caught, orden de party, inicio de Medicina) --
+# pero esto en particular TODAVÍA NO se confirmó en vivo
+# específicamente contra un save de Omega Ruby. Confirmarlo antes
+# de confiar del todo en OR (regla 1/11 del Documento Maestro).
+_ITEMS_POCKET_START_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6EC70,
+    PROCESS_NAME_OMEGA_RUBY: 0x08C6EC70,
+}
+
+# 400 casilleros confirmados en vivo (ver comentario arriba) -- a
+# diferencia de MEDICINE_POCKET_SCAN_SLOTS (un margen generoso pero
+# sin confirmar el límite real todavía), este SÍ es el tamaño real
+# confirmado del bolsillo completo, no un margen de escaneo.
+ITEMS_POCKET_SLOT_COUNT = 400
+
+
+def get_items_pocket_start_address(process_name):
+    """Idem get_party_order_address(), para el bolsillo de Objetos."""
+
+    return _ITEMS_POCKET_START_BY_PROCESS.get(
+        process_name,
+        _ITEMS_POCKET_START_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
+
+
+# Categoría "Poké Ball" de la tabla oficial de índices de items de
+# Bulbapedia para Generación VI (mismo tipo de fuente ya usado para
+# RARE_CANDY_ITEM_ID -- no es un supuesto de DexRelay). Confirmado
+# en vivo que id=4 (Poké Ball), id=3 (Super Ball) e id=12 (Premier
+# Ball) son justamente eso en una partida real (23/09/2026) -- el
+# resto del rango (Maestra, Ultra, Safari, Red, Buceo, Nido,
+# Repetición, Cronómetro, Lujo, Ocaso, Curación, Veloz, Estima) no
+# se confirmó cada uno individualmente en esa partida puntual (no
+# los tenía en el momento del dump), vienen de la misma tabla.
+POKEBALL_ITEM_IDS = frozenset(range(1, 17))

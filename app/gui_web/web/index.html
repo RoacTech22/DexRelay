@@ -863,7 +863,10 @@
                 <h1>Nuzlocke</h1>
                 <p class="page-subtitle">Registro de tu aventura en tiempo real.</p>
               </div>
-              <button id="nz-btn-reset-run" class="dash-btn-sm dash-btn-sm-danger">Reiniciar partida</button>
+              <div class="nz-page-header-actions">
+                <button id="nz-btn-restore-backup" class="dash-btn-sm">Restaurar último respaldo</button>
+                <button id="nz-btn-reset-run" class="dash-btn-sm dash-btn-sm-danger">Reiniciar partida</button>
+              </div>
             </div>
 
             <!-- Pestañas de la página Nuzlocke (Fase B, roadmap 3.3):
@@ -1940,6 +1943,40 @@
       </main>
     </section>
 
+  </div>
+
+  <!-- Bloque 4.3 (23/09/2026, guía siguiente versión): modal de
+       confirmación genérico, reusado por cualquier acción
+       destructiva o irreversible de toda la app (borrar un
+       encuentro, reiniciar la partida, restaurar un respaldo,
+       detener el servidor HTTP, escribir Caramelo Raro) en vez de
+       window.confirm() del navegador -- mismo componente visual
+       que el resto de los modales (.nz-modal-overlay/.nz-modal),
+       a propósito FUERA de cualquier página (class="page"): tiene
+       que poder abrirse sin importar cuál esté activa (Dashboard,
+       Herramientas, Overlays, Nuzlocke todas lo usan). Contenido
+       (título/mensaje/texto y color del botón de confirmar) lo
+       arma showConfirmModal() en JS en el momento -- ver app.js. -->
+  <div id="confirm-modal" class="nz-modal-overlay" hidden>
+    <div class="nz-modal nz-modal-narrow">
+      <div class="nz-modal-header">
+        <h3 id="confirm-modal-title">Confirmar</h3>
+        <button class="nz-modal-close" data-close-modal="confirm-modal"><svg class="nz-close-icon"
+            viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor"
+              d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
+          </svg></button>
+      </div>
+      <div class="nz-modal-body">
+        <p id="confirm-modal-message" class="nz-modal-subtitle"></p>
+      </div>
+      <div class="nz-modal-footer">
+        <div class="nz-modal-footer-right">
+          <button class="dash-btn-sm" data-close-modal="confirm-modal">Cancelar</button>
+          <button id="confirm-modal-confirm" class="dash-btn-sm">Confirmar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="js/app.js"></script>

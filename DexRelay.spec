@@ -65,6 +65,11 @@ _USER_PROGRESS_FILES = {"badges.json", "team_overlay_settings.json"}
 
 for _name in sorted(os.listdir("data")):
     if not _name.endswith(".json"):
+        # Bloque 4.2 (23/09/2026): esto también deja afuera del
+        # build a data/backups/ (respaldos de NuzlockeStorage.
+        # backup()) sin necesitar ningún caso especial -- es una
+        # carpeta, nunca termina en ".json", así que este chequeo
+        # ya la salta sola.
         continue
 
     if _name in _USER_PROGRESS_FILES or _name.startswith("nuzlocke"):

@@ -3665,6 +3665,19 @@ body {
   gap: 16px;
 }
 
+/* Bloque 4.2 (23/09/2026, guía siguiente versión): "Restaurar
+   último respaldo" se agregó al lado de "Reiniciar partida" --
+   ambos quedan agrupados en este contenedor para que
+   .nz-page-header-row (space-between) siga empujando el GRUPO
+   entero a la derecha, en vez de separar los dos botones entre sí
+   como si fueran los dos extremos de la fila. */
+.nz-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
 .dash-btn-sm-danger {
   flex: none;
   color: var(--danger);

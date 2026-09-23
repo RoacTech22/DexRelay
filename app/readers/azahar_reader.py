@@ -22,6 +22,9 @@ from app.memory.pointers import (
     get_box_address,
     CURRENT_ZONE_ID_ADDRESS,
     get_current_zone_id_address,
+    get_items_pocket_start_address,
+    ITEMS_POCKET_SLOT_COUNT,
+    POKEBALL_ITEM_IDS,
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
@@ -944,6 +947,48 @@ class AzaharReader:
             return None
 
         return data[0]
+
+    def read_has_pokeballs(self):
+        """
+        Bloque 4.4 (guía siguiente versión, 23/09/2026): ¿tiene el
+        jugador al menos una Poké Ball de cualquier tipo en la
+        bolsa ahora mismo? Usado para detectar el inicio real de un
+        Nuzlocke -- antes de conseguir las primeras Poké Balls, los
+        encuentros/muertes no deberían contar para el tracker (ver
+        NuzlockeService, flag `nuzlocke_started`).
+
+        Escanea el bolsillo de Objetos completo (confirmado en vivo
+        que las Poké Balls viven mezcladas ahí, NO en un bolsillo
+        propio -- ver get_items_pocket_start_address() en
+        pointers.py) buscando cualquier casillero cuyo item_id esté
+        en POKEBALL_ITEM_IDS con cantidad > 0. Solo lectura, una
+        sola lectura UDP para las 400 casilleros.
+
+        Devuelve True/False, o None si la lectura falló (mismo
+        criterio que el resto de los read_* -- nunca asumir "no
+        tiene" ante una lectura fallida, para no marcar
+        nuzlocke_started en falso por un problema transitorio de
+        conexión).
+        """
+
+        pocket_start = get_items_pocket_start_address(self.process_name)
+        slot_size = 4
+        size = ITEMS_POCKET_SLOT_COUNT * slot_size
+
+        data = self.memory.read(pocket_start, size)
+
+        if data is None or len(data) != size:
+            return None
+
+        for offset in range(0, size, slot_size):
+            item_id, quantity = struct.unpack(
+                "<HH", data[offset:offset + slot_size]
+            )
+
+            if item_id in POKEBALL_ITEM_IDS and quantity > 0:
+                return True
+
+        return False
 
     def read_box(self, box_index=1):
         """

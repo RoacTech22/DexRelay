@@ -182,11 +182,19 @@ class FakeNuzlockeService:
     def __init__(self):
         self.calls = []
 
-    def update(self, party, boxed_party=None):
+    def update(self, party, boxed_party=None, has_pokeballs=None):
         self.calls.append(
             {"party": party, "boxed_party": boxed_party}
         )
         return {"roster": [], "graveyard": []}
+
+    def is_started(self):
+        # Bloque 4.4 (23/09/2026): True -- este test prueba el
+        # cacheo de boxed_party, no el gateo de inicio real del
+        # Nuzlocke; con esto Runtime ni intenta llamar a
+        # reader.read_has_pokeballs() (que FakeReaderForRuntime no
+        # implementa).
+        return True
 
 
 def test_runtime_pasa_boxed_party_a_nuzlocke_service():

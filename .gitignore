@@ -39,6 +39,13 @@ releases/
 config.json
 data/*.json
 
+# Bloque 4.2 (23/09/2026, guía siguiente versión): respaldos
+# automáticos de NuzlockeStorage.backup() -- progreso real de
+# partida como cualquier nuzlocke_*.json, nunca se versiona.
+# data/*.json NO cubre esto (el patrón no baja a subcarpetas), por
+# eso necesita su propia línea.
+data/backups/
+
 # EXCEPCIÓN (06/09/2026): move_data.json NO es dato de runtime del
 # usuario (como nuzlocke.json/badges.json) -- es un dataset estático
 # curado offline una sola vez (tools/data_curation/build_move_data.py,

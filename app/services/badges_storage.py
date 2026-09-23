@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from app.core import paths
+from app.core.atomic_write import write_json_atomic
 
 
 class BadgesStorage:
@@ -19,17 +19,8 @@ class BadgesStorage:
 
     def save(self, badges: dict) -> None:
         """Save the current badge state as JSON."""
-        self.path.parent.mkdir(parents=True, exist_ok=True)
 
-        with self.path.open(
-            "w",
-            encoding="utf-8",
-            newline="\n",
-        ) as file:
-            json.dump(
-                badges,
-                file,
-                indent=2,
-                ensure_ascii=False,
-            )
-            file.write("\n")
+        # Bloque 4.1 (23/09/2026): escritura atómica -- ver
+        # app/core/atomic_write.py. Antes: open("w") + json.dump()
+        # directo sobre el archivo final.
+        write_json_atomic(self.path, badges)

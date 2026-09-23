@@ -118,6 +118,11 @@ class NuzlockeService:
 
         previous_ruleset = self.get_ruleset()
 
+        # Bloque 4.2 (23/09/2026): respaldo antes de la operación
+        # destructiva -- "Reiniciar todo" no tenía forma de
+        # deshacerse.
+        self.storage.backup()
+
         self._data = {
             "roster": [],
             "graveyard": [],
@@ -128,6 +133,20 @@ class NuzlockeService:
             "ignored_nicknames": [],
             "fossil_pending_species_ids": [],
             "ruleset": previous_ruleset,
+            # Bloque 4.4 (23/09/2026, bug real reportado por
+            # Ronald: "Reiniciar partida" no volvía a gatear el
+            # inicio del Nuzlocke) -- este dict se arma A MANO,
+            # sin pasar por NuzlockeStorage.load() (que es donde
+            # vive la lógica de "archivo nuevo vs. existente" para
+            # nuzlocke_started, ver ese método). Sin esta línea,
+            # el setdefault(..., True) de más abajo en update()
+            # entraba en juego apenas se llamaba de nuevo y
+            # marcaba la partida como "ya iniciada" al instante,
+            # exactamente lo que "Reiniciar partida" NO debería
+            # hacer -- reiniciar tiene que volver a exigir Poké
+            # Balls antes de registrar nada, igual que una partida
+            # nueva de verdad.
+            "nuzlocke_started": False,
         }
 
         self._last_visible_nicknames = None
@@ -135,6 +154,49 @@ class NuzlockeService:
         self.storage.save(self._data)
 
         return self._data
+
+    def restore_latest_backup(self) -> dict | None:
+        """
+        Bloque 4.2 (guía siguiente versión, 23/09/2026): "Restaurar
+        último respaldo" -- deshace la última operación destructiva
+        (borrar un encuentro o "Reiniciar todo") reemplazando el
+        archivo actual por el respaldo más reciente que se haya
+        guardado antes de esa operación.
+
+        Fuerza recargar `self._data` desde el archivo restaurado
+        (en vez de intentar reconciliar el estado en memoria a
+        mano) -- mismo criterio que switch_storage(): más simple y
+        más confiable que tratar de adivinar qué cambió.
+
+        Devuelve el estado restaurado, o None si no había ningún
+        respaldo (no se tocó nada).
+        """
+
+        restored = self.storage.restore_latest_backup()
+
+        if not restored:
+            return None
+
+        self._data = self.storage.load()
+        self._last_visible_nicknames = None
+
+        return self._data
+
+    def is_started(self) -> bool:
+        """
+        Bloque 4.4 (23/09/2026): ¿ya arrancó el desafío de este
+        Nuzlocke? (el jugador ya tiene al menos una Poké Ball).
+        Usado por Runtime para decidir si todavía hace falta seguir
+        leyendo la bolsa cada ciclo (una vez que da True, queda así
+        para siempre -- ver el comentario junto a
+        `nuzlocke_started` en update()) o si ya se puede dejar de
+        gastar esa lectura extra de memoria.
+        """
+
+        if self._data is None:
+            self._data = self.storage.load()
+
+        return bool(self._data.get("nuzlocke_started", False))
 
     def _reconcile_starter_rename(
         self,
@@ -530,6 +592,7 @@ class NuzlockeService:
         self,
         team: list[dict],
         boxed_party: list[dict] | None = None,
+        has_pokeballs: bool | None = None,
     ) -> dict:
         """
         Compara la party actual contra el estado guardado, detecta
@@ -547,6 +610,13 @@ class NuzlockeService:
         que mantener: cualquier nickname que no esté ya en
         roster/graveyard se registra como captura nueva, igual que
         un Pokémon nuevo visto en la party.
+
+        `has_pokeballs`: ver el bloque de `nuzlocke_started` más
+        abajo (Bloque 4.4, 23/09/2026) -- resultado de
+        AzaharReader.read_has_pokeballs() de este mismo ciclo, o
+        None si Runtime no lo leyó (porque ya estaba
+        `nuzlocke_started`, no hace falta seguir leyendo la bolsa
+        para siempre).
         """
 
         if self._data is None:
@@ -561,6 +631,62 @@ class NuzlockeService:
         self._data.setdefault("traded_away", [])
         self._data.setdefault("ignored_nicknames", [])
         self._data.setdefault("fossil_pending_species_ids", [])
+
+        # Bloque 4.4 (23/09/2026): default True acá a propósito
+        # (no False) -- este setdefault solo entra en juego cuando
+        # `self._data` NO vino de NuzlockeStorage.load() real (que
+        # ya decide explícitamente True/False según si el archivo
+        # existía o no, ver ese método) -- por ejemplo, un
+        # FakeStorage de test que simula una partida ya en curso
+        # con roster/graveyard ya armados. Para ese caso, tratarlo
+        # como ya iniciado es lo seguro: no bloquear de golpe algo
+        # que ya se estaba registrando.
+        self._data.setdefault("nuzlocke_started", True)
+
+        # Bloque 4.4 (guía siguiente versión, 23/09/2026): el
+        # desafío de un Nuzlocke empieza cuando el jugador consigue
+        # sus primeras Poké Balls, no antes -- un encuentro salvaje
+        # o la muerte del propio inicial antes de eso no debería
+        # contar para el tracker (pedido explícito del usuario).
+        # Mientras `nuzlocke_started` sea False, update() no
+        # procesa NADA de lo que sigue -- ni capturas nuevas, ni
+        # muertes, ni intercambios -- simplemente devuelve el
+        # estado guardado tal cual (vacío en una partida nueva).
+        # Runtime decide CUÁNDO pasar has_pokeballs=True (lee la
+        # bolsa real, ver AzaharReader.read_has_pokeballs() --
+        # confirmado en vivo el 23/09/2026 que las Poké Balls viven
+        # en el bolsillo general de Objetos, no en uno propio) --
+        # acá solo se decide QUÉ hacer con ese dato.
+        #
+        # Una vez que pasa a True queda así para siempre (mismo
+        # criterio que starter_assigned) -- no vuelve a False
+        # aunque el jugador se quede sin ninguna Poké Ball más
+        # adelante.
+        #
+        # Limitación conocida y aceptada (caso raro): si el propio
+        # inicial muere ANTES de que el jugador consiga su primera
+        # Poké Ball, esa muerte no se ve en absoluto mientras
+        # tanto -- en cuanto se detecten Poké Balls el inicial se
+        # registra con el HP que tenga en ese momento (vivo o ya en
+        # 0), sin poder reconstruir retroactivamente qué pasó en
+        # el medio.
+        #
+        # Partidas ya en curso (decisión sin confirmar todavía con
+        # el usuario, ver guía "Decisiones abiertas"): no se toca
+        # nada retroactivo -- `nuzlocke_started` arranca en False
+        # vía setdefault de arriba, así que para cualquier partida
+        # con progreso ya guardado, el PRÓXIMO ciclo real (con
+        # Poké Balls ya en la bolsa, como es casi siempre el caso
+        # para una partida en curso) lo pone en True de inmediato y
+        # todo sigue funcionando exactamente igual que antes de
+        # este bloque -- ningún encuentro/muerte ya registrado se
+        # borra ni se reinterpreta.
+        if not self._data["nuzlocke_started"]:
+            if has_pokeballs:
+                self._data["nuzlocke_started"] = True
+                self.storage.save(self._data)
+            else:
+                return self._data
 
         # Reintento de ubicación pendiente (28/08/2026, bug real
         # reportado: pasaba sobre todo cuando el jugador NO le
@@ -1488,6 +1614,22 @@ class NuzlockeService:
         otro camino mientras el combate estaba en curso.
         """
 
+        # Bloque 4.4 (23/09/2026, bug real reportado por Ronald: la
+        # detección de "perdido" seguía registrando encuentros
+        # aunque el Nuzlocke todavía no hubiera arrancado). La
+        # detección de "perdido" es un camino de Runtime totalmente
+        # aparte de update() -- Runtime._update_lost_encounter_
+        # tracking()/_resolve_pending_lost_encounter() llaman acá
+        # DIRECTO, nunca pasan por update(), así que el gateo de
+        # `nuzlocke_started` de ahí no los alcanzaba para nada. Este
+        # es el único lugar por el que TODO "perdido" pasa antes de
+        # persistirse, así que gatear justo acá garantiza que nunca
+        # se registre uno sin importar el camino (Runtime también
+        # evita el trabajo de armar el snapshot desde el vamos, ver
+        # el comentario en _update_lost_encounter_tracking()).
+        if not self.is_started():
+            return self.get_encounters()
+
         if self.has_encounter_for_location(location):
             return self.get_encounters()
 
@@ -1644,6 +1786,12 @@ class NuzlockeService:
                 self._data["ignored_nicknames"].append(
                     nickname
                 )
+
+        # Bloque 4.2 (23/09/2026): respaldo antes de la operación
+        # destructiva -- borrar un encuentro no tenía forma de
+        # deshacerse (saca al Pokémon del roster/cementerio
+        # también, no solo de la tabla de encuentros).
+        self.storage.backup()
 
         self.storage.save(self._data)
 

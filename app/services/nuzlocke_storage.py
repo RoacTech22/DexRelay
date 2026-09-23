@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
+from datetime import datetime
 from pathlib import Path
 
 from app.core import paths
+from app.core.atomic_write import write_json_atomic
 from app.memory.pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
@@ -84,6 +87,14 @@ DEFAULT_RULESET = [
 
 class NuzlockeStorage:
     """Persists the current Nuzlocke run (roster + graveyard) to disk."""
+
+    # Bloque 4.2 (guía siguiente versión, 23/09/2026): cuántos
+    # respaldos conservar POR JUEGO antes de empezar a borrar los
+    # más viejos -- 10 por defecto (sugerencia de la guía, sin
+    # confirmar todavía con Ronald, ver "Decisiones abiertas" de la
+    # guía). Un valor de clase, fácil de ajustar acá si decide otro
+    # número.
+    BACKUP_KEEP_COUNT = 10
 
     def __init__(self, path: str | Path | None = None) -> None:
         # Sin path explícito, resuelve data/nuzlocke.json relativo
@@ -165,6 +176,12 @@ class NuzlockeStorage:
                 # lista en memoria y tildar una regla en una
                 # afectaría a la otra.
                 "ruleset": copy.deepcopy(DEFAULT_RULESET),
+                # Bloque 4.4 (23/09/2026): archivo recién creado
+                # (primera vez que se ve esta partida) -- el
+                # Nuzlocke todavía no arrancó de verdad, ver el
+                # comentario junto a `nuzlocke_started` en
+                # NuzlockeService.update().
+                "nuzlocke_started": False,
             }
 
         with self.path.open(
@@ -180,25 +197,131 @@ class NuzlockeStorage:
         data.setdefault("starter_assigned", False)
         data.setdefault("ruleset", copy.deepcopy(DEFAULT_RULESET))
 
+        # Bloque 4.4 (23/09/2026): el ARCHIVO YA EXISTÍA -- es una
+        # partida que ya se venía trackeando antes de que existiera
+        # este flag. Se la considera ya iniciada por defecto (True,
+        # no False) para no bloquear de golpe el registro de
+        # encuentros/muertes de una partida en curso -- decisión
+        # explícita para no romper nada retroactivo (ver "Partidas
+        # ya en curso" en el comentario de update()). Si el archivo
+        # YA TRAE la clave (partida creada después de este bloque),
+        # setdefault no la toca.
+        data.setdefault("nuzlocke_started", True)
+
         return data
 
     def save(self, data: dict) -> None:
         """Save the current Nuzlocke run as JSON."""
 
-        self.path.parent.mkdir(
-            parents=True,
-            exist_ok=True,
+        # Bloque 4.1 (23/09/2026): escritura atómica -- ver
+        # app/core/atomic_write.py. Antes: open("w") + json.dump()
+        # directo sobre el archivo final.
+        write_json_atomic(self.path, data)
+
+    def backup(self) -> Path | None:
+        """
+        Bloque 4.2 (guía siguiente versión, 23/09/2026): copia el
+        archivo TAL COMO ESTÁ HOY en disco a data/backups/, con
+        fecha y hora en el nombre, antes de una operación
+        destructiva (borrar un encuentro, "Reiniciar todo" -- ver
+        NuzlockeService.delete_encounter()/reset_all()). Progreso
+        real de partida (regla 10 del Documento Maestro): sin esto,
+        "no se puede deshacer" era literal.
+
+        No respalda desde `self._data` en memoria -- copia el
+        archivo real con `shutil.copy2` para no depender de que la
+        memoria y el disco coincidan. Si el archivo todavía no
+        existe (partida recién arrancada, nada que perder todavía),
+        no hace nada.
+
+        Conserva los últimos BACKUP_KEEP_COUNT respaldos de ESTE
+        archivo (por juego, ya que cada juego tiene su propio
+        NuzlockeStorage/path) y borra los más viejos -- el nombre
+        con timestamp ISO ordena cronológicamente como texto, así
+        que no hace falta parsear fechas para saber cuáles son los
+        más viejos.
+        """
+
+        if not self.path.exists():
+            return None
+
+        backups_dir = self.path.parent / "backups"
+        backups_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_path = backups_dir / f"{self.path.stem}.{timestamp}.json"
+
+        # Si ya existe un backup con el mismo segundo (dos
+        # operaciones destructivas seguidas muy rápido), se suma un
+        # sufijo en vez de pisar el anterior.
+        suffix = 2
+        while backup_path.exists():
+            backup_path = backups_dir / f"{self.path.stem}.{timestamp}-{suffix}.json"
+            suffix += 1
+
+        shutil.copy2(self.path, backup_path)
+
+        self._prune_old_backups(backups_dir)
+
+        return backup_path
+
+    def _prune_old_backups(self, backups_dir: Path) -> None:
+        prefix = f"{self.path.stem}."
+        existing = sorted(
+            backups_dir.glob(f"{prefix}*.json"),
+            key=lambda backup_path: backup_path.name,
         )
 
-        with self.path.open(
-            "w",
-            encoding="utf-8",
-            newline="\n",
-        ) as file:
-            json.dump(
-                data,
-                file,
-                indent=2,
-                ensure_ascii=False,
-            )
-            file.write("\n")
+        excess_count = len(existing) - self.BACKUP_KEEP_COUNT
+
+        for old_backup in existing[: max(excess_count, 0)]:
+            try:
+                old_backup.unlink()
+            except OSError:
+                # Un backup que no se puede borrar (en uso, permisos)
+                # no debería impedir que la operación destructiva
+                # que disparó todo esto siga adelante.
+                pass
+
+    def list_backups(self) -> list[Path]:
+        """
+        Respaldos existentes de ESTE archivo, del más reciente al
+        más viejo -- usado por la GUI para ofrecer "Restaurar
+        último respaldo" (Bloque 4.2).
+        """
+
+        backups_dir = self.path.parent / "backups"
+
+        if not backups_dir.exists():
+            return []
+
+        prefix = f"{self.path.stem}."
+
+        return sorted(
+            backups_dir.glob(f"{prefix}*.json"),
+            key=lambda backup_path: backup_path.name,
+            reverse=True,
+        )
+
+    def restore_latest_backup(self) -> bool:
+        """
+        Bloque 4.2: restaura el respaldo más reciente sobre el
+        archivo actual (con os.replace() vía write_json_atomic, así
+        que también queda a salvo de un corte a mitad de camino).
+        Devuelve False sin tocar nada si no hay ningún respaldo.
+        """
+
+        backups = self.list_backups()
+
+        if not backups:
+            return False
+
+        latest_backup = backups[0]
+
+        with latest_backup.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        write_json_atomic(self.path, data)
+
+        return True
+

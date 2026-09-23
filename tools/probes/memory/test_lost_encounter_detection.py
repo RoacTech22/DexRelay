@@ -63,9 +63,17 @@ class FakeNuzlockeService:
         self.lost_calls = []
         self.registered_locations = set()
 
-    def update(self, party, boxed_party=None):
+    def update(self, party, boxed_party=None, has_pokeballs=None):
         self.calls.append(party)
         return {"roster": [], "graveyard": []}
+
+    def is_started(self):
+        # Bloque 4.4 (23/09/2026): True acá -- este test no está
+        # probando el gateo de "inicio real del Nuzlocke", así que
+        # se simula una partida ya iniciada para no interferir con
+        # lo que sí prueba (Runtime.read_has_pokeballs() ni se
+        # llama, ver runtime.py).
+        return True
 
     def has_encounter_for_location(self, location):
         return location in self.registered_locations

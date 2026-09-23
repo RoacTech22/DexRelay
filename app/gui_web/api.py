@@ -2120,6 +2120,22 @@ class Api:
     def nuzlocke_reset_all(self):
         return self.app.nuzlocke_service.reset_all()
 
+    def nuzlocke_restore_backup(self):
+        """
+        Bloque 4.2 (23/09/2026): "Restaurar último respaldo" --
+        deshace la última operación destructiva (borrar un
+        encuentro, "Reiniciar todo"). Devuelve {"error": ...} si no
+        había ningún respaldo, para que la GUI pueda avisar en vez
+        de fallar en silencio.
+        """
+
+        restored = self.app.nuzlocke_service.restore_latest_backup()
+
+        if restored is None:
+            return {"error": "No hay ningún respaldo disponible todavía."}
+
+        return restored
+
     def nuzlocke_get_ruleset(self):
         return self.app.nuzlocke_service.get_ruleset()
 
