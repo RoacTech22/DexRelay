@@ -1,3 +1,4 @@
+import socket
 import struct
 
 from app.readers.citra import Citra
@@ -25,6 +26,11 @@ from app.memory.pointers import (
     get_items_pocket_start_address,
     ITEMS_POCKET_SLOT_COUNT,
     POKEBALL_ITEM_IDS,
+    TRAINER_CARD_READ_SIZE,
+    TRAINER_CARD_ID_OFFSET,
+    TRAINER_CARD_NAME_OFFSET,
+    TRAINER_CARD_NAME_BYTES,
+    get_trainer_card_address,
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )
@@ -206,6 +212,68 @@ class AzaharReader:
                 return process_name
 
         return None
+
+    # Estados que devuelve diagnose_connection() -- constantes para
+    # que Api/GUI/tests no dependan de strings sueltos.
+    DIAG_NO_LISTENER = "no_listener"
+    DIAG_TIMEOUT = "timeout"
+    DIAG_ERROR = "error"
+    DIAG_NO_GAME = "no_game"
+    DIAG_GAME_FOUND = "game_found"
+
+    def diagnose_connection(self):
+        """
+        Bloque 6.2 (guía siguiente versión, 23/09/2026): distingue,
+        con lo que Azahar REALMENTE contesta, por qué DexRelay no
+        conecta -- para la pantalla de Espera, que hasta ahora solo
+        decía "buscando" sin importar la causa. Solo mira
+        (process_list()), no selecciona ni cambia nada de la
+        conexión.
+
+        Devuelve un dict con "state":
+
+        - DIAG_NO_LISTENER: nadie escucha en el puerto UDP (en
+          Windows el sistema devuelve un reset de conexión al
+          instante). Azahar cerrado o su interfaz de depuración
+          por UDP deshabilitada -- desde acá NO se pueden
+          distinguir esas dos, y la GUI no debe fingir que sí.
+        - DIAG_TIMEOUT: se mandó el pedido y nadie contestó en el
+          plazo del socket (2s).
+        - DIAG_ERROR: cualquier otro fallo de comunicación
+          ("detail" trae el texto real).
+        - DIAG_NO_GAME: Azahar contestó pero no hay ningún juego
+          conocido; "processes" lista los nombres que SÍ reportó
+          (dato real, puede venir vacío).
+        - DIAG_GAME_FOUND: Azahar contestó y hay un juego conocido
+          ("process_name").
+
+        Nunca lanza excepciones hacia el llamador.
+        """
+
+        try:
+            processes = self.citra.process_list()
+        except (ConnectionResetError, ConnectionRefusedError):
+            return {"state": self.DIAG_NO_LISTENER}
+        except (socket.timeout, TimeoutError):
+            return {"state": self.DIAG_TIMEOUT}
+        except OSError as error:
+            return {"state": self.DIAG_ERROR, "detail": str(error)}
+        except Exception as error:
+            return {"state": self.DIAG_ERROR, "detail": str(error)}
+
+        names = sorted(
+            {name for _title_id, name in processes.values()}
+        )
+
+        for name in names:
+            if name in KNOWN_PROCESS_NAMES:
+                return {
+                    "state": self.DIAG_GAME_FOUND,
+                    "process_name": name,
+                    "processes": names,
+                }
+
+        return {"state": self.DIAG_NO_GAME, "processes": names}
 
     def connect(self):
         """
@@ -989,6 +1057,54 @@ class AzaharReader:
                 return True
 
         return False
+
+    def read_trainer_identity(self):
+        """
+        Bloque 5 (guía siguiente versión, 24/09/2026): identifica QUÉ
+        partida está cargada leyendo la tarjeta de entrenador en RAM
+        (ver TRAINER_CARD_ADDRESS en pointers.py, confirmada en vivo
+        con dos partidas de dos juegos distintos). Solo lectura, una
+        UDP de TRAINER_CARD_READ_SIZE bytes.
+
+        Devuelve {"tid": int, "sid": int, "ot": str} o `None` si la
+        lectura falló o el contenido no parece una tarjeta real
+        (nombre vacío o con caracteres no imprimibles, o TID y SID
+        ambos en 0) -- por ejemplo con el juego todavía en el menú
+        antes de cargar una partida. Nunca inventa una identidad ante
+        una lectura dudosa; el llamador decide qué hacer con `None`.
+        """
+
+        address = get_trainer_card_address(self.process_name)
+
+        try:
+            data = self.memory.read(address, TRAINER_CARD_READ_SIZE)
+        except OSError:
+            return None
+
+        if data is None or len(data) != TRAINER_CARD_READ_SIZE:
+            return None
+
+        tid, sid = struct.unpack_from(
+            "<HH", data, TRAINER_CARD_ID_OFFSET
+        )
+
+        raw_name = data[
+            TRAINER_CARD_NAME_OFFSET:
+            TRAINER_CARD_NAME_OFFSET + TRAINER_CARD_NAME_BYTES
+        ]
+
+        try:
+            name = raw_name.decode("utf-16le").split("\x00", 1)[0]
+        except UnicodeDecodeError:
+            return None
+
+        if not name or not name.isprintable():
+            return None
+
+        if tid == 0 and sid == 0:
+            return None
+
+        return {"tid": tid, "sid": sid, "ot": name}
 
     def read_box(self, box_index=1):
         """

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from app.core import paths
 from app.core.atomic_write import write_json_atomic
+from app.services.nuzlocke_storage import _GAME_STORAGE_SLUGS
 
 
 class BadgesStorage:
@@ -16,6 +17,35 @@ class BadgesStorage:
         self.path = (
             Path(path) if path is not None else paths.path("data", "badges.json")
         )
+
+    @classmethod
+    def for_identity(
+        cls,
+        process_name: str,
+        tid: int,
+        sid: int,
+        data_dir: str | Path | None = None,
+    ) -> "BadgesStorage":
+        """
+        Bloque 5 (24/09/2026): un archivo de medallas por PARTIDA --
+        `data/badges_<juego>_<tid>_<sid>.json`, mismo criterio que
+        NuzlockeStorage.for_identity(). Antes había un solo
+        `badges.json`, y con dos partidas se pisaban entre sí. No hay
+        adopción del `badges.json` viejo: es una foto que se
+        reescribe entera en cada cambio y nada lo lee de vuelta (las
+        medallas se leen en vivo de memoria), así que no hay nada que
+        rescatar; queda sin tocar.
+        """
+
+        slug = _GAME_STORAGE_SLUGS.get(process_name, process_name)
+
+        base = (
+            Path(data_dir)
+            if data_dir is not None
+            else paths.path("data")
+        )
+
+        return cls(base / f"badges_{slug}_{tid}_{sid}.json")
 
     def save(self, badges: dict) -> None:
         """Save the current badge state as JSON."""

@@ -156,6 +156,104 @@ class NuzlockeStorage:
 
         return cls(target_path)
 
+    @classmethod
+    def for_identity(
+        cls,
+        process_name: str,
+        tid: int,
+        sid: int,
+        known_nicknames=None,
+        data_dir: str | Path | None = None,
+    ) -> "NuzlockeStorage":
+        """
+        Bloque 5 (guía siguiente versión, 24/09/2026): un archivo por
+        PARTIDA, no solo por juego --
+        `data/nuzlocke_<juego>_<tid>_<sid>.json`. Dos partidas del
+        mismo juego (dos saves distintos) ya no mezclan roster,
+        cementerio ni encuentros. TID y SID juntos (32 bits) para que
+        dos entrenadores distintos casi nunca colisionen.
+
+        Adopción del archivo por juego existente
+        (`nuzlocke_<juego>.json`, de antes de este bloque): si el
+        archivo de esta partida todavía no existe, se le MUEVE ese
+        archivo (no se copia: mismo criterio que la migración de
+        for_game(), una copia duplicaría datos) -- pero SOLO si
+        pertenece a esta partida, cosa que se decide comparando los
+        nicknames de su roster/cementerio contra los Pokémon que se
+        ven ahora mismo (`known_nicknames`: iterable o función que
+        lo devuelve; solo se llama si hace falta). Si no coincide (es
+        de otra partida del mismo juego), NO se toca: queda esperando
+        a que se cargue la partida a la que pertenece. Nunca borra
+        nada.
+
+        `data_dir` solo existe para poder probar esto sin tocar la
+        carpeta real `data/`.
+        """
+
+        slug = _GAME_STORAGE_SLUGS.get(process_name, process_name)
+
+        base = (
+            Path(data_dir)
+            if data_dir is not None
+            else paths.path("data")
+        )
+
+        target_path = base / f"nuzlocke_{slug}_{tid}_{sid}.json"
+        game_path = base / f"nuzlocke_{slug}.json"
+
+        if not target_path.exists() and game_path.exists():
+            known = (
+                known_nicknames()
+                if callable(known_nicknames)
+                else known_nicknames
+            )
+
+            if cls._game_file_belongs_to(game_path, known):
+                try:
+                    target_path.parent.mkdir(parents=True, exist_ok=True)
+                    game_path.rename(target_path)
+                except OSError:
+                    # Sin poder mover el archivo, esta partida
+                    # arranca con uno nuevo -- el viejo queda intacto.
+                    pass
+
+        return cls(target_path)
+
+    @staticmethod
+    def _game_file_belongs_to(game_path: Path, known_nicknames) -> bool:
+        """
+        ¿El archivo por juego `game_path` es de la partida que se ve
+        ahora? Compara los nicknames de su roster+cementerio contra
+        `known_nicknames` (party + cajas actuales). Exige coincidir
+        con al menos min(2, cantidad) de ellos: con un solo nickname
+        en común, dos partidas que nombraron igual a su inicial se
+        confundirían. Un archivo sin ningún nickname (vacío) no se
+        adopta: no hay nada que perder ni que reconocer.
+        """
+
+        if not known_nicknames:
+            return False
+
+        try:
+            with game_path.open("r", encoding="utf-8") as file:
+                data = json.load(file)
+        except (OSError, ValueError):
+            return False
+
+        stored = {
+            entry.get("nickname")
+            for key in ("roster", "graveyard")
+            for entry in data.get(key, [])
+            if isinstance(entry, dict) and entry.get("nickname")
+        }
+
+        if not stored:
+            return False
+
+        required = min(2, len(stored))
+
+        return len(stored & set(known_nicknames)) >= required
+
     def load(self) -> dict:
         """
         Load the current Nuzlocke run, or an empty one if no file

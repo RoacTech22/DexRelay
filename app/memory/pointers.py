@@ -110,6 +110,53 @@ def get_badges_address(process_name):
         _BADGES_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
     )
 
+
+# ---------------------------------------------------------------
+# Tarjeta de Entrenador en RAM -- identificador de la PARTIDA
+# (Bloque 5, guía siguiente versión, 23-24/09/2026).
+#
+# CONFIRMADO EN VIVO (24/09/2026, tools/probes/memory/
+# investigar_trainer_id.py --scan --size 0xD00000) con DOS partidas
+# distintas, una en cada juego, las dos en la actualización 1.4:
+#
+#   Alpha Sapphire (sango-2): TID16=23756, SID16=50341, OT="Ronii"
+#   Omega Ruby     (sango-1): TID16=29153, SID16=54059, OT="Ronii"
+#
+# En los dos casos el probe encontró el par TID/SID (dos u16
+# seguidos) en la MISMA dirección, 0x08C81340, con el nombre del
+# entrenador en UTF-16LE a +0x48 (72 bytes) -- y en cada partida el
+# valor leído ahí era el de SU entrenador (el voto de 10/10 y 12/12
+# Pokémon propios), no el de un Pokémon puntual: ninguna coincidencia
+# tenía la firma +0xA4 de una estructura PK6. Mismo patrón de
+# convergencia AS-1.4 / OR ya visto con party/box/badges.
+#
+# SIN CONFIRMAR (no se usa): una segunda copia del nombre a +98
+# (0x08C813A2) que el scan también devolvió.
+TRAINER_CARD_ADDRESS = 0x08C81340
+TRAINER_CARD_READ_SIZE = 0x60
+TRAINER_CARD_ID_OFFSET = 0x00
+TRAINER_CARD_NAME_OFFSET = 0x48
+TRAINER_CARD_NAME_BYTES = 24
+
+_TRAINER_CARD_ADDRESS_BY_PROCESS = {
+    PROCESS_NAME_ALPHA_SAPPHIRE: TRAINER_CARD_ADDRESS,
+    PROCESS_NAME_OMEGA_RUBY: TRAINER_CARD_ADDRESS,
+}
+
+
+def get_trainer_card_address(process_name):
+    """
+    Dirección de la tarjeta de entrenador para el proceso dado (ver
+    el comentario de arriba). Default a Alpha Sapphire si el proceso
+    no matchea ninguna clave conocida, mismo criterio que el resto
+    de los getters de este archivo.
+    """
+
+    return _TRAINER_CARD_ADDRESS_BY_PROCESS.get(
+        process_name,
+        _TRAINER_CARD_ADDRESS_BY_PROCESS[PROCESS_NAME_ALPHA_SAPPHIRE],
+    )
+
 # Tabla que contiene el orden lógico de los Pokémon de la party.
 # CONFIRMADO (29/08/2026): esta dirección NO era la misma entre
 # Alpha Sapphire (base) y Omega Ruby (1.4) -- la de AS-base daba
