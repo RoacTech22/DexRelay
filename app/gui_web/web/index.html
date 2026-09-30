@@ -5,11 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DexRelay</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
-    rel="stylesheet" />
+  <!-- Bloque 8.4 (30/09/2026): Inter y Space Grotesk ya no se piden a
+       Google Fonts -- DexRelay tiene que verse y arrancar igual sin
+       red (ver @font-face al principio de style.css y
+       app/gui_web/web/fonts/README.txt para los archivos .woff2). -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -68,8 +67,6 @@
       <footer class="welcome-footer">
         <span id="footer-version" class="footer-version">v0.3.0</span>
         <nav class="footer-links">
-          <a href="#" id="link-docs">Documentación</a>
-          <a href="#" id="link-discord">Discord</a>
           <a href="#" id="link-github">GitHub</a>
         </nav>
       </footer>
@@ -176,6 +173,15 @@
           </div>
           <button id="btn-cancel" class="btn btn-ghost">Cancelar</button>
         </div>
+
+        <!-- Bloque 6.1 (23/09/2026): si la espera se alarga, ofrece
+             una pista de qué revisar en vez de dejar el spinner
+             girando sin explicación -- ver maybeShowWaitingHint()
+             en app.js (se llama a lo sumo cada 5s, y solo después
+             de 15s reales de espera). -->
+        <div id="waiting-hint" class="waiting-hint" aria-live="polite" hidden>
+          <span id="waiting-hint-text"></span>
+        </div>
       </div>
     </section>
 
@@ -280,40 +286,80 @@
           </svg>
           Entrar a DexRelay
         </button>
+
+        <!-- Bloque 6.1: entra sola a los 2s si el usuario no toca
+             nada -- cancela con un click o cualquier tecla (ver
+             startAutoEnter()/cancelAutoEnter() en app.js). -->
+        <p id="enter-auto-note" class="enter-auto-note">
+          Entrando automáticamente...
+        </p>
       </div>
     </section>
 
     <!-- ================= SHELL PRINCIPAL ================= -->
     <section id="view-main" class="view">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
+        <!-- Bloque 7.1 (29/09/2026, pedido explícito del usuario):
+             sidebar colapsable -- deja visibles solo los íconos de
+             navegación. Solo dura la sesión actual (decisión del
+             usuario), no se guarda en disco ni en localStorage --
+             alcanza con la clase .collapsed en #sidebar (ver
+             toggleSidebar() en app.js). -->
+        <button id="sidebar-toggle" class="sidebar-toggle" type="button"
+          title="Colapsar sidebar" aria-label="Colapsar sidebar" aria-expanded="true">
+          <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="15,5 9,12 15,19" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
         <div class="sidebar-header">
-          <img id="sidebar-logo-img" class="sidebar-logo-img" alt="" hidden />
-          <div>
-            <div class="sidebar-title">DexRelay</div>
-            <div class="sidebar-subtitle">Control center · Azahar · Realtime</div>
+          <!-- Marca por defecto (logo + nombre + tagline) -- se ve
+               mientras no hay ninguna partida identificada por
+               Trainer ID todavía. Bloque 7 (24/09/2026, pedido
+               explícito del usuario 29/09/2026): en cuanto Runtime
+               identifica al entrenador, este bloque se oculta y se
+               reemplaza por #sidebar-trainer (ver applyUserChip()
+               en app.js) -- nunca se muestran los dos a la vez. -->
+          <div id="sidebar-brand" class="sidebar-brand">
+            <img id="sidebar-logo-img" class="sidebar-logo-img" alt="" hidden />
+            <div>
+              <div class="sidebar-title">DexRelay</div>
+              <div class="sidebar-subtitle">Control center · Azahar · Realtime</div>
+            </div>
+          </div>
+
+          <div id="sidebar-trainer" class="sidebar-trainer" hidden>
+            <div id="sidebar-trainer-avatar-wrap" class="sidebar-trainer-avatar-wrap">
+              <img id="sidebar-trainer-avatar" class="sidebar-trainer-avatar" alt="" hidden />
+            </div>
+            <div class="sidebar-trainer-text">
+              <div id="sidebar-trainer-name" class="sidebar-trainer-name">—</div>
+              <div id="sidebar-trainer-id" class="sidebar-trainer-id">ID —</div>
+            </div>
           </div>
         </div>
 
         <nav class="sidebar-nav">
-          <button class="nav-item active" data-page="dashboard">
+          <button class="nav-item active" data-page="dashboard" title="Dashboard">
             <span class="nav-icon">
               <svg viewBox="0 0 250.39 218.3" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
                   d="M214.65,218.3h-54.76c-5.67,0-10.28-4.61-10.28-10.28l-.08-57.94h-48.64s.08,57.94.08,57.94c0,5.68-4.61,10.29-10.28,10.29h-57.71c-4.14,0-7.55-3.39-7.57-7.53v-2.76s.44-111.49.44-111.49l-12.8,8.58h-3.83c-2.09,0-4.14-.78-5.63-2.25-5.4-5.3-4.36-12.86.82-16.46L119.28,2.54l.22-.14c4.97-3.2,11.39-3.2,16.36,0l.61.43,109.64,83.98c5.07,3.64,6.06,11.13.69,16.39-1.49,1.46-3.53,2.24-5.62,2.24h-3.74s-10.27-6.6-10.27-6.6l-2.25,109.29c-.06,5.62-4.65,10.17-10.28,10.17ZM167.74,207.99h0s0,0,0,0ZM167.73,200.16h39.18s2.4-118.68,2.4-118.68L127.63,18.91l-83.58,61.01-.49,120.24h39.26l-.08-57.94c0-5.68,4.61-10.29,10.28-10.29h64.36c5.67,0,10.28,4.61,10.28,10.28l.08,57.94ZM149.52,142.22h0s0,0,0,0Z" />
               </svg>
             </span>
-            Dashboard
+            <span class="nav-label">Dashboard</span>
           </button>
-          <button class="nav-item" data-page="pokemon">
+          <button class="nav-item" data-page="pokemon" title="Pokémon">
             <span class="nav-icon">
               <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
                   d="M239.76,112.5C235.87,49.81,183.65,0,120,0S4.13,49.81.24,112.5h-.24v15h.24c3.89,62.69,56.11,112.5,119.76,112.5s115.87-49.81,119.76-112.5h.24v-15h-.24ZM120,15c55.37,0,100.87,43.09,104.74,97.5h-65.55c-3.5-17.88-19.3-31.41-38.19-31.41s-34.68,13.53-38.19,31.41H15.26C19.13,58.09,64.63,15,120,15ZM121,96.09c13.19,0,23.91,10.73,23.91,23.91s-10.73,23.91-23.91,23.91-23.91-10.73-23.91-23.91,10.73-23.91,23.91-23.91ZM120,225c-55.37,0-100.87-43.09-104.74-97.5h67.55c3.5,17.88,19.3,31.41,38.19,31.41s34.68-13.53,38.19-31.41h65.55c-3.86,54.41-49.36,97.5-104.74,97.5Z" />
               </svg>
             </span>
-            Pokémon
+            <span class="nav-label">Pokémon</span>
           </button>
-          <button class="nav-item" data-page="medallas">
+          <button class="nav-item" data-page="medallas" title="Medallas">
             <span class="nav-icon">
               <svg viewBox="0 0 145.1 220.23" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="12">
@@ -328,9 +374,9 @@
                 </g>
               </svg>
             </span>
-            Medallas
+            <span class="nav-label">Medallas</span>
           </button>
-          <button class="nav-item" data-page="nuzlocke">
+          <button class="nav-item" data-page="nuzlocke" title="Nuzlocke">
             <span class="nav-icon">
               <svg viewBox="0 0 203.71 233.8" xmlns="http://www.w3.org/2000/svg">
                 <g fill="currentColor">
@@ -343,9 +389,9 @@
                   d="M160.76,66.5c1.36-33.11-26.86-60-60-60s-58.75,26.88-60,60c-.52,13.9,9.83,33.75,12.11,37.18l45.23,86.28c1.12,2.14,4.19,2.14,5.31,0l45.33-86.48c2.28-3.42,11.36-21.25,12-36.98Z" />
               </svg>
             </span>
-            Nuzlocke
+            <span class="nav-label">Nuzlocke</span>
           </button>
-          <button class="nav-item" data-page="overlays">
+          <button class="nav-item" data-page="overlays" title="Overlays">
             <span class="nav-icon">
               <svg viewBox="0 0 205.8 179.45" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
@@ -356,18 +402,18 @@
                   d="M196.42,119.68l-26.46-6.35-20.72,10.45,31.41,7.54-67.99,32.92-88.65-21.28,34.55-16.73-22.53-5.76-30.04,14.54c-4.08,1.97-6.4,6.09-5.93,10.49.48,4.45,3.69,8.02,8.17,9.1l102.25,24.55c.86.21,1.73.31,2.61.31,1.67,0,3.33-.37,4.85-1.11l80.71-39.08c4.08-1.97,6.4-6.09,5.93-10.49-.48-4.45-3.69-8.02-8.17-9.1Z" />
               </svg>
             </span>
-            Overlays
+            <span class="nav-label">Overlays</span>
           </button>
-          <button class="nav-item" data-page="herramientas">
+          <button class="nav-item" data-page="herramientas" title="Herramientas">
             <span class="nav-icon">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
                   d="M22.7,19l-9.1-9.1c0.9-2.3,0.4-5-1.5-6.9c-2-2-5-2.4-7.4-1.3L9,6l-3,3L1.7,4.7C0.6,7.1,1,10.1,3,12.1c1.9,1.9,4.6,2.4,6.9,1.5l9.1,9.1c0.4,0.4,1,0.4,1.4,0l2.3-2.3C23.1,20,23.1,19.4,22.7,19z" />
               </svg>
             </span>
-            Herramientas
+            <span class="nav-label">Herramientas</span>
           </button>
-          <button class="nav-item" data-page="configuracion">
+          <button class="nav-item" data-page="configuracion" title="Configuración">
             <span class="nav-icon">
               <svg viewBox="0 0 230.33 227.51" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
@@ -376,9 +422,9 @@
                   d="M115.98,152.01c-20.2,0-36.64-16.44-36.64-36.64s16.44-36.64,36.64-36.64,36.64,16.44,36.64,36.64-16.44,36.64-36.64,36.64ZM115.98,93.73c-11.93,0-21.64,9.71-21.64,21.64s9.71,21.64,21.64,21.64,21.64-9.71,21.64-21.64-9.71-21.64-21.64-21.64Z" />
               </svg>
             </span>
-            Configuración
+            <span class="nav-label">Configuración</span>
           </button>
-          <button class="nav-item" data-page="logs">
+          <button class="nav-item" data-page="logs" title="Logs">
             <span class="nav-icon">
               <svg viewBox="0 0 187.57 213.66" xmlns="http://www.w3.org/2000/svg">
                 <path fill="currentColor"
@@ -389,11 +435,11 @@
                 <rect fill="currentColor" x="37.23" y="161.98" width="117.4" height="15" rx="3" ry="3" />
               </svg>
             </span>
-            Logs
+            <span class="nav-label">Logs</span>
           </button>
         </nav>
 
-        <div class="sidebar-status">
+        <div class="sidebar-status" aria-live="polite">
           <div class="status-title">
             <span id="status-dot-running" class="status-dot"></span>
             <span id="status-running-text">DETENIDO</span>
@@ -412,13 +458,23 @@
           </div>
         </div>
 
-        <button id="btn-exit" class="sidebar-exit-btn">Salir</button>
+        <button id="btn-exit" class="sidebar-exit-btn" title="Detiene Runtime y el servidor HTTP -- los overlays de OBS dejan de actualizarse.">
+          <span class="nav-icon sidebar-exit-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                d="M9 5 L4 12 L9 19 M4 12 H16" />
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                d="M15 4 H19 V20 H15" />
+            </svg>
+          </span>
+          <span class="nav-label">Desconectar</span>
+        </button>
 
         <div class="sidebar-version" id="sidebar-version">v0.3.0</div>
       </aside>
 
       <main class="content">
-        <div id="dash-alert" class="dash-alert" hidden>
+        <div id="dash-alert" class="dash-alert" role="alert" hidden>
           <span id="dash-alert-text"></span>
           <button id="dash-alert-action" class="dash-alert-btn" hidden>Reiniciar</button>
         </div>
@@ -626,15 +682,15 @@
                General/Caja se piden bajo demanda recién al entrar a
                esa pestaña (ver dexrelay:tabchange más abajo), sin
                sumarse al poll de fondo. -->
-            <div class="tabs-bar" data-tabs-group="pokemon">
-              <button class="tab-btn active" data-tab="general">General</button>
-              <button class="tab-btn" data-tab="equipo">Equipo</button>
-              <button class="tab-btn" data-tab="caja">Caja</button>
+            <div class="tabs-bar" data-tabs-group="pokemon" role="tablist">
+              <button class="tab-btn active" data-tab="general" role="tab" aria-selected="true">General</button>
+              <button class="tab-btn" data-tab="equipo" role="tab" aria-selected="false">Equipo</button>
+              <button class="tab-btn" data-tab="caja" role="tab" aria-selected="false">Caja</button>
             </div>
 
             <div data-tabs-panels="pokemon">
 
-              <div class="tab-panel active" data-tab-panel="general">
+              <div class="tab-panel active" data-tab-panel="general" role="tabpanel">
                 <div class="pokemon-team-card">
                   <div class="dash-card-header-icon-title medals-section-title">
                     <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
@@ -660,7 +716,7 @@
               </div>
               <!-- /tab-panel: general -->
 
-              <div class="tab-panel" data-tab-panel="equipo">
+              <div class="tab-panel" data-tab-panel="equipo" role="tabpanel">
                 <div class="pokemon-team-card">
                   <div class="dash-card-header-icon-title medals-section-title">
                     <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
@@ -678,7 +734,7 @@
               </div>
               <!-- /tab-panel: equipo -->
 
-              <div class="tab-panel" data-tab-panel="caja">
+              <div class="tab-panel" data-tab-panel="caja" role="tabpanel">
                 <div class="pokemon-team-card">
                   <div class="dash-card-header-icon-title medals-section-title">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -725,14 +781,21 @@
                 </span>
                 <div class="medals-progress-info">
                   <span id="medals-progress-count" class="medals-progress-count">0 / 8</span>
-                  <small>Medallas obtenidas</small>
-                </div>
-              </div>
-
-              <div class="medals-progress-col">
-                <div class="medals-progress-info">
-                  <span id="medals-progress-value" class="medals-progress-value">0x00</span>
-                  <small id="medals-progress-binary">Valor en memoria</small>
+                  <!-- Bloque 8.2 (30/09/2026): el valor crudo en hex (antes
+                       una columna propia "Valor en memoria", contenido
+                       técnico sin utilidad directa para el usuario) ahora
+                       vive en el tooltip de este ícono -- solo visible para
+                       quien lo busca, con foco de teclado accesible. -->
+                  <div class="medals-progress-label-row">
+                    <small>Medallas obtenidas</small>
+                    <button
+                      type="button"
+                      id="medals-progress-value-info"
+                      class="info-tooltip-btn"
+                      data-tooltip="Valor en memoria: 0x00"
+                      aria-label="Valor crudo en memoria de las medallas"
+                    >i</button>
+                  </div>
                 </div>
               </div>
 
@@ -876,15 +939,15 @@
                en cómo se piden los datos, siguen viniendo enteros
                de get_nuzlocke_page_data() como siempre, esto es
                puramente reorganización visual. -->
-            <div class="tabs-bar" data-tabs-group="nuzlocke">
-              <button class="tab-btn active" data-tab="resumen">Resumen</button>
-              <button class="tab-btn" data-tab="seguimiento">Seguimiento</button>
-              <button class="tab-btn" data-tab="cementerio">Cementerio</button>
-              <button class="tab-btn" data-tab="lideres">Líderes</button>
+            <div class="tabs-bar" data-tabs-group="nuzlocke" role="tablist">
+              <button class="tab-btn active" data-tab="resumen" role="tab" aria-selected="true">Resumen</button>
+              <button class="tab-btn" data-tab="seguimiento" role="tab" aria-selected="false">Seguimiento</button>
+              <button class="tab-btn" data-tab="cementerio" role="tab" aria-selected="false">Cementerio</button>
+              <button class="tab-btn" data-tab="lideres" role="tab" aria-selected="false">Líderes</button>
             </div>
 
             <div data-tabs-panels="nuzlocke">
-              <div class="tab-panel active" data-tab-panel="resumen">
+              <div class="tab-panel active" data-tab-panel="resumen" role="tabpanel">
 
                 <div class="nz-summary-row">
                   <div class="nz-summary-card">
@@ -1089,7 +1152,7 @@
               </div>
               <!-- /tab-panel: resumen -->
 
-              <div class="tab-panel" data-tab-panel="seguimiento">
+              <div class="tab-panel" data-tab-panel="seguimiento" role="tabpanel">
 
                 <!-- Tarjeta del líder siguiente (Fase B, rediseño
                06/09/2026 a pedido del usuario): ahora a ancho
@@ -1201,7 +1264,7 @@
               </div>
               <!-- /tab-panel: seguimiento -->
 
-              <div class="tab-panel" data-tab-panel="cementerio">
+              <div class="tab-panel" data-tab-panel="cementerio" role="tabpanel">
                 <div class="dash-card nz-graveyard-card nz-graveyard-card-full">
                   <div class="dash-card-header">
                     <span class="dash-card-header-icon-title">
@@ -1231,7 +1294,7 @@
               </div>
               <!-- /tab-panel: cementerio -->
 
-              <div class="tab-panel" data-tab-panel="lideres">
+              <div class="tab-panel" data-tab-panel="lideres" role="tabpanel">
                 <!-- Equipos completos de los 8 líderes (roadmap 3.1/3.2),
                con el detalle grande que en Seguimiento se muestra
                resumido. Contenido armado por JS en
@@ -1248,10 +1311,10 @@
 
         <!-- ============ MODAL: Nuevo encuentro / editar ============ -->
         <div id="nz-modal-encounter" class="nz-modal-overlay" hidden>
-          <div class="nz-modal">
+          <div class="nz-modal" role="dialog" aria-modal="true" aria-labelledby="nz-encounter-modal-title">
             <div class="nz-modal-header">
               <h3 id="nz-encounter-modal-title">Nuevo encuentro</h3>
-              <button class="nz-modal-close" data-close-modal="nz-modal-encounter"><svg class="nz-close-icon"
+              <button class="nz-modal-close" data-close-modal="nz-modal-encounter" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1310,10 +1373,10 @@
 
         <!-- ============ MODAL: ¿Pokémon Especial? (pendientes) ============ -->
         <div id="nz-modal-special" class="nz-modal-overlay" hidden>
-          <div class="nz-modal nz-modal-narrow">
+          <div class="nz-modal nz-modal-narrow" role="dialog" aria-modal="true" aria-labelledby="nz-special-modal-title">
             <div class="nz-modal-header">
-              <h3>¿Pokémon Especial?</h3>
-              <button class="nz-modal-close" data-close-modal="nz-modal-special"><svg class="nz-close-icon"
+              <h3 id="nz-special-modal-title">¿Pokémon Especial?</h3>
+              <button class="nz-modal-close" data-close-modal="nz-modal-special" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1342,10 +1405,10 @@
 
         <!-- ============ MODAL: Editar reglas ============ -->
         <div id="nz-modal-ruleset" class="nz-modal-overlay" hidden>
-          <div class="nz-modal">
+          <div class="nz-modal" role="dialog" aria-modal="true" aria-labelledby="nz-ruleset-modal-title">
             <div class="nz-modal-header">
-              <h3>Reglas activas</h3>
-              <button class="nz-modal-close" data-close-modal="nz-modal-ruleset"><svg class="nz-close-icon"
+              <h3 id="nz-ruleset-modal-title">Reglas activas</h3>
+              <button class="nz-modal-close" data-close-modal="nz-modal-ruleset" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1476,10 +1539,10 @@
         </div>
 
         <div id="ov-modal-preview" class="nz-modal-overlay" hidden>
-          <div class="nz-modal nz-modal-wide">
+          <div class="nz-modal nz-modal-wide" role="dialog" aria-modal="true" aria-labelledby="ov-preview-title">
             <div class="nz-modal-header">
               <h3 id="ov-preview-title">Vista previa</h3>
-              <button class="nz-modal-close" data-close-modal="ov-modal-preview"><svg class="nz-close-icon"
+              <button class="nz-modal-close" data-close-modal="ov-modal-preview" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1497,10 +1560,10 @@
         </div>
 
         <div id="ov-modal-team-editor" class="nz-modal-overlay" hidden>
-          <div class="nz-modal nz-modal-wide">
+          <div class="nz-modal nz-modal-wide" role="dialog" aria-modal="true" aria-labelledby="ov-team-editor-modal-title">
             <div class="nz-modal-header">
-              <h3>Editar Team Overlay</h3>
-              <button class="nz-modal-close" data-close-modal="ov-modal-team-editor"><svg class="nz-close-icon"
+              <h3 id="ov-team-editor-modal-title">Editar Team Overlay</h3>
+              <button class="nz-modal-close" data-close-modal="ov-modal-team-editor" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1553,10 +1616,10 @@
 
         <!-- ============ MODAL: detalle de movimiento (roadmap 07/09/2026, sección 4.1) ============ -->
         <div id="pkm-modal-move" class="nz-modal-overlay" hidden>
-          <div class="nz-modal nz-modal-narrow">
+          <div class="nz-modal nz-modal-narrow" role="dialog" aria-modal="true" aria-labelledby="pkm-move-modal-title">
             <div class="nz-modal-header">
               <h3 id="pkm-move-modal-title">Movimiento</h3>
-              <button class="nz-modal-close" data-close-modal="pkm-modal-move"><svg class="nz-close-icon"
+              <button class="nz-modal-close" data-close-modal="pkm-modal-move" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1588,10 +1651,10 @@
 
         <!-- ============ MODAL: detalle de habilidad (roadmap 07/09/2026, sección 4.1) ============ -->
         <div id="pkm-modal-ability" class="nz-modal-overlay" hidden>
-          <div class="nz-modal nz-modal-narrow">
+          <div class="nz-modal nz-modal-narrow" role="dialog" aria-modal="true" aria-labelledby="pkm-ability-modal-title">
             <div class="nz-modal-header">
               <h3 id="pkm-ability-modal-title">Habilidad</h3>
-              <button class="nz-modal-close" data-close-modal="pkm-modal-ability"><svg class="nz-close-icon"
+              <button class="nz-modal-close" data-close-modal="pkm-modal-ability" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1605,10 +1668,10 @@
 
         <!-- ============ MODAL: Pokédex de especie (roadmap 07/09/2026, sección 4.2 -- rediseño exacto al mockup) ============ -->
         <div id="pkm-modal-species" class="nz-modal-overlay" hidden>
-          <div class="nz-modal pkm-species-modal">
+          <div class="nz-modal pkm-species-modal" role="dialog" aria-modal="true" aria-labelledby="pkm-species-modal-name">
             <div class="nz-modal-header">
               <h3><img class="pkm-species-modal-brand-icon" src="data:image/webp;base64,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" alt="" /><span class="pkm-species-modal-brand">DexRelay</span> <span class="pkm-species-modal-brand-sep">|</span> Pokédex</h3>
-              <button class="nz-modal-close" data-close-modal="pkm-modal-species"><svg class="nz-close-icon"
+              <button class="nz-modal-close" data-close-modal="pkm-modal-species" aria-label="Cerrar"><svg class="nz-close-icon"
                   viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor"
                     d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1716,9 +1779,19 @@
                     d="M124.04,82.5h-5.83c-2.26,0-4.08-1.73-4.08-3.87v-6.68c0-2.14,1.83-3.87,4.08-3.87h5.83c2.26,0,4.08,1.73,4.08,3.87v6.68c0,2.14-1.83,3.87-4.08,3.87Z" />
                 </svg>
               </span>
-              <span>A diferencia del resto de DexRelay (solo lectura), esto escribe memoria real del juego. Guardá la
-                partida y tené un respaldo del save antes de usarlo. Confirmado en vivo contra <strong>Alpha
-                  Sapphire</strong> y <strong>Omega Ruby</strong>.</span>
+              <span>A diferencia del resto de DexRelay (solo lectura), esto escribe memoria real del juego. Guarde la
+                partida y tenga un respaldo del save antes de usarlo.
+                <!-- Bloque 8.2 (30/09/2026): el detalle de QA ("confirmado en
+                     vivo contra...") se saca del texto principal -- no es
+                     información que el usuario necesite para decidir si usar
+                     la función, queda como tooltip para quien lo busque. -->
+                <button
+                  type="button"
+                  class="info-tooltip-btn"
+                  data-tooltip="Confirmado en vivo contra Alpha Sapphire y Omega Ruby"
+                  aria-label="Juegos en los que se confirmó esta función"
+                >i</button>
+              </span>
             </p>
 
             <div class="ov-card">
@@ -1730,7 +1803,7 @@
                 <span>Agregar Caramelo Raro</span>
               </div>
 
-              <p id="herr-connection-note" class="ov-note-text cfg-status-text" hidden></p>
+              <p id="herr-connection-note" class="ov-note-text cfg-status-text" aria-live="polite" hidden></p>
 
               <div class="cfg-field-grid herr-field-grid">
                 <label class="cfg-field">
@@ -1743,7 +1816,7 @@
                 <button id="herr-btn-add-candy" class="dash-btn-action cfg-btn-inline">Agregar a la bolsa</button>
               </div>
 
-              <p id="herr-candy-status" class="ov-note-text cfg-status-text"></p>
+              <p id="herr-candy-status" class="ov-note-text cfg-status-text" aria-live="polite"></p>
             </div>
           </div>
         </div>
@@ -1751,7 +1824,7 @@
         <div id="page-configuracion" class="page">
           <div class="cfg-page-inner">
             <h1>Configuración</h1>
-            <p class="page-subtitle">Ajustá la conexión y el mantenimiento de DexRelay.</p>
+            <p class="page-subtitle">Ajuste la conexión y el mantenimiento de DexRelay.</p>
 
             <div class="ov-card">
               <div class="dash-card-header-icon-title ov-section-title">
@@ -1779,7 +1852,7 @@
                 </label>
               </div>
 
-              <p id="cfg-connection-status" class="ov-note-text cfg-status-text"></p>
+              <p id="cfg-connection-status" class="ov-note-text cfg-status-text" aria-live="polite"></p>
 
               <div class="cfg-actions-row">
                 <button id="cfg-btn-save" class="dash-btn-action cfg-btn-inline">Guardar</button>
@@ -1820,16 +1893,12 @@
                 <span>Rising Ruby / Sinking Sapphire (hack de Drayano sobre Omega Ruby/Alpha Sapphire)</span>
               </label>
 
-              <p id="cfg-hackroom-status" class="ov-note-text cfg-status-text"></p>
-
-              <div class="cfg-actions-row">
-                <button id="cfg-btn-save-hackroom" class="dash-btn-action cfg-btn-inline">Guardar</button>
-              </div>
+              <p id="cfg-hackroom-status" class="ov-note-text cfg-status-text" aria-live="polite"></p>
 
               <p class="ov-note-text cfg-inline-note">
-                <span>Activá esto solo si estás jugando el hack parcheado, no el juego base -- cambia qué equipos de
-                  líder (y más adelante, evoluciones/tipos) usa la pestaña Líderes. Surte efecto al instante, no hace
-                  falta reiniciar DexRelay.</span>
+                <span>Actívelo solo si está jugando el hack parcheado, no el juego base -- cambia qué equipos de
+                  líder (y más adelante, evoluciones/tipos) usa la pestaña Líderes. Se guarda solo y surte efecto al
+                  instante, no hace falta reiniciar DexRelay.</span>
               </p>
             </div>
 
@@ -1861,7 +1930,7 @@
                   <button id="cfg-btn-clear-cache" class="dash-btn-action cfg-btn-fixed">Limpiar</button>
                 </div>
 
-                <p id="cfg-cache-status" class="ov-note-text cfg-status-text"></p>
+                <p id="cfg-cache-status" class="ov-note-text cfg-status-text" aria-live="polite"></p>
               </div>
 
               <div class="ov-card">
@@ -1911,15 +1980,25 @@
 
                 <span id="logs-count" class="logs-count">0 líneas</span>
 
+                <button id="logs-btn-copy-all" class="dash-btn-sm">Copiar todo</button>
+                <button id="logs-btn-save-txt" class="dash-btn-sm">Guardar como .txt</button>
                 <button id="logs-btn-clear" class="dash-btn-action logs-btn-clear">Limpiar</button>
               </div>
 
               <div id="logs-list" class="logs-list">
                 <p id="logs-empty" class="logs-empty">Todavía no hay nada en el buffer de logs.</p>
               </div>
+
+              <p id="logs-export-status" class="ov-note-text cfg-status-text" aria-live="polite"></p>
             </div>
 
-            <div class="ov-card ov-note-card">
+            <!-- Bloque 8.2 (30/09/2026): el detalle técnico (stdout/stderr,
+                 print() sin logging estructurado) se saca del texto siempre
+                 visible y pasa a una sección "Avanzado" plegable -- el
+                 usuario común solo necesita saber qué hacen los botones de
+                 arriba, no cómo está implementado el buffer por dentro. -->
+            <details class="ov-card ov-note-card logs-advanced-details">
+              <summary class="logs-advanced-summary">Avanzado</summary>
               <p class="ov-note-text cfg-inline-note">
                 <span class="cfg-note-icon">
                   <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
@@ -1935,9 +2014,10 @@
                   se van descartando las más viejas. No hay "Nivel"/"Fuente" por línea todavía porque DexRelay no tiene
                   un módulo de logging estructurado, solo <code>print()</code>. Las líneas en rojo vienen de
                   <code>stderr</code> (normalmente, una excepción no capturada); el resto es <code>stdout</code>.
-                  "Limpiar" vacía el buffer en memoria, no borra nada de disco.</span>
+                  "Limpiar" vacía el buffer en memoria, no borra nada de disco ni el archivo que se guarde con
+                  "Guardar como .txt".</span>
               </p>
-            </div>
+            </details>
           </div>
         </div>
       </main>
@@ -1958,10 +2038,10 @@
        (título/mensaje/texto y color del botón de confirmar) lo
        arma showConfirmModal() en JS en el momento -- ver app.js. -->
   <div id="confirm-modal" class="nz-modal-overlay" hidden>
-    <div class="nz-modal nz-modal-narrow">
+    <div class="nz-modal nz-modal-narrow" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
       <div class="nz-modal-header">
         <h3 id="confirm-modal-title">Confirmar</h3>
-        <button class="nz-modal-close" data-close-modal="confirm-modal"><svg class="nz-close-icon"
+        <button class="nz-modal-close" data-close-modal="confirm-modal" aria-label="Cerrar"><svg class="nz-close-icon"
             viewBox="0 0 150.02 150.04" xmlns="http://www.w3.org/2000/svg">
             <path fill="currentColor"
               d="M77.38,0c6.07.18,9.99,5.23,11.32,10.77l.1,50.24.21.22h49.19c6.05.83,11.53,4.97,11.82,11.42v4.69c-1.2,5.53-5.61,10-11.46,10.84h-50.33s-.15,50.54-.15,50.54c0,3.31-2.26,6.09-4.49,8.11-4.9,4.46-12.39,4.17-17.3-.08-2.19-2.28-4.36-4.87-4.36-8.26l-.08-50.31H11.33c-4.98-1.07-8.44-3.71-10.48-8.45-1.7-4.6-.84-9.61,2.23-13.27,2.4-2.34,4.97-4.55,8.46-4.55l50.31-.1V11.46c.82-5.87,5.3-10.19,10.83-11.46h4.69Z" />
@@ -1978,6 +2058,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Bloque 7 (24/09/2026): notificaciones tipo toast (cambio de
+       partida, nueva captura pendiente en el Nuzlocke) -- ver
+       showToast() en app.js. Vive fuera de #view-main a propósito,
+       así sobrevive a un cambio de página/vista sin perder los
+       toasts en pantalla. -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <script src="js/app.js"></script>
 </body>

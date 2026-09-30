@@ -16,6 +16,13 @@
   var WAITING_POLL_MS = 400;
   var MAIN_POLL_MS = 1000;
 
+  // Bloque 6.1 (23/09/2026): pista de diagnóstico en Espera y
+  // auto-entrada en Conectado -- ver maybeShowWaitingHint()/
+  // startAutoEnter() más abajo.
+  var WAITING_HINT_AFTER_MS = 15000;
+  var WAITING_HINT_EVERY_MS = 5000;
+  var AUTO_ENTER_DELAY_MS = 2000;
+
   // Página Pokémon (Bloque 3, 03/09/2026): a diferencia del resto
   // del Dashboard, esta página pide detalle vía PKHeX bajo demanda
   // (ver Api.get_pokemon_page_data()) -- por eso un ritmo más lento
@@ -103,8 +110,25 @@
   var lastApiError = null;
   var consecutiveApiFailures = 0;
 
+  // Bloque 6.3 (23/09/2026): completa el comentario de arriba --
+  // "sin banner propio todavía" ya tiene dueño (applyDashboardAlert()
+  // trata esto como un caso más de "no confíes en los datos que ves",
+  // distinto del "se perdió la conexión con el juego" pero con el
+  // mismo tratamiento visual). apiUnresponsive es lo que
+  // applyDashboardAlert() consulta en cada ciclo; originalTitle
+  // guarda el <title> real para poder restaurarlo apenas una
+  // llamada vuelve a responder.
+  var apiUnresponsive = false;
+  var originalTitle = document.title;
+
   function recordApiSuccess() {
     consecutiveApiFailures = 0;
+
+    if (apiUnresponsive) {
+      apiUnresponsive = false;
+      document.title = originalTitle;
+      restoreDashAlertAfterRecovery();
+    }
   }
 
   function recordApiFailure(methodName, error) {
@@ -134,7 +158,9 @@
     // rota, sin construir un sistema de notificaciones nuevo que
     // el Bloque 6.3 va a tener que rehacer/fusionar de todos modos.
     if (consecutiveApiFailures === 3) {
+      apiUnresponsive = true;
       document.title = "⚠ DexRelay — sin respuesta";
+      showApiUnresponsiveAlert();
     }
   }
 
@@ -341,15 +367,6 @@
         );
       });
 
-    // Documentación/Discord: sin destino confirmado todavía --
-    // no rompen nada, simplemente no navegan a ningún lado por
-    // ahora (a completar cuando haya URLs reales).
-    ["link-docs", "link-discord"].forEach(function (id) {
-      document.getElementById(id).addEventListener("click", function (event) {
-        event.preventDefault();
-      });
-    });
-
     document
       .getElementById("btn-start")
       .addEventListener("click", onStartClicked);
@@ -400,8 +417,18 @@
 
   // ===================== ESPERA =====================
 
+  // Bloque 6.1 (23/09/2026): cuánto lleva esperando esta pasada (no
+  // sobrevive a un Cancelar/Comenzar) y cuándo se consultó por
+  // última vez get_connection_diagnosis() -- no más de una vez cada
+  // WAITING_HINT_EVERY_MS, para no ir preguntando en cada tick de
+  // 400ms.
+  var waitingStartedAt = null;
+  var lastHintCheckAt = 0;
+
   function startWaitingPoll() {
     stopWaitingPoll();
+    waitingStartedAt = Date.now();
+    lastHintCheckAt = 0;
     waitingPollTimer = setInterval(pollWaiting, WAITING_POLL_MS);
 
     document
@@ -414,6 +441,47 @@
       clearInterval(waitingPollTimer);
       waitingPollTimer = null;
     }
+    waitingStartedAt = null;
+    hideWaitingHint();
+  }
+
+  function hideWaitingHint() {
+    var hint = document.getElementById("waiting-hint");
+    if (hint) {
+      hint.hidden = true;
+    }
+  }
+
+  // Solo pregunta por qué no conecta después de WAITING_HINT_AFTER_MS
+  // reales de espera -- antes de eso, "buscando Azahar..." solo es
+  // ruido (todavía es normal que tarde un par de segundos).
+  function maybeShowWaitingHint() {
+    if (!waitingStartedAt) {
+      return;
+    }
+
+    if (Date.now() - waitingStartedAt < WAITING_HINT_AFTER_MS) {
+      return;
+    }
+
+    if (Date.now() - lastHintCheckAt < WAITING_HINT_EVERY_MS) {
+      return;
+    }
+    lastHintCheckAt = Date.now();
+
+    api()
+      .get_connection_diagnosis()
+      .then(function (diagnosis) {
+        var hint = document.getElementById("waiting-hint");
+        var hintText = document.getElementById("waiting-hint-text");
+
+        if (!hint || !hintText || !diagnosis || !diagnosis.hint) {
+          return;
+        }
+
+        hintText.textContent = diagnosis.hint;
+        hint.hidden = false;
+      });
   }
 
   function pollWaiting() {
@@ -423,7 +491,10 @@
         if (status.connected) {
           stopWaitingPoll();
           onConnected(status);
+          return;
         }
+
+        maybeShowWaitingHint();
       });
   }
 
@@ -464,6 +535,73 @@
     showView("view-connected");
 
     document.getElementById("btn-enter").onclick = onEnterClicked;
+
+    startAutoEnter();
+  }
+
+  // Bloque 6.1 (23/09/2026): "Entrar a DexRelay" se dispara solo a
+  // los AUTO_ENTER_DELAY_MS si el usuario no toca nada -- ya no hay
+  // ninguna decisión real que tomar en esta pantalla (era un paso
+  // manual sin motivo una vez que la conexión con Azahar ya está
+  // confirmada). Un click en el botón o cualquier tecla lo cancela,
+  // así el usuario que sí quiere leer la info de "Conectado" antes
+  // no se ve empujado.
+  var autoEnterTimer = null;
+  var autoEnterListeners = null;
+
+  function startAutoEnter() {
+    cancelAutoEnter();
+
+    var note = document.getElementById("enter-auto-note");
+    if (note) {
+      note.hidden = false;
+    }
+
+    autoEnterTimer = setTimeout(function () {
+      autoEnterTimer = null;
+      detachAutoEnterListeners();
+      onEnterClicked();
+    }, AUTO_ENTER_DELAY_MS);
+
+    var onUserActivity = function () {
+      cancelAutoEnter();
+    };
+
+    document.addEventListener("keydown", onUserActivity);
+    document.getElementById("btn-enter").addEventListener(
+      "click", onUserActivity
+    );
+
+    autoEnterListeners = { keydown: onUserActivity, click: onUserActivity };
+  }
+
+  function cancelAutoEnter() {
+    if (autoEnterTimer) {
+      clearTimeout(autoEnterTimer);
+      autoEnterTimer = null;
+    }
+
+    var note = document.getElementById("enter-auto-note");
+    if (note) {
+      note.hidden = true;
+    }
+
+    detachAutoEnterListeners();
+  }
+
+  function detachAutoEnterListeners() {
+    if (!autoEnterListeners) {
+      return;
+    }
+
+    document.removeEventListener("keydown", autoEnterListeners.keydown);
+
+    var enterBtn = document.getElementById("btn-enter");
+    if (enterBtn) {
+      enterBtn.removeEventListener("click", autoEnterListeners.click);
+    }
+
+    autoEnterListeners = null;
   }
 
   function updateUptime() {
@@ -531,6 +669,9 @@
       initLogsActions();
     }
 
+    loadGameAvatars();
+    resetGlobalSignals();
+
     startMainPoll();
   }
 
@@ -542,6 +683,32 @@
         switchToPage(item.dataset.page);
       });
     });
+
+    var toggleBtn = document.getElementById("sidebar-toggle");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", toggleSidebar);
+    }
+  }
+
+  // Bloque 7.1 (29/09/2026, pedido explícito del usuario): sidebar
+  // colapsable -- deja visibles solo los íconos de navegación (ver
+  // .sidebar.collapsed en style.css). Dura solo la sesión actual
+  // (decisión explícita del usuario): ni localStorage ni ningún
+  // archivo en disco, la clase vuelve a su default apenas se
+  // reinicia DexRelay.
+  function toggleSidebar() {
+    var sidebar = document.getElementById("sidebar");
+    var toggleBtn = document.getElementById("sidebar-toggle");
+    if (!sidebar || !toggleBtn) {
+      return;
+    }
+
+    var collapsed = sidebar.classList.toggle("collapsed");
+
+    toggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    var label = collapsed ? "Expandir sidebar" : "Colapsar sidebar";
+    toggleBtn.title = label;
+    toggleBtn.setAttribute("aria-label", label);
   }
 
   // Extraído de initSidebarNav() (04/09/2026) para que el botón
@@ -695,7 +862,13 @@
     }
 
     bar.querySelectorAll(".tab-btn").forEach(function (btn) {
-      btn.classList.toggle("active", btn.dataset.tab === tab);
+      var isActive = btn.dataset.tab === tab;
+      btn.classList.toggle("active", isActive);
+      // Bloque 7.3 (29/09/2026): mantiene aria-selected al día --
+      // el role="tab"/aria-selected inicial vive en el HTML, esto
+      // es lo único que hacía falta agregar acá para que un lector
+      // de pantalla anuncie el cambio de pestaña real.
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
     panelsContainer.querySelectorAll(".tab-panel").forEach(function (panel) {
@@ -794,12 +967,354 @@
     if (data.running) {
       runningDot.classList.add("on");
       runningDot.classList.remove("warn");
-      runningText.textContent = "RUNNING";
+      runningText.textContent = "CORRIENDO";
     } else {
       runningDot.classList.remove("on");
       runningDot.classList.add("warn");
       runningText.textContent = "DETENIDO";
     }
+  }
+
+  // ===================== TOASTS (Bloque 7, 24/09/2026) =====================
+  //
+  // Notificación discreta y con auto-descarte -- distinta del
+  // banner global de dash-alert (arriba, un ESTADO persistente):
+  // acá cada llamado es un EVENTO puntual ("cambiaste de partida",
+  // "nueva captura pendiente en el Nuzlocke"). Vive en
+  // #toast-container (ver index.html), fuera de #view-main, así
+  // sobrevive a un cambio de página/vista.
+
+  var TOAST_MAX_VISIBLE = 4;
+  var TOAST_DEFAULT_MS = 6000;
+  var toastSeq = 0;
+
+  // options:
+  //   key      -- opcional; si ya hay un toast visible con la misma
+  //               key, no se agrega uno nuevo (evita duplicar el
+  //               mismo aviso si el dato que lo dispara no cambia
+  //               entre dos ciclos de poll).
+  //   type     -- "info" (default) | "success" | "warning"
+  //   message  -- texto del cuerpo (obligatorio)
+  //   actionLabel / onAction -- opcional, botón de acción
+  //   duration -- ms antes de auto-descartarse; TOAST_DEFAULT_MS
+  //               por defecto
+  function showToast(options) {
+    var container = document.getElementById("toast-container");
+    if (!container) {
+      return;
+    }
+
+    if (options.key) {
+      var existing = container.querySelector(
+        '[data-toast-key="' + options.key + '"]'
+      );
+      if (existing) {
+        return;
+      }
+    }
+
+    // Máximo TOAST_MAX_VISIBLE a la vez -- descarta el más viejo (el
+    // primer hijo, ya que los nuevos se agregan al final) en vez de
+    // dejar que se acumulen sin límite si varios eventos disparan
+    // toasts seguidos.
+    while (container.children.length >= TOAST_MAX_VISIBLE) {
+      container.removeChild(container.firstElementChild);
+    }
+
+    toastSeq += 1;
+    var id = "toast-" + toastSeq;
+
+    var toast = document.createElement("div");
+    toast.id = id;
+    toast.className = "toast toast-" + (options.type || "info");
+    if (options.key) {
+      toast.dataset.toastKey = options.key;
+    }
+
+    var body = document.createElement("div");
+    body.className = "toast-body";
+
+    var message = document.createElement("p");
+    message.className = "toast-message";
+    message.textContent = options.message || "";
+    body.appendChild(message);
+
+    if (options.actionLabel && options.onAction) {
+      var actionBtn = document.createElement("button");
+      actionBtn.type = "button";
+      actionBtn.className = "toast-action";
+      actionBtn.textContent = options.actionLabel;
+      actionBtn.addEventListener("click", function () {
+        options.onAction();
+        removeToast(id);
+      });
+      body.appendChild(actionBtn);
+    }
+
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "toast-close";
+    closeBtn.setAttribute("aria-label", "Cerrar");
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("click", function () {
+      removeToast(id);
+    });
+
+    toast.appendChild(body);
+    toast.appendChild(closeBtn);
+
+    // Pausa el auto-descarte mientras el mouse está encima -- un
+    // toast con un botón de acción no debería desaparecer justo
+    // cuando el usuario está por hacer click en él.
+    //
+    // options.sticky (29/09/2026, pedido explícito del usuario): el
+    // toast de "captura pendiente en el Nuzlocke" no se cierra solo
+    // -- una pendiente real no deja de estar pendiente porque
+    // pasaron 6 segundos, así que queda a la vista hasta que el
+    // usuario lo cierre (×) o use la acción "Ver". El resto de los
+    // toasts (cambio de partida, etc.) siguen auto-descartándose
+    // igual que antes.
+    var dismissTimer = null;
+    var remaining = options.duration || TOAST_DEFAULT_MS;
+    var startedAt = Date.now();
+
+    function scheduleDismiss(ms) {
+      if (options.sticky) {
+        return;
+      }
+      dismissTimer = setTimeout(function () {
+        removeToast(id);
+      }, ms);
+    }
+
+    toast.addEventListener("mouseenter", function () {
+      if (dismissTimer) {
+        clearTimeout(dismissTimer);
+        dismissTimer = null;
+        remaining -= (Date.now() - startedAt);
+      }
+    });
+
+    toast.addEventListener("mouseleave", function () {
+      startedAt = Date.now();
+      scheduleDismiss(Math.max(remaining, 500));
+    });
+
+    container.appendChild(toast);
+    scheduleDismiss(remaining);
+  }
+
+  function removeToast(id) {
+    var toast = document.getElementById(id);
+    if (!toast || toast.classList.contains("toast-leaving")) {
+      return;
+    }
+
+    toast.classList.add("toast-leaving");
+    setTimeout(function () {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 200);
+  }
+
+  // Bloque 8.2 (30/09/2026): único punto para "Copiar URL" (Dashboard,
+  // Medallas, Overlays) -- antes cada botón llamaba a
+  // navigator.clipboard.writeText() directo, sin aviso de éxito ni manejo
+  // de error (por ejemplo si el build empaquetado corre sin permiso de
+  // portapapeles). Ahora siempre hay un toast, éxito o error.
+  function copyUrlToClipboard(url) {
+    navigator.clipboard
+      .writeText(url)
+      .then(function () {
+        showToast({
+          key: "url-copied",
+          type: "success",
+          message: "URL copiada al portapapeles.",
+          duration: 3000,
+        });
+      })
+      .catch(function () {
+        showToast({
+          key: "url-copy-error",
+          type: "warning",
+          message: "No se pudo copiar la URL. Cópiela manualmente.",
+        });
+      });
+  }
+
+  // ===================== FICHA DEL ENTRENADOR (Bloque 7) =====================
+  //
+  // Reemplaza la marca de DexRelay en el sidebar (logo+título+
+  // tagline, #sidebar-brand) por la foto de perfil del juego, el
+  // nombre y el Trainer ID de la partida activa (#sidebar-trainer)
+  // -- pedido explícito del usuario (24/09/2026, ubicado
+  // originalmente arriba a la derecha; reubicado al sidebar el
+  // 29/09/2026). Se alimenta de data.trainer/data.process_name,
+  // parte del mismo payload de get_dashboard_data() que ya trae
+  // todo lo demás del Dashboard.
+
+  // Mismos valores que PROCESS_NAME_ALPHA_SAPPHIRE/
+  // PROCESS_NAME_OMEGA_RUBY de app/memory/pointers.py -- el color
+  // del borde del avatar (--ruby/--sapphire, ver style.css) depende
+  // de cuál de los dos es, y no hay necesidad de pedirle esto a
+  // Python por separado.
+  var PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2";
+  var PROCESS_NAME_OMEGA_RUBY = "sango-1";
+
+  var gameAvatars = null;
+  var gameAvatarsLoading = false;
+
+  function loadGameAvatars() {
+    if (gameAvatars || gameAvatarsLoading) {
+      return;
+    }
+    gameAvatarsLoading = true;
+
+    api()
+      .get_game_avatars()
+      .then(function (avatars) {
+        gameAvatars = avatars || {};
+        gameAvatarsLoading = false;
+      })
+      .catch(function () {
+        gameAvatarsLoading = false;
+      });
+  }
+
+  function applyUserChip(data) {
+    // "avatarKey" fuerza un re-render cuando gameAvatars pasa de
+    // `null` (todavía cargando, ver loadGameAvatars()) a los datos
+    // reales -- sin esto, si el trainer/processName no cambiaron
+    // entre ese medio, renderIfChanged() no vuelve a llamar a este
+    // render y el <img> se queda sin `src` para siempre (bug real,
+    // detectado por el usuario 29/09/2026: el avatar no se veía).
+    var avatarKey = gameAvatars
+      ? (gameAvatars[data.process_name] || "none")
+      : "loading";
+
+    renderIfChanged(
+      "userChip",
+      { trainer: data.trainer, processName: data.process_name, avatarKey: avatarKey },
+      function (snapshotData) {
+        var brand = document.getElementById("sidebar-brand");
+        var chip = document.getElementById("sidebar-trainer");
+        var avatar = document.getElementById("sidebar-trainer-avatar");
+        var nameEl = document.getElementById("sidebar-trainer-name");
+        var idEl = document.getElementById("sidebar-trainer-id");
+
+        if (!brand || !chip || !avatar || !nameEl || !idEl) {
+          return;
+        }
+
+        var trainer = snapshotData.trainer;
+
+        if (!trainer) {
+          chip.hidden = true;
+          brand.hidden = false;
+          return;
+        }
+
+        brand.hidden = true;
+        chip.hidden = false;
+
+        chip.classList.toggle(
+          "is-alpha-sapphire",
+          snapshotData.processName === PROCESS_NAME_ALPHA_SAPPHIRE
+        );
+        chip.classList.toggle(
+          "is-omega-ruby",
+          snapshotData.processName === PROCESS_NAME_OMEGA_RUBY
+        );
+
+        nameEl.textContent = trainer.ot || "—";
+        idEl.textContent = "ID " + trainer.tid;
+        chip.title = trainer.ot + " · ID " + trainer.tid + " / SID " + trainer.sid;
+
+        var avatarSrc = gameAvatars && gameAvatars[snapshotData.processName];
+        if (avatarSrc) {
+          avatar.src = avatarSrc;
+          avatar.hidden = false;
+        } else {
+          avatar.hidden = true;
+        }
+      }
+    );
+  }
+
+  // ===================== AVISOS GLOBALES (Bloque 7) =====================
+  //
+  // Toasts disparados por eventos que importan aunque el usuario
+  // esté mirando otra página del shell principal: cambio de
+  // partida identificada (Trainer ID distinto al del último ciclo)
+  // y una captura nueva que quedó pendiente de resolver en el
+  // Nuzlocke Tracker.
+
+  var toastedTrainerKey = null;
+  var pendingCountSeen = -1;
+
+  // Al recién entrar (o volver a entrar tras un "Desconectar"), el
+  // primer par de ciclos de poll no deberían disparar un toast de
+  // "nueva captura pendiente" -- el primer dato que llega YA trae
+  // las pendientes de antes, no son nuevas de este momento. Se
+  // descuentan las primeras PENDING_BASELINE_SKIP lecturas antes de
+  // empezar a comparar contra el conteo anterior.
+  var PENDING_BASELINE_SKIP = 2;
+  var pendingBaselineSkip = PENDING_BASELINE_SKIP;
+
+  function resetGlobalSignals() {
+    toastedTrainerKey = null;
+    pendingCountSeen = -1;
+    pendingBaselineSkip = PENDING_BASELINE_SKIP;
+  }
+
+  function applyGlobalSignals(data) {
+    var trainer = data.trainer;
+    var trainerKey = trainer ? trainer.tid + "/" + trainer.sid : null;
+
+    if (trainerKey && trainerKey !== toastedTrainerKey) {
+      var isFirstRead = toastedTrainerKey === null;
+      toastedTrainerKey = trainerKey;
+
+      // Solo avisa en un CAMBIO real de partida, no en la primera
+      // lectura tras entrar a DexRelay (ahí no hay "cambio", es
+      // simplemente la partida que ya estaba cargada).
+      if (!isFirstRead) {
+        showToast({
+          key: "trainer-change",
+          type: "info",
+          message: "Partida detectada: " + trainer.ot + " (ID " + trainer.tid + ").",
+        });
+      }
+    }
+
+    var pending = data.pending_captures || [];
+
+    if (pendingBaselineSkip > 0) {
+      pendingBaselineSkip -= 1;
+      pendingCountSeen = pending.length;
+      return;
+    }
+
+    if (pending.length > pendingCountSeen && pendingCountSeen >= 0) {
+      var latest = pending[pending.length - 1];
+      var label = latest
+        ? (latest.nickname || latest.species || "un Pokémon")
+        : "un Pokémon";
+
+      showToast({
+        key: "pending-capture-" + pending.length,
+        type: "warning",
+        sticky: true,
+        message: "Captura pendiente en el Nuzlocke: " + label + ".",
+        actionLabel: "Ver",
+        onAction: function () {
+          switchToPage("nuzlocke");
+        },
+      });
+    }
+
+    pendingCountSeen = pending.length;
   }
 
   // ===================== DASHBOARD (Bloque 2) =====================
@@ -817,6 +1332,8 @@
     }
 
     applyDashboardAlert(data);
+    applyUserChip(data);
+    applyGlobalSignals(data);
 
     // AZAHAR
     setDashDot("dash-dot-azahar", data.connected);
@@ -928,6 +1445,7 @@
     var alertBox = document.getElementById("dash-alert");
     var alertText = document.getElementById("dash-alert-text");
     var alertBtn = document.getElementById("dash-alert-action");
+    var viewMain = document.getElementById("view-main");
 
     if (!alertBox || !alertText || !alertBtn) {
       return;
@@ -935,10 +1453,16 @@
 
     if (data.connected) {
       alertBox.hidden = true;
+      if (viewMain) {
+        viewMain.classList.remove("is-stale");
+      }
       return;
     }
 
     alertBox.hidden = false;
+    if (viewMain) {
+      viewMain.classList.add("is-stale");
+    }
 
     if (data.other_game_detected) {
       alertBox.style.setProperty("--dash-alert-color", "var(--warning)");
@@ -951,6 +1475,55 @@
       alertText.textContent =
         "Se perdió la conexión con el juego. Vuelve a abrirlo en Azahar para seguir viendo datos en tiempo real.";
       alertBtn.hidden = true;
+    }
+  }
+
+  // Bloque 6.3 (23/09/2026): distinto del caso de arriba -- acá NO
+  // se perdió la conexión con el juego, es la propia app la que dejó
+  // de responder (bridge de pywebview colgado, Python trabado). Se
+  // dispara desde recordApiFailure() -- a diferencia de
+  // applyDashboardAlert(), que solo corre cuando un poll SÍ trae
+  // datos frescos, este caso es justamente cuando los polls dejan
+  // de traer nada.
+  function showApiUnresponsiveAlert() {
+    var alertBox = document.getElementById("dash-alert");
+    var alertText = document.getElementById("dash-alert-text");
+    var alertBtn = document.getElementById("dash-alert-action");
+    var viewMain = document.getElementById("view-main");
+
+    if (!alertBox || !alertText || !alertBtn) {
+      return;
+    }
+
+    alertBox.hidden = false;
+    alertBtn.hidden = true;
+    alertBox.style.setProperty("--dash-alert-color", "var(--warning)");
+    alertText.textContent =
+      "DexRelay no está respondiendo. Si esto sigue unos segundos más, cierra y volvé a abrir la app.";
+
+    if (viewMain) {
+      viewMain.classList.add("is-stale");
+    }
+  }
+
+  // Llamado desde recordApiSuccess() al volver a responder tras un
+  // período de apiUnresponsive -- deja el banner como quedaría con
+  // el último dato real conocido (o lo oculta si todavía no hay
+  // ninguno), en vez de dejar el mensaje de "sin respuesta" pegado.
+  function restoreDashAlertAfterRecovery() {
+    if (lastDashboardData) {
+      applyDashboardAlert(lastDashboardData);
+      return;
+    }
+
+    var alertBox = document.getElementById("dash-alert");
+    var viewMain = document.getElementById("view-main");
+
+    if (alertBox) {
+      alertBox.hidden = true;
+    }
+    if (viewMain) {
+      viewMain.classList.remove("is-stale");
     }
   }
 
@@ -1078,14 +1651,28 @@
     stopLogsPoll();
   }
 
+  // Bloque 6.2 (23/09/2026): "Desconectar" (antes "Salir", ver
+  // index.html/style.css) corta Runtime+HTTPServer -- eso apaga los
+  // overlays de OBS al toque, en medio de un stream real, igual que
+  // "Detener" en la tarjeta HTTP SERVER (ver initDashboardActions()
+  // más arriba). Antes no avisaba nada; ahora reusa el mismo
+  // showConfirmModal() del Bloque 4.3 en vez de un modal aparte.
   function onExitClicked() {
-    stopAllPolls();
+    showConfirmModal({
+      title: "Desconectar DexRelay",
+      message: "Esto detiene Runtime y el servidor HTTP -- los overlays de OBS (Team/Badges/Nuzlocke) y el panel web del Nuzlocke van a dejar de mostrarse hasta que vuelvas a entrar.",
+      confirmLabel: "Desconectar",
+      danger: true,
+      onConfirm: function () {
+        stopAllPolls();
 
-    api()
-      .cancel()
-      .then(function () {
-        showView("view-welcome");
-      });
+        api()
+          .cancel()
+          .then(function () {
+            showView("view-welcome");
+          });
+      },
+    });
   }
 
   function setDashDot(id, on) {
@@ -1229,6 +1816,16 @@
 
       var img = document.createElement("img");
       img.src = spriteBaseUrl + "/overlay/badges/sprites/" + (index + 1) + ".png";
+      // Bloque 7.3 (29/09/2026): acá (a diferencia de la grilla de
+      // la página Medallas) no hay ningún texto visible que diga
+      // CUÁL medalla es -- solo "Obtenida"/"Pendiente" -- así que el
+      // alt es la única forma de que un lector de pantalla sepa de
+      // qué medalla se trata. GYM_BADGE_NAMES se define más abajo en
+      // este archivo (línea ~3003) pero ya está asignada para cuando
+      // esta función corre (se llama recién desde un poll, nunca en
+      // la carga inicial del script).
+      var badgeName = GYM_BADGE_NAMES[index] || ("Medalla " + (index + 1));
+      img.alt = badgeName + (obtained ? " -- obtenida" : " -- pendiente");
       if (!obtained) {
         img.className = "pending";
       }
@@ -2464,8 +3061,14 @@
     var value = (badges && badges.value) || 0;
 
     setText("medals-progress-count", count + " / 8");
-    setText("medals-progress-value", "0x" + value.toString(16).toUpperCase().padStart(2, "0"));
-    setText("medals-progress-binary", "Valor en memoria");
+
+    var hexValueBtn = document.getElementById("medals-progress-value-info");
+    if (hexValueBtn) {
+      hexValueBtn.setAttribute(
+        "data-tooltip",
+        "Valor en memoria: 0x" + value.toString(16).toUpperCase().padStart(2, "0")
+      );
+    }
 
     setText("medals-stat-obtained", count);
     setText("medals-stat-remaining", 8 - count);
@@ -2485,7 +3088,7 @@
       card.className = "medals-badge-card";
       card.innerHTML =
         '<span class="medals-badge-number">' + (index + 1) + "</span>" +
-        '<img src="' + spriteBaseUrl + "/overlay/badges/sprites/" + (index + 1) + '.png"' +
+        '<img src="' + spriteBaseUrl + "/overlay/badges/sprites/" + (index + 1) + '.png" alt=""' +
         (obtained ? "" : ' class="pending"') + " />" +
         '<div class="medals-badge-name">' + name + "</div>" +
         '<div class="medals-badge-status' + (obtained ? " on" : "") + '">' +
@@ -2515,7 +3118,7 @@
         var copyBtn = document.getElementById("medals-btn-copy");
         if (copyBtn) {
           copyBtn.addEventListener("click", function () {
-            navigator.clipboard.writeText(medalsOverlayUrl);
+            copyUrlToClipboard(medalsOverlayUrl);
           });
         }
 
@@ -2592,7 +3195,7 @@
         "</div>";
 
       item.querySelector('[data-action="copy"]').addEventListener("click", function () {
-        navigator.clipboard.writeText(url);
+        copyUrlToClipboard(url);
       });
       item.querySelector('[data-action="open"]').addEventListener("click", function () {
         api().open_external(url);
@@ -2693,7 +3296,7 @@
         "</div>";
 
       item.querySelector('[data-action="copy"]').addEventListener("click", function () {
-        navigator.clipboard.writeText(document.getElementById("ov-url-" + overlay.id).value);
+        copyUrlToClipboard(document.getElementById("ov-url-" + overlay.id).value);
       });
       item.querySelector('[data-action="open"]').addEventListener("click", function () {
         api().open_external(document.getElementById("ov-url-" + overlay.id).value);
@@ -2910,7 +3513,7 @@
     var cantidad = parseInt(cantidadInput.value, 10);
 
     if (!cantidad || cantidad < 1) {
-      setCfgStatus("herr-candy-status", "Ingresá una cantidad válida.", "error");
+      setCfgStatus("herr-candy-status", "Ingrese una cantidad válida.", "error");
       return;
     }
 
@@ -2945,7 +3548,7 @@
 
         setCfgStatus(
           "herr-candy-status",
-          "Listo. Ahora tenés " + result.new_quantity + " Caramelo(s) Raro(s) en la bolsa. Confirmalo abriendo la bolsa en el juego.",
+          "Listo. Ahora tiene " + result.new_quantity + " Caramelo(s) Raro(s) en la bolsa. Confírmelo abriendo la bolsa en el juego.",
           "success"
         );
       });
@@ -2955,7 +3558,11 @@
     document.getElementById("cfg-btn-save").addEventListener("click", onSaveConnectionSettingsClicked);
     document.getElementById("cfg-btn-reset").addEventListener("click", onResetConnectionSettingsClicked);
     document.getElementById("cfg-btn-clear-cache").addEventListener("click", onClearCacheClicked);
-    document.getElementById("cfg-btn-save-hackroom").addEventListener("click", onSaveHackroomSettingClicked);
+    // Bloque 8.2 (30/09/2026, a pedido del usuario: "todo autoguardado
+    // donde sea posible"): el toggle ya no tiene botón "Guardar" propio --
+    // se guarda solo apenas cambia (surte efecto al instante, no hace
+    // falta reiniciar, ver onSaveHackroomSettingClicked/api.py).
+    document.getElementById("cfg-hackroom-enabled").addEventListener("change", onSaveHackroomSettingClicked);
   }
 
   function loadConfiguracionPage() {
@@ -3015,7 +3622,7 @@
 
         setCfgStatus(
           "cfg-connection-status",
-          "Guardado. Reiniciá DexRelay para que tome efecto.",
+          "Guardado. Reinicie DexRelay para que tome efecto.",
           "success"
         );
       });
@@ -3031,7 +3638,7 @@
 
         setCfgStatus(
           "cfg-connection-status",
-          "Restablecido a los valores por defecto. Reiniciá DexRelay para que tome efecto.",
+          "Restablecido a los valores por defecto. Reinicie DexRelay para que tome efecto.",
           "success"
         );
       });
@@ -3091,6 +3698,21 @@
   function initLogsActions() {
     document.getElementById("logs-search").addEventListener("input", renderLogsList);
     document.getElementById("logs-btn-clear").addEventListener("click", onClearLogsClicked);
+    // Bloque 8.3 (30/09/2026): exportación manual del buffer completo
+    // (decisión del usuario -- sin archivo rotativo en disco). Ambos
+    // botones usan siempre logsAllEntries entero, no el filtro de
+    // búsqueda -- "Copiar todo"/"Guardar como .txt" significan eso,
+    // ya no solo lo que está a la vista.
+    document.getElementById("logs-btn-copy-all").addEventListener("click", onCopyAllLogsClicked);
+    document.getElementById("logs-btn-save-txt").addEventListener("click", onSaveLogsTxtClicked);
+  }
+
+  function logsBufferAsText() {
+    return logsAllEntries
+      .map(function (entry) {
+        return "[" + entry.time + "] " + entry.text;
+      })
+      .join("\n");
   }
 
   function startLogsPoll() {
@@ -3178,6 +3800,55 @@
       .clear_logs()
       .then(function () {
         pollLogsPage();
+      });
+  }
+
+  function setLogsExportStatus(message, kind) {
+    var el = document.getElementById("logs-export-status");
+    if (!el) {
+      return;
+    }
+    el.textContent = message;
+    el.classList.remove("success", "error");
+    if (kind) {
+      el.classList.add(kind);
+    }
+  }
+
+  function onCopyAllLogsClicked() {
+    if (logsAllEntries.length === 0) {
+      setLogsExportStatus("No hay líneas en el buffer para copiar.", null);
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(logsBufferAsText())
+      .then(function () {
+        setLogsExportStatus(
+          "Buffer completo copiado (" +
+            logsAllEntries.length +
+            (logsAllEntries.length === 1 ? " línea)." : " líneas)."),
+          "success"
+        );
+      })
+      .catch(function () {
+        setLogsExportStatus("No se pudo copiar el buffer.", "error");
+      });
+  }
+
+  function onSaveLogsTxtClicked() {
+    if (logsAllEntries.length === 0) {
+      setLogsExportStatus("No hay líneas en el buffer para guardar.", null);
+      return;
+    }
+
+    api()
+      .save_logs_to_file(logsBufferAsText())
+      .then(function (result) {
+        if (!result || !result.saved) {
+          return;
+        }
+        setLogsExportStatus("Guardado en " + result.path, "success");
       });
   }
 
@@ -3348,11 +4019,14 @@
 
     // Clic en el fondo oscuro (fuera de la tarjeta del modal)
     // cierra igual que el botón "X" -- patrón estándar de modal,
-    // no hace falta que el usuario apunte exacto al botón.
+    // no hace falta que el usuario apunte exacto al botón. Pasa por
+    // closeModal() (Bloque 7.3, antes hacía `overlay.hidden = true`
+    // directo) para que el foco vuelva a quien abrió el modal
+    // también en este camino, no solo al usar el botón "X".
     document.querySelectorAll(".nz-modal-overlay").forEach(function (overlay) {
       overlay.addEventListener("click", function (event) {
         if (event.target === overlay) {
-          overlay.hidden = true;
+          closeModal(overlay.id);
         }
       });
     });
@@ -3362,18 +4036,132 @@
         onAddRuleClicked();
       }
     });
+
+    initModalAccessibility();
   }
 
+  // ===================== ACCESIBILIDAD DE MODALES (Bloque 7.3,
+  // 29/09/2026) =====================
+  //
+  // Todos los modales de la app (9 en total: alta/especial/reglas
+  // del Nuzlocke, vista previa y editor de overlays, movimiento/
+  // habilidad/especie de Pokémon, confirmación genérica) comparten
+  // el mismo componente (.nz-modal-overlay) y pasan siempre por
+  // openModal()/closeModal() -- centralizar acá alcanza para los 9
+  // sin tocar cada uno por separado.
+
+  // Selector de "cosas enfocables" para el focus trap -- criterio
+  // estándar (mismo usado por la mayoría de las librerías de
+  // accesibilidad), sin inventar nada más elaborado.
+  var FOCUSABLE_SELECTOR =
+    'a[href], button:not([disabled]), textarea:not([disabled]), ' +
+    'input:not([disabled]), select:not([disabled]), ' +
+    '[tabindex]:not([tabindex="-1"])';
+
+  function getFocusableElements(container) {
+    return Array.prototype.slice
+      .call(container.querySelectorAll(FOCUSABLE_SELECTOR))
+      .filter(function (el) {
+        // offsetParent es null en elementos con display:none o
+        // dentro de un ancestro oculto -- filtro barato para no
+        // intentar enfocar algo que no se ve (ej. un campo de una
+        // pestaña interna no activa dentro del mismo modal).
+        return el.offsetParent !== null;
+      });
+  }
+
+  function getOpenModal() {
+    return document.querySelector(".nz-modal-overlay:not([hidden])");
+  }
+
+  // Qué tenía el foco justo antes de abrir el modal -- closeModal()
+  // se lo devuelve al cerrar, en vez de dejarlo perdido en <body>
+  // (el comportamiento por defecto del navegador al ocultar el
+  // elemento que tenía el foco).
+  var modalFocusReturnEl = null;
+
   function openModal(id) {
-    document.getElementById(id).hidden = false;
+    var modal = document.getElementById(id);
+    if (!modal) {
+      return;
+    }
+
+    modalFocusReturnEl = document.activeElement;
+    modal.hidden = false;
+
+    var dialog = modal.querySelector('[role="dialog"]') || modal;
+    var focusables = getFocusableElements(dialog);
+
+    if (focusables.length) {
+      focusables[0].focus();
+    } else {
+      dialog.setAttribute("tabindex", "-1");
+      dialog.focus();
+    }
   }
 
   function closeModal(id) {
-    document.getElementById(id).hidden = true;
+    var modal = document.getElementById(id);
+    if (modal) {
+      modal.hidden = true;
+    }
 
     if (id === "confirm-modal") {
       confirmModalConfirmHandler = null;
     }
+
+    if (modalFocusReturnEl && typeof modalFocusReturnEl.focus === "function") {
+      modalFocusReturnEl.focus();
+    }
+    modalFocusReturnEl = null;
+  }
+
+  // Un solo listener global (registrado una vez desde
+  // initModalAccessibility(), llamada desde initNuzlockeActions())
+  // cubre los 9 modales -- Escape cierra el que esté abierto
+  // (nunca hay más de uno a la vez en esta app) y Tab/Shift+Tab
+  // quedan atrapados dentro de él mientras esté abierto.
+  var modalAccessibilityInitialized = false;
+
+  function initModalAccessibility() {
+    if (modalAccessibilityInitialized) {
+      return;
+    }
+    modalAccessibilityInitialized = true;
+
+    document.addEventListener("keydown", function (event) {
+      var openModalEl = getOpenModal();
+      if (!openModalEl) {
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal(openModalEl.id);
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      var dialog = openModalEl.querySelector('[role="dialog"]') || openModalEl;
+      var focusables = getFocusableElements(dialog);
+      if (!focusables.length) {
+        return;
+      }
+
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
   }
 
   // ===================== Bloque 4.3: modal de confirmación
@@ -3790,7 +4578,7 @@
           ? "<td></td>"
           : '<td><button class="nz-row-delete-btn" data-delete-location="' +
           escapeHtml(entry.location || "") +
-          '" title="Eliminar ruta">' +
+          '" title="Eliminar ruta" aria-label="Eliminar ruta">' +
           NZ_TRASH_ICON_SVG +
           "</button></td>";
     }
@@ -4062,7 +4850,7 @@
       setText("nz-stat-playtime", "—");
       note.hidden = false;
       note.textContent =
-        "El tiempo de juego sale del archivo de guardado, no de la memoria en vivo -- se actualiza recién cuando guardás la partida" +
+        "El tiempo de juego sale del archivo de guardado, no de la memoria en vivo -- se actualiza recién cuando se guarda la partida" +
         (playtime && playtime.reason ? " (" + playtime.reason + ")" : ".");
     }
   }
@@ -4573,6 +5361,8 @@
         showView("view-main");
         initSidebarNav();
         initDashboardActions();
+        loadGameAvatars();
+        resetGlobalSignals();
         startMainPoll();
       });
   }
