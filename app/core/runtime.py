@@ -22,6 +22,7 @@ class Runtime:
         state: ApplicationState,
         nuzlocke_service: NuzlockeService | None = None,
         time_source=None,
+        storage_resolver=None,
     ):
         self.reader = reader
         self.state = state
@@ -126,6 +127,23 @@ class Runtime:
         self._last_box_scan_time = 0.0
         self._cached_boxed_party = []
 
+        # Bloque 5 (24/09/2026, guía siguiente versión): identificación
+        # de la PARTIDA por Trainer ID. `storage_resolver(process_name,
+        # identity_o_None, nicknames_fn)` devuelve el NuzlockeStorage
+        # que corresponde (ver Application._resolve_nuzlocke_storage()).
+        # Sin resolver (None, el default) todo se comporta como antes
+        # de este bloque: el storage lo elige quien construyó el
+        # servicio y no se lee ninguna identidad.
+        self._storage_resolver = storage_resolver
+        # Inyectable para que los tests no escriban en data/ real.
+        self._badges_storage_factory = BadgesStorage.for_identity
+        self._trainer = None
+        self._trainer_process = None
+        self._pending_trainer = None
+        self._pending_trainer_cycles = 0
+        self._trainer_unreadable_cycles = 0
+        self._trainer_fallback = False
+
     # Ciclos seguidos con party vacía estando "conectado" antes de
     # forzar una reconexión (25 ciclos de 200ms ≈ 5s).
     EMPTY_PARTY_RECONNECT_CYCLES = 25
@@ -137,6 +155,14 @@ class Runtime:
     # cada ciclo de 200ms, sin demorar de más la detección de una
     # captura depositada directo en caja.
     BOX_SCAN_INTERVAL_SECONDS = 1.5
+    BOX_SCAN_INTERVAL_SECONDS = 1.5
+
+    # Bloque 5: lecturas seguidas IGUALES de una identidad nueva antes
+    # de confirmarla (evita que una lectura basura durante una carga
+    # cambie de partida), y ciclos de 200ms (~5s) con party visible
+    # sin poder leer la identidad antes de caer al archivo por juego.
+    TRAINER_CONFIRM_CYCLES = 2
+    TRAINER_FALLBACK_CYCLES = 25
 
     def _reset_connection_dependent_state(self):
         """
@@ -161,6 +187,173 @@ class Runtime:
         # de la conexión anterior (podría corresponder a otro juego
         # si Azahar cambió de proceso).
         self._last_box_scan_time = 0.0
+
+        self._reset_trainer_state()
+
+    def _reset_trainer_state(self):
+        self._trainer = None
+        self._trainer_process = None
+        self._pending_trainer = None
+        self._pending_trainer_cycles = 0
+        self._trainer_unreadable_cycles = 0
+        self._trainer_fallback = False
+        self.state.trainer = None
+
+    def reset_trainer_identity(self):
+        """
+        Olvida la identidad de partida actual para que se vuelva a
+        leer y confirmar desde cero. Application.restart_reader() lo
+        llama al cambiar de juego (ese camino no pasa por una
+        desconexión, así que nada más limpiaría la identidad vieja).
+        """
+
+        self._reset_trainer_state()
+
+    def _known_nicknames(self, party):
+        names = {
+            pokemon.get("nickname")
+            for pokemon in party
+            if pokemon.get("nickname")
+        }
+
+        try:
+            for pokemon in self.reader.read_boxes_range():
+                if pokemon.get("nickname"):
+                    names.add(pokemon.get("nickname"))
+        except Exception:
+            # Sin poder leer las cajas, la party sola alcanza para
+            # reconocer la mayoría de los casos.
+            pass
+
+        return names
+
+    def _resolve_trainer_identity(self, party):
+        """
+        Bloque 5: decide si ya se puede rastrear el Nuzlocke este ciclo
+        y mantiene NuzlockeService apuntando al archivo de la PARTIDA
+        cargada. Devuelve True si se puede rastrear.
+
+        - Sin `storage_resolver`: siempre True (comportamiento previo).
+        - Mientras la identidad no esté confirmada (o esté cambiando)
+          devuelve False: reconciliar la party de una partida contra
+          el archivo de otra mezclaría datos.
+        - Lectura dudosa (None) con identidad ya conocida: se conserva
+          la que había.
+        - Si nunca se logra leer con party visible durante
+          TRAINER_FALLBACK_CYCLES ciclos, se cae al archivo por juego
+          (comportamiento previo) en vez de dejar el Nuzlocke sin
+          funcionar.
+        """
+
+        if self._storage_resolver is None:
+            return True
+
+        process_name = self.reader.process_name
+
+        if (
+            self._trainer_process is not None
+            and self._trainer_process != process_name
+        ):
+            # El juego cambió por debajo, sin pasar por una desconexión.
+            self._reset_trainer_state()
+
+        current = self.reader.read_trainer_identity()
+
+        if current is None:
+            if self._trainer is not None or self._trainer_fallback:
+                return True
+
+            self._trainer_unreadable_cycles += 1
+
+            if self._trainer_unreadable_cycles >= self.TRAINER_FALLBACK_CYCLES:
+                self._enter_trainer_fallback(process_name)
+                return True
+
+            return False
+
+        self._trainer_unreadable_cycles = 0
+
+        if current == self._trainer:
+            self._pending_trainer = None
+            self._pending_trainer_cycles = 0
+            return True
+
+        if current == self._pending_trainer:
+            self._pending_trainer_cycles += 1
+        else:
+            self._pending_trainer = current
+            self._pending_trainer_cycles = 1
+
+        if self._pending_trainer_cycles < self.TRAINER_CONFIRM_CYCLES:
+            return False
+
+        return self._apply_trainer_identity(current, party)
+
+    def _apply_trainer_identity(self, identity, party):
+        process_name = self.reader.process_name
+
+        try:
+            storage = self._storage_resolver(
+                process_name,
+                identity,
+                lambda: self._known_nicknames(party),
+            )
+        except Exception as error:
+            print(
+                f"[Partida] No se pudo abrir el archivo de esta partida: "
+                f"{error}",
+                flush=True,
+            )
+            return False
+
+        # Descarta todo el seguimiento de la partida anterior (perdidos,
+        # cajas cacheadas) y recién después fija la identidad nueva.
+        self._reset_connection_dependent_state()
+
+        self.nuzlocke_service.switch_storage(storage)
+        self._cached_boxed_party = []
+
+        # Medallas: mismo archivo por partida; `_last_badges = None`
+        # fuerza guardar la lectura actual en el archivo nuevo.
+        self.badges_storage = self._badges_storage_factory(
+            process_name, identity["tid"], identity["sid"]
+        )
+        self._last_badges = None
+
+        self._trainer = identity
+        self._trainer_process = process_name
+        self.state.trainer = dict(identity)
+
+        path = getattr(storage, "path", None)
+        file_name = getattr(path, "name", "?")
+
+        print(
+            f"[Partida] Entrenador '{identity['ot']}' "
+            f"(TID {identity['tid']} / SID {identity['sid']}) -> "
+            f"{file_name}",
+            flush=True,
+        )
+
+        return True
+
+    def _enter_trainer_fallback(self, process_name):
+        print(
+            "[Partida] No se pudo leer el Trainer ID de la partida: se usa "
+            "el archivo por juego.",
+            flush=True,
+        )
+
+        self._trainer_fallback = True
+        self._trainer_process = process_name
+
+        try:
+            self.nuzlocke_service.switch_storage(
+                self._storage_resolver(process_name, None, None)
+            )
+            self.badges_storage = BadgesStorage()
+            self._last_badges = None
+        except Exception as error:
+            print(f"[Partida] Fallback falló: {error}", flush=True)
 
     def _log_lost(self, key, message):
         """print() de una sola vez por combate por `key`."""
@@ -223,6 +416,12 @@ class Runtime:
 
         self.state.team = party
         self.state.reader_active = True
+        self.state.team = party
+        self.state.reader_active = True
+
+        # Bloque 5: sin identidad de partida confirmada no se toca el
+        # Nuzlocke (ni capturas, ni muertes, ni perdidos).
+        tracking_ready = self._resolve_trainer_identity(party)
 
         # Detección de capturas nuevas (26-27/08/2026, reemplaza al
         # viejo camino de dos etapas por TOTAL_CAUGHT_ADDRESS +
@@ -272,20 +471,23 @@ class Runtime:
         # NuzlockeService.is_started()/update()).
         has_pokeballs = None
 
-        if not self.nuzlocke_service.is_started():
-            has_pokeballs = self.reader.read_has_pokeballs()
+        if tracking_ready:
+            if not self.nuzlocke_service.is_started():
+                has_pokeballs = self.reader.read_has_pokeballs()
 
-        self.state.nuzlocke = self.nuzlocke_service.update(
-            party,
-            boxed_party=box,
-            has_pokeballs=has_pokeballs,
-        )
+            self.state.nuzlocke = self.nuzlocke_service.update(
+                party,
+                boxed_party=box,
+                has_pokeballs=has_pokeballs,
+            )
 
         badges = self.badges_service.read_badges()
 
         self.state.badges = badges
 
-        if badges != self._last_badges:
+        # Bloque 5: con la partida sin identificar no se guarda (iría al
+        # archivo de otra partida); `state.badges` sí se actualiza.
+        if tracking_ready and badges != self._last_badges:
             self.badges_storage.save(badges)
             self._last_badges = badges.copy()
 
@@ -316,8 +518,9 @@ class Runtime:
         # sigue pendiente confirmar COMBAT_POINTER_ADDRESS/
         # WILD_BATTLE_FLAG_OFFSET en Omega Ruby, que es lo
         # proximo en la lista.
-        self._resolve_pending_lost_encounter()
-        self._update_lost_encounter_tracking()
+        if tracking_ready:
+            self._resolve_pending_lost_encounter()
+            self._update_lost_encounter_tracking()
 
     def _resolve_pending_lost_encounter(self):
         """

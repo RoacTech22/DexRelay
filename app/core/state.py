@@ -32,3 +32,8 @@ class ApplicationState:
             "roster": [],
             "graveyard": [],
         }
+
+        # Bloque 5 (24/09/2026): identidad de la partida cargada
+        # ({"tid", "sid", "ot"}) o None si todavía no se pudo leer.
+        # Runtime la reasigna entera (misma invariante de arriba).
+        self.trainer = None

@@ -62,6 +62,7 @@ class Application:
             self.reader,
             self.state,
             nuzlocke_service=self.nuzlocke_service,
+            storage_resolver=self._resolve_nuzlocke_storage,
         )
 
         refresh_ms = self.config.get(
@@ -231,6 +232,26 @@ class Application:
         self.http_server.stop()
         self._http_active = False
 
+    @staticmethod
+    def _resolve_nuzlocke_storage(process_name, identity, nicknames):
+        """
+        Bloque 5 (24/09/2026): storage del Nuzlocke para la partida
+        cargada. Con identidad (TID/SID leídos de la tarjeta de
+        entrenador) es un archivo POR PARTIDA; sin ella (no se pudo
+        leer) cae al archivo por juego de siempre. Lo llama Runtime
+        (ver Runtime._resolve_trainer_identity()).
+        """
+
+        if identity is None:
+            return NuzlockeStorage.for_game(process_name)
+
+        return NuzlockeStorage.for_identity(
+            process_name,
+            identity["tid"],
+            identity["sid"],
+            nicknames,
+        )
+
     def restart_reader(self):
         """
         "Reiniciar" del Reader (tarjeta READER del Dashboard).
@@ -280,6 +301,11 @@ class Application:
         self.state.reader_active = False
         self.state.azahar_connected = False
 
+        # Bloque 5: este camino puede cambiar de juego sin pasar por
+        # una desconexión -- la identidad de partida anterior ya no
+        # vale y hay que leerla de nuevo.
+        self.runtime.reset_trainer_identity()
+
     def update(self):
         self.runtime.update()
         self._sync_nuzlocke_storage()
@@ -308,9 +334,14 @@ class Application:
 
         if current is not None and current != self._nuzlocke_game:
             self._nuzlocke_game = current
-            self.nuzlocke_service.switch_storage(
-                NuzlockeStorage.for_game(current)
-            )
+
+            # Bloque 5: si Runtime ya identificó la partida, el archivo
+            # correcto es el de ESA partida (lo eligió él) -- este
+            # cambio por juego solo aplica mientras no hay identidad.
+            if self.state.trainer is None:
+                self.nuzlocke_service.switch_storage(
+                    NuzlockeStorage.for_game(current)
+                )
 
     def _run_realtime_loop(self):
         """
