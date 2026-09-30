@@ -4,7 +4,7 @@ Ventana principal de la GUI v2 de DexRelay (pywebview).
 Bloque 1: esqueleto -- Bienvenida, Espera, Conectado, y el shell
 principal (sidebar + Dashboard placeholder, resto de las páginas
 "Próximamente" hasta sus bloques respectivos). Reemplaza a
-`app/gui/app_window.py` (Tkinter/ttkbootstrap) como punto de
+`legacy/gui_tkinter/app_window.py` (Tkinter/ttkbootstrap) como punto de
 entrada de `app/main.py` -- esa GUI vieja no se borra, queda en el
 proyecto sin usarse (mismo criterio que con los probes: documenta
 lo que ya se probó, no estorba).

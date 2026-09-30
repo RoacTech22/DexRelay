@@ -36,12 +36,10 @@ from app.core.app import Application
 from app.services.pkhex.bridge import PKHeXBridge
 
 # GUI v2 (pywebview), reemplaza a la Tkinter/ttkbootstrap
-# (app/gui/) como punto de entrada por defecto -- ver
-# Documento Maestro, plan del 30/08/2026. La GUI vieja no se
-# borró, queda en el proyecto sin usarse (mismo criterio que
-# con los probes: documenta lo que ya se probó, no estorba). Si
-# hiciera falta volver atrás temporalmente, alcanza con volver a
-# importar `from app.gui.app_window import AppWindow` acá.
+# como punto de entrada por defecto -- ver Documento Maestro, plan
+# del 30/08/2026. La GUI vieja no se borró: desde el Bloque 9.3
+# (30/09/2026) está archivada en legacy/gui_tkinter/, fuera de app/
+# (ver legacy/README.txt). No es código ejecutable tal cual.
 from app.gui_web.window import AppWindow
 
 
