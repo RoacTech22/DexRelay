@@ -26,6 +26,7 @@ import base64
 import json
 import time
 import webbrowser
+from datetime import datetime
 
 import webview
 
@@ -94,12 +95,14 @@ GAME_VERSIONS = [
         "process_name": PROCESS_NAME_ALPHA_SAPPHIRE,
         "badge": "AS",
         "background": "bg_alpha_sapphire.jpg",
+        "avatar": "avatar_alpha_sapphire.jpg",
     },
     {
         "label": "Omega Ruby",
         "process_name": PROCESS_NAME_OMEGA_RUBY,
         "badge": "OR",
         "background": "bg_omega_ruby.jpg",
+        "avatar": "avatar_omega_ruby.jpg",
     },
 ]
 
@@ -645,6 +648,22 @@ class Api:
 
         return versions
 
+    def get_game_avatars(self):
+        """
+        Bloque 7 (24/09/2026): foto de perfil del sidebar (arte del
+        juego de la partida) -- recorte circular-friendly de 160x160
+        de cada juego (assets/ui/avatar_*.jpg), como data URI por
+        `process_name`. Un archivo faltante da `None` para ese juego
+        (el frontend muestra un círculo neutro).
+        """
+
+        return {
+            game["process_name"]: self._asset_data_uri(
+                "ui", game["avatar"], mime="image/jpeg"
+            )
+            for game in GAME_VERSIONS
+        }
+
     def get_app_version(self):
         return resolve_app_version()
 
@@ -803,6 +822,58 @@ class Api:
 
         return self._connection_fields()
 
+    def get_connection_diagnosis(self):
+        """
+        Bloque 6.2 (23/09/2026): pista sobre por qué la pantalla de
+        Espera no conecta, a partir de lo que Azahar REALMENTE
+        contesta (ver AzaharReader.diagnose_connection()). Lo
+        consulta la GUI solo después de un rato esperando (no en
+        cada poll de 400ms: cada llamada puede costar hasta 2s de
+        timeout de socket).
+
+        Devuelve {"state", "hint", "processes"?}. `hint` es texto
+        listo para mostrar; `None` si el estado es "hay juego" (no
+        hace falta ninguna pista, la conexión ya está por darse).
+        No inventa causas: cuando dos casos no se pueden distinguir
+        desde acá (Azahar cerrado vs. interfaz UDP deshabilitada),
+        el texto nombra las dos.
+        """
+
+        reader = self.app.reader
+        result = reader.diagnose_connection()
+        state = result.get("state")
+
+        if state == reader.DIAG_NO_LISTENER:
+            hint = (
+                "Nada responde en el puerto 45987. Comprueba que "
+                "Azahar esté abierto y que su interfaz de "
+                "depuración por UDP (servidor RPC) esté habilitada."
+            )
+        elif state == reader.DIAG_TIMEOUT:
+            hint = (
+                "Azahar no contestó a tiempo. Puede estar cargando; "
+                "si sigue igual, ciérralo y ábrelo de nuevo."
+            )
+        elif state == reader.DIAG_NO_GAME:
+            hint = (
+                "Azahar responde, pero todavía no hay ningún juego "
+                "compatible en ejecución. Carga Pokémon Omega Ruby o "
+                "Alpha Sapphire y espera a estar dentro de la partida."
+            )
+        elif state == reader.DIAG_ERROR:
+            hint = (
+                "No se pudo hablar con Azahar: "
+                f"{result.get('detail') or 'error desconocido'}."
+            )
+        else:
+            hint = None
+
+        return {
+            "state": state,
+            "hint": hint,
+            "processes": result.get("processes"),
+        }
+
     def get_dashboard_data(self):
         """
         Todo lo que necesita la página Dashboard (GUI v2, Bloque 2)
@@ -897,6 +968,20 @@ class Api:
             "badges": badges,
             "graveyard_nicknames": graveyard_nicknames,
             "other_game_detected": other_game_label,
+            # Bloque 5 (24/09/2026): partida cargada ({"tid", "sid",
+            # "ot"}) o None si todavía no se identificó.
+            "trainer": state.trainer,
+            # Capturas sin ruta asignada: el frontend avisa con un
+            # toast cuando aparece una nueva, esté en la página que
+            # esté (Bloque 7.2).
+            "pending_captures": [
+                {
+                    "nickname": pending.get("nickname"),
+                    "species": pending.get("species"),
+                }
+                for pending in nuzlocke.get("pending_encounters", [])
+                if isinstance(pending, dict)
+            ],
         })
 
         return fields
@@ -2365,6 +2450,38 @@ class Api:
 
         log_capture.buffer.clear()
         return True
+
+    def save_logs_to_file(self, text: str):
+        """
+        Bloque 8.3 (30/09/2026): botón "Guardar como .txt" de la
+        página Logs -- decisión del usuario: solo exportación
+        manual, sin archivo rotativo en disco (`logs/dexrelay.log`
+        queda descartado). Abre el selector nativo de "Guardar
+        como" de pywebview y escribe el texto completo (ya armado
+        en app.js a partir del buffer) tal cual, sin tocar nada de
+        `log_capture`.
+        """
+
+        default_name = "dexrelay_logs_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".txt"
+
+        result = webview.windows[0].create_file_dialog(
+            webview.SAVE_DIALOG,
+            save_filename=default_name,
+            file_types=("Archivos de texto (*.txt)", "Todos los archivos (*.*)"),
+        )
+
+        if not result:
+            return {"saved": False}
+
+        # pywebview devuelve un string en algunas plataformas y una
+        # tupla/lista de un elemento en otras -- normalizar acá en
+        # vez de asumir un solo formato.
+        path = result[0] if isinstance(result, (list, tuple)) else result
+
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(text)
+
+        return {"saved": True, "path": str(path)}
 
     def open_external(self, url: str):
         """Abre una URL en el navegador del sistema, no en la ventana."""

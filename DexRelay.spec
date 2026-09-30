@@ -46,6 +46,12 @@ with open(_RELEASE_CONFIG_PATH, "w", encoding="utf-8") as _f:
 # mostrar ninguna pantalla. Los sprites (assets/pokemon_full,
 # assets/gym_leaders, assets/pokemon_shuffle) sí estaban cubiertos
 # porque cuelgan de `assets/`, que ya estaba en la lista.
+#
+# CONFIRMADO (Bloque 8.4, 30/09/2026): esta misma entrada ya cubre
+# app/gui_web/web/fonts/ (los .woff2 de Inter/Space Grotesk
+# empaquetados localmente, ver style.css) -- es una copia recursiva
+# de toda la carpeta 'app/gui_web/web', no hace falta agregar una
+# entrada aparte para fonts/.
 datas = [(_RELEASE_CONFIG_PATH, '.'), ('VERSION', '.'), ('assets', 'assets'), ('overlays', 'overlays'), ('panels', 'panels'), ('app/gui_web/web', 'app/gui_web/web'), ('releases/pkhex-bridge', 'releases/pkhex-bridge')]
 
 # NOTA (18/09/2026, revisión previa al tag v0.3.0-alpha): faltaba
@@ -54,8 +60,8 @@ datas = [(_RELEASE_CONFIG_PATH, '.'), ('VERSION', '.'), ('assets', 'assets'), ('
 # pre_evolution_index, item_sprite_id_map, *_changes_rrss...) los
 # leen los servicios con paths.path("data", ...) -- en un build sin
 # esos JSON, Pokédex/Líderes/Movimientos no cargan. Se incluye todo
-# data/*.json EXCEPTO el progreso real del usuario (badges,
-# nuzlocke_*, team_overlay_settings): eso NUNCA se distribuye, cada
+# data/*.json EXCEPTO el progreso real del usuario (badges*,
+# nuzlocke*, team_overlay_settings): eso NUNCA se distribuye, cada
 # instalación arranca con el suyo vacío (los servicios lo crean).
 # Los cachés regenerables (species/location/ability/item/move_cache)
 # sí van: evitan la primera espera al llamar al bridge PKHeX.
@@ -72,7 +78,14 @@ for _name in sorted(os.listdir("data")):
         # ya la salta sola.
         continue
 
-    if _name in _USER_PROGRESS_FILES or _name.startswith("nuzlocke"):
+    # Bloque 5 (24/09/2026): el progreso ahora vive en archivos POR
+    # PARTIDA -- nuzlocke_<juego>_<tid>_<sid>.json y
+    # badges_<juego>_<tid>_<sid>.json. Por prefijo (no por nombre
+    # exacto, que es lo que dejaba pasar a badges_*.json): cualquier
+    # archivo de progreso, presente o futuro, queda afuera del build.
+    if _name in _USER_PROGRESS_FILES or _name.startswith(
+        ("nuzlocke", "badges")
+    ):
         continue
 
     datas.append((os.path.join("data", _name), "data"))
