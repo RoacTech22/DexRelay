@@ -1,5 +1,4 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all
 
 # NOTA (19/09/2026, primer build v0.3.0-alpha): el spec copiaba el
 # config.json PERSONAL del desarrollador al build (con
@@ -92,10 +91,9 @@ for _name in sorted(os.listdir("data")):
 
 binaries = []
 hiddenimports = []
-tmp_ret = collect_all('ttkbootstrap')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('PIL')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+# Bloque 9.6 (30/09/2026): se sacaron collect_all('ttkbootstrap') y
+# collect_all('PIL') -- eran restos de la GUI Tkinter, ya archivada
+# en legacy/gui_tkinter/. Nada en app/ importa ninguno de los dos.
 
 
 a = Analysis(
