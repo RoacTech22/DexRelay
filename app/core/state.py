@@ -37,3 +37,22 @@ class ApplicationState:
         # ({"tid", "sid", "ot"}) o None si todavía no se pudo leer.
         # Runtime la reasigna entera (misma invariante de arriba).
         self.trainer = None
+
+        # Bloque 9.1 (30/09/2026): salud del ciclo realtime. Los
+        # escribe SOLO el hilo del Runtime (Application.
+        # _run_realtime_loop) y misma invariante de arriba: enteros y
+        # floats se reasignan; `last_error` se reasigna como dict
+        # nuevo completo, nunca se muta.
+        #
+        # - last_cycle_ok_at: time.time() del último ciclo que terminó
+        #   sin lanzar excepción (None si todavía no hubo ninguno).
+        # - transient_error_count: fallos de red/socket esperables
+        #   (timeout, Azahar cerrándose) desde el arranque.
+        # - bug_error_count: excepciones NO esperables (errores de
+        #   programación) desde el arranque.
+        # - last_error: {"kind": "transient"|"bug", "type", "message",
+        #   "at"} del último ciclo fallido, o None.
+        self.last_cycle_ok_at = None
+        self.transient_error_count = 0
+        self.bug_error_count = 0
+        self.last_error = None

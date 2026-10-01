@@ -557,6 +557,8 @@
                   <div class="dash-divider"></div>
                   <div class="dash-card-rows">
                     <div class="dash-row"><span>Uptime</span><span id="dash-runtime-uptime">00:00:00</span></div>
+                    <div class="dash-row"><span>Último ciclo OK</span><span id="dash-runtime-lastok">—</span></div>
+                    <div class="dash-row"><span>Errores</span><span id="dash-runtime-errors">0</span></div>
                   </div>
                   <button id="dash-btn-runtime-toggle" class="dash-btn-action" data-running="false">Iniciar</button>
                 </div>
@@ -1967,6 +1969,14 @@
           <div class="logs-page-inner">
             <h1>Logs</h1>
             <p class="page-subtitle">Salida en vivo de DexRelay (stdout/stderr).</p>
+
+            <div id="logs-health" class="logs-health" aria-live="polite">
+              <span class="logs-health-item">Runtime: <strong id="logs-health-state">—</strong></span>
+              <span class="logs-health-item">Último ciclo OK: <strong id="logs-health-lastok">—</strong></span>
+              <span class="logs-health-item">Errores de código: <strong id="logs-health-bugs">0</strong></span>
+              <span class="logs-health-item">Fallos de red transitorios: <strong id="logs-health-transient">0</strong></span>
+              <span id="logs-health-last" class="logs-health-last"></span>
+            </div>
 
             <div class="ov-card logs-card">
               <div class="logs-toolbar">

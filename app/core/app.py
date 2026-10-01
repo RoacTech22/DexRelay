@@ -1,7 +1,13 @@
+import sys
 import time
 from threading import Thread
 
 from app.core.config import Config
+from app.core.error_classification import (
+    error_signature,
+    format_error_traceback,
+    is_transient_error,
+)
 from app.core.runtime import Runtime
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
@@ -129,6 +135,10 @@ class Application:
         # + estado compartido que con asyncio. Documentado en el
         # Documento Maestro, seccion 18.
         self._runtime_thread = None
+
+        # Bloque 9.1: dedup del log de errores del ciclo realtime.
+        self._error_log_seen = {}
+        self._transient_streak_logged = False
 
     @property
     def running(self):
@@ -343,6 +353,82 @@ class Application:
                     NuzlockeStorage.for_game(current)
                 )
 
+    # Cada cuántas repeticiones de un MISMO error ya reportado se
+    # vuelve a dejar una línea de recordatorio en los logs (a 5
+    # ciclos por segundo, imprimir cada uno inundaría el buffer de
+    # 500 líneas en 100 segundos).
+    ERROR_LOG_REPEAT_EVERY = 100
+
+    def _run_one_cycle(self):
+        """
+        Un ciclo del loop realtime con la red de seguridad de
+        siempre (el hilo nunca muere) y, desde el Bloque 9.1
+        (30/09/2026), clasificando lo que falla:
+
+        - Ciclo sin excepción -> `state.last_cycle_ok_at`.
+        - OSError y derivados (timeout/conexión de Azahar) ->
+          transitorio: se cuenta y se deja UNA línea corta por racha.
+        - Cualquier otra excepción -> bug de programación: se cuenta
+          y se registra como ERROR con traceback completo por
+          stderr (la página Logs lo muestra como línea de error),
+          deduplicado por firma para no inundar el buffer.
+        """
+
+        try:
+            self.update()
+        except Exception as error:
+            self._record_cycle_error(error)
+            return
+
+        self.state.last_cycle_ok_at = time.time()
+        self._transient_streak_logged = False
+
+    def _record_cycle_error(self, error):
+        transient = is_transient_error(error)
+
+        self.state.last_error = {
+            "kind": "transient" if transient else "bug",
+            "type": type(error).__name__,
+            "message": str(error),
+            "at": time.time(),
+        }
+
+        if transient:
+            self.state.transient_error_count += 1
+
+            if not self._transient_streak_logged:
+                self._transient_streak_logged = True
+                print(
+                    f"[Runtime] Fallo transitorio de comunicación con "
+                    f"Azahar ({type(error).__name__}: {error}); se "
+                    f"reintenta en el próximo ciclo.",
+                    flush=True,
+                )
+
+            return
+
+        self.state.bug_error_count += 1
+
+        signature = error_signature(error)
+        seen = self._error_log_seen.get(signature, 0) + 1
+        self._error_log_seen[signature] = seen
+
+        if seen == 1:
+            print(
+                f"[ERROR] Excepción inesperada en el ciclo realtime "
+                f"(se ignora este ciclo, el Runtime sigue corriendo):\n"
+                f"{format_error_traceback(error)}",
+                file=sys.stderr,
+                flush=True,
+            )
+        elif seen % self.ERROR_LOG_REPEAT_EVERY == 0:
+            print(
+                f"[ERROR] Se repite {type(error).__name__}: {error} "
+                f"({seen} veces desde que apareció).",
+                file=sys.stderr,
+                flush=True,
+            )
+
     def _run_realtime_loop(self):
         """
         Ciclo realtime de DexRelay (Runtime.update() cada
@@ -370,14 +456,7 @@ class Application:
         next_update = time.monotonic()
 
         while self._runtime_active:
-            try:
-                self.update()
-            except Exception as error:
-                print(
-                    f"[Application] Error no capturado durante "
-                    f"el ciclo realtime (se ignora este ciclo, "
-                    f"el Runtime sigue corriendo): {error}"
-                )
+            self._run_one_cycle()
 
             next_update += self.refresh_seconds
             sleep_time = next_update - time.monotonic()

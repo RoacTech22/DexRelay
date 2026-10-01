@@ -1354,6 +1354,7 @@
     setDashDot("dash-dot-runtime", data.runtime_running);
     setDashStatus("dash-runtime-status", data.runtime_running, "Ejecutándose", "Detenido");
     setText("dash-runtime-uptime", formatUptime(data.uptime_seconds));
+    applyRuntimeHealthDashboard(data.runtime_health);
     setToggleButton("dash-btn-runtime-toggle", data.runtime_running);
 
     // HTTP SERVER
@@ -1696,6 +1697,51 @@
     var el = document.getElementById(id);
     if (el) {
       el.textContent = value;
+    }
+  }
+
+  // Bloque 9.1 (30/09/2026): "hace 3 s" / "hace 2 min" / "hace 1 h".
+  function formatSecondsAgo(seconds) {
+    if (seconds == null) {
+      return "—";
+    }
+    var total = Math.floor(seconds);
+    if (total < 60) {
+      return "hace " + total + " s";
+    }
+    if (total < 3600) {
+      return "hace " + Math.floor(total / 60) + " min";
+    }
+    return "hace " + Math.floor(total / 3600) + " h";
+  }
+
+  // Resumen de errores del ciclo realtime, compartido por Dashboard
+  // y Logs: separa errores de código (bugs) de fallos de red.
+  function describeLastRuntimeError(health) {
+    var last = health && health.last_error;
+    if (!last) {
+      return "";
+    }
+    var kind = last.kind === "bug" ? "Error de código" : "Fallo de red";
+    return (
+      "Último error (" + kind + ", " + formatSecondsAgo(last.seconds_ago) + "): " +
+      last.type + (last.message ? ": " + last.message : "")
+    );
+  }
+
+  function applyRuntimeHealthDashboard(health) {
+    health = health || {};
+    var bugs = health.bug_errors || 0;
+    var transient = health.transient_errors || 0;
+    setText("dash-runtime-lastok", formatSecondsAgo(health.last_cycle_ok_seconds_ago));
+    setText(
+      "dash-runtime-errors",
+      bugs + " código · " + transient + " red"
+    );
+    var errorsRow = document.getElementById("dash-runtime-errors");
+    if (errorsRow) {
+      errorsRow.title = describeLastRuntimeError(health);
+      errorsRow.parentElement.classList.toggle("dash-row-alert", bugs > 0);
     }
   }
 
@@ -3728,7 +3774,25 @@
     }
   }
 
+  function pollRuntimeHealthLogs() {
+    api()
+      .get_runtime_health()
+      .then(function (health) {
+        setText("logs-health-state", health.runtime_running ? "Ejecutándose" : "Detenido");
+        setText("logs-health-lastok", formatSecondsAgo(health.last_cycle_ok_seconds_ago));
+        setText("logs-health-bugs", String(health.bug_errors));
+        setText("logs-health-transient", String(health.transient_errors));
+        var bugsItem = document.getElementById("logs-health-bugs");
+        if (bugsItem) {
+          bugsItem.parentElement.classList.toggle("is-alert", health.bug_errors > 0);
+        }
+        setText("logs-health-last", describeLastRuntimeError(health));
+      })
+      .catch(function () {});
+  }
+
   function pollLogsPage() {
+    pollRuntimeHealthLogs();
     api()
       .get_logs()
       .then(function (entries) {

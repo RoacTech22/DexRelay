@@ -971,6 +971,8 @@ class Api:
             # Bloque 5 (24/09/2026): partida cargada ({"tid", "sid",
             # "ot"}) o None si todavía no se identificó.
             "trainer": state.trainer,
+            # Bloque 9.1 (30/09/2026): salud del ciclo realtime.
+            "runtime_health": self._runtime_health(),
             # Capturas sin ruta asignada: el frontend avisa con un
             # toast cuando aparece una nueva, esté en la página que
             # esté (Bloque 7.2).
@@ -985,6 +987,46 @@ class Api:
         })
 
         return fields
+
+    def _runtime_health(self):
+        """
+        Bloque 9.1 (30/09/2026): salud del ciclo realtime para
+        Dashboard y Logs. Todo sale de datos reales que escribe
+        `Application._run_one_cycle()` en `ApplicationState`;
+        `last_cycle_ok_seconds_ago` se calcula acá (reloj de pared)
+        para que el frontend no dependa de la hora de su propio
+        reloj. None = todavía no hubo un ciclo exitoso.
+        """
+
+        state = self.app.state
+        last_ok = state.last_cycle_ok_at
+        last_error = state.last_error
+
+        return {
+            "last_cycle_ok_seconds_ago": (
+                None if last_ok is None else max(0.0, time.time() - last_ok)
+            ),
+            "transient_errors": state.transient_error_count,
+            "bug_errors": state.bug_error_count,
+            "last_error": (
+                None
+                if last_error is None
+                else {
+                    "kind": last_error["kind"],
+                    "type": last_error["type"],
+                    "message": last_error["message"],
+                    "seconds_ago": max(0.0, time.time() - last_error["at"]),
+                }
+            ),
+        }
+
+    def get_runtime_health(self):
+        """Salud del ciclo realtime (ver `_runtime_health()`)."""
+
+        return {
+            "runtime_running": self.app.runtime_running,
+            **self._runtime_health(),
+        }
 
     def _connection_fields(self):
         state = self.app.state
