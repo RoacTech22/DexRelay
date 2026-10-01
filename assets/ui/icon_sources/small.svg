@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18213a"/><stop offset="1" stop-color="#0a0e18"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#b8fbff"/><stop offset="0.5" stop-color="#2dd4dc"/><stop offset="1" stop-color="#0b6b82"/>
+    </radialGradient>
+    <clipPath id="dshape">
+      <path d="M190 150 H520 C770 150 860 320 860 512 C860 704 770 874 520 874 H190 Z M540 360 A152 152 0 1 0 540 664 A152 152 0 1 0 540 360 Z" clip-rule="evenodd" fill-rule="evenodd"/>
+    </clipPath>
+  </defs>
+  <rect x="24" y="24" width="976" height="976" rx="224" fill="url(#bg)"/>
+  <g clip-path="url(#dshape)">
+    <rect x="150" y="100" width="390" height="820" fill="#f0525c"/>
+    <rect x="540" y="100" width="360" height="820" fill="#4a85f2"/>
+  </g>
+  <circle cx="540" cy="512" r="112" fill="url(#lens)"/>
+  <ellipse cx="500" cy="466" rx="36" ry="24" transform="rotate(-35 500 466)" fill="#ffffff" fill-opacity="0.9"/>
+</svg>

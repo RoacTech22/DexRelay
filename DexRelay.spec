@@ -137,6 +137,9 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     contents_directory='.',
+    # Bloque 10 (01/10/2026): ícono de la app (.ico multi-tamaño
+    # 16-256 px; fuentes en assets/ui/icon_sources/).
+    icon='assets/ui/dexrelay.ico',
 )
 coll = COLLECT(
     exe,
