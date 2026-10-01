@@ -16,6 +16,14 @@ from app.core import paths
 # todos al salir (ver stop_all() y el atexit de abajo).
 _LIVE_BRIDGES = weakref.WeakSet()
 
+# Bloque 9.2 (01/10/2026): instancia compartida del proceso. Antes
+# cada servicio creaba su propio PKHeXBridge() si nadie le pasaba
+# uno (hasta 9 procesos .NET en paralelo, y el bug real de respuesta
+# cruzada de la sección 6.9 del Documento Maestro). Ver
+# PKHeXBridge.shared().
+_shared_bridge = None
+_shared_bridge_lock = threading.Lock()
+
 _kill_on_close_job = None
 
 
@@ -168,6 +176,34 @@ class PKHeXBridge:
     """
 
     PUBLISHED_EXE_NAME = "DexRelay.PKHeX.exe"
+
+    @classmethod
+    def shared(cls):
+        """
+        Bloque 9.2 (01/10/2026): el ÚNICO bridge de la aplicación.
+
+        Application lo crea una vez y se lo inyecta a todos los
+        servicios (readers, catálogos, resolvers, Api, HTTPServer);
+        los servicios que reciben `bridge=None` (probes, tests
+        viejos, código nuevo que se olvide de inyectarlo) caen acá
+        en vez de arrancar su propio proceso .NET -- así un
+        servicio olvidado ya no puede reintroducir un segundo
+        proceso. Un proceso, un lock (self._lock en __init__), una
+        sola petición a la vez sobre el pipe: sin respuestas
+        cruzadas por construcción.
+
+        El proceso .NET sigue arrancando recién en el primer
+        request() (perezoso), así que pedir el compartido no
+        cuesta nada.
+        """
+
+        global _shared_bridge
+
+        with _shared_bridge_lock:
+            if _shared_bridge is None:
+                _shared_bridge = cls()
+
+            return _shared_bridge
 
     def __init__(self):
         self.process = None

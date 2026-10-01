@@ -23,7 +23,7 @@ class SpeciesResolver:
         self.bridge = (
             bridge
             if bridge is not None
-            else PKHeXBridge()
+            else PKHeXBridge.shared()
         )
 
         self.cache = {}

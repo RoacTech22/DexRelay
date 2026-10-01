@@ -32,7 +32,7 @@ class PokemonDetailResolver:
         self.bridge = (
             bridge
             if bridge is not None
-            else PKHeXBridge()
+            else PKHeXBridge.shared()
         )
 
     def resolve(self, decrypted_box_data, base_stats_override=None):

@@ -46,7 +46,6 @@ from app.services.location_catalog import LocationCatalog
 from app.services.playtime_service import PlaytimeService
 from app.services.pokemon_detail_resolver import PokemonDetailResolver
 from app.services.species_catalog import SpeciesCatalog
-from app.services.pkhex.bridge import PKHeXBridge
 from app.services.move_data import MoveDataCatalog, merge_move_details
 from app.services.move_description import MoveDescriptionCatalog
 from app.services.ability_description import AbilityDescriptionCatalog
@@ -185,7 +184,14 @@ class Api:
         # app/services/pokemon_detail_resolver.py sobre por qué
         # esto vive acá (solo GUI) y no en Application (no lo usa
         # ningún overlay ni el HTTP server).
-        self.pokemon_detail_resolver = PokemonDetailResolver()
+        #
+        # Bloque 9.2 (01/10/2026): TODOS los servicios de esta clase
+        # comparten el único bridge de la aplicación
+        # (`application.bridge`, ver Application.__init__) -- antes
+        # cada uno arrancaba su propio proceso .NET.
+        bridge = self.app.bridge
+
+        self.pokemon_detail_resolver = PokemonDetailResolver(bridge=bridge)
 
         # Modales de movimiento/habilidad/especie (07/09/2026,
         # roadmap 4.1/4.2) -- instancia PROPIA del bridge, mismo
@@ -200,12 +206,13 @@ class Api:
         # MoveDataCatalog/MoveDescriptionCatalog/
         # AbilityDescriptionCatalog/TypeChartCatalog son lecturas de
         # JSON cacheadas, sin costo de mantener vivas.
-        self.modal_bridge = PKHeXBridge()
+        # (alias: es el mismo bridge único de la aplicación)
+        self.modal_bridge = bridge
         self.move_data_catalog = MoveDataCatalog()
         self.move_description_catalog = MoveDescriptionCatalog()
         self.ability_description_catalog = AbilityDescriptionCatalog()
         self.type_chart_catalog = TypeChartCatalog()
-        self.item_catalog = ItemCatalog()
+        self.item_catalog = ItemCatalog(bridge=bridge)
         self.species_extra_catalog = SpeciesExtraCatalog()
         self.pre_evolution_catalog = PreEvolutionCatalog()
 
@@ -217,9 +224,9 @@ class Api:
         # instancia acá en vez de compartirla para no tener que
         # tocar Application/HTTPServer, mismo patrón que ya se usó
         # con PokemonDetailResolver.
-        self.species_catalog = SpeciesCatalog()
-        self.location_catalog = LocationCatalog()
-        self.playtime_service = PlaytimeService()
+        self.species_catalog = SpeciesCatalog(bridge=bridge)
+        self.location_catalog = LocationCatalog(bridge=bridge)
+        self.playtime_service = PlaytimeService(bridge=bridge)
 
         # Pestaña Líderes del Nuzlocke (Fase B, roadmap 3.1/3.2) --
         # dataset estático curado en Fase A, no necesita el bridge

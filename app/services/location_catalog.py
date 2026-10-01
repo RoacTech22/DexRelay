@@ -165,7 +165,7 @@ class LocationCatalog:
         self.bridge = (
             bridge
             if bridge is not None
-            else PKHeXBridge()
+            else PKHeXBridge.shared()
         )
 
         # Sin cache_path explícito, resuelve data/location_cache.json

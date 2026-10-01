@@ -28,7 +28,7 @@ class PlaytimeService:
         self.bridge = (
             bridge
             if bridge is not None
-            else PKHeXBridge()
+            else PKHeXBridge.shared()
         )
 
         # Por process_name -- Alpha Sapphire y Omega Ruby tienen

@@ -28,7 +28,7 @@ class SpeciesCatalog:
         self.bridge = (
             bridge
             if bridge is not None
-            else PKHeXBridge()
+            else PKHeXBridge.shared()
         )
 
         # Sin cache_path explícito, resuelve data/species_cache.json

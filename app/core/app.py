@@ -14,7 +14,10 @@ from app.readers.azahar_reader import AzaharReader
 from app.server.http_server import HTTPServer
 from app.services.location_catalog import LocationCatalog
 from app.services.nuzlocke_service import NuzlockeService
+from app.services.location_resolver import LocationResolver
 from app.services.nuzlocke_storage import NuzlockeStorage
+from app.services.pkhex.bridge import PKHeXBridge
+from app.services.species_resolver import SpeciesResolver
 from app.services.species_catalog import SpeciesCatalog
 from app.services.team_overlay_settings import TeamOverlaySettings
 
@@ -30,7 +33,16 @@ class Application:
             default="sango-2",
         )
 
+        # Bloque 9.2 (01/10/2026): el ÚNICO bridge PKHeX de toda la
+        # aplicación. Se inyecta explícitamente a todo lo que lo
+        # necesita (reader, HTTPServer, y la GUI vía `Api`, que lo
+        # toma de `application.bridge`) en vez de que cada servicio
+        # arranque su propio proceso .NET. Ver PKHeXBridge.shared().
+        self.bridge = PKHeXBridge.shared()
+
         self.reader = AzaharReader(
+            species_resolver=SpeciesResolver(bridge=self.bridge),
+            location_resolver=LocationResolver(bridge=self.bridge),
             process_name=process_name,
         )
 
@@ -99,8 +111,8 @@ class Application:
             host=server_host,
             port=int(server_port),
             nuzlocke_service=self.nuzlocke_service,
-            species_catalog=SpeciesCatalog(),
-            location_catalog=LocationCatalog(),
+            species_catalog=SpeciesCatalog(bridge=self.bridge),
+            location_catalog=LocationCatalog(bridge=self.bridge),
             team_overlay_settings=self.team_overlay_settings,
         )
 
