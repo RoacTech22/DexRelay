@@ -11,7 +11,7 @@ from app.memory.pointers import (
 
 # Bajo (8 hex) del Title ID de cada juego -- son los mismos Title
 # IDs públicos y conocidos que ya usa
-# app/gui_web/api.py:TITLE_ID_REGIONS ("000400000011C400" /
+# app/gui_web/api_dashboard.py:TITLE_ID_REGIONS ("000400000011C400" /
 # "000400000011C500"), no algo medido/adivinado acá. El alto
 # ("00040000") es el mismo para ambos, es la categoría estándar de
 # "aplicación" en 3DS.

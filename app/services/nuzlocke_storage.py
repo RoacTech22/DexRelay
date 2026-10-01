@@ -33,7 +33,7 @@ _GAME_STORAGE_SLUGS = {
 # es solo el punto de partida la primera vez que se lee el archivo.
 # Los `id` son fijos para las reglas de este set inicial -- una
 # regla agregada a mano por el usuario después lleva un id nuevo
-# (ver Api.nuzlocke_add_ruleset_rule() en app/gui_web/api.py).
+# (ver Api.nuzlocke_add_ruleset_rule() en app/gui_web/api_nuzlocke.py).
 #
 # AJUSTE (09/09/2026, a pedido del usuario): de las 7 reglas, solo
 # 3 vienen tildadas por defecto ahora (primer_encuentro,

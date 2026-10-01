@@ -823,7 +823,7 @@ class AzaharReader:
         esto en cada ciclo de 200ms de Runtime.update() sería
         innecesario -- se piden bajo demanda, solo cuando la
         página Pokémon está abierta (ver
-        Api.get_pokemon_page_data() en app/gui_web/api.py).
+        Api.get_pokemon_page_data() en app/gui_web/api_pokemon.py).
 
         Vuelve a leer memoria en el momento (no usa
         _last_known_party) -- para esta página, sí importa que el
