@@ -1,102 +1,544 @@
 # DexRelay
 
-Aplicación de escritorio *companion* para partidas de **Pokémon Omega Ruby / Alpha Sapphire** ejecutadas en el emulador **Azahar**. Lee la memoria del juego en vivo (sin modificar el ROM ni el save) y la muestra en una GUI propia, en overlays para OBS y en un servidor HTTP local.
+<p align="center">
+  <img src="docs/images/dexrelay_logo.png" alt="DexRelay" width="420">
+</p>
 
-> Estado: **v0.3.0-alpha** — funciona y se probó en partidas reales, pero puede tener bugs.
-> [Descargar el último release](https://github.com/RoacTech22/DexRelay/releases/tag/v0.3.0-alpha)
+<p align="center">
+  <strong>Tu compañero para Pokémon ORAS en Azahar</strong>
+</p>
 
-## Qué incluye
+<p align="center">
+  Equipo en tiempo real · Nuzlocke · Pokédex · Medallas · OBS
+</p>
 
-- **Dashboard:** estado de la conexión con Azahar, equipo actual, medallas y URLs de los overlays.
-- **Pokémon:** equipo y las 7 primeras cajas, detalle de cada Pokémon, modal Pokédex (tipos, stats base, habilidades, evoluciones con ramas, resistencias y debilidades) y modales de movimientos y habilidades.
-- **Medallas y líderes de gimnasio:** progreso, retratos y equipos de cada líder.
-- **Nuzlocke Tracker:** encuentros por ruta con captura automática, cementerio, level cap del siguiente líder, reglas editables y registro automático de encuentros **perdidos** (huida o derrota sin captura).
-- **Overlays para OBS** (Browser Source): Team (1170×210), Badges (656×100) y Nuzlocke (376×270).
-- **Herramientas:** agregar Caramelo Raro a la bolsa. Es la única función que **escribe** en memoria, con aviso visible; todo lo demás es solo lectura.
-- **Soporte del ROM hack Rising Ruby / Sinking Sapphire** (opcional, desactivado por defecto): líderes propios, cambios de evolución, de tipo/habilidad/stats y de movimientos. Se activa desde Configuración, sin reiniciar.
-- **Reconexión automática:** si cierras y reabres Azahar con DexRelay abierto, vuelve a detectar el juego solo, incluso si abres el otro.
+<p align="center">
 
-Todo corre **100 % offline**: no hay ninguna dependencia de red en tiempo de ejecución.
+  <a href="RELEASE_URL">
+    <img src="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.0-alpha" alt="Descargar DexRelay">
+  </a>
+
+  <a href="ISSUES_URL">
+    <img src="https://github.com/RoacTech22/DexRelay/issues" alt="Reportar problema">
+  </a>
+
+</p>
+
+---
+
+## ¿Qué es DexRelay?
+
+**DexRelay** es una aplicación de escritorio para partidas de **Pokémon Omega Ruby y Alpha Sapphire (ORAS)** ejecutadas en **Azahar**.
+
+Lee los datos de la partida en tiempo real y los convierte en información útil para jugar, gestionar un Nuzlocke y transmitir tus partidas.
+
+DexRelay integra en una sola aplicación:
+
+- Equipo Pokémon en tiempo real.
+- Información detallada de Pokémon.
+- Pokédex integrada.
+- Cajas Pokémon.
+- Medallas y líderes de gimnasio.
+- Nuzlocke Tracker.
+- Overlays para OBS.
+- Servidor HTTP local.
+- Herramientas adicionales para la partida.
+
+La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
+
+> **Estado actual:** v0.4.0-alpha  
+> Publicada el 1 de octubre de 2026.
+
+---
+
+## Vista general
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard de DexRelay" width="900">
+</p>
+
+El Dashboard reúne en una sola pantalla el estado de Azahar, el lector de memoria, el Runtime, el servidor HTTP, el equipo actual, las medallas y los overlays disponibles.
+
+---
+
+# Funciones principales
+
+## Pokémon en tiempo real
+
+DexRelay detecta automáticamente el juego conectado a Azahar y muestra el equipo actual.
+
+<p align="center">
+  <img src="docs/screenshots/team.png" alt="Equipo Pokémon en DexRelay" width="900">
+</p>
+
+Para cada Pokémon puedes consultar información como:
+
+- Nombre y apodo.
+- Nivel.
+- Género.
+- Tipo o tipos.
+- Habilidad.
+- Movimientos.
+- HP actual y máximo.
+- Estadísticas.
+- Información detallada del Pokémon.
+
+También puedes consultar las primeras **7 cajas** del PC.
+
+---
+
+## Pokédex integrada
+
+DexRelay incluye una Pokédex integrada con información detallada de las especies.
+
+<p align="center">
+  <img src="docs/screenshots/pokedex.png" alt="Pokédex de DexRelay" width="900">
+</p>
+
+La ficha de cada especie puede mostrar:
+
+- Tipo.
+- Estadísticas base.
+- Habilidades.
+- Habilidad oculta.
+- Altura y peso.
+- Categoría.
+- Evoluciones.
+- Evoluciones ramificadas.
+- Debilidades.
+- Resistencias.
+- Inmunidades.
+
+---
+
+## Medallas y líderes de gimnasio
+
+Consulta el progreso de las 8 medallas de Hoenn y la información de los líderes.
+
+DexRelay muestra:
+
+- Medallas obtenidas y pendientes.
+- Líder correspondiente.
+- Ciudad.
+- Tipo de gimnasio.
+- Equipo del líder.
+- Información específica para Rising Ruby / Sinking Sapphire cuando el modo hackrom está activado.
+
+---
+
+# Nuzlocke Tracker
+
+DexRelay incluye un tracker de Nuzlocke integrado con la partida.
+
+<p align="center">
+  <img src="docs/screenshots/nuzlocke.png" alt="Nuzlocke Tracker de DexRelay" width="900">
+</p>
+
+El tracker permite gestionar:
+
+- Primer encuentro por ruta.
+- Capturas detectadas automáticamente.
+- Pokémon vivos.
+- Cementerio.
+- Encuentros perdidos.
+- Reglas de la partida.
+- Nivel máximo del siguiente líder.
+- Estadísticas generales.
+- Tiempo de juego.
+- Seguimiento de rutas y zonas.
+
+El sistema también puede detectar automáticamente encuentros que terminan sin captura y dejarlos registrados para revisión cuando la información disponible no permite resolverlos completamente.
+
+---
+
+# Overlays para OBS
+
+DexRelay incluye overlays compatibles con **OBS Browser Source**.
+
+Puedes utilizar:
+
+### Team Overlay
+
+Muestra el equipo actual con sprites, nombres, niveles y estado.
+
+**Tamaño recomendado:** 1170 × 210
+
+### Badges Overlay
+
+Muestra el progreso de las medallas.
+
+**Tamaño recomendado:** 656 × 100
+
+### Nuzlocke Overlay
+
+Muestra información del progreso de la partida Nuzlocke.
+
+**Tamaño recomendado:** 376 × 270
+
+Las URLs se generan automáticamente dentro de DexRelay y pueden copiarse desde la página **Overlays**.
+
+---
+
+## DexRelay para streams
+
+<p align="center">
+  <img src="docs/screenshots/stream.png" alt="DexRelay utilizado en un stream" width="1000">
+</p>
+
+Los overlays están pensados para integrarse directamente en tus escenas de OBS y mostrar información de la partida sin tener que actualizarla manualmente.
+
+---
+
+# Rising Ruby / Sinking Sapphire
+
+DexRelay incluye soporte opcional para los hackroms:
+
+- **Rising Ruby**
+- **Sinking Sapphire**
+
+El modo hackrom está desactivado por defecto y puede activarse desde **Configuración**.
+
+Cuando está activo, DexRelay puede utilizar los datos específicos del hackrom para:
+
+- Líderes de gimnasio.
+- Equipos de líderes.
+- Cambios de tipo.
+- Cambios de habilidades.
+- Cambios de estadísticas base.
+- Cambios de movimientos.
+- Evoluciones modificadas.
+
+---
+
+# Requisitos
+
+## Sistema
+
+- Windows 10/11 de 64 bits.
+- Microsoft Edge WebView2 Runtime.
+- Azahar con el juego cargado.
+
+## Juego
+
+Actualmente DexRelay soporta:
+
+- Pokémon Omega Ruby — actualización **1.4**.
+- Pokémon Alpha Sapphire — actualización **1.4**.
+
+> Las direcciones de memoria utilizadas por DexRelay corresponden a estas versiones exactas del juego. El juego base sin la actualización 1.4 no está soportado.
+
+## .NET
+
+No necesitas instalar .NET para utilizar la versión publicada.
+
+El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejecutable autocontenido.
+
+---
+
+# Instalación
+
+## 1. Descargar DexRelay
+
+Descarga:
+
+**DexRelay v0.4.0-alpha**
+
+Archivo:
+
+`DexRelay-v0.4.0-alpha-win-x64.zip`
+
+## 2. Extraer
+
+Descomprime el archivo en una carpeta donde tengas permisos de escritura.
+
+DexRelay guarda determinados datos de progreso dentro de su carpeta `data/`.
+
+## 3. Ejecutar
+
+Abre:
+
+`DexRelay.exe`
+
+## 4. Iniciar Azahar
+
+Abre Azahar y carga Pokémon Omega Ruby o Alpha Sapphire.
+
+DexRelay detectará automáticamente el juego compatible.
+
+## 5. Comenzar
+
+Pulsa **Comenzar** desde DexRelay.
+
+Cuando la conexión sea correcta, el Dashboard mostrará:
+
+- Azahar conectado.
+- Reader activo.
+- Runtime ejecutándose.
+- Servidor HTTP activo.
+- Equipo detectado.
+
+---
+
+# OBS — configuración rápida
+
+1. Abre DexRelay.
+2. Conecta Azahar.
+3. Ve a **Overlays**.
+4. Copia la URL del overlay que quieras utilizar.
+5. En OBS añade una fuente **Navegador / Browser Source**.
+6. Introduce la URL.
+7. Configura el tamaño recomendado.
+
+Las URLs locales tienen este formato:
+
+`http://localhost:8080/overlay/team`
+
+`http://localhost:8080/overlay/badges`
+
+`http://localhost:8080/overlay/nuzlocke`
+
+No necesitas publicar ningún puerto de Internet.
+
+---
+
+# Funcionamiento offline y privacidad
+
+DexRelay funciona localmente en tu ordenador.
+
+La aplicación:
+
+- No necesita conexión a Internet para funcionar.
+- No envía los datos de tu partida a servidores externos.
+- Utiliza un servidor HTTP únicamente en tu propio ordenador.
+- Lee la memoria de Azahar localmente.
+- Utiliza datos estáticos incluidos con la aplicación.
+
+La excepción funcional es la página **Herramientas**, donde existe una operación específica para agregar Caramelos Raros a la bolsa.
+
+> **Importante:** esta es actualmente la única función de DexRelay que escribe en la memoria del juego. El resto de las funciones de lectura funcionan en modo de solo lectura.
+
+---
+
+# Herramientas
+
+DexRelay incluye herramientas adicionales para la partida.
+
+Actualmente se puede agregar **Caramelo Raro** a la bolsa desde la página Herramientas.
+
+La operación:
+
+- Requiere una conexión activa.
+- Muestra una advertencia antes de ejecutarse.
+- Vuelve a leer la memoria después de escribir.
+- Muestra la cantidad realmente detectada.
+
+---
+
+# Reconexión automática
+
+DexRelay puede volver a detectar Azahar si el emulador se cierra y vuelve a abrirse mientras DexRelay permanece abierto.
+
+También puede detectar automáticamente si se inicia el otro juego compatible entre Omega Ruby y Alpha Sapphire.
+
+---
+
+# Limitaciones conocidas
+
+DexRelay sigue en fase **alpha** y existen algunas limitaciones conocidas.
+
+### HP durante el combate
+
+El HP mostrado durante el combate en el Team Overlay actualmente asume que el Pokémon activo corresponde al **slot 1** del equipo.
+
+La detección automática del slot activo no está implementada actualmente.
+
+### Cajas
+
+DexRelay muestra actualmente las primeras **7 cajas** del PC.
+
+### Encuentros especiales
+
+Huevos, regalos, intercambios u otros casos especiales pueden quedar como encuentros pendientes cuando no es posible resolver automáticamente toda la información de captura.
+
+### Encuentros perdidos
+
+Si no es posible determinar la especie del rival durante un encuentro perdido, el registro puede aparecer como **Desconocido** para revisión manual.
+
+### Overlay Nuzlocke
+
+El overlay Nuzlocke muestra actualmente hasta **8 Pokémon caídos**.
+
+---
+
+# Reportar un problema
+
+Si encuentras un error, abre un issue en GitHub.
+
+Cuando sea posible incluye:
+
+- Versión de DexRelay.
+- Versión de Azahar.
+- Juego utilizado.
+- Versión del juego.
+- Si utilizas Rising Ruby / Sinking Sapphire.
+- Pasos para reproducir el problema.
+- Qué esperabas que ocurriera.
+- Qué ocurrió realmente.
+- Información de la pestaña **Logs**.
+
+Los reportes con información reproducible son especialmente útiles para mejorar DexRelay.
+
+---
+
+# Ejecutar desde el código fuente
 
 ## Requisitos
 
-- Windows 10/11 de 64 bits.
-- [Azahar](https://azahar-emu.org/) con el juego cargado (DexRelay se conecta por UDP al puerto `45987`).
-- **Pokémon Omega Ruby o Alpha Sapphire con la actualización 1.4 instalada.** Las direcciones de memoria son específicas de esa versión exacta del juego: con el juego base el mapa de memoria queda corrido y DexRelay no lee nada (equipo vacío, sin error visible).
-- Microsoft Edge WebView2 Runtime (ya viene con Windows 11 y con Edge actualizado).
+- Python 3.13.
+- .NET 10 SDK.
+- Git.
 
-No hace falta instalar .NET: el release incluye el bridge PKHeX autocontenido.
-
-## Instalación (release)
-
-1. Descarga `DexRelay-v0.3.0-alpha-win-x64.zip` desde la [página de releases](https://github.com/RoacTech22/DexRelay/releases).
-2. Descomprímelo en una carpeta con permisos de escritura (tu progreso se guarda dentro de `data/`).
-3. Abre `DexRelay.exe`. Windows SmartScreen puede avisar que el ejecutable no está firmado ("Más información" → "Ejecutar de todas formas").
-4. Abre Azahar con el juego y pulsa **Comenzar**. DexRelay detecta el juego solo.
-
-### Overlays en OBS
-
-Añade una fuente *Browser Source* con la URL y el tamaño indicados. La página **Overlays** de la app muestra las URLs y permite copiarlas:
-
-| Overlay | URL | Tamaño |
-|---|---|---|
-| Team | `http://localhost:8080/overlay/team` | 1170×210 |
-| Badges | `http://localhost:8080/overlay/badges` | 656×100 |
-| Nuzlocke | `http://localhost:8080/overlay/nuzlocke` | 376×270 |
-
-## Ejecutar desde el código fuente
-
-Requisitos: Python 3.13, y el SDK de .NET 10 si no publicas el bridge (en desarrollo se usa `dotnet run`).
+## Crear entorno virtual
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
+```
+
+## Instalar dependencias
+
+```bash
 pip install -r requirements.txt
+```
+
+## Ejecutar
+
+```bash
 python -m app.main
 ```
 
-Para publicar el bridge y empaquetar (Git Bash, con la `.venv` activada):
+---
+
+# Compilar el bridge PKHeX
+
+Desde Git Bash:
 
 ```bash
 cd dotnet/DexRelay.PKHeX
-dotnet publish -c Release -r win-x64 --self-contained true \
+
+dotnet publish -c Release \
+    -r win-x64 \
+    --self-contained true \
     -p:PublishSingleFile=true \
     -p:IncludeNativeLibrariesForSelfExtract=true \
     -o ../../releases/pkhex-bridge
+
 cd ../..
+```
+
+---
+
+# Crear el build de Windows
+
+Con la `.venv` activada:
+
+```bash
 pip install pyinstaller
 pyinstaller DexRelay.spec --noconfirm --clean
 ```
 
-El resultado queda en `dist/DexRelay/`. El spec genera una `config.json` de distribución limpia y **no** empaqueta tu progreso (`badges`, `nuzlocke_*`, `team_overlay_settings`).
-
-## Arquitectura
+El resultado se genera en:
 
 ```text
-Azahar (UDP 45987) → lector de memoria (Python) → Runtime / ApplicationState
-                                                   ├─ GUI de escritorio (pywebview)
-                                                   └─ servidor HTTP local
-                                                       ├─ overlays para OBS
-                                                       └─ panel web del Nuzlocke
-Bridge PKHeX (.NET 10, PKHeX.Core) ← JSON por stdin/stdout, para nombres, tipos, stats y evoluciones
+dist/DexRelay/
 ```
 
-La GUI, los overlays y el Nuzlocke Tracker nunca leen memoria directamente: todo pasa por `Runtime` y `ApplicationState`. La lógica de Pokémon se delega en PKHeX en vez de reimplementarla.
+El proceso de release utiliza una configuración limpia y evita empaquetar los datos de progreso personales del desarrollador.
 
-## Limitaciones conocidas
+---
 
-- El HP en combate del overlay asume que el Pokémon activo es el del slot 1 (no se logró detectar el slot real).
-- Solo se leen las cajas 1 a 7.
-- Las capturas raras (huevos, regalos, intercambios) o sin ubicación resuelta caen a "pendientes" para revisión manual.
-- Si un perdido no puede leer la especie del rival, se registra como "Desconocido" y se edita desde el panel web (`/panel/nuzlocke`).
-- El overlay Nuzlocke muestra hasta 8 caídos sin recorte.
+# Arquitectura
 
-## Reportar problemas
+```text
+                    AZAHAR
+                       │
+                       │ UDP 45987
+                       ▼
+              Lector de memoria
+                    Python
+                       │
+                       ▼
+                  Runtime
+                       │
+                       ▼
+              ApplicationState
+                  │         │
+                  │         │
+                  ▼         ▼
+               GUI       HTTP Server
+                  │         │
+                  │         ├── Team Overlay
+                  │         ├── Badges Overlay
+                  │         └── Nuzlocke Overlay
+                  │
+                  ├── Dashboard
+                  ├── Pokémon
+                  ├── Pokédex
+                  ├── Medallas
+                  ├── Nuzlocke
+                  ├── Overlays
+                  ├── Herramientas
+                  └── Configuración
 
-Abre un [issue](https://github.com/RoacTech22/DexRelay/issues) e incluye lo que aparezca en la pestaña **Logs** de la app.
+             PKHeX.Core / .NET
+                     │
+                     ▼
+             Datos de Pokémon
+```
 
-## Créditos
+La GUI, los overlays y el Nuzlocke Tracker no leen directamente la memoria de Azahar.
 
-- [PKHeX.Core](https://github.com/kwsch/PKHeX) para la lectura y decodificación de datos de Pokémon.
-- [PokéAPI](https://pokeapi.co/) como fuente de datos de movimientos, curados una sola vez de forma offline.
-- Emulador Azahar y su interfaz de depuración por UDP.
+Los datos pasan primero por el Runtime y el estado compartido de DexRelay, manteniendo separadas la lectura de memoria, la lógica de aplicación y la presentación.
+
+---
+
+# Estado del proyecto
+
+**v0.4.0-alpha**
+
+DexRelay se encuentra actualmente en fase alpha.
+
+La versión 0.4.0 incluye mejoras relacionadas con:
+
+- Progreso separado por partida.
+- Identificación mediante Trainer ID.
+- Diagnóstico de conexión.
+- Mejoras de GUI y accesibilidad.
+- Tipografías locales.
+- Limpieza de deuda técnica.
+- Nuevo icono de aplicación.
+- Mejoras de estabilidad y consistencia.
+
+---
+
+# Créditos
+
+DexRelay utiliza:
+
+- **PKHeX.Core** para lectura, decodificación y lógica de datos Pokémon.
+- **PokéAPI** como fuente para datos que fueron curados e incorporados localmente.
+- **Azahar** y su interfaz de depuración por UDP.
+
+---
+
+# Licencia
+
+Consulta la información de licencia incluida en el repositorio antes de redistribuir o modificar el proyecto.
+
+---
+
+<p align="center">
+  <strong>DexRelay</strong>
+  <br>
+  Tu compañero para Pokémon ORAS en Azahar.
+</p>
