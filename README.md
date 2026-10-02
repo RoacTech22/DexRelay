@@ -14,12 +14,12 @@
 
 <p align="center">
 
-  <a href="RELEASE_URL">
-    <img src="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.0-alpha" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.0-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.4.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
-  <a href="ISSUES_URL">
-    <img src="https://github.com/RoacTech22/DexRelay/issues" alt="Reportar problema">
+  <a href="https://github.com/RoacTech22/DexRelay/issues">
+    <img src="https://img.shields.io/badge/Reportar%20problema-GitHub-111827?style=for-the-badge" alt="Reportar problema">
   </a>
 
 </p>
