@@ -665,9 +665,10 @@ class NuzlockeService:
         #
         # Limitación conocida y aceptada (caso raro): si el propio
         # inicial muere ANTES de que el jugador consiga su primera
-        # Poké Ball, esa muerte no se ve en absoluto mientras
-        # tanto -- en cuanto se detecten Poké Balls el inicial se
-        # registra con el HP que tenga en ese momento (vivo o ya en
+        # Poké Ball, esa muerte no se registra mientras tanto (el
+        # inicial SÍ se registra apenas se obtiene, ver
+        # `pre_start`) -- en cuanto se detecten Poké Balls se
+        # procesa con el HP que tenga en ese momento (vivo o ya en
         # 0), sin poder reconstruir retroactivamente qué pasó en
         # el medio.
         #
@@ -681,19 +682,49 @@ class NuzlockeService:
         # todo sigue funcionando exactamente igual que antes de
         # este bloque -- ningún encuentro/muerte ya registrado se
         # borra ni se reinterpreta.
+        #
+        # Excepción: el INICIAL (03/10/2026, bug real reportado por
+        # Ronald -- la cláusula "empieza con las primeras Poké
+        # Balls" nunca debió alcanzar al inicial, que se registra
+        # apenas se obtiene, igual que antes de este bloque). Antes
+        # de las Poké Balls (`pre_start`), update() procesa SOLO el
+        # primer Pokémon de la party (el inicial, o su renombre
+        # "Mudkip" -> "Daron" vía _reconcile_starter_rename) y
+        # nada más: sin Caja PC, sin muertes, sin intercambios, sin
+        # reintento de pendientes. Todo lo demás sigue esperando a
+        # `nuzlocke_started`, como pidió el usuario.
+        pre_start = False
+
         if not self._data["nuzlocke_started"]:
             if has_pokeballs:
                 self._data["nuzlocke_started"] = True
                 self.storage.save(self._data)
             else:
-                return self._data
+                pre_start = True
+
+                first_mon = next(
+                    (
+                        pokemon
+                        for pokemon in team
+                        if pokemon
+                        and not pokemon.get("empty")
+                        and pokemon.get("nickname")
+                    ),
+                    None,
+                )
+
+                team = [first_mon] if first_mon else []
+                boxed_party = None
 
         # Reintento de ubicación pendiente (28/08/2026, bug real
         # reportado: pasaba sobre todo cuando el jugador NO le
         # ponía nombre al Pokémon). Ver _retry_pending_captures()
         # para el detalle completo -- se ejecuta cada ciclo, antes
         # de procesar capturas nuevas.
-        if self._retry_pending_captures(team, boxed_party):
+        if (
+            not pre_start
+            and self._retry_pending_captures(team, boxed_party)
+        ):
             changed_by_retry = True
         else:
             changed_by_retry = False
@@ -996,8 +1027,11 @@ class NuzlockeService:
 
                 changed = True
 
+            # Antes de las Poké Balls (pre_start) no se registran
+            # muertes -- ver el bloque de `nuzlocke_started`.
             is_dead = (
-                hp is not None
+                not pre_start
+                and hp is not None
                 and hp <= 0
             )
 
@@ -1135,7 +1169,8 @@ class NuzlockeService:
         # trueque (ej. se liberó, o el usuario cerró la app justo
         # en el medio de una lectura).
         if (
-            len(trade_registrations_this_cycle) == 1
+            not pre_start
+            and len(trade_registrations_this_cycle) == 1
             and len(
                 [
                     n for n in vanished_candidates

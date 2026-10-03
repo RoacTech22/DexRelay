@@ -93,15 +93,74 @@ def _team(*mons):
     return filled
 
 
-def test_partida_nueva_no_registra_nada_sin_pokeballs():
+def test_partida_nueva_registra_solo_el_inicial_sin_pokeballs():
+    # 03/10/2026: el inicial se registra apenas se obtiene; la
+    # cláusula de las Poké Balls solo gatea todo lo demás.
     service = NuzlockeService(FreshFakeStorage())
 
     boti = _mon("Boti", "Torchic", 255, 5, met_location="")
     state = service.update(_team(boti), has_pokeballs=False)
 
-    assert state["roster"] == []
-    assert state["encounters"] == []
+    assert len(state["roster"]) == 1
+    assert state["roster"][0]["nickname"] == "Boti"
+    assert len(state["encounters"]) == 1
+    assert state["encounters"][0]["location"] == "Inicial"
     assert state.get("nuzlocke_started") is False
+
+
+def test_sin_pokeballs_lo_demas_no_se_registra():
+    service = NuzlockeService(FreshFakeStorage())
+
+    boti = _mon("Boti", "Torchic", 255, 5, met_location="")
+    service.update(_team(boti), has_pokeballs=False)
+
+    # Un segundo Pokémon (party o Caja) antes de las Poké Balls
+    # NO se registra.
+    segundo = _mon("Rocko", "Geodude", 74, 4, met_location="Ruta 102")
+    segundo["slot"] = 2
+    caja = _mon("Cajon", "Zigzagoon", 263, 3, met_location="Ruta 101")
+    team = _team(boti, segundo)
+    state = service.update(team, boxed_party=[caja], has_pokeballs=False)
+
+    assert [e["nickname"] for e in state["roster"]] == ["Boti"]
+    assert len(state["encounters"]) == 1
+
+    # Con Poké Balls, ahora sí.
+    state = service.update(team, boxed_party=[caja], has_pokeballs=True)
+    assert {e["nickname"] for e in state["roster"]} == {
+        "Boti", "Rocko", "Cajon",
+    }
+    assert state["nuzlocke_started"] is True
+
+
+def test_inicial_renombrado_antes_de_las_pokeballs_no_se_duplica():
+    service = NuzlockeService(FreshFakeStorage())
+
+    # Nombre por defecto de la especie, y luego el que elige el
+    # jugador en el laboratorio.
+    service.update(
+        _team(_mon("Torchic", "Torchic", 255, 5, met_location="")),
+        has_pokeballs=False,
+    )
+    state = service.update(
+        _team(_mon("Boti", "Torchic", 255, 5, met_location="")),
+        has_pokeballs=False,
+    )
+
+    assert [e["nickname"] for e in state["roster"]] == ["Boti"]
+    assert len(state["encounters"]) == 1
+    assert state["encounters"][0]["nickname"] == "Boti"
+    assert state["encounters"][0]["location"] == "Inicial"
+
+
+def test_muerte_del_inicial_no_se_registra_antes_de_las_pokeballs():
+    service = NuzlockeService(FreshFakeStorage())
+
+    boti = _mon("Boti", "Torchic", 255, 5, hp=0, met_location="")
+    state = service.update(_team(boti), has_pokeballs=False)
+
+    assert state["graveyard"] == []
+    assert len(state["roster"]) == 1
 
 
 def test_partida_nueva_registra_todo_una_vez_que_hay_pokeballs():
@@ -109,13 +168,14 @@ def test_partida_nueva_registra_todo_una_vez_que_hay_pokeballs():
 
     boti = _mon("Boti", "Torchic", 255, 5, met_location="")
 
-    # Dos ciclos sin Poké Balls todavía -- no pasa nada.
+    # Dos ciclos sin Poké Balls todavía -- el inicial ya se
+    # registró (una sola vez, sin duplicarse).
     service.update(_team(boti), has_pokeballs=False)
     state = service.update(_team(boti), has_pokeballs=False)
-    assert state["roster"] == []
+    assert len(state["roster"]) == 1
+    assert state.get("nuzlocke_started") is False
 
-    # Ahora sí tiene Poké Balls -- recién acá se registra el
-    # inicial, con los datos que tenga la party EN ESE MOMENTO.
+    # Ahora sí tiene Poké Balls -- el tracking completo arranca.
     state = service.update(_team(boti), has_pokeballs=True)
 
     assert len(state["roster"]) == 1
@@ -143,13 +203,14 @@ def test_una_vez_iniciado_queda_asi_aunque_has_pokeballs_vuelva_a_false():
 def test_lectura_fallida_de_la_bolsa_no_arranca_el_tracking():
     # has_pokeballs=None (lectura de memoria fallida, ver
     # AzaharReader.read_has_pokeballs()) se trata igual que False
-    # -- nunca arrancar el tracking por una lectura fallida.
+    # -- nunca arrancar el tracking por una lectura fallida (el
+    # inicial se registra igual, no depende de la bolsa).
     service = NuzlockeService(FreshFakeStorage())
 
     boti = _mon("Boti", "Torchic", 255, 5, met_location="")
     state = service.update(_team(boti), has_pokeballs=None)
 
-    assert state["roster"] == []
+    assert len(state["roster"]) == 1
     assert state.get("nuzlocke_started") is False
 
 
@@ -211,12 +272,15 @@ def test_reiniciar_partida_vuelve_a_exigir_pokeballs():
     nuevo = _mon("Nuevo", "Mudkip", 258, 5, met_location="")
     state = service.update(_team(nuevo), has_pokeballs=False)
 
-    assert state["roster"] == []
-    assert state["encounters"] == []
+    # Solo el inicial; el tracking completo espera a las Balls.
+    assert [e["nickname"] for e in state["roster"]] == ["Nuevo"]
+    assert state["encounters"][0]["location"] == "Inicial"
+    assert state["nuzlocke_started"] is False
 
     state = service.update(_team(nuevo), has_pokeballs=True)
     assert len(state["roster"]) == 1
     assert state["encounters"][0]["location"] == "Inicial"
+    assert state["nuzlocke_started"] is True
 
 
 def test_register_lost_encounter_no_registra_nada_sin_pokeballs():
@@ -254,7 +318,10 @@ if __name__ == "__main__":
     import tempfile
     from pathlib import Path
 
-    test_partida_nueva_no_registra_nada_sin_pokeballs()
+    test_partida_nueva_registra_solo_el_inicial_sin_pokeballs()
+    test_sin_pokeballs_lo_demas_no_se_registra()
+    test_inicial_renombrado_antes_de_las_pokeballs_no_se_duplica()
+    test_muerte_del_inicial_no_se_registra_antes_de_las_pokeballs()
     test_partida_nueva_registra_todo_una_vez_que_hay_pokeballs()
     test_una_vez_iniciado_queda_asi_aunque_has_pokeballs_vuelva_a_false()
     test_lectura_fallida_de_la_bolsa_no_arranca_el_tracking()
