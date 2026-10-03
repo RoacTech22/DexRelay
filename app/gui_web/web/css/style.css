@@ -257,8 +257,11 @@ body {
 }
 
 .logo-img {
-  width: 220px;
-  margin-bottom: 8px;
+  /* Logo nuevo (03/10/2026): SVG apaisado 182x48. */
+  width: 340px;
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 12px;
 }
 
 .logo-fallback {

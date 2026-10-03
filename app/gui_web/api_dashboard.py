@@ -148,7 +148,18 @@ class DashboardMixin:
         """
 
         return self._asset_data_uri(
-            "ui", "dexrelay_logo.png", mime="image/png"
+            "ui", "dexrelay_logo.svg", mime="image/svg+xml"
+        )
+
+    def get_mark_data_uri(self):
+        """
+        Solo la marca (isotipo cuadrado, sin el texto) -- para el
+        sidebar (34px / 28px colapsado), donde el logo completo
+        apaisado no entra. Mismo criterio que get_logo_data_uri().
+        """
+
+        return self._asset_data_uri(
+            "ui", "dexrelay_mark.svg", mime="image/svg+xml"
         )
 
     def get_welcome_background_data_uri(self):

@@ -335,6 +335,16 @@
         img.hidden = false;
         fallback.style.display = "none";
 
+      });
+
+    // Sidebar: solo la marca cuadrada (el logo completo apaisado no
+    // entra en 34px).
+    api()
+      .get_mark_data_uri()
+      .then(function (dataUri) {
+        if (!dataUri) {
+          return;
+        }
         var sidebarImg = document.getElementById("sidebar-logo-img");
         sidebarImg.src = dataUri;
         sidebarImg.hidden = false;

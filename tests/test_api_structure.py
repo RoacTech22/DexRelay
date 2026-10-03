@@ -48,6 +48,7 @@ EXPECTED_PUBLIC_METHODS = [
     "get_leader_team_window_data",
     "get_location_catalog",
     "get_logo_data_uri",
+    "get_mark_data_uri",
     "get_logs",
     "get_move_modal_data",
     "get_move_modal_data_by_name",
