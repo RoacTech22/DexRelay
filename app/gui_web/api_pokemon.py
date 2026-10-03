@@ -123,7 +123,9 @@ class PokemonMixin:
             )
 
             details = self._apply_hackroom_pokemon_changes_to_live_detail(
-                basic.get("speciesId"), details
+                basic.get("speciesId"),
+                details,
+                raw_data=pokemon.raw_data[:232],
             )
 
             entry = dict(basic)
@@ -280,7 +282,7 @@ class PokemonMixin:
             )
 
             details = self._apply_hackroom_pokemon_changes_to_live_detail(
-                basic.get("speciesId"), details
+                basic.get("speciesId"), details, raw_data=raw_data
             )
 
             entry = dict(basic)

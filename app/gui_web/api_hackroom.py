@@ -228,8 +228,43 @@ class HackroomMixin:
 
         return pokemon_changes.get("baseStats")
 
+    # Offset de AbilityNumber en la estructura PK6 descifrada (byte
+    # 0x15, justo después del id de habilidad en 0x14): bit 0 =
+    # habilidad 1, bit 1 = habilidad 2, bit 2 = oculta -- mismo
+    # significado que pk.AbilityNumber de PKHeX.
+    _PK6_ABILITY_NUMBER_OFFSET = 0x15
+
+    @classmethod
+    def _live_ability_slot_key(cls, raw_data):
+        """
+        Qué slot de habilidad lleva puesto el Pokémon vivo, como la
+        clave de pokemon_changes_rrss.json que le corresponde
+        ("ability1" / "ability2"), o None si no se puede saber con
+        certeza o es la oculta (el hackroom no cambia esa).
+
+        Bug real (03/10/2026, reportado por el usuario): los
+        iniciales (Mudkip/Torchic/Treecko) mostraban siempre la
+        habilidad oculta aunque en el juego tenían la normal --
+        el override de habilidad se aplicaba SIEMPRE que la
+        especie tuviera un cambio en un solo slot, sin mirar si el
+        Pokémon realmente llevaba ese slot.
+        """
+
+        try:
+            ability_number = raw_data[cls._PK6_ABILITY_NUMBER_OFFSET]
+        except (TypeError, IndexError):
+            return None
+
+        if ability_number == 1:
+            return "ability1"
+
+        if ability_number == 2:
+            return "ability2"
+
+        return None
+
     def _apply_hackroom_pokemon_changes_to_live_detail(
-        self, species_id, details
+        self, species_id, details, raw_data=None
     ):
         """
         Mismo propósito que los overrides de species_details()
@@ -278,37 +313,23 @@ class HackroomMixin:
             # (details["abilityName"] está en español, así que se
             # compara por id vía AbilityCatalog en vez de por
             # texto).
-            if "ability1" in pokemon_changes or "ability2" in pokemon_changes:
-                for key in ("ability1", "ability2"):
-                    if key not in pokemon_changes:
-                        continue
+            # Solo se overridea el slot que el Pokémon REALMENTE lleva
+            # (AbilityNumber del PK6, ver _live_ability_slot_key()).
+            # Antes (hasta 03/10/2026) se pisaba la habilidad con el
+            # único slot que cambiara la especie sin verificar nada,
+            # así que un Pokémon con la habilidad 1 mostraba la
+            # nueva habilidad 2 (o la oculta, en iniciales). Si no
+            # se puede determinar el slot, o lleva la oculta, se
+            # deja la habilidad real que reportó el bridge.
+            live_slot_key = self._live_ability_slot_key(raw_data)
 
-                    new_id, new_name = self._resolve_hackroom_ability(
-                        pokemon_changes[key]
-                    )
+            if live_slot_key and live_slot_key in pokemon_changes:
+                new_id, new_name = self._resolve_hackroom_ability(
+                    pokemon_changes[live_slot_key]
+                )
 
-                    # Sin el id real del ability ORIGINAL de esa
-                    # especie/slot (species_details() no se consulta
-                    # acá para no pagar otro viaje al bridge por
-                    # cada Pokémon del equipo/caja), no hay forma
-                    # barata de saber con certeza si el ability
-                    # ACTUAL del Pokémon corresponde al slot 1 o al
-                    # 2 en el caso ambiguo de que AMBOS slots
-                    # cambien para la misma especie -- verificado
-                    # que no pasa en este hackroom (las 242 especies
-                    # con cambio de habilidad cambian un solo slot,
-                    # nunca los dos a la vez), pero se deja la
-                    # guarda igual por si un futuro hack sí tuviera
-                    # ese caso -- mejor no aplicar nada que adivinar
-                    # mal.
-                    only_one_ability_changed = not (
-                        "ability1" in pokemon_changes
-                        and "ability2" in pokemon_changes
-                    )
-
-                    if only_one_ability_changed:
-                        details["abilityId"] = new_id
-                        details["abilityName"] = new_name
+                details["abilityId"] = new_id
+                details["abilityName"] = new_name
 
         # CORRECCIÓN (09/09/2026, reportado por el usuario: "el
         # Corte aparece con el ícono de tipo Normal en la vista sin
