@@ -14,8 +14,8 @@
 
 <p align="center">
 
-  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.0-alpha">
-    <img src="https://img.shields.io/badge/Descargar-v0.4.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.1-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.4.1--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
   <a href="https://github.com/RoacTech22/DexRelay/issues">
@@ -46,8 +46,8 @@ DexRelay integra en una sola aplicación:
 
 La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
 
-> **Estado actual:** v0.4.0-alpha  
-> Publicada el 1 de octubre de 2026.
+> **Estado actual:** v0.4.1-alpha  
+> Publicada el 3 de octubre de 2026.
 
 ---
 
@@ -241,11 +241,11 @@ El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejec
 
 Descarga:
 
-**DexRelay v0.4.0-alpha**
+**DexRelay v0.4.1-alpha**
 
 Archivo:
 
-`DexRelay-v0.4.0-alpha-win-x64.zip`
+`DexRelay-v0.4.1-alpha-win-x64.zip`
 
 ## 2. Extraer
 
