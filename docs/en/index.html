@@ -37,7 +37,7 @@
     "description": "DexRelay shows your team, badges, Pokédex and Nuzlocke in real time while you play Pokémon Omega Ruby and Alpha Sapphire on Azahar, with OBS overlays. Free for Windows.",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "Windows 10, Windows 11",
-    "softwareVersion": "0.4.0-alpha",
+    "softwareVersion": "0.4.1-alpha",
     "url": "https://roactech22.github.io/DexRelay/en/",
     "image": "https://roactech22.github.io/DexRelay/assets/og-image.jpg",
     "downloadUrl": "https://github.com/RoacTech22/DexRelay/releases",
@@ -90,7 +90,7 @@
         "name": "Is it free? What state is it in?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, DexRelay is free. It is currently in alpha (v0.4.0-alpha), so there may be bugs: you can report them on GitHub Issues."
+          "text": "Yes, DexRelay is free. It is currently in alpha (v0.4.1-alpha), so there may be bugs: you can report them on GitHub Issues."
         }
       },
       {
@@ -148,7 +148,7 @@
     <section class="hero">
       <div class="wrap hero-in">
         <div class="hero-copy">
-          <div class="pill-eyebrow">POKÉMON ORAS · <b>AZAHAR</b> · v0.4.0-alpha</div>
+          <div class="pill-eyebrow">POKÉMON ORAS · <b>AZAHAR</b> · <span data-dr-version>v0.4.1-alpha</span></div>
           <h1>Your companion for<br><span>Pokémon ORAS<br>on Azahar</span></h1>
           <p class="lead">Real-time team · Nuzlocke · Pokédex<br>Badges · OBS</p>
           <div class="hero-actions">
@@ -391,7 +391,7 @@
             <details><summary>Does it work with Omega Ruby and Alpha Sapphire?</summary><div>Yes. DexRelay supports Pokémon Omega Ruby and Alpha Sapphire running on Azahar.</div></details>
             <details><summary>Does it work with Rising Ruby and Sinking Sapphire?</summary><div>Yes. DexRelay includes optional support for the Rising Ruby and Sinking Sapphire ROM hacks.</div></details>
             <details><summary>Do I need to install .NET?</summary><div>You do not need to install .NET to use the distributed version.</div></details>
-            <details><summary>Is it free? What state is it in?</summary><div>Yes, DexRelay is free. It is currently in alpha (v0.4.0-alpha), so there may be bugs: you can report them on GitHub Issues.</div></details>
+            <details><summary>Is it free? What state is it in?</summary><div>Yes, DexRelay is free. It is currently in alpha (<span data-dr-version>v0.4.1-alpha</span>), so there may be bugs: you can report them on GitHub Issues.</div></details>
             <details><summary>Can I use it with OBS?</summary><div>Yes. DexRelay lets you use its overlays in OBS to show your game information.</div></details>
           </div>
         </article>
@@ -426,7 +426,7 @@
           <a class="btn btn-ghost btn-xl" href="https://github.com/RoacTech22/DexRelay" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
 </svg>View on GitHub</a>
-          <p class="cta-note">Latest version: <b>v0.4.0-alpha</b> · pre-release · Windows x64</p>
+          <p class="cta-note">Latest version: <b><span data-dr-version>v0.4.1-alpha</span></b> · pre-release · Windows x64</p>
         </div>
       </div>
     </section>
@@ -529,6 +529,33 @@
         items.forEach(function (d) { d.open = open; });
         btn.textContent = open ? 'Hide →' : 'View all →';
       });
+    })();
+  </script>
+
+  <script>
+    /* Versión automática: lee el último release publicado en GitHub (incluye pre-releases)
+       y actualiza todos los textos marcados con data-dr-version. Si falla (sin red, límite de
+       la API), queda el texto estático del HTML. Se guarda 1 h en sessionStorage. */
+    (function () {
+      var els = document.querySelectorAll('[data-dr-version]');
+      if (!els.length) return;
+      function apply(tag) {
+        if (!/^v\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/.test(tag)) return;
+        els.forEach(function (el) { el.textContent = tag; });
+      }
+      var KEY = 'dr-latest-release', TTL = 3600000;
+      try {
+        var c = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+        if (c && Date.now() - c.t < TTL) { apply(c.tag); return; }
+      } catch (e) { }
+      fetch('https://api.github.com/repos/RoacTech22/DexRelay/releases?per_page=1', { headers: { Accept: 'application/vnd.github+json' } })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (d) {
+          var tag = d && d[0] && d[0].tag_name; if (!tag) return;
+          apply(tag);
+          try { sessionStorage.setItem(KEY, JSON.stringify({ tag: tag, t: Date.now() })); } catch (e) { }
+        })
+        .catch(function () { });
     })();
   </script>
 </body>

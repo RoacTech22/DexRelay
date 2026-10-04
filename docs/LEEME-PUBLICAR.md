@@ -43,7 +43,7 @@ Si más adelante compras un dominio propio (por ejemplo `dexrelay.app`): en Sett
 
 ## Actualizar la versión de DexRelay
 
-Cuando publiques una nueva versión de la app, cambia el texto `v0.4.0-alpha` en `index.html` y `en/index.html` (etiqueta del hero, preguntas frecuentes, nota bajo el botón final y JSON-LD `softwareVersion`). Los botones de descarga apuntan a la página de releases, así que no hay que tocar enlaces.
+La versión que ve el visitante (etiqueta del hero, preguntas frecuentes y nota bajo el botón final) se actualiza sola: un script al final de `index.html` y `en/index.html` consulta el último release de GitHub (pre-releases incluidos) y reemplaza los textos marcados con `data-dr-version`. Si la consulta falla, se ve el texto estático del HTML. Ese texto estático, y el JSON-LD `softwareVersion` (que leen los buscadores), no se actualizan solos: cámbialos a mano de vez en cuando (buscar `v0.4.1-alpha` y `0.4.1-alpha`). Los botones de descarga apuntan a la página de releases, así que no hay que tocar enlaces.
 
 ## Capturas de pantalla
 
