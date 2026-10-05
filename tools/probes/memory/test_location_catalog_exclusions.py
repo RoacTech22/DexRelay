@@ -33,7 +33,7 @@ class FakeBridge:
     disco, para que el test sea autocontenido.
     """
 
-    def location_list(self):
+    def location_list(self, game="AS"):
         return {
             "locations": [
                 {"id": 170, "name": "Littleroot Town"},

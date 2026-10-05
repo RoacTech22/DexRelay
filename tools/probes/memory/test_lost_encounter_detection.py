@@ -18,11 +18,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from app.core.runtime import Runtime
+from app.games.oras.profile import ALPHA_SAPPHIRE
 from app.core.state import ApplicationState
 from app.services.combat_service import LECTURA_DESCARTADA
 
 
 class FakeReader:
+    profile = ALPHA_SAPPHIRE  # Bloque 13: zonas/capacidades salen del perfil
+
     def __init__(self):
         self.memory = None
         self._connected = True
