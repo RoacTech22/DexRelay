@@ -425,10 +425,11 @@ class PKHeXBridge:
             }
         )
 
-    def location_list(self):
+    def location_list(self, game="AS"):
         """
         Obtiene la lista completa {id, name} de ubicaciones
-        conocidas por PKHeX para Alpha Sapphire -- la misma
+        conocidas por PKHeX para `game` ("AS" por defecto, también
+        "OR", "X", "Y"; Bloque 13) -- la misma
         fuente que met_location() usa para resolver el lugar de
         encuentro real de una captura, así que ambas siempre
         coinciden textualmente. Se llama una sola vez -- el
@@ -439,6 +440,7 @@ class PKHeXBridge:
         return self.request(
             {
                 "action": "location_list",
+                "game": game,
             }
         )
 

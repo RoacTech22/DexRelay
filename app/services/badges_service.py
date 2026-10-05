@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from app.memory.pointers import get_badges_address
-
 BADGES_SIZE = 1
 BADGE_COUNT = 8
 
@@ -30,7 +28,21 @@ class BadgesService:
     def read_value(self) -> int:
         """Read the raw one-byte badge bitfield."""
 
-        address = get_badges_address(self.reader.process_name)
+        # Bloque 13: la dirección sale del perfil del juego conectado.
+        # Sin perfil o sin dirección confirmada (None) no se lee nada:
+        # nunca se usa la de otro juego.
+        profile = self.reader.profile
+
+        if (
+            profile is None
+            or not profile.capabilities.has_gym_badges
+            or profile.memory_map.badges_address is None
+        ):
+            raise RuntimeError(
+                "Las medallas no están disponibles para este juego."
+            )
+
+        address = profile.memory_map.badges_address
 
         data = self.reader.memory.read(
             address,

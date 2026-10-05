@@ -52,14 +52,36 @@ class LocationResolver:
     real que esto corrige.
     """
 
-    def __init__(self, bridge=None):
+    def __init__(self, bridge=None, profile_provider=None):
         self.bridge = (
             bridge
             if bridge is not None
             else PKHeXBridge.shared()
         )
 
+        # Bloque 13: de dónde sale la traducción por ID. Con un
+        # `profile_provider` (la app real) se usa la del juego
+        # conectado; si ese juego no tiene tabla de ubicaciones se
+        # deja el texto de PKHeX tal cual (nunca la tabla de Hoenn
+        # para otro juego). Sin provider (probes y tests antiguos)
+        # se conserva la traducción de Hoenn de siempre.
+        self.profile_provider = profile_provider
+
         self.cache = {}
+
+    def _translate(self, location_id, raw_name):
+        """Traduce el nombre de ubicación con la tabla del juego actual."""
+
+        if self.profile_provider is None:
+            return translate_location_name(location_id, raw_name)
+
+        profile = self.profile_provider()
+        spec = None if profile is None else profile.content.locations
+
+        if spec is None:
+            return raw_name
+
+        return spec.translate(location_id, raw_name)
 
     def resolve(self, nickname, decrypted_box_data):
         """
@@ -159,7 +181,7 @@ class LocationResolver:
         # arriba) -- si el texto crudo de PKHeX no es válido
         # todavía, se trata como vacío, no como una ruta real.
         met_location_name = (
-            translate_location_name(
+            self._translate(
                 met_location_id,
                 raw_met_location_name,
             )

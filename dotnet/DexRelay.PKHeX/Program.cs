@@ -84,7 +84,7 @@ while (true)
                 break;
 
             case "location_list":
-                HandleLocationList();
+                HandleLocationList(root);
                 break;
 
             case "pokemon_details":
@@ -295,8 +295,47 @@ static void HandleItemList()
 }
 
 
-static void HandleLocationList()
+static void HandleLocationList(JsonElement root)
 {
+    // Bloque 13 (ruta multijuego): `game` es opcional. Sin él (o
+    // con "AS") la respuesta es la de siempre, la de Alpha
+    // Sapphire, que DexRelay usa también para Omega Ruby. Un valor
+    // desconocido devuelve error en vez de caer en otro juego.
+    var gameName = "AS";
+
+    if (
+        root.TryGetProperty("game", out var gameElement)
+        && gameElement.ValueKind == JsonValueKind.String
+    )
+    {
+        gameName = gameElement.GetString() ?? "AS";
+    }
+
+    GameVersion version;
+
+    switch (gameName)
+    {
+        case "AS":
+            version = GameVersion.AS;
+            break;
+
+        case "OR":
+            version = GameVersion.OR;
+            break;
+
+        case "X":
+            version = GameVersion.X;
+            break;
+
+        case "Y":
+            version = GameVersion.Y;
+            break;
+
+        default:
+            WriteError($"Juego desconocido para location_list: {gameName}");
+            return;
+    }
+
     // Misma fuente de verdad que HandleMetLocation() usa para
     // resolver el lugar de encuentro de una captura real -- así
     // la lista de rutas que se le muestra al usuario en el panel
@@ -308,7 +347,7 @@ static void HandleLocationList()
     // y creara una duplicada.
     var locations =
         GameInfo.GetLocationList(
-            GameVersion.AS,
+            version,
             EntityContext.Gen6,
             egg: false
         );

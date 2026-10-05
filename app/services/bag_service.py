@@ -33,7 +33,6 @@ from app.memory.pointers import (
     BAG_SLOT_SIZE,
     BAG_MAX_QUANTITY,
     MEDICINE_POCKET_SCAN_SLOTS,
-    get_medicine_pocket_start_address,
 )
 
 
@@ -136,9 +135,22 @@ class BagService:
                 "Dashboard antes de usar esta herramienta."
             )
 
-        pocket_start = get_medicine_pocket_start_address(
-            self.reader.process_name
-        )
+        # Bloque 13: la dirección sale del perfil del juego conectado.
+        # Sin perfil, con la función apagada o con la dirección sin
+        # confirmar (None) no se escribe NADA en memoria.
+        profile = self.reader.profile
+
+        if (
+            profile is None
+            or not profile.capabilities.has_bag_writing
+            or profile.memory_map.medicine_pocket_start_address is None
+        ):
+            raise BagWriteError(
+                "Esta función todavía no está disponible para el "
+                "juego conectado."
+            )
+
+        pocket_start = profile.memory_map.medicine_pocket_start_address
 
         data = self._read_window(pocket_start, MEDICINE_POCKET_SCAN_SLOTS)
 

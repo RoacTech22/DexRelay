@@ -5,8 +5,16 @@ import struct
 from app.memory.memory_reader import MemoryReader
 
 
-COMBAT_POINTER_ADDRESS = 0x083F8658
-COMBAT_HP_OFFSET = 0x404
+# Bloque 11 (ruta multijuego): estos valores viven ahora en el perfil de
+# ORAS (app/games/oras/profile.py); acá se conservan los mismos nombres
+# para no cambiar ningún import ni test. Los comentarios de
+# investigación de abajo se quedan como referencia histórica.
+from app.games.oras.profile import ALPHA_SAPPHIRE as _ORAS_PROFILE
+
+_ORAS_MAP = _ORAS_PROFILE.memory_map
+
+COMBAT_POINTER_ADDRESS = _ORAS_MAP.combat_pointer_address
+COMBAT_HP_OFFSET = _ORAS_MAP.combat_hp_offset
 
 # ============================================================
 # FLAG SALVAJE / ENTRENADOR
@@ -39,7 +47,7 @@ COMBAT_HP_OFFSET = 0x404
 # constantes en las pruebas realizadas, pero no hay garantia de que
 # sean iguales para todas las especies/niveles no probados todavia.
 # Comparar solo contra cero es mas robusto.
-WILD_BATTLE_FLAG_OFFSET = 0x87F
+WILD_BATTLE_FLAG_OFFSET = _ORAS_MAP.wild_battle_flag_offset
 
 # Confirmado con tools/probes/combat/observar_puntero_combate.py:
 # al salir de combate, el puntero NO vuelve a 0x00000000. Se queda
@@ -92,20 +100,71 @@ def _looks_like_real_combat_pointer(base_address: int) -> bool:
     return False
 
 
+_warned_unknown_battle_pointers: set[int] = set()
+
+
+def _warn_unknown_battle_pointer(base_address: int) -> None:
+    """
+    Combate con una base que el perfil no conoce (otro tipo de encuentro:
+    horda, doble, Safari, etc.): no se adivina, se descarta la lectura y
+    se avisa una vez por valor para poder agregarlo al perfil.
+    """
+    if base_address in _warned_unknown_battle_pointers:
+        return
+
+    _warned_unknown_battle_pointers.add(base_address)
+    print(
+        "[CombatService] Combate con una base desconocida "
+        f"({hex(base_address)}): no se clasifica como salvaje ni de "
+        "entrenador. Avisar para agregarla al perfil.",
+        flush=True,
+    )
+
+
 LECTURA_DESCARTADA = object()
 
 
 class CombatService:
     """Lee el HP de combate validando la consistencia del puntero."""
 
-    def __init__(self, memory_reader: MemoryReader) -> None:
+    def __init__(self, memory_reader: MemoryReader, profile_provider=None) -> None:
         self.memory_reader = memory_reader
+        # Bloque 15: el mapa de combate sale del perfil del juego
+        # conectado. Sin provider (tests y probes antiguos) se usa el de
+        # ORAS de siempre.
+        self.profile_provider = profile_provider
+
+    def _combat_map(self):
+        """MemoryMap del juego actual con el combate confirmado, o None."""
+
+        if self.profile_provider is None:
+            return _ORAS_MAP
+
+        profile = self.profile_provider()
+
+        if profile is None:
+            return None
+
+        memory_map = profile.memory_map
+
+        if (
+            memory_map.combat_pointer_address is None
+            or memory_map.combat_inactive_pointers is None
+        ):
+            return None
+
+        return memory_map
 
     def read(self):
         """Lee el HP de combate."""
 
+        combat = self._combat_map()
+
+        if combat is None or combat.combat_hp_offset is None:
+            return None
+
         pointer_before = self.memory_reader.read(
-            COMBAT_POINTER_ADDRESS,
+            combat.combat_pointer_address,
             4,
         )
 
@@ -122,13 +181,13 @@ class CombatService:
             pointer_before,
         )[0]
 
-        if base_address in (0, COMBAT_INACTIVE_POINTER) or not (
+        if base_address in combat.combat_inactive_pointers or not (
             _looks_like_real_combat_pointer(base_address)
         ):
             return None
 
         hp_data = self.memory_reader.read(
-            base_address + COMBAT_HP_OFFSET,
+            base_address + combat.combat_hp_offset,
             2,
         )
 
@@ -136,7 +195,7 @@ class CombatService:
             return LECTURA_DESCARTADA
 
         pointer_after = self.memory_reader.read(
-            COMBAT_POINTER_ADDRESS,
+            combat.combat_pointer_address,
             4,
         )
 
@@ -174,8 +233,13 @@ class CombatService:
         if self.memory_reader is None:
             return None
 
+        combat = self._combat_map()
+
+        if combat is None:
+            return None
+
         pointer_data = self.memory_reader.read(
-            COMBAT_POINTER_ADDRESS,
+            combat.combat_pointer_address,
             4,
         )
 
@@ -201,8 +265,16 @@ class CombatService:
           descarta y se reintenta el próximo ciclo.
         """
 
+        combat = self._combat_map()
+
+        if combat is None or (
+            combat.wild_battle_flag_offset is None
+            and combat.wild_battle_pointers is None
+        ):
+            return None
+
         pointer_before = self.memory_reader.read(
-            COMBAT_POINTER_ADDRESS,
+            combat.combat_pointer_address,
             4,
         )
 
@@ -215,25 +287,37 @@ class CombatService:
             pointer_before,
         )[0]
 
-        if base_address in (0, COMBAT_INACTIVE_POINTER) or not (
+        if base_address in combat.combat_inactive_pointers or not (
             _looks_like_real_combat_pointer(base_address)
         ):
             return None
 
-        flag_data = self.memory_reader.read(
-            base_address + WILD_BATTLE_FLAG_OFFSET,
-            1,
-        )
+        if combat.wild_battle_pointers is not None:
+            # X/Y: el tipo de combate lo da el valor de la celda.
+            if base_address in combat.wild_battle_pointers:
+                result = True
+            elif base_address in (combat.trainer_battle_pointers or ()):
+                result = False
+            else:
+                _warn_unknown_battle_pointer(base_address)
+                return LECTURA_DESCARTADA
+        else:
+            flag_data = self.memory_reader.read(
+                base_address + combat.wild_battle_flag_offset,
+                1,
+            )
 
-        if flag_data is None or len(flag_data) != 1:
-            return LECTURA_DESCARTADA
+            if flag_data is None or len(flag_data) != 1:
+                return LECTURA_DESCARTADA
+
+            result = flag_data[0] != 0
 
         pointer_after = self.memory_reader.read(
-            COMBAT_POINTER_ADDRESS,
+            combat.combat_pointer_address,
             4,
         )
 
         if pointer_after != pointer_before:
             return LECTURA_DESCARTADA
 
-        return flag_data[0] != 0
+        return result
