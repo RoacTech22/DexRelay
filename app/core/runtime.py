@@ -12,7 +12,6 @@ from app.services.combat_service import (
 )
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
-from app.services.zone_names import resolve_zone_name
 
 
 class Runtime:
@@ -45,7 +44,8 @@ class Runtime:
         )
 
         self.combat_service = CombatService(
-            self.reader.memory
+            self.reader.memory,
+            profile_provider=lambda: getattr(self.reader, "profile", None),
         )
 
         self.badges_storage = BadgesStorage()
@@ -611,6 +611,16 @@ class Runtime:
 
         self._pending_lost_resolution = None
 
+    def _zone_name_resolver(self):
+        """Resolvedor id de zona -> nombre del juego actual, o None."""
+
+        profile = getattr(self.reader, "profile", None)
+
+        if profile is None or not profile.capabilities.has_zone_names:
+            return None
+
+        return profile.content.zone_name_resolver
+
     def _update_lost_encounter_tracking(self):
         """
         Detección automática del estado "perdido" del Nuzlocke
@@ -667,6 +677,13 @@ class Runtime:
         if not self.nuzlocke_service.is_started():
             return
 
+        # Bloque 13: sin tabla de zonas del juego conectado no hay
+        # forma de nombrar la ruta, así que la detección automática
+        # de "perdido" queda apagada para ese juego (en vez de usar
+        # los nombres de zona de Hoenn).
+        if self._zone_name_resolver() is None:
+            return
+
         wild_result = self.combat_service.read_wild_flag()
 
         if wild_result is LECTURA_DESCARTADA:
@@ -708,7 +725,7 @@ class Runtime:
         ):
 
             zone_id = self.reader.read_current_zone_id()
-            location = resolve_zone_name(zone_id)
+            location = self._zone_name_resolver()(zone_id)
 
             already_registered = (
                 location is not None

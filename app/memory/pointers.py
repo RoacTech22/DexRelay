@@ -38,8 +38,39 @@
 # de AS-base quedan archivadas en ARCHIVO_DIRECCIONES_AS_BASE (más
 # abajo) por si hiciera falta volver atrás alguna vez -- no se usan
 # en ningún lado del código, son solo referencia histórica.
-PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2"
-PROCESS_NAME_OMEGA_RUBY = "sango-1"
+#
+# BLOQUE 11 (ruta multijuego, 03/10/2026): los VALORES finales de las
+# direcciones ya no viven en este archivo sino en los perfiles de
+# juego (app/games/oras/profile.py, uno por versión, agrupados en un
+# `MemoryMap`). Este módulo se queda con el historial de investigación
+# (los comentarios, que NO se borran) y con los getters históricos
+# `get_*_address(process_name)` como capa de compatibilidad para
+# probes y tests existentes -- mismos nombres, mismos valores (los fija
+# tests/test_pointers_golden.py). OJO: estos getters conservan su
+# comportamiento histórico de caer a Alpha Sapphire ante un proceso
+# desconocido; el registro nuevo (app/games/registry.py) es estricto y
+# es el que debe usar el código nuevo.
+from app.games.oras.profile import (  # noqa: E402
+    ALPHA_SAPPHIRE as _ALPHA_SAPPHIRE_PROFILE,
+    OMEGA_RUBY as _OMEGA_RUBY_PROFILE,
+)
+
+PROCESS_NAME_ALPHA_SAPPHIRE = _ALPHA_SAPPHIRE_PROFILE.key  # "sango-2"
+PROCESS_NAME_OMEGA_RUBY = _OMEGA_RUBY_PROFILE.key  # "sango-1"
+
+_ORAS_MAP = _ALPHA_SAPPHIRE_PROFILE.memory_map
+
+
+def _by_process(field):
+    """{process_name: valor} para los perfiles de ORAS."""
+    return {
+        _ALPHA_SAPPHIRE_PROFILE.key: getattr(
+            _ALPHA_SAPPHIRE_PROFILE.memory_map, field
+        ),
+        _OMEGA_RUBY_PROFILE.key: getattr(
+            _OMEGA_RUBY_PROFILE.memory_map, field
+        ),
+    }
 
 # Archivo histórico (09/09/2026): direcciones de Alpha Sapphire SIN
 # la actualización 1.4 (juego base), confirmadas el 29/08/2026 y
@@ -90,10 +121,7 @@ ARCHIVO_DIRECCIONES_AS_BASE = {
 # ya visto con party/box/zone/bag en la migración anterior. 0
 # medallas reales en esa partida coincidió con la lectura (0x00,
 # resultado correcto, no una lectura fallida disfrazada).
-_BADGES_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C71DC4,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C71DC4,
-}
+_BADGES_ADDRESS_BY_PROCESS = _by_process("badges_address")
 
 
 def get_badges_address(process_name):
@@ -132,16 +160,13 @@ def get_badges_address(process_name):
 #
 # SIN CONFIRMAR (no se usa): una segunda copia del nombre a +98
 # (0x08C813A2) que el scan también devolvió.
-TRAINER_CARD_ADDRESS = 0x08C81340
-TRAINER_CARD_READ_SIZE = 0x60
-TRAINER_CARD_ID_OFFSET = 0x00
-TRAINER_CARD_NAME_OFFSET = 0x48
-TRAINER_CARD_NAME_BYTES = 24
+TRAINER_CARD_ADDRESS = _ORAS_MAP.trainer_card_address
+TRAINER_CARD_READ_SIZE = _ORAS_MAP.trainer_card_read_size
+TRAINER_CARD_ID_OFFSET = _ORAS_MAP.trainer_card_id_offset
+TRAINER_CARD_NAME_OFFSET = _ORAS_MAP.trainer_card_name_offset
+TRAINER_CARD_NAME_BYTES = _ORAS_MAP.trainer_card_name_bytes
 
-_TRAINER_CARD_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: TRAINER_CARD_ADDRESS,
-    PROCESS_NAME_OMEGA_RUBY: TRAINER_CARD_ADDRESS,
-}
+_TRAINER_CARD_ADDRESS_BY_PROCESS = _by_process("trainer_card_address")
 
 
 def get_trainer_card_address(process_name):
@@ -167,10 +192,7 @@ def get_trainer_card_address(process_name):
 # 1.4 (ver decisión junto a PROCESS_NAME_ALPHA_SAPPHIRE más arriba)
 # -- con el parche puesto, AS usa la MISMA dirección que Omega Ruby.
 # Valor viejo de AS-base archivado en ARCHIVO_DIRECCIONES_AS_BASE.
-_PARTY_ORDER_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CFB1E0,
-    PROCESS_NAME_OMEGA_RUBY: 0x08CFB1E0,
-}
+_PARTY_ORDER_ADDRESS_BY_PROCESS = _by_process("party_order_address")
 
 # Cada entrada de la tabla ocupa 4 bytes.
 ORDER_ENTRY_SIZE = 4
@@ -198,10 +220,7 @@ ORDER_ENTRY_SIZE = 4
 # ACTUALIZADO (09/09/2026): mismo criterio que PARTY_ORDER_ADDRESS
 # de acá arriba -- AS 1.4 comparte esta dirección con Omega Ruby.
 # Valor viejo de AS-base archivado en ARCHIVO_DIRECCIONES_AS_BASE.
-_PARTY_COUNT_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08CFB1F8,
-    PROCESS_NAME_OMEGA_RUBY: 0x08CFB1F8,
-}
+_PARTY_COUNT_ADDRESS_BY_PROCESS = _by_process("party_count_address")
 
 
 def get_party_order_address(process_name):
@@ -255,25 +274,20 @@ POKEMON_POINTER_OFFSET = 0x40
 
 
 # ============================================================
-# ESTRUCTURA PK6
+# ESTRUCTURA PK6 / DATOS ADICIONALES
 # ============================================================
-
-# Tamaño de la estructura principal del Pokémon.
-SLOT_DATA_SIZE = 232
-
-# Tamaño de cada bloque utilizado durante el descifrado.
-BLOCK_SIZE = 56
-
-
-# ============================================================
-# DATOS ADICIONALES
-# ============================================================
-
-# Offset de los datos adicionales respecto a la estructura.
-STAT_DATA_OFFSET = 112
-
-# Cantidad de bytes de datos adicionales que se leen.
-STAT_DATA_SIZE = 22
+#
+# Bloque 11 (ruta multijuego): SLOT_DATA_SIZE, BLOCK_SIZE,
+# STAT_DATA_OFFSET y STAT_DATA_SIZE son propiedades del formato del
+# Pokémon, no de la memoria del juego -- ahora se definen en
+# app/memory/structures.py (junto al decoder) y se re-exportan acá
+# con los mismos nombres.
+from app.memory.structures import (  # noqa: E402,F401
+    BLOCK_SIZE,
+    SLOT_DATA_SIZE,
+    STAT_DATA_OFFSET,
+    STAT_DATA_SIZE,
+)
 
 
 # ============================================================
@@ -299,10 +313,10 @@ STAT_DATA_SIZE = 22
 # Confirmado con dos capturas reales consecutivas (Pandy/Pancham y
 # luego QAS/Phanpy): la misma dirección fija mostró cada vez el
 # Pokémon recién atrapado, reemplazando al anterior.
-CAPTURE_BUFFER_ADDRESS = 0x08804A94
-CAPTURE_BUFFER_ENTRY_STRIDE = 0x1E4
+CAPTURE_BUFFER_ADDRESS = _ORAS_MAP.capture_buffer_address
+CAPTURE_BUFFER_ENTRY_STRIDE = _ORAS_MAP.capture_buffer_entry_stride
 
-LAST_CAUGHT_ADDRESS = 0x08805638
+LAST_CAUGHT_ADDRESS = _ORAS_MAP.last_caught_address
 
 # ------------------------------------------------------------
 # RIVAL SALVAJE EN COMBATE (18/09/2026)
@@ -325,18 +339,7 @@ LAST_CAUGHT_ADDRESS = 0x08805638
 # direcciones (badges, party, contador de capturas). Si en Alpha
 # Sapphire la especie del rival sale "Desconocido", correr el probe
 # en esa versión y separar las tuplas.
-_WILD_RIVAL_ADDRESSES_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: (
-        0x081FEEC8,
-        0x081FFA6C,
-        LAST_CAUGHT_ADDRESS,
-    ),
-    PROCESS_NAME_OMEGA_RUBY: (
-        0x081FEEC8,
-        0x081FFA6C,
-        LAST_CAUGHT_ADDRESS,
-    ),
-}
+_WILD_RIVAL_ADDRESSES_BY_PROCESS = _by_process("wild_rival_addresses")
 
 
 def get_wild_rival_addresses(process_name):
@@ -404,10 +407,7 @@ def get_wild_rival_addresses(process_name):
 # Omega Ruby: confirmado en vivo (10/09/2026) que usa la MISMA
 # dirección que Alpha Sapphire 1.4 -- mismo patrón de convergencia
 # ya visto con party/box/zone/bag, y con BADGES_ADDRESS arriba.
-_TOTAL_CAUGHT_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C8B28C,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C8B28C,
-}
+_TOTAL_CAUGHT_ADDRESS_BY_PROCESS = _by_process("total_caught_address")
 
 
 def get_total_caught_address(process_name):
@@ -464,16 +464,13 @@ def get_total_caught_address(process_name):
 # Ruby (ver decisión junto a PROCESS_NAME_ALPHA_SAPPHIRE, arriba
 # del todo del archivo). Valor viejo de AS-base archivado en
 # ARCHIVO_DIRECCIONES_AS_BASE.
-_BOX_BASE_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C9E134,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C9E134,
-}
+_BOX_BASE_ADDRESS_BY_PROCESS = _by_process("box_base_address")
 
 BOX_BASE_ADDRESS = _BOX_BASE_ADDRESS_BY_PROCESS[
     PROCESS_NAME_ALPHA_SAPPHIRE
 ]
-BOX_SLOT_STRIDE = 0xE8
-BOX_SLOT_COUNT = 30
+BOX_SLOT_STRIDE = _ORAS_MAP.box_slot_stride
+BOX_SLOT_COUNT = _ORAS_MAP.box_slot_count
 
 
 def get_box_base_address(process_name):
@@ -654,14 +651,8 @@ def get_box_address(process_name, box_index):
 # Omega Ruby para la zona actual y su espejo (ver decisión junto a
 # PROCESS_NAME_ALPHA_SAPPHIRE, arriba del todo del archivo). Valores
 # viejos de AS-base archivados en ARCHIVO_DIRECCIONES_AS_BASE.
-_CURRENT_ZONE_ID_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6E7A2,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6E7A2,
-}
-_CURRENT_ZONE_ID_MIRROR_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6E884,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6E884,
-}
+_CURRENT_ZONE_ID_ADDRESS_BY_PROCESS = _by_process("current_zone_id_address")
+_CURRENT_ZONE_ID_MIRROR_ADDRESS_BY_PROCESS = _by_process("current_zone_id_mirror_address")
 
 CURRENT_ZONE_ID_ADDRESS = _CURRENT_ZONE_ID_ADDRESS_BY_PROCESS[
     PROCESS_NAME_ALPHA_SAPPHIRE
@@ -721,14 +712,8 @@ def get_current_zone_id_address(process_name):
 # Confirmado en vivo (dump_medicina_candidato_as_1_4.py) que AS 1.4
 # usa la MISMA dirección que Omega Ruby. Valores viejos de AS-base
 # archivados en ARCHIVO_DIRECCIONES_AS_BASE.
-_BAG_START_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6EC70,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6EC70,
-}
-_BAG_END_ADDRESS_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6F800,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6F800,
-}
+_BAG_START_ADDRESS_BY_PROCESS = _by_process("bag_start_address")
+_BAG_END_ADDRESS_BY_PROCESS = _by_process("bag_end_address")
 
 BAG_START_ADDRESS = _BAG_START_ADDRESS_BY_PROCESS[
     PROCESS_NAME_ALPHA_SAPPHIRE
@@ -808,10 +793,7 @@ def get_bag_end_address(process_name):
 # funcionar tras el parche) que AS 1.4 usa la MISMA dirección que
 # Omega Ruby. Valor viejo de AS-base archivado en
 # ARCHIVO_DIRECCIONES_AS_BASE.
-_MEDICINE_POCKET_START_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6B5F0 + 0x3FF0,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6B5F0 + 0x3FF0,
-}
+_MEDICINE_POCKET_START_BY_PROCESS = _by_process("medicine_pocket_start_address")
 
 # Cuantos casilleros escanear hacia adelante desde el inicio del
 # bolsillo de Medicina al buscar lugar para un item nuevo. Generoso
@@ -869,16 +851,13 @@ def get_medicine_pocket_start_address(process_name):
 # pero esto en particular TODAVÍA NO se confirmó en vivo
 # específicamente contra un save de Omega Ruby. Confirmarlo antes
 # de confiar del todo en OR (regla 1/11 del Documento Maestro).
-_ITEMS_POCKET_START_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: 0x08C6EC70,
-    PROCESS_NAME_OMEGA_RUBY: 0x08C6EC70,
-}
+_ITEMS_POCKET_START_BY_PROCESS = _by_process("items_pocket_start_address")
 
 # 400 casilleros confirmados en vivo (ver comentario arriba) -- a
 # diferencia de MEDICINE_POCKET_SCAN_SLOTS (un margen generoso pero
 # sin confirmar el límite real todavía), este SÍ es el tamaño real
 # confirmado del bolsillo completo, no un margen de escaneo.
-ITEMS_POCKET_SLOT_COUNT = 400
+ITEMS_POCKET_SLOT_COUNT = _ORAS_MAP.items_pocket_slot_count
 
 
 def get_items_pocket_start_address(process_name):
@@ -899,4 +878,4 @@ def get_items_pocket_start_address(process_name):
 # Repetición, Cronómetro, Lujo, Ocaso, Curación, Veloz, Estima) no
 # se confirmó cada uno individualmente en esa partida puntual (no
 # los tenía en el momento del dump), vienen de la misma tabla.
-POKEBALL_ITEM_IDS = frozenset(range(1, 17))
+POKEBALL_ITEM_IDS = _ORAS_MAP.pokeball_item_ids

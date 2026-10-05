@@ -2,37 +2,19 @@ import socket
 import struct
 
 from app.readers.citra import Citra
+from app.readers.base import EmulatorTransport  # noqa: F401 -- tipo del transporte
 from app.memory.memory_reader import MemoryReader
 from app.memory.pointers import (
-    PARTY_ORDER_ADDRESS,
-    PARTY_COUNT_ADDRESS,
-    get_party_order_address,
-    get_party_count_address,
     ORDER_ENTRY_SIZE,
     POKEMON_POINTER_OFFSET,
     SLOT_DATA_SIZE,
     STAT_DATA_OFFSET,
     STAT_DATA_SIZE,
-    LAST_CAUGHT_ADDRESS,
-    get_total_caught_address,
-    get_wild_rival_addresses,
-    BOX_BASE_ADDRESS,
-    BOX_SLOT_STRIDE,
-    BOX_SLOT_COUNT,
-    BOX_BLOCK_SIZE,
-    get_box_address,
-    CURRENT_ZONE_ID_ADDRESS,
-    get_current_zone_id_address,
-    get_items_pocket_start_address,
-    ITEMS_POCKET_SLOT_COUNT,
-    POKEBALL_ITEM_IDS,
-    TRAINER_CARD_READ_SIZE,
-    TRAINER_CARD_ID_OFFSET,
-    TRAINER_CARD_NAME_OFFSET,
-    TRAINER_CARD_NAME_BYTES,
-    get_trainer_card_address,
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
+)
+from app.games.registry import (
+    get_profile,
+    process_names,
+    recognized_title_name,
 )
 from app.memory.structures import Pokemon6, decrypt_data
 from app.services.location_resolver import LocationResolver
@@ -44,10 +26,10 @@ from app.services.species_resolver import SpeciesResolver
 # y para detect_process_name(), que solo mira sin conectarse (GUI
 # v2, 02/09/2026: Bienvenida sin selección manual + botón
 # "Reiniciar" del Reader que detecta un cambio de juego).
-KNOWN_PROCESS_NAMES = (
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
-)
+#
+# Bloque 11 (ruta multijuego): sale del registro de perfiles (los
+# juegos de Azahar con perfil), en vez de listarse a mano acá.
+KNOWN_PROCESS_NAMES = process_names(reader_kind="azahar")
 
 
 class ReadFailure:
@@ -74,7 +56,7 @@ class AzaharReader:
 
     def __init__(
         self,
-        citra=None,
+        citra: "EmulatorTransport | None" = None,
         species_resolver=None,
         location_resolver=None,
         process_name="sango-2"
@@ -142,6 +124,54 @@ class AzaharReader:
         # proceso equivocado. Ahora una conexión solo cuenta como
         # válida si la seleccionó connect() y sigue siendo la misma.
         self._process_selected = False
+
+    # ------------------------------------------------------------
+    # Perfil del juego (Bloque 12, ruta multijuego, 04/10/2026)
+    # ------------------------------------------------------------
+    #
+    # Antes, cada lectura elegía su dirección con un getter de
+    # pointers.py que, ante un juego desconocido, caía en SILENCIO a
+    # las direcciones de Alpha Sapphire. Ahora todas salen del perfil
+    # del juego conectado (app/games/): si el juego no tiene perfil, o
+    # ese campo del mapa no está confirmado (None), la lectura se
+    # trata como fallida -- nunca se lee memoria con direcciones de
+    # otro juego (regla 4 del Documento Maestro).
+
+    @property
+    def profile(self):
+        """Perfil del juego actual, o None si no hay uno soportado."""
+        return get_profile(self.process_name)
+
+    def _field(self, name):
+        """Campo del MemoryMap del juego actual, o None si no existe."""
+        profile = self.profile
+
+        if profile is None:
+            return None
+
+        return getattr(profile.memory_map, name)
+
+    def _box_geometry(self):
+        """(base, stride, slots_por_caja) o None si falta alguno."""
+        base = self._field("box_base_address")
+        stride = self._field("box_slot_stride")
+        slots = self._field("box_slot_count")
+
+        if base is None or stride is None or slots is None:
+            return None
+
+        return base, stride, slots
+
+    def _box_address(self, box_index):
+        """Dirección de la caja `box_index` (1-based), o None."""
+        geometry = self._box_geometry()
+
+        if geometry is None:
+            return None
+
+        base, stride, slots = geometry
+
+        return base + (box_index - 1) * slots * stride
 
     def find_game_process(self):
         """
@@ -219,6 +249,9 @@ class AzaharReader:
     DIAG_TIMEOUT = "timeout"
     DIAG_ERROR = "error"
     DIAG_NO_GAME = "no_game"
+    # Azahar tiene cargado un Pokémon que DexRelay reconoce (por Title
+    # ID) pero que todavía no tiene perfil de lectura.
+    DIAG_UNSUPPORTED_GAME = "unsupported_game"
     DIAG_GAME_FOUND = "game_found"
 
     def diagnose_connection(self):
@@ -244,6 +277,9 @@ class AzaharReader:
         - DIAG_NO_GAME: Azahar contestó pero no hay ningún juego
           conocido; "processes" lista los nombres que SÍ reportó
           (dato real, puede venir vacío).
+        - DIAG_UNSUPPORTED_GAME: Azahar contestó y hay un Pokémon
+          reconocido por Title ID ("game_name") pero sin perfil de
+          lectura todavía (Bloque 12, ruta multijuego).
         - DIAG_GAME_FOUND: Azahar contestó y hay un juego conocido
           ("process_name").
 
@@ -270,6 +306,17 @@ class AzaharReader:
                 return {
                     "state": self.DIAG_GAME_FOUND,
                     "process_name": name,
+                    "processes": names,
+                }
+
+        for title_id, name in processes.values():
+            game_name = recognized_title_name(title_id)
+
+            if game_name is not None:
+                return {
+                    "state": self.DIAG_UNSUPPORTED_GAME,
+                    "process_name": name,
+                    "game_name": game_name,
                     "processes": names,
                 }
 
@@ -463,13 +510,12 @@ class AzaharReader:
         que ya usa el proyecto para encontrar el proceso del juego.
         """
 
-        party_order_address = get_party_order_address(
-            self.process_name
-        )
+        party_order_address = self._field("party_order_address")
 
-        party_count_address = get_party_count_address(
-            self.process_name
-        )
+        party_count_address = self._field("party_count_address")
+
+        if party_order_address is None or party_count_address is None:
+            return []
 
         data = self.memory.read(
             party_order_address,
@@ -889,8 +935,13 @@ class AzaharReader:
         vacía se descarta igual que un slot de party vacío).
         """
 
+        last_caught_address = self._field("last_caught_address")
+
+        if last_caught_address is None:
+            return None
+
         pokemon = self._read_pokemon_at_address(
-            LAST_CAUGHT_ADDRESS
+            last_caught_address
         )
 
         if pokemon is READ_FAILED:
@@ -919,7 +970,7 @@ class AzaharReader:
         None devuelto sin lanzar nada.
         """
 
-        for address in get_wild_rival_addresses(self.process_name):
+        for address in (self._field("wild_rival_addresses") or ()):
 
             try:
                 data = self.memory.read(address, SLOT_DATA_SIZE)
@@ -964,8 +1015,13 @@ class AzaharReader:
         Devuelve el valor entero, o None si la lectura falló.
         """
 
+        total_caught_address = self._field("total_caught_address")
+
+        if total_caught_address is None:
+            return None
+
         data = self.memory.read(
-            get_total_caught_address(self.process_name),
+            total_caught_address,
             4
         )
 
@@ -1000,21 +1056,25 @@ class AzaharReader:
         # (confirmado -- ver get_current_zone_id_address() en
         # pointers.py). Se elige segun self.process_name, mismo
         # criterio que ya usa read_party_order()/read_box().
-        zone_address = get_current_zone_id_address(
-            self.process_name
-        )
+        zone_address = self._field("current_zone_id_address")
+
+        if zone_address is None:
+            return None
+
+        # Bloque 15: el ancho sale del perfil (ORAS: 1 byte; X/Y: u16).
+        width = self._field("current_zone_id_width") or 1
 
         data = self.memory.read(
             zone_address,
-            1
+            width
         )
 
         # Ídem read_total_caught_count()/read_party_order(): data
         # puede ser None, no solo tener la longitud equivocada.
-        if data is None or len(data) != 1:
+        if data is None or len(data) != width:
             return None
 
-        return data[0]
+        return int.from_bytes(data, "little")
 
     def read_has_pokeballs(self):
         """
@@ -1039,9 +1099,15 @@ class AzaharReader:
         conexión).
         """
 
-        pocket_start = get_items_pocket_start_address(self.process_name)
+        pocket_start = self._field("items_pocket_start_address")
+        slot_count = self._field("items_pocket_slot_count")
+        pokeball_ids = self._field("pokeball_item_ids")
+
+        if pocket_start is None or slot_count is None or pokeball_ids is None:
+            return None
+
         slot_size = 4
-        size = ITEMS_POCKET_SLOT_COUNT * slot_size
+        size = slot_count * slot_size
 
         data = self.memory.read(pocket_start, size)
 
@@ -1053,7 +1119,7 @@ class AzaharReader:
                 "<HH", data[offset:offset + slot_size]
             )
 
-            if item_id in POKEBALL_ITEM_IDS and quantity > 0:
+            if item_id in pokeball_ids and quantity > 0:
                 return True
 
         return False
@@ -1074,23 +1140,30 @@ class AzaharReader:
         una lectura dudosa; el llamador decide qué hacer con `None`.
         """
 
-        address = get_trainer_card_address(self.process_name)
+        address = self._field("trainer_card_address")
+        read_size = self._field("trainer_card_read_size")
+        id_offset = self._field("trainer_card_id_offset")
+        name_offset = self._field("trainer_card_name_offset")
+        name_bytes = self._field("trainer_card_name_bytes")
+
+        if None in (address, read_size, id_offset, name_offset, name_bytes):
+            return None
 
         try:
-            data = self.memory.read(address, TRAINER_CARD_READ_SIZE)
+            data = self.memory.read(address, read_size)
         except OSError:
             return None
 
-        if data is None or len(data) != TRAINER_CARD_READ_SIZE:
+        if data is None or len(data) != read_size:
             return None
 
         tid, sid = struct.unpack_from(
-            "<HH", data, TRAINER_CARD_ID_OFFSET
+            "<HH", data, id_offset
         )
 
         raw_name = data[
-            TRAINER_CARD_NAME_OFFSET:
-            TRAINER_CARD_NAME_OFFSET + TRAINER_CARD_NAME_BYTES
+            name_offset:
+            name_offset + name_bytes
         ]
 
         try:
@@ -1168,14 +1241,17 @@ class AzaharReader:
         incompleta.
         """
 
-        box_base_address = get_box_address(
-            self.process_name,
-            box_index,
-        )
+        box_base_address = self._box_address(box_index)
+        geometry = self._box_geometry()
+
+        if box_base_address is None or geometry is None:
+            return None
+
+        _base, box_slot_stride, box_slot_count = geometry
 
         window_size = (
-            BOX_SLOT_COUNT
-            * BOX_SLOT_STRIDE
+            box_slot_count
+            * box_slot_stride
         )
 
         # Bug real (03/09/2026, confirmado con traceback real del
@@ -1234,17 +1310,21 @@ class AzaharReader:
         inválido.
         """
 
-        if not (1 <= slot <= BOX_SLOT_COUNT):
+        geometry = self._box_geometry()
+
+        if geometry is None:
             return None
 
-        box_base_address = get_box_address(
-            self.process_name,
-            box_index,
-        )
+        _base, box_slot_stride, box_slot_count = geometry
+
+        if not (1 <= slot <= box_slot_count):
+            return None
+
+        box_base_address = self._box_address(box_index)
 
         slot_address = (
             box_base_address
-            + (slot - 1) * BOX_SLOT_STRIDE
+            + (slot - 1) * box_slot_stride
         )
 
         try:
@@ -1300,14 +1380,18 @@ class AzaharReader:
         por completo.
         """
 
-        box_base_address = get_box_address(
-            self.process_name,
-            start_box_index,
-        )
+        box_base_address = self._box_address(start_box_index)
+        geometry = self._box_geometry()
+
+        if box_base_address is None or geometry is None:
+            return []
+
+        _base, box_slot_stride, box_slot_count = geometry
+        box_block_size = box_slot_count * box_slot_stride
 
         window_size = (
             box_count
-            * BOX_BLOCK_SIZE
+            * box_block_size
         )
 
         try:
@@ -1333,11 +1417,11 @@ class AzaharReader:
 
         for box_offset in range(box_count):
 
-            box_start = box_offset * BOX_BLOCK_SIZE
+            box_start = box_offset * box_block_size
 
             box_chunk = data[
                 box_start:
-                box_start + BOX_BLOCK_SIZE
+                box_start + box_block_size
             ]
 
             occupied.extend(
@@ -1366,11 +1450,18 @@ class AzaharReader:
 
         occupied = []
 
-        for slot_index in range(BOX_SLOT_COUNT):
+        geometry = self._box_geometry()
+
+        if geometry is None:
+            return occupied
+
+        _base, box_slot_stride, box_slot_count = geometry
+
+        for slot_index in range(box_slot_count):
 
             start = (
                 slot_index
-                * BOX_SLOT_STRIDE
+                * box_slot_stride
             )
 
             chunk = data[

@@ -1,9 +1,28 @@
 import struct
 
-from app.memory.pointers import (
-    SLOT_DATA_SIZE,
-    BLOCK_SIZE,
-)
+# ============================================================
+# ESTRUCTURA PK6
+# ============================================================
+#
+# Bloque 11 (ruta multijuego, 03/10/2026): estas constantes son
+# propiedades del FORMATO del Pokémon, no de dónde está en memoria,
+# así que viven con el decoder (antes estaban en pointers.py, lo que
+# hacía que structures.py importara un módulo de direcciones de
+# ORAS). pointers.py las vuelve a exportar con los mismos nombres
+# para no romper probes ni imports existentes.
+
+# Tamaño de la estructura principal del Pokémon.
+SLOT_DATA_SIZE = 232
+
+# Tamaño de cada bloque utilizado durante el descifrado.
+BLOCK_SIZE = 56
+
+# Offset de los datos adicionales (stats calculados de la party)
+# respecto a la estructura.
+STAT_DATA_OFFSET = 112
+
+# Cantidad de bytes de datos adicionales que se leen.
+STAT_DATA_SIZE = 22
 
 
 def crypt(data, seed, i):
