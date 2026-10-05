@@ -48,7 +48,7 @@ body {
 
     border-radius: 50%;
 
-    background-size: cover;
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
 
@@ -71,16 +71,14 @@ body {
         grayscale(1) brightness(1.8) contrast(0.85);
 }
 
-/* Obtenida: sin aro ni fondo, solo la imagen
-   con un resplandor tipo "iluminada" alrededor
-   (glow blanco pegado a la forma + glow calido
-   mas difuso hacia afuera). */
+/* Obtenida: solo la imagen tal cual viene, sin resplandor
+   (se quito el sombreado blanco, 05/10/2026). */
 .badge.obtained {
     border: none;
 
     opacity: 1;
 
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 2px rgba(209, 209, 209, 0.55)) drop-shadow(0 0 2px rgba(185, 185, 185, 0.3));
+    filter: none;
 }
 
 /* =========================================

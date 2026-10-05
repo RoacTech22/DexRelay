@@ -13,6 +13,16 @@ const badgesElement =
    bug de conexiones en el Team Overlay: menos
    trabajo por ciclo, nada que "parpadee"). */
 
+/* Set de sprites (Bloque 15): "" = Hoenn (sprites/N.png), "kalos" =
+   sprites/kalos/N.png. Lo informa /api/badges segun el juego conectado. */
+let currentSpriteSet = "";
+
+function spriteUrl(badgeNumber) {
+    return currentSpriteSet
+        ? `sprites/${currentSpriteSet}/${badgeNumber}.png`
+        : `sprites/${badgeNumber}.png`;
+}
+
 let previousBadges = new Array(BADGE_COUNT).fill(null);
 
 let loadInProgress = false;
@@ -40,7 +50,7 @@ function createSlots() {
         badge.id = `badge-${badgeNumber}`;
 
         badge.style.backgroundImage =
-            `url("sprites/${badgeNumber}.png")`;
+            `url("${spriteUrl(badgeNumber)}")`;
 
         badgesElement.appendChild(badge);
     }
@@ -98,6 +108,32 @@ async function loadBadges() {
 ========================================= */
 
 function renderBadges(data) {
+
+    const spriteSet =
+        typeof data.sprite_set === "string"
+            ? data.sprite_set
+            : "";
+
+    if (spriteSet !== currentSpriteSet) {
+
+        currentSpriteSet = spriteSet;
+
+        for (
+            let index = 1;
+            index <= BADGE_COUNT;
+            index++
+        ) {
+            const element =
+                document.getElementById(
+                    `badge-${index}`
+                );
+
+            if (element) {
+                element.style.backgroundImage =
+                    `url("${spriteUrl(index)}")`;
+            }
+        }
+    }
 
     const badges =
         Array.isArray(data.badges)
