@@ -345,7 +345,7 @@ class PokemonMixin:
         # los demás overrides de esta fase: solo se aplica con
         # hackroom.enabled prendido, y solo si este movimiento
         # puntual tiene algo documentado.
-        if self.app.config.get("hackroom", "enabled", default=False):
+        if self._hackroom_enabled():
 
             move_changes = self._hackroom_attack_changes_by_move.get(
                 move_id

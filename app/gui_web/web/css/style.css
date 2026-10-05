@@ -251,9 +251,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 460px;
+  max-width: 640px;
   width: 100%;
   margin: auto 0;
+}
+
+#btn-start {
+  max-width: 460px;
 }
 
 .logo-img {
@@ -302,104 +306,29 @@ body {
 
 .version-list {
   display: flex;
+  flex-wrap: nowrap;
   gap: 14px;
   width: 100%;
   margin-bottom: 22px;
 }
 
+/* Tarjetas cuadradas, solo arte (sin texto), en una sola línea. */
 .version-card {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
   border: 1px solid var(--border);
-  background-color: var(--bg-elevated);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  height: 190px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  text-align: center;
-  cursor: default;
-  transition: border-color 0.15s ease, transform 0.1s ease;
-}
-
-/* El fondo (Kyogre/Groudon) vive en un pseudo-elemento aparte en
-   vez de directo en `background-image` -- así se puede espejar
-   solo la imagen con `transform: scaleX(-1)` sin dar vuelta
-   también el texto/badge de la tarjeta. `--card-bg` lo setea
-   app.js por tarjeta (ver renderVersionList()).
-
-   Espejadas A PROPÓSITO las dos: Kyogre mira hacia la izquierda
-   en su archivo original y Groudon hacia la derecha -- con Kyogre
-   a la izquierda y Groudon a la derecha (orden de
-   GAME_VERSIONS en api.py), sin espejar quedarían mirando cada
-   uno para afuera. Si el orden de las tarjetas cambia alguna vez,
-   revisar esto de nuevo. */
-.version-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--card-bg);
+  background-color: var(--bg-elevated);
   background-size: cover;
   background-position: center;
-  transform: scaleX(-1);
-  z-index: 0;
-}
-
-.version-card>* {
-  position: relative;
-  z-index: 1;
-}
-
-.version-card:last-child::before {
-  background-position: top;
+  cursor: default;
+  transition: border-color 0.15s ease, transform 0.1s ease;
 }
 
 .version-card:hover {
   border-color: var(--border-strong);
   transform: translateY(-2px);
-}
-
-.version-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.version-card .version-label {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--text);
-  margin-bottom: 10px;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.7), 0 0 14px rgba(0, 0, 0, 0.4);
-}
-
-.version-card .version-badge {
-  display: inline-block;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--bg-elevated-2);
-  color: var(--text-secondary);
-}
-
-/* Azul zafiro / rojo rubí -- misma paleta del resto de la app
-   (mismo brillo/saturación que --accent), aplicado a la píldora
-   del badge (no al nombre del juego, que queda en blanco) para
-   que combine con el juego que representa. */
-.version-card[data-badge="AS"] .version-badge {
-  color: var(--sapphire);
-}
-
-.version-card[data-badge="OR"] .version-badge {
-  color: var(--ruby);
-}
-
-.version-card.selected .version-badge {
-  background: var(--accent);
-  color: #04181a;
 }
 
 .icon-play {
@@ -868,8 +797,10 @@ body {
 }
 
 .sidebar-logo-img {
-  width: 34px;
-  height: 34px;
+  /* Logo completo (marca + nombre dibujado en la propia imagen). */
+  width: 100%;
+  max-width: 180px;
+  height: auto;
 }
 
 .sidebar-title {
@@ -930,16 +861,25 @@ body {
   border-radius: 50%;
   flex: none;
   overflow: hidden;
-  border: 3px solid var(--border-strong);
+  /* Borde fino (1px) con un color parecido al aro de cada juego. */
+  border: 1px solid var(--border-strong);
   background: var(--bg-elevated-2);
 }
 
-.sidebar-trainer.is-omega-ruby .sidebar-trainer-avatar-wrap {
-  border-color: var(--ruby);
+.sidebar-trainer.is-alpha-sapphire .sidebar-trainer-avatar-wrap {
+  border-color: #46cdff;
 }
 
-.sidebar-trainer.is-alpha-sapphire .sidebar-trainer-avatar-wrap {
-  border-color: var(--sapphire);
+.sidebar-trainer.is-omega-ruby .sidebar-trainer-avatar-wrap {
+  border-color: #ff783c;
+}
+
+.sidebar-trainer.is-pokemon-x .sidebar-trainer-avatar-wrap {
+  border-color: #7896ff;
+}
+
+.sidebar-trainer.is-pokemon-y .sidebar-trainer-avatar-wrap {
+  border-color: #ff508c;
 }
 
 .sidebar-trainer-avatar {
@@ -1141,8 +1081,12 @@ body {
 }
 
 .sidebar.collapsed .sidebar-logo-img {
+  /* Colapsado: solo se ve la marca (el extremo izquierdo del logo). */
   width: 28px;
   height: 28px;
+  max-width: none;
+  object-fit: cover;
+  object-position: left center;
 }
 
 .sidebar.collapsed .sidebar-trainer-avatar-wrap {

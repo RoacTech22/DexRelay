@@ -15,10 +15,7 @@ import time
 
 from app.core import paths
 from app.core.version import get_app_version as resolve_app_version
-from app.memory.pointers import (
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
-)
+from app.games.registry import all_profiles
 
 
 # La versión de la app YA NO se hardcodea acá -- se resuelve en
@@ -44,21 +41,20 @@ from app.memory.pointers import (
 # PNG de 2000x2000 sin transparencia real, ~1-1.6MB cada una,
 # demasiado pesadas para mandar como data URI en cada arranque de
 # la GUI sin necesidad).
+# Bloque 13 (ruta multijuego): la lista sale de los perfiles registrados
+# (app/games/), no de una tabla escrita aquí. Agregar un juego es
+# registrar su perfil; nada de la GUI depende de que sean exactamente dos.
 GAME_VERSIONS = [
     {
-        "label": "Alpha Sapphire",
-        "process_name": PROCESS_NAME_ALPHA_SAPPHIRE,
-        "badge": "AS",
-        "background": "bg_alpha_sapphire.jpg",
-        "avatar": "avatar_alpha_sapphire.jpg",
-    },
-    {
-        "label": "Omega Ruby",
-        "process_name": PROCESS_NAME_OMEGA_RUBY,
-        "badge": "OR",
-        "background": "bg_omega_ruby.jpg",
-        "avatar": "avatar_omega_ruby.jpg",
-    },
+        "label": profile.content.label or profile.display_name,
+        "process_name": profile.key,
+        "badge": profile.content.badge,
+        "background": profile.content.background_asset,
+        "avatar": profile.content.avatar_asset,
+        "card": profile.content.card_asset,
+        "experimental": profile.capabilities.experimental,
+    }
+    for profile in all_profiles()
 ]
 
 
@@ -110,9 +106,22 @@ class DashboardMixin:
 
         for game in GAME_VERSIONS:
             entry = dict(game)
-            entry["background"] = self._asset_data_uri(
-                "ui", game["background"], mime="image/jpeg"
+            entry["background"] = (
+                self._asset_data_uri(
+                    "ui", game["background"], mime="image/jpeg"
+                )
+                if game["background"]
+                else None
             )
+            entry["card"] = (
+                self._asset_data_uri(
+                    "ui", game["card"], mime="image/jpeg"
+                )
+                if game["card"]
+                else None
+            )
+            # La pantalla de inicio ya no usa el fondo apaisado.
+            entry["background"] = None
             versions.append(entry)
 
         return versions
@@ -127,8 +136,12 @@ class DashboardMixin:
         """
 
         return {
-            game["process_name"]: self._asset_data_uri(
-                "ui", game["avatar"], mime="image/jpeg"
+            game["process_name"]: (
+                self._asset_data_uri(
+                    "ui", game["avatar"], mime="image/jpeg"
+                )
+                if game["avatar"]
+                else None
             )
             for game in GAME_VERSIONS
         }
@@ -334,11 +347,18 @@ class DashboardMixin:
                 "Azahar no contestó a tiempo. Puede estar cargando; "
                 "si sigue igual, ciérralo y ábrelo de nuevo."
             )
+        elif state == reader.DIAG_UNSUPPORTED_GAME:
+            hint = (
+                f"Se detectó {result.get('game_name')}, pero DexRelay "
+                "todavía no es compatible con ese juego. Juegos "
+                f"compatibles: {self._supported_games_text()}."
+            )
         elif state == reader.DIAG_NO_GAME:
             hint = (
                 "Azahar responde, pero todavía no hay ningún juego "
-                "compatible en ejecución. Carga Pokémon Omega Ruby o "
-                "Alpha Sapphire y espera a estar dentro de la partida."
+                "compatible en ejecución. Carga uno de estos juegos "
+                f"({self._supported_games_text()}) y espera a estar "
+                "dentro de la partida."
             )
         elif state == reader.DIAG_ERROR:
             hint = (
@@ -353,6 +373,44 @@ class DashboardMixin:
             "hint": hint,
             "processes": result.get("processes"),
         }
+
+    def _badge_art_available(self):
+        profile = self.app.reader.profile
+
+        return profile is None or profile.capabilities.has_badge_art
+
+    def _leader_portraits(self):
+        """Retratos de líderes propios del juego ([] = usar los de Hoenn)."""
+
+        profile = self.app.reader.profile
+
+        if profile is None or not profile.content.leader_portrait_set:
+            return []
+
+        folder = profile.content.leader_portrait_set
+
+        return [
+            {"name": name, "file": f"{folder}/{index + 1}.png"}
+            for index, name in enumerate(profile.content.leader_names)
+        ]
+
+    def _badge_info(self):
+        """Set de sprites y nombres de medallas del juego conectado."""
+
+        profile = self.app.reader.profile
+
+        if profile is None:
+            return "", []
+
+        return (
+            profile.content.badge_sprite_set,
+            list(profile.content.badge_names),
+        )
+
+    @staticmethod
+    def _supported_games_text():
+        """Nombres de los juegos con perfil, para los textos de ayuda."""
+        return ", ".join(p.display_name for p in all_profiles())
 
     def get_dashboard_data(self):
         """
@@ -446,6 +504,15 @@ class DashboardMixin:
             },
             "team": state.team or [],
             "badges": badges,
+            # Bloque 15: sin arte de medallas del juego (X/Y por ahora),
+            # la GUI muestra "Medalla N" en vez de las de Hoenn.
+            "badge_art": self._badge_art_available(),
+            # Los retratos de líderes de la página Medallas son de Hoenn:
+            # se ocultan en los juegos sin datos de líderes.
+            "leaders_available": self._leaders_available(),
+            "leader_portraits": self._leader_portraits(),
+            "badge_sprite_set": self._badge_info()[0],
+            "badge_names": self._badge_info()[1],
             "graveyard_nicknames": graveyard_nicknames,
             "other_game_detected": other_game_label,
             # Bloque 5 (24/09/2026): partida cargada ({"tid", "sid",

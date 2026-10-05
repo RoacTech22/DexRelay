@@ -33,6 +33,27 @@ TRADE_METHOD_KEYS = {
 class HackroomMixin:
     """Mixin de `Api` (ver el docstring del módulo)."""
 
+    def _hackroom_available(self):
+        """
+        Bloque 13: el hackroom (Rising Ruby / Sinking Sapphire) solo
+        existe sobre ORAS. Con un juego conectado cuyo perfil no lo
+        declara, queda apagado aunque el interruptor esté activo.
+        Sin juego detectado todavía se mantiene lo de siempre.
+        """
+
+        reader = getattr(self.app, "reader", None)
+        profile = getattr(reader, "profile", None)
+
+        return profile is None or profile.capabilities.has_hackroom
+
+    def _hackroom_enabled(self):
+        """Interruptor de Configuración Y disponible en este juego."""
+
+        return bool(
+            self._hackroom_available()
+            and self.app.config.get("hackroom", "enabled", default=False)
+        )
+
     def _load_hackroom_attack_changes(self):
 
         changes_path = paths.path("data", "attack_changes_rrss.json")
@@ -115,7 +136,7 @@ class HackroomMixin:
         if "error" in details:
             return details
 
-        if not self.app.config.get("hackroom", "enabled", default=False):
+        if not self._hackroom_enabled():
             return details
 
         overrides = self._hackroom_evolution_overrides_by_species.get(
@@ -216,7 +237,7 @@ class HackroomMixin:
         apagado o esta especie no tiene cambio de stats.
         """
 
-        if not self.app.config.get("hackroom", "enabled", default=False):
+        if not self._hackroom_enabled():
             return None
 
         pokemon_changes = self._hackroom_pokemon_changes_by_species.get(
@@ -292,7 +313,7 @@ class HackroomMixin:
         if details is None:
             return details
 
-        if not self.app.config.get("hackroom", "enabled", default=False):
+        if not self._hackroom_enabled():
             return details
 
         pokemon_changes = self._hackroom_pokemon_changes_by_species.get(
@@ -390,7 +411,7 @@ class HackroomMixin:
         Configuración ahora surte efecto sin reiniciar DexRelay).
         """
 
-        if self.app.config.get("hackroom", "enabled", default=False):
+        if self._hackroom_enabled():
             return self.gym_leader_catalog_hackroom
 
         return self.gym_leader_catalog
@@ -398,7 +419,7 @@ class HackroomMixin:
     def _apply_hackroom_move_type(self, move_name, type_key):
         """Override de tipo del hackroom sobre un tipo ya conocido."""
 
-        if not self.app.config.get("hackroom", "enabled", default=False):
+        if not self._hackroom_enabled():
             return type_key
 
         move_id = self.move_description_catalog.get_id_by_name(

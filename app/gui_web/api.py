@@ -113,7 +113,10 @@ class Api(
         # tocar Application/HTTPServer, mismo patrón que ya se usó
         # con PokemonDetailResolver.
         self.species_catalog = SpeciesCatalog(bridge=bridge)
-        self.location_catalog = LocationCatalog(bridge=bridge)
+        self.location_catalog = LocationCatalog(
+            bridge=bridge,
+            profile_provider=lambda: self.app.reader.profile,
+        )
         self.playtime_service = PlaytimeService(bridge=bridge)
 
         # Pestaña Líderes del Nuzlocke (Fase B, roadmap 3.1/3.2) --

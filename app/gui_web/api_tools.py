@@ -38,8 +38,23 @@ class ToolsMixin:
 
         state = self.app.state
 
+        # Bloque 13: la escritura en la bolsa solo se ofrece si el
+        # perfil del juego conectado la tiene confirmada. Sin juego
+        # detectado todavía no se bloquea nada (la nota de "conecta
+        # Azahar" ya cubre ese caso).
+        profile = self.app.reader.profile
+        bag_writing = (
+            profile is None
+            or (
+                profile.capabilities.has_bag_writing
+                and profile.memory_map.medicine_pocket_start_address
+                is not None
+            )
+        )
+
         return {
             "connected": bool(state.azahar_connected),
+            "bagWritingAvailable": bool(bag_writing),
         }
 
     def add_rare_candy(self, cantidad):

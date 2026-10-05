@@ -18,6 +18,17 @@ from app.core import paths
 class LeadersMixin:
     """Mixin de `Api` (ver el docstring del módulo)."""
 
+    def _leaders_available(self):
+        """
+        Bloque 13: False si el juego conectado no tiene datos de
+        líderes confirmados (p. ej. X/Y hasta tener su contenido de
+        Kalos). Sin juego detectado todavía, se mantiene lo de siempre.
+        """
+
+        profile = self.app.reader.profile
+
+        return profile is None or profile.capabilities.has_leader_data
+
     def _gym_leaders_with_earned(self):
         """
         Los 8 líderes del catálogo (`GymLeaderCatalog.list_all()`)
@@ -33,6 +44,9 @@ class LeadersMixin:
         de equipo, Fase B 06/09/2026) -- un solo lugar calcula
         `earned`, nadie más lo recalcula por su cuenta.
         """
+
+        if not self._leaders_available():
+            return []
 
         badges = self.app.state.badges
 
@@ -116,7 +130,7 @@ class LeadersMixin:
 
             self._move_type_key_cache[move_id] = type_key
 
-        if self.app.config.get("hackroom", "enabled", default=False):
+        if self._hackroom_enabled():
             move_changes = self._hackroom_attack_changes_by_move.get(
                 move_id
             )

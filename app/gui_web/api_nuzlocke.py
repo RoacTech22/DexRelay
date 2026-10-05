@@ -105,6 +105,7 @@ class NuzlockeMixin:
             ),
             "stats": stats,
             "gymLeaders": gym_leaders,
+            "leadersAvailable": self._leaders_available(),
             "nextLeader": next_leader,
         }
 
