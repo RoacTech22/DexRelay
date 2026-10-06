@@ -1,0 +1,201 @@
+{
+  "nota": "ID de zona (u16 de memoria) -> ID de lugar del catálogo de Kalos (app/games/xy/locations.py). Recolectado en vivo con recolectar_zonas_xy.py; fuente 'captura' = verificado con el Met_Location de un Pokémon capturado en esa zona.",
+  "zonas": {
+    "38": {
+      "lugar": 90,
+      "nombre": "Pueblo Mosaico",
+      "fuente": "manual"
+    },
+    "45": {
+      "lugar": 44,
+      "nombre": "Pueblo Petroglifo",
+      "fuente": "manual"
+    },
+    "157": {
+      "lugar": 40,
+      "nombre": "Ciudad Relieve",
+      "fuente": "manual"
+    },
+    "172": {
+      "lugar": 58,
+      "nombre": "Ciudad Yantra",
+      "fuente": "manual"
+    },
+    "200": {
+      "lugar": 70,
+      "nombre": "Ciudad Romantis",
+      "fuente": "manual"
+    },
+    "259": {
+      "lugar": 12,
+      "nombre": "Ruta 2",
+      "fuente": "manual"
+    },
+    "260": {
+      "lugar": 16,
+      "nombre": "Ruta 3",
+      "fuente": "manual"
+    },
+    "261": {
+      "lugar": 20,
+      "nombre": "Ruta 4",
+      "fuente": "manual"
+    },
+    "262": {
+      "lugar": 28,
+      "nombre": "Ruta 5",
+      "fuente": "manual"
+    },
+    "263": {
+      "lugar": 34,
+      "nombre": "Ruta 6",
+      "fuente": "manual"
+    },
+    "264": {
+      "lugar": 38,
+      "nombre": "Ruta 7",
+      "fuente": "manual"
+    },
+    "266": {
+      "lugar": 42,
+      "nombre": "Ruta 8",
+      "fuente": "manual"
+    },
+    "267": {
+      "lugar": 46,
+      "nombre": "Ruta 9",
+      "fuente": "manual"
+    },
+    "268": {
+      "lugar": 50,
+      "nombre": "Ruta 10",
+      "fuente": "captura"
+    },
+    "269": {
+      "lugar": 54,
+      "nombre": "Ruta 11",
+      "fuente": "captura"
+    },
+    "270": {
+      "lugar": 62,
+      "nombre": "Ruta 12",
+      "fuente": "manual"
+    },
+    "272": {
+      "lugar": 66,
+      "nombre": "Ruta 13",
+      "fuente": "captura"
+    },
+    "273": {
+      "lugar": 68,
+      "nombre": "Ruta 14",
+      "fuente": "manual"
+    },
+    "275": {
+      "lugar": 74,
+      "nombre": "Ruta 15",
+      "fuente": "manual"
+    },
+    "276": {
+      "lugar": 78,
+      "nombre": "Ruta 16",
+      "fuente": "manual"
+    },
+    "278": {
+      "lugar": 84,
+      "nombre": "Ruta 17",
+      "fuente": "manual"
+    },
+    "279": {
+      "lugar": 88,
+      "nombre": "Ruta 18",
+      "fuente": "manual"
+    },
+    "281": {
+      "lugar": 92,
+      "nombre": "Ruta 19",
+      "fuente": "manual"
+    },
+    "282": {
+      "lugar": 96,
+      "nombre": "Ruta 20",
+      "fuente": "manual"
+    },
+    "283": {
+      "lugar": 100,
+      "nombre": "Ruta 21",
+      "fuente": "manual"
+    },
+    "285": {
+      "lugar": 102,
+      "nombre": "Ruta 22",
+      "fuente": "manual"
+    },
+    "286": {
+      "lugar": 14,
+      "nombre": "Bosque de Novarte",
+      "fuente": "manual"
+    },
+    "302": {
+      "lugar": 36,
+      "nombre": "Palacio Cénit",
+      "fuente": "manual"
+    },
+    "303": {
+      "lugar": 132,
+      "nombre": "Cueva Brillante",
+      "fuente": "manual"
+    },
+    "305": {
+      "lugar": 56,
+      "nombre": "Cueva Reflejos",
+      "fuente": "captura"
+    },
+    "314": {
+      "lugar": 82,
+      "nombre": "Gruta Helada",
+      "fuente": "manual"
+    },
+    "318": {
+      "lugar": 98,
+      "nombre": "Villa Pokémon",
+      "fuente": "manual"
+    },
+    "324": {
+      "lugar": 104,
+      "nombre": "Calle Victoria",
+      "fuente": "manual"
+    },
+    "326": {
+      "lugar": 104,
+      "nombre": "Calle Victoria",
+      "fuente": "manual"
+    },
+    "328": {
+      "lugar": 104,
+      "nombre": "Calle Victoria",
+      "fuente": "manual"
+    },
+    "334": {
+      "lugar": 134,
+      "nombre": "Gruta Tierraunida",
+      "fuente": "manual"
+    },
+    "343": {
+      "lugar": 140,
+      "nombre": "Cueva Desenlace",
+      "fuente": "manual"
+    },
+    "349": {
+      "lugar": 142,
+      "nombre": "Hotel Desolación",
+      "fuente": "manual"
+    },
+    "357": {
+      "lugar": 112,
+      "nombre": "Bahía Azul",
+      "fuente": "manual"
+    }
+  },
+  "no_aplica": []
+}
