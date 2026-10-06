@@ -17,9 +17,10 @@ Estado de cada dirección:
 - Sin investigar (None): buffer de capturas, bolsa completa,
   bolsillo de Medicina.
 
-El contenido de Kalos (ubicaciones, zonas, líderes, arte) llega cuando
-se confirmen estas direcciones (decisión D3), así que esas funciones
-quedan apagadas en las capacidades.
+El contenido de Kalos llega por bloques de la guía de paridad: arte de
+medallas, catálogo de ubicaciones (P1) y nombres de zona / detección de
+"perdido" (P2, solo zonas ya recolectadas) están activos; líderes sigue
+apagado en las capacidades.
 """
 
 from __future__ import annotations
@@ -28,9 +29,18 @@ from app.games.base import (
     GameCapabilities,
     GameContent,
     GameProfile,
+    LocationSpec,
     MemoryMap,
 )
+from app.games.xy.locations import (
+    EXCLUDED_LOCATION_IDS,
+    KALOS_ID_MAX,
+    KALOS_ID_MIN,
+    STORY_ORDER_IDS,
+)
 from app.memory.structures import Pokemon6
+from app.services.kalos_locations_es import translate_location_name
+from app.services.kalos_zone_names import resolve_zone_name
 
 _LAST_CAUGHT_ADDRESS = 0x08805614
 _COMBAT_POINTER_ADDRESS = 0x081FB304
@@ -98,12 +108,24 @@ _KALOS_LEADER_NAMES = (
     "Edel",
 )
 
+# P1 (05/10/2026): X e Y devuelven la misma lista de PKHeX (volcado real),
+# así que comparten spec y caché cruda.
+_KALOS_LOCATIONS = LocationSpec(
+    id_min=KALOS_ID_MIN,
+    id_max=KALOS_ID_MAX,
+    excluded_ids=EXCLUDED_LOCATION_IDS,
+    story_order_ids=STORY_ORDER_IDS,
+    translate=translate_location_name,
+    bridge_game="X",
+    cache_file="location_cache_xy.json",
+)
+
 _XY_CAPABILITIES = GameCapabilities(
     generation=6,
     box_count=7,
     experimental=True,
-    has_location_catalog=False,
-    has_zone_names=False,
+    has_location_catalog=True,
+    has_zone_names=True,
     has_leader_data=False,
     has_badge_art=True,
     has_bag_writing=False,
@@ -130,6 +152,8 @@ POKEMON_X = GameProfile(
         badge_names=_KALOS_BADGE_NAMES,
         leader_portrait_set="kalos",
         leader_names=_KALOS_LEADER_NAMES,
+        locations=_KALOS_LOCATIONS,
+        zone_name_resolver=resolve_zone_name,
     ),
 )
 
@@ -152,5 +176,7 @@ POKEMON_Y = GameProfile(
         badge_names=_KALOS_BADGE_NAMES,
         leader_portrait_set="kalos",
         leader_names=_KALOS_LEADER_NAMES,
+        locations=_KALOS_LOCATIONS,
+        zone_name_resolver=resolve_zone_name,
     ),
 )

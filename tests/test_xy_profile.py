@@ -14,6 +14,7 @@ from app.games.oras.profile import ALPHA_SAPPHIRE
 from app.games.registry import get_profile
 from app.games.xy.profile import POKEMON_X, POKEMON_Y
 from app.services.combat_service import LECTURA_DESCARTADA, CombatService
+from app.services.kalos_zone_names import resolve_zone_name
 from tests.test_reader_profile import _reader, _trainer_card
 
 
@@ -184,15 +185,16 @@ def test_lectura_inconsistente_se_descarta_tambien_en_xy():
     assert service.read() is LECTURA_DESCARTADA
 
 
-def test_xy_con_arte_de_medallas_pero_sin_resto_del_contenido_de_kalos():
+def test_xy_con_arte_catalogo_y_zonas_pero_sin_resto_del_contenido_de_kalos():
     caps = POKEMON_X.capabilities
 
     assert caps.has_badge_art is True
-    assert caps.has_location_catalog is False
-    assert caps.has_zone_names is False
+    assert caps.has_location_catalog is True
+    assert caps.has_zone_names is True
     assert caps.has_leader_data is False
     assert caps.has_bag_writing is False
     assert caps.has_hackroom is False
-    assert POKEMON_X.content.locations is None
-    assert POKEMON_X.content.zone_name_resolver is None
+    assert POKEMON_X.content.locations is not None
+    assert POKEMON_X.content.zone_name_resolver is resolve_zone_name
+    assert POKEMON_Y.content.zone_name_resolver is resolve_zone_name
     assert ALPHA_SAPPHIRE.capabilities.has_badge_art is True
