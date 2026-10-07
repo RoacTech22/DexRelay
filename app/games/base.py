@@ -144,6 +144,49 @@ class LocationSpec:
 
 
 @dataclass(frozen=True)
+class SpecialRules:
+    """
+    Señales de las reglas especiales del Nuzlocke que dependen del JUEGO
+    (P3, paridad X/Y). Lo que es de PKHeX o del idioma ("Egg"/"Huevo",
+    "a Link Trade", "Entregado por") no vive aquí: es igual en todos los
+    juegos de Gen 6.
+
+    Defaults conservadores = apagado: un juego sin señal confirmada NO
+    detecta nada por aproximación (regla 2 de la guía de paridad).
+    """
+
+    # IDs de lugar de encuentro (Met_Location de PKHeX) donde se revive un
+    # fósil. ORAS: Devon Corp (Ciudad Férrica) = 190, donde NO hay pasto
+    # salvaje, así que el lugar solo basta. Kalos: Pueblo Petroglifo (44),
+    # que SÍ tiene pesca salvaje (confirmado en vivo 06/10/2026: un
+    # Dragalge pescado y un Tyrunt revivido traen el mismo lugar 44), por
+    # eso allí el lugar solo NO basta y se combina con `fossil_item_ids`.
+    fossil_location_ids: frozenset[int] = frozenset()
+
+    # IDs de los objetos fósil de la bolsa (bolsillo de Objetos). Si no está
+    # vacío, un Pokémon nuevo cuenta como fósil solo si su lugar está en
+    # `fossil_location_ids` Y la cantidad de fósiles de la bolsa bajó en
+    # los últimos segundos (cada baja se usa una sola vez). No depende de
+    # la especie, así que sirve en randomlocke. Vacío = basta el lugar
+    # (ORAS, comportamiento histórico).
+    fossil_item_ids: frozenset[int] = frozenset()
+
+    # Si no está vacío, los fósiles se registran bajo este pseudo-lugar
+    # ("Fósil", y "Fósil (apodo)" si ya está tomado) en vez del lugar real.
+    # Necesario cuando el lugar del fósil también es una ruta con capturas
+    # salvajes (Pueblo Petroglifo): si no, el fósil ocuparía la fila de la
+    # ruta. Vacío = se usa el lugar real (ORAS, comportamiento histórico).
+    fossil_pseudo_location: str = ""
+
+    # Si es True, las filas especiales automáticas que usan un pseudo-lugar
+    # (fósil "Fósil", intercambio "Intercambiado") se guardan con un ancla
+    # (`anchorLocation`) al lugar donde se obtuvieron, para que la tabla las
+    # ubique justo debajo de esa ruta en vez de al final de la lista. Kalos:
+    # sí (06/10/2026, pedido de Ronald). ORAS: no, conserva su orden actual.
+    anchor_specials_to_place: bool = False
+
+
+@dataclass(frozen=True)
 class GameContent:
     """
     Datos del juego que NO son memoria: cómo se llaman sus archivos
@@ -183,6 +226,9 @@ class GameContent:
     locations: LocationSpec | None = None
     # id de zona -> nombre. None = sin tabla confirmada.
     zone_name_resolver: Callable[[int | None], str | None] | None = None
+
+    # Reglas especiales del Nuzlocke que dependen del juego (P3).
+    special_rules: SpecialRules = SpecialRules()
 
 
 @dataclass(frozen=True)

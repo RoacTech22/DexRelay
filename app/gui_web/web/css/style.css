@@ -4347,6 +4347,19 @@ body {
   color: var(--danger);
 }
 
+/* Se fue por intercambio (06/10/2026): ámbar, distinto del rojo de
+   "Muerto" y del gris de "Perdido". */
+.nz-status-intercambiado {
+  background: rgba(245, 158, 11, 0.14);
+  color: var(--warning);
+}
+
+.nz-row-traded .nz-row-species,
+.nz-row-traded td:nth-child(4) {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
 .nz-status-sin_intentar {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-dim);

@@ -68,7 +68,9 @@ class Application:
         self._nuzlocke_game = process_name
 
         self.nuzlocke_service = NuzlockeService(
-            NuzlockeStorage.for_game(process_name)
+            NuzlockeStorage.for_game(process_name),
+            profile_provider=lambda: getattr(self.reader, "profile", None),
+            place_provider=lambda: self.runtime.current_place_name(),
         )
 
         # Editor del Team Overlay (GUI v2, página Overlays,

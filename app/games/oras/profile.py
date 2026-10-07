@@ -20,6 +20,7 @@ from app.games.base import (
     GameProfile,
     LocationSpec,
     MemoryMap,
+    SpecialRules,
 )
 from app.games.oras.locations import (
     EXCLUDED_LOCATION_IDS,
@@ -71,6 +72,16 @@ _ORAS_MEMORY_MAP = MemoryMap(
 
 # Omega Ruby y Alpha Sapphire comparten la lista de ubicaciones de Hoenn
 # (el bridge siempre la pide con GameVersion.AS) y su caché cruda.
+# Fósil (29/08/2026): en Ciudad Férrica (Devon Corp, lugar 190) no hay pasto
+# salvaje, así que lo que traiga ese Met_Location es un fósil revivido.
+# Antes era la constante DEVON_CORP_LOCATION_ID de nuzlocke_service.py.
+# El fósil ya queda bajo su lugar real (Devon Corp), así que solo el
+# intercambio necesita ancla al lugar donde se recibió (mismo orden que X/Y).
+_HOENN_SPECIAL_RULES = SpecialRules(
+    fossil_location_ids=frozenset({190}),
+    anchor_specials_to_place=True,
+)
+
 _HOENN_BADGE_NAMES = (
     "Roca",
     "Cascada",
@@ -113,6 +124,7 @@ ALPHA_SAPPHIRE = GameProfile(
         badge_names=_HOENN_BADGE_NAMES,
         locations=_HOENN_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        special_rules=_HOENN_SPECIAL_RULES,
     ),
 )
 
@@ -134,5 +146,6 @@ OMEGA_RUBY = GameProfile(
         badge_names=_HOENN_BADGE_NAMES,
         locations=_HOENN_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        special_rules=_HOENN_SPECIAL_RULES,
     ),
 )

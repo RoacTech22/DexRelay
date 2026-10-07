@@ -1124,6 +1124,54 @@ class AzaharReader:
 
         return False
 
+    def read_fossil_item_count(self):
+        """
+        P3 (paridad X/Y, 06/10/2026): cuántos fósiles hay en total en
+        el bolsillo de Objetos (suma de las cantidades de los objetos
+        de `special_rules.fossil_item_ids` del perfil). El servicio
+        del Nuzlocke detecta un fósil revivido cuando esta cantidad
+        baja y poco después aparece un Pokémon nuevo del lugar del
+        laboratorio. Solo lectura, una UDP para los 400 casilleros.
+
+        None si el juego no usa esta señal (ORAS), si falta el
+        bolsillo en el perfil o si la lectura falló (nunca se asume 0
+        ante una lectura fallida: una "baja" falsa marcaría fósil a
+        la siguiente captura).
+        """
+
+        profile = getattr(self, "profile", None)
+
+        if profile is None:
+            return None
+
+        fossil_ids = profile.content.special_rules.fossil_item_ids
+
+        if not fossil_ids:
+            return None
+
+        pocket_start = self._field("items_pocket_start_address")
+        slot_count = self._field("items_pocket_slot_count")
+
+        if pocket_start is None or slot_count is None:
+            return None
+
+        size = slot_count * 4
+
+        data = self.memory.read(pocket_start, size)
+
+        if data is None or len(data) != size:
+            return None
+
+        total = 0
+
+        for offset in range(0, size, 4):
+            item_id, quantity = struct.unpack("<HH", data[offset:offset + 4])
+
+            if item_id in fossil_ids:
+                total += quantity
+
+        return total
+
     def read_trainer_identity(self):
         """
         Bloque 5 (guía siguiente versión, 24/09/2026): identifica QUÉ

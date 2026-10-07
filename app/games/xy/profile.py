@@ -31,6 +31,7 @@ from app.games.base import (
     GameProfile,
     LocationSpec,
     MemoryMap,
+    SpecialRules,
 )
 from app.games.xy.locations import (
     EXCLUDED_LOCATION_IDS,
@@ -41,6 +42,24 @@ from app.games.xy.locations import (
 from app.memory.structures import Pokemon6
 from app.services.kalos_locations_es import translate_location_name
 from app.services.kalos_zone_names import resolve_zone_name
+
+# Reglas especiales del Nuzlocke en Kalos (P3, 06/10/2026). Fósil: el
+# Laboratorio de Fósiles está en Pueblo Petroglifo (lugar 44, que también
+# tiene pesca salvaje), así que el lugar solo no basta, y la especie
+# tampoco (randomlocke). Medido en vivo en Y con tres casos: al revivir un
+# fósil la cantidad de ese objeto baja 1 unos 13-15 s ANTES de que el
+# Pokémon aparezca (Fósil Mandíbula 710 -> Tyrunt; Fósil Garra 100 ->
+# Anorith), con lugar 44 y nivel de encuentro 20; una captura pescada solo
+# baja Poké Balls (Ultra Ball 2). Los IDs de fósil salen de la tabla de
+# objetos de PKHeX (data/item_cache.json): 99-105 (Raíz, Garra, Hélix, Domo,
+# Ámbar Viejo, Coraza, Cráneo), 572 Tapa, 573 Pluma, 710 Mandíbula, 711
+# Aleta. Confirmados en vivo: 100 y 710; el resto, por nombre en la tabla.
+_KALOS_SPECIAL_RULES = SpecialRules(
+    fossil_location_ids=frozenset({44}),
+    fossil_item_ids=frozenset({99, 100, 101, 102, 103, 104, 105, 572, 573, 710, 711}),
+    fossil_pseudo_location="Fósil",
+    anchor_specials_to_place=True,
+)
 
 _LAST_CAUGHT_ADDRESS = 0x08805614
 _COMBAT_POINTER_ADDRESS = 0x081FB304
@@ -154,6 +173,7 @@ POKEMON_X = GameProfile(
         leader_names=_KALOS_LEADER_NAMES,
         locations=_KALOS_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        special_rules=_KALOS_SPECIAL_RULES,
     ),
 )
 
@@ -178,5 +198,6 @@ POKEMON_Y = GameProfile(
         leader_names=_KALOS_LEADER_NAMES,
         locations=_KALOS_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        special_rules=_KALOS_SPECIAL_RULES,
     ),
 )

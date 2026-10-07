@@ -10,6 +10,7 @@ import struct
 import pytest
 
 from app.games import registry
+from app.games.registry import get_profile
 from app.games.base import GameCapabilities, GameContent, GameProfile, MemoryMap
 from app.games.oras.profile import ALPHA_SAPPHIRE
 from app.memory.structures import Pokemon6
@@ -176,3 +177,36 @@ def test_diagnostico_proceso_desconocido_sigue_siendo_no_game():
 
     assert result["state"] == AzaharReader.DIAG_NO_GAME
     assert result["processes"] == ["otra-cosa"]
+
+
+def _bolsillo_de(*slots, total=400):
+    data = bytearray(total * 4)
+    for i, (item_id, quantity) in enumerate(slots):
+        struct.pack_into("<HH", data, i * 4, item_id, quantity)
+    return bytes(data)
+
+
+def test_cantidad_de_fosiles_de_kalos_suma_solo_los_ids_de_fosil():
+    # P3: 710 Fósil Mandíbula y 100 Fósil Garra son fósiles; 2 es Ultra Ball.
+    address = get_profile("kujira-2").memory_map.items_pocket_start_address
+    reader = _reader(
+        "kujira-2",
+        {address: _bolsillo_de((2, 994), (710, 3), (4, 50), (100, 2))},
+    )
+
+    assert reader.read_fossil_item_count() == 5
+    assert reader.memory.reads == [(address, 400 * 4)]
+
+
+def test_cantidad_de_fosiles_es_cero_sin_fosiles_y_none_si_la_lectura_falla():
+    address = get_profile("kujira-1").memory_map.items_pocket_start_address
+
+    assert _reader("kujira-1", {address: _bolsillo_de((2, 994))}).read_fossil_item_count() == 0
+    assert _reader("kujira-1", {}).read_fossil_item_count() is None
+
+
+def test_oras_no_lee_la_bolsa_para_fosiles():
+    reader = _reader("sango-2", {})
+
+    assert reader.read_fossil_item_count() is None
+    assert reader.memory.reads == []

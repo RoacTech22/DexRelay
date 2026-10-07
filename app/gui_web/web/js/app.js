@@ -4624,14 +4624,30 @@
     }
   }
 
+  // Etiqueta visible del estado (06/10/2026, a pedido del usuario):
+  // un Pokémon que se fue por intercambio se muestra como
+  // "Intercambiado" (el dato histórico -- ruta y estado -- no cambia,
+  // igual que en el panel original); un especial muestra solo su
+  // origen ("Fósil", "Shiny", "Huevo"...), sin el prefijo "Especial/".
   function nuzlockeStatusLabel(entry) {
+    if (entry.tradedAway) {
+      return "Intercambiado";
+    }
     if (entry.status === "especial" && entry.origin) {
-      return "Especial/" + (NZ_ORIGIN_LABELS[entry.origin] || entry.origin);
+      return NZ_ORIGIN_LABELS[entry.origin] || entry.origin;
     }
     if (entry.extraCapture) {
       return "Captura Extra";
     }
     return NZ_STATUS_LABELS[entry.status] || entry.status || "—";
+  }
+
+  // Clase de color de la píldora: "Intercambiado" tiene la suya, distinta
+  // de "Muerto"/"Perdido", para que se lea de un vistazo.
+  function nuzlockeStatusClass(entry) {
+    return entry.tradedAway
+      ? "intercambiado"
+      : entry.status || "sin_intentar";
   }
 
   // Posición de orden para una fila de la tabla (05/09/2026):
@@ -4737,6 +4753,9 @@
   function buildEncounterRow(entry, displayIndex, options) {
     var row = document.createElement("tr");
 
+    // Pokémon que se fue por intercambio: nombre y especie tachados.
+    row.classList.toggle("nz-row-traded", !!entry.tradedAway);
+
     var searchKey = (
       (entry.location || "") + " " + (entry.species || "") + " " + (entry.nickname || "")
     ).toLowerCase();
@@ -4783,7 +4802,7 @@
       "</span></td>" +
       "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
       "<td>" + (level != null ? level : "—") + "</td>" +
-      '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
+      '<td><span class="nz-status-pill nz-status-' + nuzlockeStatusClass(entry) + '">' +
       escapeHtml(nuzlockeStatusLabel(entry)) +
       "</span></td>" +
       deleteCell;

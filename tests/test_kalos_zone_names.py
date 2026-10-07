@@ -110,6 +110,10 @@ class _FakeReader:
     def read_total_caught_count(self):
         return self.total_caught
 
+    def read_fossil_item_count(self):
+        # X/Y declaran objetos de fósil (P3); este test no los usa.
+        return None
+
     def read_wild_rival_species(self):
         return "Pidgey"
 
