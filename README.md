@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Tu compañero para Pokémon ORAS en Azahar</strong>
+  <strong>Tu compañero para Pokémon ORAS y X/Y en Azahar</strong>
 </p>
 
 <p align="center">
@@ -14,8 +14,8 @@
 
 <p align="center">
 
-  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.4.1-alpha">
-    <img src="https://img.shields.io/badge/Descargar-v0.4.1--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.5.0-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.5.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
   <a href="https://github.com/RoacTech22/DexRelay/issues">
@@ -28,7 +28,7 @@
 
 ## ¿Qué es DexRelay?
 
-**DexRelay** es una aplicación de escritorio para partidas de **Pokémon Omega Ruby y Alpha Sapphire (ORAS)** ejecutadas en **Azahar**.
+**DexRelay** es una aplicación de escritorio para partidas de **Pokémon Omega Ruby y Alpha Sapphire (ORAS)** y de **Pokémon X e Y** ejecutadas en **Azahar**.
 
 Lee los datos de la partida en tiempo real y los convierte en información útil para jugar, gestionar un Nuzlocke y transmitir tus partidas.
 
@@ -46,8 +46,8 @@ DexRelay integra en una sola aplicación:
 
 La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
 
-> **Estado actual:** v0.4.1-alpha  
-> Publicada el 3 de octubre de 2026.
+> **Estado actual:** v0.5.0-alpha  
+> Primera versión multijuego: ORAS y Pokémon X/Y.
 
 ---
 
@@ -113,7 +113,7 @@ La ficha de cada especie puede mostrar:
 
 ## Medallas y líderes de gimnasio
 
-Consulta el progreso de las 8 medallas de Hoenn y la información de los líderes.
+Consulta el progreso de las 8 medallas de Hoenn o de Kalos y la información de los líderes, el Alto Mando y el campeón de cada región.
 
 DexRelay muestra:
 
@@ -122,6 +122,8 @@ DexRelay muestra:
 - Ciudad.
 - Tipo de gimnasio.
 - Equipo del líder.
+- Alto Mando y campeón, con sus equipos.
+- Próximo líder y nivel máximo recomendado.
 - Información específica para Rising Ruby / Sinking Sapphire cuando el modo hackrom está activado.
 
 ---
@@ -224,8 +226,10 @@ Actualmente DexRelay soporta:
 
 - Pokémon Omega Ruby — actualización **1.4**.
 - Pokémon Alpha Sapphire — actualización **1.4**.
+- Pokémon X — actualización **1.5**.
+- Pokémon Y — actualización **1.5**.
 
-> Las direcciones de memoria utilizadas por DexRelay corresponden a estas versiones exactas del juego. El juego base sin la actualización 1.4 no está soportado.
+> Las direcciones de memoria utilizadas por DexRelay corresponden a estas versiones exactas del juego. Los juegos base sin la actualización indicada no están soportados.
 
 ## .NET
 
@@ -241,11 +245,11 @@ El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejec
 
 Descarga:
 
-**DexRelay v0.4.1-alpha**
+**DexRelay v0.5.0-alpha**
 
 Archivo:
 
-`DexRelay-v0.4.1-alpha-win-x64.zip`
+`DexRelay-v0.5.0-alpha-win-x64.zip`
 
 ## 2. Extraer
 
@@ -261,7 +265,7 @@ Abre:
 
 ## 4. Iniciar Azahar
 
-Abre Azahar y carga Pokémon Omega Ruby o Alpha Sapphire.
+Abre Azahar y carga Pokémon Omega Ruby, Alpha Sapphire, X o Y.
 
 DexRelay detectará automáticamente el juego compatible.
 
@@ -323,7 +327,7 @@ La excepción funcional es la página **Herramientas**, donde existe una operaci
 
 DexRelay incluye herramientas adicionales para la partida.
 
-Actualmente se puede agregar **Caramelo Raro** a la bolsa desde la página Herramientas.
+Actualmente se puede agregar **Caramelo Raro** a la bolsa desde la página Herramientas, en ORAS y en X/Y.
 
 La operación:
 
@@ -338,7 +342,7 @@ La operación:
 
 DexRelay puede volver a detectar Azahar si el emulador se cierra y vuelve a abrirse mientras DexRelay permanece abierto.
 
-También puede detectar automáticamente si se inicia el otro juego compatible entre Omega Ruby y Alpha Sapphire.
+También puede detectar automáticamente si se inicia otro de los juegos compatibles.
 
 ---
 
@@ -383,5 +387,5 @@ Consulta la información de licencia incluida en el repositorio antes de redistr
 <p align="center">
   <strong>DexRelay</strong>
   <br>
-  Tu compañero para Pokémon ORAS en Azahar.
+  Tu compañero para Pokémon ORAS y X/Y en Azahar.
 </p>
