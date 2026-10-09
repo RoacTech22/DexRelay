@@ -221,6 +221,10 @@ class GameContent:
     # usa el bloque de Hoenn que ya trae la GUI.
     leader_portrait_set: str = ""
     leader_names: tuple[str, ...] = ()
+    # Alto Mando y campeón (P4): nombres en orden 9-13; sus cuerpos
+    # completos están en <leader_portrait_set>/full/N.png y sus rostros
+    # en <leader_portrait_set>/N.png. Vacío = sin sección en Medallas.
+    league_names: tuple[str, ...] = ()
 
     # None = el juego no tiene catálogo de ubicaciones confirmado.
     locations: LocationSpec | None = None

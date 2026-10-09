@@ -185,13 +185,13 @@ def test_lectura_inconsistente_se_descarta_tambien_en_xy():
     assert service.read() is LECTURA_DESCARTADA
 
 
-def test_xy_con_arte_catalogo_y_zonas_pero_sin_resto_del_contenido_de_kalos():
+def test_xy_con_arte_catalogo_zonas_y_lideres_pero_sin_bolsa_ni_hackroom():
     caps = POKEMON_X.capabilities
 
     assert caps.has_badge_art is True
     assert caps.has_location_catalog is True
     assert caps.has_zone_names is True
-    assert caps.has_leader_data is False
+    assert caps.has_leader_data is True
     assert caps.has_bag_writing is False
     assert caps.has_hackroom is False
     assert POKEMON_X.content.locations is not None

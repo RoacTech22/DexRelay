@@ -82,6 +82,14 @@ _HOENN_SPECIAL_RULES = SpecialRules(
     anchor_specials_to_place=True,
 )
 
+_HOENN_LEAGUE_NAMES = (
+    "Sixto",
+    "Fátima",
+    "Nívea",
+    "Dracón",
+    "Máximo Peñas",
+)
+
 _HOENN_BADGE_NAMES = (
     "Roca",
     "Cascada",
@@ -124,6 +132,7 @@ ALPHA_SAPPHIRE = GameProfile(
         badge_names=_HOENN_BADGE_NAMES,
         locations=_HOENN_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        league_names=_HOENN_LEAGUE_NAMES,
         special_rules=_HOENN_SPECIAL_RULES,
     ),
 )
@@ -146,6 +155,7 @@ OMEGA_RUBY = GameProfile(
         badge_names=_HOENN_BADGE_NAMES,
         locations=_HOENN_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
+        league_names=_HOENN_LEAGUE_NAMES,
         special_rules=_HOENN_SPECIAL_RULES,
     ),
 )

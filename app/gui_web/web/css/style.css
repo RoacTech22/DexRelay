@@ -6332,3 +6332,65 @@ body {
   font-size: 12px;
   color: var(--text-dim);
 }
+
+/* P4 (07/10/2026): pestaña Bosses (Líderes + Alto Mando) y tarjeta del Alto Mando */
+.nz-bosses-section-title {
+  grid-column: 1 / -1;
+  margin: 12px 0 2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #8b93a7);
+}
+
+.nz-bosses-section-title:first-child {
+  margin-top: 0;
+}
+
+.nz-next-leader-faces {
+  gap: 8px;
+}
+
+/* Mismo tratamiento en recuadro que los Pokémon de la tarjeta
+   (.nz-next-leader-mon), con el rostro cuadrado. */
+.nz-next-leader-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--bg-elevated-2);
+  min-width: 46px;
+  flex: none;
+}
+
+.nz-next-leader-face img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.nz-next-leader-face span {
+  font-size: 11px;
+  color: var(--text-dim);
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nz-next-leader-face.champion {
+  box-shadow: inset 0 0 0 1px var(--warning, #f59e0b);
+}
+
+/* Sección Alto Mando de la página Medallas (P4): 5 en una fila, cuerpo completo */
+.medals-league-grid {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.medals-league-grid .medals-leader-card img {
+  max-height: 150px;
+}

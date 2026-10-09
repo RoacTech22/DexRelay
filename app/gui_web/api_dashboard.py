@@ -394,6 +394,25 @@ class DashboardMixin:
             for index, name in enumerate(profile.content.leader_names)
         ]
 
+    def _league_portraits(self):
+        """
+        Alto Mando y campeón para la sección de la página Medallas (P4):
+        cuerpos completos en <set>/full/N.png (N = 9-13). [] = sin sección.
+        """
+
+        profile = self.app.reader.profile
+
+        if profile is None or not profile.content.league_names:
+            return []
+
+        folder = profile.content.leader_portrait_set
+        prefix = f"{folder}/" if folder else ""
+
+        return [
+            {"name": name, "file": f"{prefix}full/{index + 9}.png"}
+            for index, name in enumerate(profile.content.league_names)
+        ]
+
     def _badge_info(self):
         """Set de sprites y nombres de medallas del juego conectado."""
 
@@ -511,6 +530,7 @@ class DashboardMixin:
             # se ocultan en los juegos sin datos de líderes.
             "leaders_available": self._leaders_available(),
             "leader_portraits": self._leader_portraits(),
+            "league_portraits": self._league_portraits(),
             "badge_sprite_set": self._badge_info()[0],
             "badge_names": self._badge_info()[1],
             "graveyard_nicknames": graveyard_nicknames,

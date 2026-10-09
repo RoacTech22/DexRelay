@@ -31,6 +31,7 @@ from __future__ import annotations
 from app.core import paths
 from app.services.ability_description import AbilityDescriptionCatalog
 from app.services.gym_leaders import GymLeaderCatalog
+from app.services.kalos_leaders import KALOS_LEADER_SPEC
 from app.services.item_catalog import ItemCatalog
 from app.services.location_catalog import LocationCatalog
 from app.services.move_data import MoveDataCatalog
@@ -148,6 +149,13 @@ class Api(
         self.gym_leader_catalog_hackroom = GymLeaderCatalog(
             data_path=paths.path("data", "gym_leaders_rrss.json"),
             bridge=self.modal_bridge,
+        )
+        # P4 (07/10/2026): líderes, Alto Mando y campeona de Kalos
+        # (X/Y). Mismo bridge compartido; se elige por perfil en
+        # _active_gym_leader_catalog().
+        self.gym_leader_catalog_kalos = GymLeaderCatalog(
+            bridge=self.modal_bridge,
+            spec=KALOS_LEADER_SPEC,
         )
 
         # Overrides de evolución del hackroom (09/09/2026, Fase E,

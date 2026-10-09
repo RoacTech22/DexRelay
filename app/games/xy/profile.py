@@ -105,6 +105,14 @@ _XY_MEMORY_MAP = MemoryMap(
 
 # Medallas de Kalos en orden de gimnasio (Viola, Cornelio, Corelia,
 # Amaro, Lem, Valeria, Astrid, Edel). Arte provisto por el usuario.
+_KALOS_LEAGUE_NAMES = (
+    "Malva",
+    "Narciso",
+    "Tileo",
+    "Drácena",
+    "Dianta",
+)
+
 _KALOS_BADGE_NAMES = (
     "Bicho",
     "Acantilado",
@@ -145,7 +153,7 @@ _XY_CAPABILITIES = GameCapabilities(
     experimental=True,
     has_location_catalog=True,
     has_zone_names=True,
-    has_leader_data=False,
+    has_leader_data=True,
     has_badge_art=True,
     has_bag_writing=False,
     has_hackroom=False,
@@ -171,6 +179,7 @@ POKEMON_X = GameProfile(
         badge_names=_KALOS_BADGE_NAMES,
         leader_portrait_set="kalos",
         leader_names=_KALOS_LEADER_NAMES,
+        league_names=_KALOS_LEAGUE_NAMES,
         locations=_KALOS_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
         special_rules=_KALOS_SPECIAL_RULES,
@@ -196,6 +205,7 @@ POKEMON_Y = GameProfile(
         badge_names=_KALOS_BADGE_NAMES,
         leader_portrait_set="kalos",
         leader_names=_KALOS_LEADER_NAMES,
+        league_names=_KALOS_LEAGUE_NAMES,
         locations=_KALOS_LOCATIONS,
         zone_name_resolver=resolve_zone_name,
         special_rules=_KALOS_SPECIAL_RULES,

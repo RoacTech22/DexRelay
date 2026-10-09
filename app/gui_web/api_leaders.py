@@ -59,8 +59,14 @@ class LeadersMixin:
 
         for leader in self._active_gym_leader_catalog().list_all():
             index = (leader.get("order") or 0) - 1
-            earned = 0 <= index < len(badge_flags) and bool(
-                badge_flags[index]
+
+            # P4: solo los líderes de gimnasio tienen medalla. El
+            # Alto Mando y el campeón no tienen señal de progreso
+            # confirmada, así que nunca figuran como obtenidos.
+            earned = (
+                leader.get("kind", "gym") == "gym"
+                and 0 <= index < len(badge_flags)
+                and bool(badge_flags[index])
             )
 
             # CORRECCIÓN (09/09/2026, a pedido del usuario: revisó
@@ -86,6 +92,55 @@ class LeadersMixin:
             gym_leaders.append({**leader, "team": team, "earned": earned})
 
         return gym_leaders
+
+    def _next_boss(self, gym_leaders):
+        """
+        Tarjeta "próximo líder" (P4): el primer líder de gimnasio sin
+        medalla; con las 8 obtenidas, pasa al Alto Mando
+        (`isLeague`), con el nivel máximo del Pokémon más fuerte del
+        primer miembro y los rostros de los 4 miembros + el campeón.
+        Sin datos de liga, None (como antes).
+        """
+
+        gyms = [
+            leader for leader in gym_leaders
+            if leader.get("kind", "gym") == "gym"
+        ]
+
+        pending = next(
+            (leader for leader in gyms if not leader["earned"]),
+            None,
+        )
+
+        if pending is not None or not gyms:
+            return pending
+
+        league = [
+            leader for leader in gym_leaders
+            if leader.get("kind", "gym") != "gym"
+        ]
+
+        if not league:
+            return None
+
+        first = league[0]
+
+        return {
+            "isLeague": True,
+            "order": first["order"],
+            "nameEs": "Alto Mando",
+            "name": "Elite Four",
+            "levelCap": first["levelCap"],
+            "members": [
+                {
+                    "order": member["order"],
+                    "nameEs": member.get("nameEs"),
+                    "kind": member.get("kind"),
+                    "portraitFile": member.get("portraitFile"),
+                }
+                for member in league
+            ],
+        }
 
     def _resolve_move_type_key(self, move_name):
         """

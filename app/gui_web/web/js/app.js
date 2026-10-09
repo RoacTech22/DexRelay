@@ -1397,6 +1397,7 @@
     badgeSpriteSet = data.badge_sprite_set || "";
     var leadersCard = document.getElementById("medals-leaders-card");
     leaderPortraits = data.leader_portraits || [];
+    leaguePortraits = data.league_portraits || [];
     if (leadersCard) {
       leadersCard.style.display =
         data.leaders_available === false && !leaderPortraits.length ? "none" : "";
@@ -3135,6 +3136,8 @@
   var leaderPortraits = [];
   var hoennLeadersHtml = null;
   var leaderPortraitsKey = "";
+  var leaguePortraitsKey = "";
+  var leaguePortraits = [];
 
   function badgeSpriteUrl(index) {
     return spriteBaseUrl + "/overlay/badges/sprites/" +
@@ -3236,6 +3239,31 @@
           leadersGrid.innerHTML = hoennLeadersHtml;
           gymLeaderImagesInitialized = false;
         }
+      }
+    }
+
+    // Alto Mando y campeón (P4): sección propia, cuerpos completos; se
+    // reconstruye solo cuando cambia el juego.
+    var leagueCard = document.getElementById("medals-league-card");
+    var leagueGrid = document.getElementById("medals-league-grid");
+    if (leagueCard && leagueGrid && baseUrl) {
+      var leagueKey = JSON.stringify(leaguePortraits);
+      if (leagueKey !== leaguePortraitsKey) {
+        leaguePortraitsKey = leagueKey;
+        leagueGrid.innerHTML = "";
+        leaguePortraits.forEach(function (member) {
+          var memberCard = document.createElement("div");
+          memberCard.className = "medals-leader-card";
+          var memberImg = document.createElement("img");
+          memberImg.src = baseUrl + "/sprites/gym_leaders/" + member.file;
+          memberImg.alt = member.name;
+          var memberName = document.createElement("span");
+          memberName.textContent = member.name;
+          memberCard.appendChild(memberImg);
+          memberCard.appendChild(memberName);
+          leagueGrid.appendChild(memberCard);
+        });
+        leagueCard.style.display = leaguePortraits.length ? "" : "none";
       }
     }
 
@@ -5090,6 +5118,41 @@
       return;
     }
 
+    if (nextLeader && nextLeader.isLeague) {
+      // P4: con las 8 medallas, la tarjeta pasa al Alto Mando: rostros
+      // de los 4 miembros y el campeón en vez de los Pokémon, y como
+      // Lvl Cap el Pokémon más fuerte del primer miembro.
+      if (btn) {
+        btn.hidden = false;
+      }
+      if (detailBtn) {
+        detailBtn.hidden = false;
+      }
+
+      var facesHtml = (nextLeader.members || []).map(function (member) {
+        var faceUrl = spriteBaseUrl + "/sprites/gym_leaders/" + member.portraitFile;
+        return (
+          '<div class="nz-next-leader-face' + (member.kind === "champion" ? " champion" : "") + '" title="' + escapeHtml(member.nameEs || "") + '">' +
+          '<img src="' + faceUrl + '" alt="' + escapeHtml(member.nameEs || "") + '" onerror="this.style.visibility=\'hidden\'" />' +
+          "<span>" + escapeHtml(member.nameEs || "") + "</span>" +
+          "</div>"
+        );
+      }).join("");
+
+      body.innerHTML =
+        '<div class="nz-next-leader-info">' +
+        '<span class="nz-next-leader-name">Alto Mando</span>' +
+        '<span class="nz-next-leader-badge">y campeón</span>' +
+        '<span class="nz-next-leader-location">Liga Pokémon</span>' +
+        "</div>" +
+        '<div class="nz-next-leader-team nz-next-leader-faces">' + facesHtml + "</div>" +
+        '<div class="nz-next-leader-cap">' +
+        '<span class="nz-next-leader-cap-value">Nv. ' + nextLeader.levelCap + "</span>" +
+        '<span class="nz-next-leader-cap-label">Lvl Cap</span>' +
+        "</div>";
+      return;
+    }
+
     if (!nextLeader) {
       // Las 8 medallas ya están obtenidas -- no queda "líder
       // siguiente" que mostrar, no es un error ni un dato faltante.
@@ -5110,7 +5173,7 @@
       detailBtn.hidden = false;
     }
 
-    var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + nextLeader.portraitIndex + ".png";
+    var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + (nextLeader.portraitFile || (nextLeader.portraitIndex + ".png"));
 
     var teamHtml = (nextLeader.team || []).map(function (mon) {
       var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
@@ -5156,11 +5219,35 @@
       return;
     }
 
-    (leaders || []).forEach(function (leader) {
+    // P4: pestaña "Bosses" con dos secciones, Líderes (con medalla) y
+    // Alto Mando (miembros + campeón, sin estado de progreso).
+    var gymLeaders = leaders.filter(function (leader) { return !leader.kind || leader.kind === "gym"; });
+    var leagueLeaders = leaders.filter(function (leader) { return leader.kind && leader.kind !== "gym"; });
+
+    function appendSectionTitle(text) {
+      var title = document.createElement("h3");
+      title.className = "nz-bosses-section-title";
+      title.textContent = text;
+      container.appendChild(title);
+    }
+
+    if (leagueLeaders.length) {
+      appendSectionTitle("Líderes");
+    }
+
+    gymLeaders.concat([null], leagueLeaders).forEach(function (leader) {
+      if (leader === null) {
+        if (leagueLeaders.length) {
+          appendSectionTitle("Alto Mando");
+        }
+        return;
+      }
+
+      var isGym = !leader.kind || leader.kind === "gym";
       var card = document.createElement("div");
       card.className = "nz-leader-card" + (leader.earned ? " earned" : "");
 
-      var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + leader.portraitIndex + ".png";
+      var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + (leader.portraitFile || (leader.portraitIndex + ".png"));
 
       var teamHtml = (leader.team || []).map(function (mon) {
         var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
@@ -5230,16 +5317,20 @@
 
       card.innerHTML =
         '<div class="nz-leader-header">' +
-        '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" />' +
+        '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" onerror="this.style.visibility=\'hidden\'" />' +
         '<div class="nz-leader-info">' +
         '<span class="nz-leader-name">' + escapeHtml(leader.nameEs || leader.name || "") + "</span>" +
-        '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>" +
+        (isGym
+          ? '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>"
+          : '<span class="nz-leader-badge">' + (leader.kind === "champion" ? "Campeón" : "Alto Mando") + "</span>") +
         '<span class="nz-leader-location">' + escapeHtml(leader.gymLocationEs || leader.gymLocation || "") + "</span>" +
         "</div>" +
         '<div class="nz-leader-header-actions">' +
-        '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
-        (leader.earned ? "Obtenida" : "Pendiente") +
-        "</span>" +
+        (isGym
+          ? '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
+            (leader.earned ? "Obtenida" : "Pendiente") +
+            "</span>"
+          : "") +
         // Botón de solo ícono + tooltip (06/09/2026, mismo
         // tratamiento que "Detalle de equipo" de la tarjeta de
         // líder siguiente en Seguimiento -- ver .dash-icon-btn/

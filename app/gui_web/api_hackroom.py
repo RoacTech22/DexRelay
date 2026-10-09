@@ -411,6 +411,14 @@ class HackroomMixin:
         Configuración ahora surte efecto sin reiniciar DexRelay).
         """
 
+        profile = getattr(self.app.reader, "profile", None)
+
+        if (
+            profile is not None
+            and profile.content.leader_portrait_set == "kalos"
+        ):
+            return self.gym_leader_catalog_kalos
+
         if self._hackroom_enabled():
             return self.gym_leader_catalog_hackroom
 
