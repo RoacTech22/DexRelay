@@ -98,6 +98,12 @@ _XY_MEMORY_MAP = MemoryMap(
     # +0xFF7 NO sirve: es la fase del combate (0 -> 128 -> 192), no un tipo.
     wild_battle_pointers=frozenset({0x08203EC8}),
     trainer_battle_pointers=frozenset({0x082059D8}),
+    # P5 (09/10/2026), medido en Pokémon Y con bolsa_xy.py: la Poción (id 17)
+    # bajó de 995 a 991 en 0x08C67ECC, y el bolsillo de Medicina son 64
+    # casilleros que terminan justo donde empiezan las Bayas (0x08C67FCC =
+    # 0x08C67ECC + 64 * 4). El bolsillo de Objetos arranca 0x968 antes.
+    medicine_pocket_start_address=0x08C67ECC,
+    medicine_pocket_slot_count=64,
     items_pocket_start_address=0x08C67564,
     items_pocket_slot_count=400,
     pokeball_item_ids=frozenset(range(1, 17)),
@@ -155,7 +161,7 @@ _XY_CAPABILITIES = GameCapabilities(
     has_zone_names=True,
     has_leader_data=True,
     has_badge_art=True,
-    has_bag_writing=False,
+    has_bag_writing=True,
     has_hackroom=False,
 )
 

@@ -87,6 +87,9 @@ class MemoryMap:
     bag_start_address: int | None = None
     bag_end_address: int | None = None
     medicine_pocket_start_address: int | None = None
+    # Capacidad real del bolsillo de Medicina (casilleros). None = sin
+    # medir: BagService usa su ventana de escaneo legada (ORAS).
+    medicine_pocket_slot_count: int | None = None
     items_pocket_start_address: int | None = None
     items_pocket_slot_count: int | None = None
     pokeball_item_ids: frozenset[int] | None = None

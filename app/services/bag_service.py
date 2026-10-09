@@ -152,7 +152,14 @@ class BagService:
 
         pocket_start = profile.memory_map.medicine_pocket_start_address
 
-        data = self._read_window(pocket_start, MEDICINE_POCKET_SCAN_SLOTS)
+        # Si el perfil conoce la capacidad real del bolsillo, la ventana
+        # no puede pasarse al bolsillo siguiente (Bayas en X/Y).
+        scan_slots = (
+            profile.memory_map.medicine_pocket_slot_count
+            or MEDICINE_POCKET_SCAN_SLOTS
+        )
+
+        data = self._read_window(pocket_start, scan_slots)
 
         existing_offset = self._find_existing_slot(data, item_id)
 

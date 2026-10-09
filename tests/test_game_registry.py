@@ -60,10 +60,12 @@ def test_oras_tiene_confirmado_todo_el_mapa_de_memoria():
     # Los métodos de clasificar el combate son excluyentes: ORAS usa la
     # bandera de un byte, X/Y el valor de la celda.
     solo_xy = {"wild_battle_pointers", "trainer_battle_pointers"}
+    # Capacidad medida solo en X/Y (P5); ORAS conserva su ventana legada.
+    solo_xy_p5 = {"medicine_pocket_slot_count"}
 
     for profile in (get_profile("sango-1"), get_profile("sango-2")):
         for campo in fields(MemoryMap):
-            if campo.name in solo_xy:
+            if campo.name in solo_xy | solo_xy_p5:
                 assert getattr(profile.memory_map, campo.name) is None
                 continue
 
@@ -101,7 +103,8 @@ def test_xy_declara_explicitamente_lo_que_no_esta_investigado():
 
         assert m.capture_buffer_address is None
         assert m.bag_start_address is None
-        assert m.medicine_pocket_start_address is None
+        # P5: la Medicina de X/Y se midió (no hereda la de ORAS).
+        assert m.medicine_pocket_start_address == 0x08C67ECC
 
         for campo in fields(MemoryMap):
             valor = getattr(m, campo.name)
