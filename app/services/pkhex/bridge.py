@@ -572,7 +572,7 @@ class PKHeXBridge:
             }
         )
 
-    def species_details(self, species_id):
+    def species_details(self, species_id, game=None):
         """
         GUI v2, roadmap 06/09/2026 sección 4.2 -- modal "Pokédex"
         de detalle de especie. A diferencia de species() (que solo
@@ -587,12 +587,21 @@ class PKHeXBridge:
         probada en vivo.
         """
 
-        return self.request(
-            {
-                "action": "species_details",
-                "id": species_id,
-            }
-        )
+        # P6 (09/10/2026): `game` es opcional ("AS"/"OR"/"X"/"Y").
+        # Sin él, el payload es EXACTAMENTE el de siempre (tabla
+        # personal de ORAS), así que ningún llamador existente
+        # cambia. Con "X"/"Y" el bridge usa la tabla personal de
+        # X/Y; hoy solo lo usa el probe de comparación
+        # (tools/probes/xy/comparar_datos_xy_oras.py).
+        payload = {
+            "action": "species_details",
+            "id": species_id,
+        }
+
+        if game is not None:
+            payload["game"] = game
+
+        return self.request(payload)
 
     def move_details(self, move_id):
         """
