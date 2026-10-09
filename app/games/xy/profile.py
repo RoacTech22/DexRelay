@@ -7,20 +7,15 @@ están anotados en la sección 9 de la guía de la ruta multijuego. X y Y
 comparten mapa de memoria (se confirmó en los dos juegos), igual que
 ORAS, pero cada uno es un perfil propio.
 
-Estado de cada dirección:
-- CONFIRMADAS en X e Y: tarjeta de entrenador, equipo, cantidad de
-  equipo, cajas.
-- CANDIDATAS FUERTES, a validar en vivo (Bloque 15): medallas, zona,
-  contador de capturas, último capturado, rival salvaje, combate y
-  bolsillo de Objetos. Si alguna no se confirma, se deja en None: la
-  función se apaga, no se aproxima (reglas 1, 11 y 12).
-- Sin investigar (None): buffer de capturas, bolsa completa,
-  bolsillo de Medicina.
+Estado (P9, 09/10/2026): todo lo de este perfil está confirmado en vivo en
+X e Y (1.5): tarjeta de entrenador, equipo, cajas, medallas, zona, contador
+de capturas, rival salvaje, combate, bolsillo de Objetos (fósiles y
+Poké Balls) y bolsillo de Medicina (Caramelo Raro). Quedan en None, por no
+usarlos el runtime: bag_start/bag_end y el buffer de capturas.
 
-El contenido de Kalos llega por bloques de la guía de paridad: arte de
-medallas, catálogo de ubicaciones (P1) y nombres de zona / detección de
-"perdido" (P2, solo zonas ya recolectadas) están activos; líderes sigue
-apagado en las capacidades.
+El contenido de Kalos llegó por los bloques de la guía de paridad (P1 a P7):
+catálogo de ubicaciones, zonas, reglas especiales, líderes y liga, datos
+curados y tiempo de juego. La paridad con ORAS está validada en vivo.
 """
 
 from __future__ import annotations
@@ -82,7 +77,7 @@ _XY_MEMORY_MAP = MemoryMap(
     current_zone_id_mirror_address=0x08C67190,
     current_zone_id_width=2,
     total_caught_address=0x08C82AC0,
-    last_caught_address=_LAST_CAUGHT_ADDRESS,
+    wild_rival_copy_address=_LAST_CAUGHT_ADDRESS,
     wild_rival_addresses=(
         0x081FEBA0,
         0x081FF744,
@@ -156,7 +151,6 @@ _KALOS_LOCATIONS = LocationSpec(
 _XY_CAPABILITIES = GameCapabilities(
     generation=6,
     box_count=7,
-    experimental=True,
     has_location_catalog=True,
     has_zone_names=True,
     has_leader_data=True,

@@ -58,7 +58,9 @@ class MemoryMap:
 
     # Capturas y detección de "perdido".
     total_caught_address: int | None = None
-    last_caught_address: int | None = None
+    # Copia fija del PK6 del rival salvaje (antes "último capturado":
+    # el dato es el rival; que haya captura lo decide total_caught).
+    wild_rival_copy_address: int | None = None
     capture_buffer_address: int | None = None
     capture_buffer_entry_stride: int | None = None
     # Direcciones donde buscar el PK6 cifrado del rival salvaje,

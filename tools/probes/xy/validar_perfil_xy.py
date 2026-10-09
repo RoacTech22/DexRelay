@@ -101,7 +101,7 @@ def snapshot(reader, badges, combat, captures_address):
         if data is not None and len(data) == 4:
             captures = struct.unpack("<I", data)[0]
 
-    last = reader.read_last_caught()
+    last = reader.read_wild_rival_copy()
 
     return {
         "entrenador": reader.read_trainer_identity(),

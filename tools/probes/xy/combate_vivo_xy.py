@@ -228,7 +228,7 @@ def main():
     state = {"label": None, "stop": False, "notes": []}
 
     def last_species():
-        last = reader.read_last_caught()
+        last = reader.read_wild_rival_copy()
         return None if last is None else last.get("species")
 
     captures_address = reader.profile.memory_map.total_caught_address

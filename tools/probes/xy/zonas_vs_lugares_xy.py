@@ -443,7 +443,7 @@ def scan_party_and_boxes(
                     add(pokemon.raw_data, f"caja {box}.{slot}")
 
     if include_last:
-        address = reader._field("last_caught_address")
+        address = reader._field("wild_rival_copy_address")
 
         if address is not None:
             try:

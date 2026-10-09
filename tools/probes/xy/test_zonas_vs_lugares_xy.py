@@ -226,7 +226,7 @@ class _FakeReader:
         return self.BOX_BASE + (index - 1) * self.SLOTS * self.STRIDE
 
     def _field(self, name):
-        return self.LAST if name == "last_caught_address" else None
+        return self.LAST if name == "wild_rival_copy_address" else None
 
 
 def test_escaneo_incluye_cajas_altas_y_ultimo_capturado():

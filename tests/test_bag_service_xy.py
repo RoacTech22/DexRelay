@@ -3,8 +3,11 @@
 import struct
 
 from app.games.registry import get_profile
-from app.services.bag_service import BagService, BagWriteError
-from app.memory.pointers import RARE_CANDY_ITEM_ID
+from app.services.bag_service import (
+    RARE_CANDY_ITEM_ID,
+    BagService,
+    BagWriteError,
+)
 
 MED = 0x08C67ECC
 BERRIES = 0x08C67FCC

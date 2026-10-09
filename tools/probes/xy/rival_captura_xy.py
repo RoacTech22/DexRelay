@@ -2,7 +2,7 @@
 Paso 6 del Bloque 14 (ruta multijuego, 04/10/2026): encontrar en RAM de
 Pokémon X/Y (a) al Pokémon RIVAL de un combate salvaje y (b) al "último
 capturado". En ORAS son direcciones fijas con una estructura PK6 completa
-(wild_rival_addresses y last_caught_address del perfil) y alimentan al
+(wild_rival_addresses y wild_rival_copy_address del perfil) y alimentan al
 Nuzlocke: saber contra qué especie peleaste y qué acabas de capturar.
 
 Método (el mismo de buscar_rival_pk6_absoluto.py de ORAS): escanear 32 MB

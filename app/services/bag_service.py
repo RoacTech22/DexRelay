@@ -29,11 +29,15 @@ from __future__ import annotations
 
 import struct
 
-from app.memory.pointers import (
-    BAG_SLOT_SIZE,
-    BAG_MAX_QUANTITY,
-    MEDICINE_POCKET_SCAN_SLOTS,
-)
+# Formato del casillero (u16 id + u16 cantidad), stack máximo y ventana
+# de búsqueda legada. Antes vivían en app/memory/pointers.py (retirado en P9).
+BAG_SLOT_SIZE = 4
+BAG_MAX_QUANTITY = 999
+MEDICINE_POCKET_SCAN_SLOTS = 100
+
+# Confirmado contra la tabla oficial de índices de Bulbapedia (Gen VI) y en
+# vivo en ORAS y X/Y (el Caramelo Raro aparece con id 50 en el bolsillo).
+RARE_CANDY_ITEM_ID = 50
 
 
 class BagWriteError(Exception):
