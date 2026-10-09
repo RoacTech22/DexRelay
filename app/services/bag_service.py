@@ -29,12 +29,15 @@ from __future__ import annotations
 
 import struct
 
-from app.memory.pointers import (
-    BAG_SLOT_SIZE,
-    BAG_MAX_QUANTITY,
-    MEDICINE_POCKET_SCAN_SLOTS,
-    get_medicine_pocket_start_address,
-)
+# Formato del casillero (u16 id + u16 cantidad), stack máximo y ventana
+# de búsqueda legada. Antes vivían en app/memory/pointers.py (retirado en P9).
+BAG_SLOT_SIZE = 4
+BAG_MAX_QUANTITY = 999
+MEDICINE_POCKET_SCAN_SLOTS = 100
+
+# Confirmado contra la tabla oficial de índices de Bulbapedia (Gen VI) y en
+# vivo en ORAS y X/Y (el Caramelo Raro aparece con id 50 en el bolsillo).
+RARE_CANDY_ITEM_ID = 50
 
 
 class BagWriteError(Exception):
@@ -136,11 +139,31 @@ class BagService:
                 "Dashboard antes de usar esta herramienta."
             )
 
-        pocket_start = get_medicine_pocket_start_address(
-            self.reader.process_name
+        # Bloque 13: la dirección sale del perfil del juego conectado.
+        # Sin perfil, con la función apagada o con la dirección sin
+        # confirmar (None) no se escribe NADA en memoria.
+        profile = self.reader.profile
+
+        if (
+            profile is None
+            or not profile.capabilities.has_bag_writing
+            or profile.memory_map.medicine_pocket_start_address is None
+        ):
+            raise BagWriteError(
+                "Esta función todavía no está disponible para el "
+                "juego conectado."
+            )
+
+        pocket_start = profile.memory_map.medicine_pocket_start_address
+
+        # Si el perfil conoce la capacidad real del bolsillo, la ventana
+        # no puede pasarse al bolsillo siguiente (Bayas en X/Y).
+        scan_slots = (
+            profile.memory_map.medicine_pocket_slot_count
+            or MEDICINE_POCKET_SCAN_SLOTS
         )
 
-        data = self._read_window(pocket_start, MEDICINE_POCKET_SCAN_SLOTS)
+        data = self._read_window(pocket_start, scan_slots)
 
         existing_offset = self._find_existing_slot(data, item_id)
 

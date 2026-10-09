@@ -58,7 +58,7 @@ import time
 from app.core.config import Config
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BADGES_ADDRESS
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PROCESS_NAME_OMEGA_RUBY,
     get_party_order_address,
 )

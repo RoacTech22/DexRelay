@@ -61,8 +61,12 @@ class HTTPServer:
         species_catalog: SpeciesCatalog | None = None,
         location_catalog: LocationCatalog | None = None,
         team_overlay_settings: "TeamOverlaySettings | None" = None,
+        profile_provider=None,
     ) -> None:
         self.state = state
+        # Bloque 15: perfil del juego conectado (para el set de sprites
+        # de medallas del overlay). None = arte de Hoenn por defecto.
+        self.profile_provider = profile_provider
         self.host = host
         self.port = port
         self.nuzlocke_service = nuzlocke_service
@@ -199,6 +203,23 @@ class HTTPServer:
     def _decrement_connections(self) -> None:
         with self._active_connections_lock:
             self._active_connections = max(0, self._active_connections - 1)
+
+    def _badge_sprite_set(self) -> str:
+        """Carpeta de sprites de medallas del juego conectado ("" = Hoenn)."""
+
+        try:
+            profile = (
+                self.profile_provider()
+                if self.profile_provider is not None
+                else None
+            )
+        except Exception:
+            return ""
+
+        if profile is None:
+            return ""
+
+        return profile.content.badge_sprite_set or ""
 
     def get_active_connections(self) -> int:
         """Clientes con una conexión TCP abierta ahora mismo (0 si el servidor está detenido)."""
@@ -409,8 +430,16 @@ class HTTPServer:
                     return
 
                 if self.path == "/api/badges":
+                    payload = state.badges
+
+                    if isinstance(payload, dict):
+                        payload = dict(payload)
+                        payload["sprite_set"] = (
+                            http_server_ref._badge_sprite_set()
+                        )
+
                     self._send_json(
-                        state.badges,
+                        payload,
                         200,
                     )
                     return

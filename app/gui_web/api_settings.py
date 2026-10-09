@@ -88,6 +88,8 @@ class SettingsMixin:
                 "enabled": config.get(
                     "hackroom", "enabled", default=False
                 ),
+                # Bloque 13: False si el juego conectado no lo soporta.
+                "available": self._hackroom_available(),
             },
             "appVersion": resolve_app_version(),
             "githubUrl": GITHUB_URL,

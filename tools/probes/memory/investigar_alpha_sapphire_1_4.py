@@ -68,7 +68,7 @@ bloque listo para copiar directo a pointers.py si todo cierra.
 
 import sys
 
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     ORDER_ENTRY_SIZE,
     PROCESS_NAME_ALPHA_SAPPHIRE,
 )

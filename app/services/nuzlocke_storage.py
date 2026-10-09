@@ -8,10 +8,7 @@ from pathlib import Path
 
 from app.core import paths
 from app.core.atomic_write import write_json_atomic
-from app.memory.pointers import (
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
-)
+from app.games.registry import all_profiles
 
 
 # Nombre de archivo por juego (02/09/2026) -- antes de esto había
@@ -21,9 +18,15 @@ from app.memory.pointers import (
 # reportado por el usuario) o viceversa. Un slug legible en vez
 # del process_name crudo ("sango-1"/"sango-2") para que el nombre
 # de archivo tenga sentido si alguien lo mira directo.
+#
+# Bloque 11 (ruta multijuego): el slug de cada juego vive ahora en su
+# perfil (`GameContent.storage_slug`). Los de ORAS NO pueden cambiar
+# nunca (tests/test_pointers_golden.py los fija): dejarían huérfanos
+# los nuzlocke_<slug>_<tid>_<sid>.json existentes.
 _GAME_STORAGE_SLUGS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: "alpha_sapphire",
-    PROCESS_NAME_OMEGA_RUBY: "omega_ruby",
+    profile.key: profile.content.storage_slug
+    for profile in all_profiles()
+    if profile.content.storage_slug
 }
 
 

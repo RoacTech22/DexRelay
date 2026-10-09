@@ -4,134 +4,9 @@ import json
 from pathlib import Path
 
 from app.core import paths
-from app.services.hoenn_locations_es import translate_location_name
+# Reexportado por compatibilidad (la fuente es el perfil ORAS, Bloque 13).
+from app.games.oras.locations import EXCLUDED_LOCATION_IDS  # noqa: F401
 from app.services.pkhex.bridge import PKHeXBridge
-
-
-# Rango de IDs de ubicaciones de Hoenn (ORAS) confirmado con datos
-# reales de /api/locations (24/08/2026): todo lo de Hoenn cae entre
-# 170 ("Littleroot Town") y 354 ("Secret Base"), sin excepciones.
-# Fuera de ese rango queda todo lo que NO es parte del recorrido:
-# Kalos/X-Y (IDs 2-168), eventos y torneos (40000+), transferencias
-# entre juegos/regiones (30000+), y regalos especiales (60000+).
-_HOENN_ID_MIN = 170
-_HOENN_ID_MAX = 354
-
-# Ubicaciones de Hoenn excluidas a propósito del catálogo
-# (29/08/2026, decisión explícita del usuario) -- no son
-# relevantes para un Nuzlocke normal: mirage spots de DexNav que
-# aparecen al azar (nunca forman parte de un recorrido real),
-# las cuevas de los Regis (post-juego, muy raras), y la base
-# secreta del propio jugador (no es un lugar de encuentro
-# salvaje). Esto SOLO afecta la lista precargada del panel (no
-# aparecen como fila esperando captura) -- si por algún motivo
-# rarísimo una captura real reportara uno de estos IDs, igual se
-# registraría normal (LocationResolver es un módulo aparte, no
-# consulta esta exclusión); el panel simplemente le crearía una
-# fila nueva sobre la marcha, como con cualquier ubicación no
-# precargada.
-EXCLUDED_LOCATION_IDS = {
-    276,  # "???" -- ID interno sin uso real, no una ubicación
-          # jugable (nombre crudo de PKHeX, nunca se pudo
-          # confirmar qué es)
-    278,  # Desert Ruins / "Ruinas del Desierto"
-    306,  # Island Cave / "Cueva Insular"
-    308,  # Ancient Tomb / "Tumba Antigua"
-    310,  # Sealed Chamber / "Cámara Sellada"
-    334,  # Trackless Forest / "Bosque Virgen"
-    336,  # Pathless Plain / "Llanura Sinnombre"
-    338,  # Nameless Cavern / "Cueva Ignota"
-    340,  # Fabled Cave / "Cueva Incierta"
-    342,  # Gnarled Den / "Boquete Irregular"
-    344,  # Crescent Isle / "Isla Creciente"
-    354,  # Secret Base / "Base Secreta"
-    350,  # Secret Shore / "Costa Secreta"
-    352,  # Secret Meadow / "Prado Secreto"
-}
-
-# Actualización (09/09/2026): las 13 de acá abajo (todas menos 276)
-# ya tienen traducción real en hoenn_locations_es.py -- esta lista
-# sigue existiendo igual (sigue siendo una decisión de UX sobre qué
-# precargar en el panel, no sobre qué traducir), pero ya no hay que
-# leerla como "sin traducción" -- eso quedó resuelto.
-
-# Orden narrativo aproximado (progresión de historia de ORAS), por
-# ID -- no por nombre, para que funcione sin importar en qué idioma
-# termine devolviendo el texto PKHeX. Lo que no está en este mapa
-# (áreas post-juego/DexNav: mirages, cuevas secretas, etc.) se
-# agrega al final, ordenado por ID, para no perder ninguna
-# ubicación real aunque no tenga un lugar fijo asignado acá.
-_STORY_ORDER_IDS = [
-    170,  # Littleroot Town
-    204,  # Route 101
-    172,  # Oldale Town
-    206,  # Route 102
-    208,  # Route 103
-    184,  # Petalburg City
-    210,  # Route 104
-    282,  # Petalburg Woods
-    190,  # Rustboro City
-    234,  # Route 116
-    274,  # Rusturf Tunnel
-    212,  # Route 105
-    174,  # Dewford Town
-    280,  # Granite Cave
-    214,  # Route 106
-    216,  # Route 107
-    218,  # Route 108
-    220,  # Route 109
-    186,  # Slateport City
-    222,  # Route 110
-    224,  # Route 111
-    226,  # Route 112
-    284,  # Mt. Chimney
-    286,  # Jagged Pass
-    178,  # Fallarbor Town
-    228,  # Route 113
-    230,  # Route 114
-    272,  # Meteor Falls
-    232,  # Route 115
-    176,  # Lavaridge Town
-    288,  # Fiery Path
-    188,  # Mauville City
-    236,  # Route 117
-    180,  # Verdanturf Town
-    302,  # New Mauville
-    238,  # Route 118
-    240,  # Route 119
-    192,  # Fortree City
-    242,  # Route 120
-    244,  # Route 121
-    324,  # Safari Zone
-    246,  # Route 122
-    290,  # Mt. Pyre
-    248,  # Route 123
-    194,  # Lilycove City
-    292,  # Team Aqua Hideout
-    314,  # Team Magma Hideout
-    250,  # Route 124
-    304,  # Sea Mauville
-    252,  # Route 125
-    254,  # Route 126
-    256,  # Route 127
-    258,  # Route 128
-    294,  # Seafloor Cavern
-    196,  # Mossdeep City
-    260,  # Route 129
-    262,  # Route 130
-    264,  # Route 131
-    182,  # Pacifidlog Town
-    266,  # Route 132
-    268,  # Route 133
-    270,  # Route 134
-    198,  # Sootopolis City
-    296,  # Cave of Origin
-    300,  # Shoal Cave
-    316,  # Sky Pillar
-    200,  # Ever Grande City
-    202,  # Pokémon League (OR/AS)
-    298,  # Victory Road (OR/AS)
-]
 
 
 class LocationCatalog:
@@ -161,6 +36,7 @@ class LocationCatalog:
         self,
         bridge=None,
         cache_path=None,
+        profile_provider=None,
     ):
         self.bridge = (
             bridge
@@ -168,15 +44,32 @@ class LocationCatalog:
             else PKHeXBridge.shared()
         )
 
-        # Sin cache_path explícito, resuelve data/location_cache.json
-        # relativo a la carpeta del proyecto o del .exe empaquetado
-        # -- ver app/core/paths.py.
-        self.cache_path = (
-            Path(cache_path)
-            if cache_path is not None
-            else paths.path("data", "location_cache.json")
+        # Sin cache_path explícito, la caché cruda es data/<cache_file
+        # del juego> relativo a la carpeta del proyecto o del .exe
+        # empaquetado -- ver app/core/paths.py.
+        self._explicit_cache_path = (
+            Path(cache_path) if cache_path is not None else None
         )
-        self._locations = None
+
+        # Bloque 13: qué juego está conectado. Sin juego soportado, o
+        # con un juego sin catálogo de ubicaciones, la lista es vacía
+        # (nunca la de Hoenn para otro juego). Sin provider (probes y
+        # tests antiguos) se usa el perfil de Alpha Sapphire.
+        self.profile_provider = profile_provider
+        self._locations_by_cache = {}
+
+    def _spec(self):
+        if self.profile_provider is None:
+            from app.games.oras.profile import ALPHA_SAPPHIRE
+
+            return ALPHA_SAPPHIRE.content.locations
+
+        profile = self.profile_provider()
+
+        if profile is None:
+            return None
+
+        return profile.content.locations
 
     def list_all(self):
         """
@@ -197,15 +90,22 @@ class LocationCatalog:
         de agregar la traducción, y seguía sirviéndolos tal cual).
         """
 
-        if self._locations:
-            return self._locations
+        spec = self._spec()
 
-        raw_locations = self._load_from_disk()
+        if spec is None:
+            return []
+
+        memo = self._locations_by_cache.get(spec.cache_file)
+
+        if memo:
+            return memo
+
+        raw_locations = self._load_from_disk(spec)
 
         if not raw_locations:
 
             try:
-                result = self.bridge.location_list()
+                result = self.bridge.location_list(spec.bridge_game)
                 raw_locations = result.get(
                     "locations", []
                 )
@@ -214,41 +114,41 @@ class LocationCatalog:
                 raw_locations = []
 
             if raw_locations:
-                self._save_to_disk(raw_locations)
+                self._save_to_disk(raw_locations, spec)
 
         if not raw_locations:
             return []
 
         locations = self._filter_and_order(
-            raw_locations
+            raw_locations, spec
         )
 
         if locations:
-            self._locations = locations
+            self._locations_by_cache[spec.cache_file] = locations
 
         return locations
 
-    def _filter_and_order(self, raw_locations):
+    def _filter_and_order(self, raw_locations, spec):
 
         hoenn_locations = {
             entry["id"]: {
                 "id": entry["id"],
-                "name": translate_location_name(
+                "name": spec.translate(
                     entry["id"],
                     entry.get("name", ""),
                 ),
             }
             for entry in raw_locations
-            if _HOENN_ID_MIN
+            if spec.id_min
             <= entry.get("id", -1)
-            <= _HOENN_ID_MAX
-            and entry.get("id") not in EXCLUDED_LOCATION_IDS
+            <= spec.id_max
+            and entry.get("id") not in spec.excluded_ids
         }
 
         ordered = []
         seen_ids = set()
 
-        for location_id in _STORY_ORDER_IDS:
+        for location_id in spec.story_order_ids:
 
             entry = hoenn_locations.get(
                 location_id
@@ -277,14 +177,22 @@ class LocationCatalog:
 
         return ordered
 
-    def _load_from_disk(self):
+    def _cache_file(self, spec):
+        if self._explicit_cache_path is not None:
+            return self._explicit_cache_path
 
-        if not self.cache_path.exists():
+        return paths.path("data", spec.cache_file)
+
+    def _load_from_disk(self, spec):
+
+        cache_path = self._cache_file(spec)
+
+        if not cache_path.exists():
             return None
 
         try:
 
-            with self.cache_path.open(
+            with cache_path.open(
                 "r",
                 encoding="utf-8",
             ) as file:
@@ -293,16 +201,18 @@ class LocationCatalog:
         except Exception:
             return None
 
-    def _save_to_disk(self, locations):
+    def _save_to_disk(self, locations, spec):
+
+        cache_path = self._cache_file(spec)
 
         try:
 
-            self.cache_path.parent.mkdir(
+            cache_path.parent.mkdir(
                 parents=True,
                 exist_ok=True,
             )
 
-            with self.cache_path.open(
+            with cache_path.open(
                 "w",
                 encoding="utf-8",
                 newline="\n",

@@ -16,10 +16,11 @@ from pathlib import Path
 
 from app.core.runtime import Runtime
 from app.core.state import ApplicationState
-from app.memory.pointers import (
-    TRAINER_CARD_ADDRESS,
-    TRAINER_CARD_READ_SIZE,
-)
+from app.games.registry import get_profile
+
+_ORAS_MAP = get_profile("sango-2").memory_map
+TRAINER_CARD_ADDRESS = _ORAS_MAP.trainer_card_address
+TRAINER_CARD_READ_SIZE = _ORAS_MAP.trainer_card_read_size
 from app.readers.azahar_reader import AzaharReader
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage

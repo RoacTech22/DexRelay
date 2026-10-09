@@ -40,7 +40,7 @@ COMO USARLO:
 
 from app.core.config import Config
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PROCESS_NAME_OMEGA_RUBY,
     get_party_order_address,
     POKEMON_POINTER_OFFSET,

@@ -84,7 +84,7 @@ while (true)
                 break;
 
             case "location_list":
-                HandleLocationList();
+                HandleLocationList(root);
                 break;
 
             case "pokemon_details":
@@ -295,8 +295,47 @@ static void HandleItemList()
 }
 
 
-static void HandleLocationList()
+static void HandleLocationList(JsonElement root)
 {
+    // Bloque 13 (ruta multijuego): `game` es opcional. Sin él (o
+    // con "AS") la respuesta es la de siempre, la de Alpha
+    // Sapphire, que DexRelay usa también para Omega Ruby. Un valor
+    // desconocido devuelve error en vez de caer en otro juego.
+    var gameName = "AS";
+
+    if (
+        root.TryGetProperty("game", out var gameElement)
+        && gameElement.ValueKind == JsonValueKind.String
+    )
+    {
+        gameName = gameElement.GetString() ?? "AS";
+    }
+
+    GameVersion version;
+
+    switch (gameName)
+    {
+        case "AS":
+            version = GameVersion.AS;
+            break;
+
+        case "OR":
+            version = GameVersion.OR;
+            break;
+
+        case "X":
+            version = GameVersion.X;
+            break;
+
+        case "Y":
+            version = GameVersion.Y;
+            break;
+
+        default:
+            WriteError($"Juego desconocido para location_list: {gameName}");
+            return;
+    }
+
     // Misma fuente de verdad que HandleMetLocation() usa para
     // resolver el lugar de encuentro de una captura real -- así
     // la lista de rutas que se le muestra al usuario en el panel
@@ -308,7 +347,7 @@ static void HandleLocationList()
     // y creara una duplicada.
     var locations =
         GameInfo.GetLocationList(
-            GameVersion.AS,
+            version,
             EntityContext.Gen6,
             egg: false
         );
@@ -887,10 +926,75 @@ static void HandleSpeciesDetails(JsonElement root)
 
     string speciesName = GameInfo.Strings.Species[speciesId];
 
+    // P6 (paridad X/Y, 09/10/2026): `game` es opcional. Sin él (o con
+    // "AS"/"OR") la respuesta es la de siempre, la tabla personal de
+    // ORAS (PersonalTable.AO). Con "X" o "Y" se usa PersonalTable.XY,
+    // para poder COMPARAR las dos tablas antes de decidir si Kalos
+    // necesita datos propios (probe tools/probes/xy/comparar_datos_xy_oras.py).
+    // Un valor desconocido devuelve error en vez de caer en otro juego.
+    var gameName = "AS";
+
+    if (
+        root.TryGetProperty("game", out var gameElement)
+        && gameElement.ValueKind == JsonValueKind.String
+    )
+    {
+        gameName = gameElement.GetString() ?? "AS";
+    }
+
+    if (
+        gameName != "AS"
+        && gameName != "OR"
+        && gameName != "X"
+        && gameName != "Y"
+    )
+    {
+        WriteError($"Juego desconocido para species_details: {gameName}");
+        return;
+    }
+
     // BUG REAL DE COMPILACIÓN corregido (06/09/2026, primer intento
     // de `dotnet build` real): GetFormEntry pide `ushort`, no
     // `int` -- especiesId llega como int desde el JSON de entrada.
-    var info = PersonalTable.AO.GetFormEntry((ushort)speciesId, 0);
+    //
+    // Los valores se copian a variables locales dentro de cada rama
+    // (cada tabla devuelve su propio tipo concreto, así que no se
+    // asume un tipo base común para Ability1/Ability2/AbilityH).
+    int type1, type2, ability1, ability2, abilityHidden;
+    int statHp, statAtk, statDef, statSpa, statSpd, statSpe;
+
+    if (gameName == "X" || gameName == "Y")
+    {
+        var info = PersonalTable.XY.GetFormEntry((ushort)speciesId, 0);
+
+        type1 = info.Type1;
+        type2 = info.Type2;
+        ability1 = info.Ability1;
+        ability2 = info.Ability2;
+        abilityHidden = info.AbilityH;
+        statHp = info.HP;
+        statAtk = info.ATK;
+        statDef = info.DEF;
+        statSpa = info.SPA;
+        statSpd = info.SPD;
+        statSpe = info.SPE;
+    }
+    else
+    {
+        var info = PersonalTable.AO.GetFormEntry((ushort)speciesId, 0);
+
+        type1 = info.Type1;
+        type2 = info.Type2;
+        ability1 = info.Ability1;
+        ability2 = info.Ability2;
+        abilityHidden = info.AbilityH;
+        statHp = info.HP;
+        statAtk = info.ATK;
+        statDef = info.DEF;
+        statSpa = info.SPA;
+        statSpd = info.SPD;
+        statSpe = info.SPE;
+    }
 
     string ResolveTypeName(int typeId) =>
         (typeId >= 0 && typeId < GameInfo.Strings.Types.Count)
@@ -910,17 +1014,10 @@ static void HandleSpeciesDetails(JsonElement root)
             : "";
     }
 
-    int type1 = info.Type1;
-    int type2 = info.Type2;
-
     string AbilityName(int abilityId) =>
         (abilityId >= 0 && abilityId < GameInfo.Strings.Ability.Count)
             ? GameInfo.Strings.Ability[abilityId]
             : "";
-
-    int ability1 = info.Ability1;
-    int ability2 = info.Ability2;
-    int abilityHidden = info.AbilityH;
 
     // Árbol de evolución de Gen 6 -- Forward da, para cada especie,
     // a qué evoluciona (no de dónde viene). EvolutionMethod trae el
@@ -994,12 +1091,12 @@ static void HandleSpeciesDetails(JsonElement root)
         type2 = type1 != type2 ? ResolveTypeName(type2) : "",
         baseStats = new
         {
-            hp = info.HP,
-            attack = info.ATK,
-            defense = info.DEF,
-            spAttack = info.SPA,
-            spDefense = info.SPD,
-            speed = info.SPE,
+            hp = statHp,
+            attack = statAtk,
+            defense = statDef,
+            spAttack = statSpa,
+            spDefense = statSpd,
+            speed = statSpe,
         },
         ability1Id = ability1,
         ability1Name = AbilityName(ability1),

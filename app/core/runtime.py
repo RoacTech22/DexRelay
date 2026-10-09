@@ -12,7 +12,6 @@ from app.services.combat_service import (
 )
 from app.services.nuzlocke_service import NuzlockeService
 from app.services.nuzlocke_storage import NuzlockeStorage
-from app.services.zone_names import resolve_zone_name
 
 
 class Runtime:
@@ -45,7 +44,8 @@ class Runtime:
         )
 
         self.combat_service = CombatService(
-            self.reader.memory
+            self.reader.memory,
+            profile_provider=lambda: getattr(self.reader, "profile", None),
         )
 
         self.badges_storage = BadgesStorage()
@@ -57,7 +57,12 @@ class Runtime:
         # con código/tests existentes que construyen Runtime solo).
         self.nuzlocke_service = (
             nuzlocke_service
-            or NuzlockeService(NuzlockeStorage())
+            or NuzlockeService(
+                NuzlockeStorage(),
+                profile_provider=lambda: getattr(
+                    self.reader, "profile", None
+                ),
+            )
         )
 
         self._last_badges = None
@@ -125,6 +130,7 @@ class Runtime:
         # Caja PC no se pierde, solo se vuelve un poco menos
         # inmediata (hasta BOX_SCAN_INTERVAL_SECONDS de demora).
         self._last_box_scan_time = 0.0
+        self._last_fossil_scan_time = 0.0
         self._cached_boxed_party = []
 
         # Bloque 5 (24/09/2026, guía siguiente versión): identificación
@@ -157,6 +163,10 @@ class Runtime:
     BOX_SCAN_INTERVAL_SECONDS = 1.5
     BOX_SCAN_INTERVAL_SECONDS = 1.5
 
+    # Cada cuánto se relee la cantidad de fósiles de la bolsa (P3; solo
+    # juegos cuyo perfil declara objetos de fósil).
+    FOSSIL_SCAN_INTERVAL_SECONDS = 1.0
+
     # Bloque 5: lecturas seguidas IGUALES de una identidad nueva antes
     # de confirmarla (evita que una lectura basura durante una carga
     # cambie de partida), y ciclos de 200ms (~5s) con party visible
@@ -187,6 +197,7 @@ class Runtime:
         # de la conexión anterior (podría corresponder a otro juego
         # si Azahar cambió de proceso).
         self._last_box_scan_time = 0.0
+        self._last_fossil_scan_time = 0.0
 
         self._reset_trainer_state()
 
@@ -475,10 +486,36 @@ class Runtime:
             if not self.nuzlocke_service.is_started():
                 has_pokeballs = self.reader.read_has_pokeballs()
 
+            # P3 (06/10/2026): en juegos cuyo perfil declara objetos de
+            # fósil (Kalos), la bolsa se relee cada
+            # FOSSIL_SCAN_INTERVAL_SECONDS (la baja precede 13-15 s al
+            # Pokémon, no hace falta cada ciclo de 200 ms). ORAS no
+            # declara ninguno y no gasta esta lectura.
+            fossil_count = None
+            profile = getattr(self.reader, "profile", None)
+
+            if (
+                profile is not None
+                and profile.content.special_rules.fossil_item_ids
+                and now - self._last_fossil_scan_time
+                >= self.FOSSIL_SCAN_INTERVAL_SECONDS
+            ):
+                fossil_count = self.reader.read_fossil_item_count()
+                self._last_fossil_scan_time = now
+
+            # `fossil_count` viaja solo cuando se leyó en este ciclo
+            # (los servicios de prueba sin esta señal no lo reciben).
+            extra = (
+                {"fossil_count": fossil_count}
+                if fossil_count is not None
+                else {}
+            )
+
             self.state.nuzlocke = self.nuzlocke_service.update(
                 party,
                 boxed_party=box,
                 has_pokeballs=has_pokeballs,
+                **extra,
             )
 
         badges = self.badges_service.read_badges()
@@ -611,6 +648,37 @@ class Runtime:
 
         self._pending_lost_resolution = None
 
+    def _zone_name_resolver(self):
+        """Resolvedor id de zona -> nombre del juego actual, o None."""
+
+        profile = getattr(self.reader, "profile", None)
+
+        if profile is None or not profile.capabilities.has_zone_names:
+            return None
+
+        return profile.content.zone_name_resolver
+
+    def current_place_name(self):
+        """
+        Nombre del catálogo del lugar donde está el jugador ahora
+        (zona de memoria -> tabla de zonas del juego), o None si el
+        juego no tiene tabla, la lectura falló o la zona no está
+        mapeada. Lo usa NuzlockeService para anclar las filas
+        especiales (P3).
+        """
+
+        resolver = self._zone_name_resolver()
+
+        if resolver is None:
+            return None
+
+        zone_id = self.reader.read_current_zone_id()
+
+        if zone_id is None:
+            return None
+
+        return resolver(zone_id)
+
     def _update_lost_encounter_tracking(self):
         """
         Detección automática del estado "perdido" del Nuzlocke
@@ -667,6 +735,13 @@ class Runtime:
         if not self.nuzlocke_service.is_started():
             return
 
+        # Bloque 13: sin tabla de zonas del juego conectado no hay
+        # forma de nombrar la ruta, así que la detección automática
+        # de "perdido" queda apagada para ese juego (en vez de usar
+        # los nombres de zona de Hoenn).
+        if self._zone_name_resolver() is None:
+            return
+
         wild_result = self.combat_service.read_wild_flag()
 
         if wild_result is LECTURA_DESCARTADA:
@@ -708,7 +783,7 @@ class Runtime:
         ):
 
             zone_id = self.reader.read_current_zone_id()
-            location = resolve_zone_name(zone_id)
+            location = self._zone_name_resolver()(zone_id)
 
             already_registered = (
                 location is not None

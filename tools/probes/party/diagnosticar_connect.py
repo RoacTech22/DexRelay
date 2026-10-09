@@ -17,7 +17,7 @@ USO:
 """
 
 from app.readers.citra import Citra
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )

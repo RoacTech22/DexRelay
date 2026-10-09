@@ -337,10 +337,9 @@
 
       });
 
-    // Sidebar: solo la marca cuadrada (el logo completo apaisado no
-    // entra en 34px).
+    // Sidebar: logo completo, sin texto aparte (05/10/2026).
     api()
-      .get_mark_data_uri()
+      .get_logo_data_uri()
       .then(function (dataUri) {
         if (!dataUri) {
           return;
@@ -392,21 +391,16 @@
       card.dataset.processName = game.process_name;
       card.dataset.badge = game.badge;
 
-      if (game.background) {
-        // Va en la variable --card-bg (consumida por
-        // .version-card::before en css/style.css), no en
-        // background-image directo -- así el CSS puede espejar
-        // solo la imagen sin dar vuelta el texto de la tarjeta.
-        card.style.setProperty(
-          "--card-bg",
-          "linear-gradient(180deg, rgba(10,14,24,0.15) 0%, rgba(10,14,24,0.55) 55%, rgba(10,14,24,0.92) 100%), " +
-          "url('" + game.background + "')"
-        );
-      }
+      // Tarjeta cuadrada solo con el arte del juego (sin texto): el
+      // nombre queda en title/aria-label.
+      var cardLabel = game.label + (game.experimental ? " (experimental)" : "");
+      card.title = cardLabel;
+      card.setAttribute("role", "img");
+      card.setAttribute("aria-label", cardLabel);
 
-      card.innerHTML =
-        '<div class="version-label">' + game.label + "</div>" +
-        '<span class="version-badge">' + game.badge + "</span>";
+      if (game.card) {
+        card.style.backgroundImage = "url('" + game.card + "')";
+      }
 
       // Ya no son seleccionables (02/09/2026, ver
       // Api.start_auto()) -- son informativas ("juegos soportados
@@ -1203,6 +1197,17 @@
       ? (gameAvatars[data.process_name] || "none")
       : "loading";
 
+    // Bloque 13: el catálogo de ubicaciones es del juego conectado.
+    // Si cambia el juego, se descarta la copia cacheada para que la
+    // página Nuzlocke pida la del juego nuevo.
+    if (data.process_name && data.process_name !== catalogProcessName) {
+      if (catalogProcessName !== null) {
+        nuzlockeLocationCatalog = null;
+        nuzlockeSpeciesCatalog = null;
+      }
+      catalogProcessName = data.process_name;
+    }
+
     renderIfChanged(
       "userChip",
       { trainer: data.trainer, processName: data.process_name, avatarKey: avatarKey },
@@ -1236,6 +1241,8 @@
           "is-omega-ruby",
           snapshotData.processName === PROCESS_NAME_OMEGA_RUBY
         );
+        chip.classList.toggle("is-pokemon-x", snapshotData.processName === "kujira-1");
+        chip.classList.toggle("is-pokemon-y", snapshotData.processName === "kujira-2");
 
         nameEl.textContent = trainer.ot || "—";
         idEl.textContent = "ID " + trainer.tid;
@@ -1386,6 +1393,19 @@
     // Dashboard estaba siquiera a la vista. Ahora: nada de trabajo
     // si la página no está activa, y solo se toca el DOM si la
     // huella de los datos cambió de verdad.
+    badgeArt = data.badge_art !== false;
+    badgeSpriteSet = data.badge_sprite_set || "";
+    var leadersCard = document.getElementById("medals-leaders-card");
+    leaderPortraits = data.leader_portraits || [];
+    leaguePortraits = data.league_portraits || [];
+    if (leadersCard) {
+      leadersCard.style.display =
+        data.leaders_available === false && !leaderPortraits.length ? "none" : "";
+    }
+    if (data.badge_names && data.badge_names.length) {
+      GYM_BADGE_NAMES = data.badge_names;
+    }
+
     if (currentPage === "dashboard") {
       renderIfChanged(
         "dash-team",
@@ -1395,7 +1415,13 @@
         }
       );
 
-      renderIfChanged("dash-badges", data.badges, renderDashBadges);
+      renderIfChanged(
+        "dash-badges",
+        { badges: data.badges, art: badgeArt, set: badgeSpriteSet, names: GYM_BADGE_NAMES },
+        function (snapshotData) {
+          renderDashBadges(snapshotData.badges);
+        }
+      );
     }
 
     if (!overlaysRendered && data.http_server) {
@@ -1417,6 +1443,10 @@
         "medallas-page",
         {
           badges: data.badges,
+          art: badgeArt,
+          set: badgeSpriteSet,
+          names: GYM_BADGE_NAMES,
+          leaders: leaderPortraits,
           baseUrl: data.http_server && data.http_server.base_url,
         },
         function (snapshotData) {
@@ -1870,8 +1900,13 @@
       var cell = document.createElement("div");
       cell.className = "dash-badge-cell";
 
-      var img = document.createElement("img");
-      img.src = spriteBaseUrl + "/overlay/badges/sprites/" + (index + 1) + ".png";
+      var img = document.createElement(badgeArt ? "img" : "span");
+      if (badgeArt) {
+        img.src = badgeSpriteUrl(index);
+      } else {
+        img.textContent = String(index + 1);
+        img.style.cssText = "display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:2px solid currentColor;font-weight:600;";
+      }
       // Bloque 7.3 (29/09/2026): acá (a diferencia de la grilla de
       // la página Medallas) no hay ningún texto visible que diga
       // CUÁL medalla es -- solo "Obtenida"/"Pendiente" -- así que el
@@ -1880,8 +1915,11 @@
       // este archivo (línea ~3003) pero ya está asignada para cuando
       // esta función corre (se llama recién desde un poll, nunca en
       // la carga inicial del script).
-      var badgeName = GYM_BADGE_NAMES[index] || ("Medalla " + (index + 1));
+      var badgeName = badgeNameFor(index);
       img.alt = badgeName + (obtained ? " -- obtenida" : " -- pendiente");
+      if (!badgeArt) {
+        img.setAttribute("aria-label", img.alt);
+      }
       if (!obtained) {
         img.className = "pending";
       }
@@ -3091,6 +3129,25 @@
 
   // Nombres tal como están en el mockup (Medallas.png) -- mismo
   // orden que el bitfield de badges_service.py (bit 0 = índice 0).
+  // Bloque 15: false si el juego conectado no tiene arte/nombres de
+  // medallas (X/Y por ahora) -- se muestran "Medalla N" sin sprites de Hoenn.
+  var badgeArt = true;
+  var badgeSpriteSet = "";
+  var leaderPortraits = [];
+  var hoennLeadersHtml = null;
+  var leaderPortraitsKey = "";
+  var leaguePortraitsKey = "";
+  var leaguePortraits = [];
+
+  function badgeSpriteUrl(index) {
+    return spriteBaseUrl + "/overlay/badges/sprites/" +
+      (badgeSpriteSet ? badgeSpriteSet + "/" : "") + (index + 1) + ".png";
+  }
+
+  function badgeNameFor(index) {
+    return (badgeArt && GYM_BADGE_NAMES[index]) || ("Medalla " + (index + 1));
+  }
+
   var GYM_BADGE_NAMES = [
     "Roca",
     "Cascada",
@@ -3138,19 +3195,77 @@
     grid.innerHTML = "";
 
     list.forEach(function (obtained, index) {
-      var name = GYM_BADGE_NAMES[index] || "Medalla " + (index + 1);
+      var name = badgeNameFor(index);
 
       var card = document.createElement("div");
       card.className = "medals-badge-card";
       card.innerHTML =
         '<span class="medals-badge-number">' + (index + 1) + "</span>" +
-        '<img src="' + spriteBaseUrl + "/overlay/badges/sprites/" + (index + 1) + '.png" alt=""' +
-        (obtained ? "" : ' class="pending"') + " />" +
+        (badgeArt
+          ? '<img src="' + badgeSpriteUrl(index) + '" alt=""' +
+            (obtained ? "" : ' class="pending"') + " />"
+          : "") +
         '<div class="medals-badge-name">' + name + "</div>" +
         '<div class="medals-badge-status' + (obtained ? " on" : "") + '">' +
         '<span class="dot"></span>' + (obtained ? "Obtenida" : "No obtenida") + "</div>";
       grid.appendChild(card);
     });
+
+    // Retratos propios del juego (Kalos): se reconstruye la grilla solo
+    // cuando cambia el juego; con [] vuelve el bloque de Hoenn original.
+    var leadersGrid = document.querySelector(".medals-leaders-grid");
+    if (leadersGrid && baseUrl) {
+      if (hoennLeadersHtml === null) {
+        hoennLeadersHtml = leadersGrid.innerHTML;
+      }
+      var portraitsKey = JSON.stringify(leaderPortraits);
+      if (portraitsKey !== leaderPortraitsKey) {
+        leaderPortraitsKey = portraitsKey;
+        if (leaderPortraits.length) {
+          leadersGrid.innerHTML = "";
+          leaderPortraits.forEach(function (leader) {
+            var card = document.createElement("div");
+            card.className = "medals-leader-card";
+            var img = document.createElement("img");
+            img.src = baseUrl + "/sprites/gym_leaders/" + leader.file;
+            img.alt = leader.name;
+            var name = document.createElement("span");
+            name.textContent = leader.name;
+            card.appendChild(img);
+            card.appendChild(name);
+            leadersGrid.appendChild(card);
+          });
+        } else {
+          leadersGrid.innerHTML = hoennLeadersHtml;
+          gymLeaderImagesInitialized = false;
+        }
+      }
+    }
+
+    // Alto Mando y campeón (P4): sección propia, cuerpos completos; se
+    // reconstruye solo cuando cambia el juego.
+    var leagueCard = document.getElementById("medals-league-card");
+    var leagueGrid = document.getElementById("medals-league-grid");
+    if (leagueCard && leagueGrid && baseUrl) {
+      var leagueKey = JSON.stringify(leaguePortraits);
+      if (leagueKey !== leaguePortraitsKey) {
+        leaguePortraitsKey = leagueKey;
+        leagueGrid.innerHTML = "";
+        leaguePortraits.forEach(function (member) {
+          var memberCard = document.createElement("div");
+          memberCard.className = "medals-leader-card";
+          var memberImg = document.createElement("img");
+          memberImg.src = baseUrl + "/sprites/gym_leaders/" + member.file;
+          memberImg.alt = member.name;
+          var memberName = document.createElement("span");
+          memberName.textContent = member.name;
+          memberCard.appendChild(memberImg);
+          memberCard.appendChild(memberName);
+          leagueGrid.appendChild(memberCard);
+        });
+        leagueCard.style.display = leaguePortraits.length ? "" : "none";
+      }
+    }
 
     // Retratos de los líderes de gimnasio (04/09/2026): contenido
     // 100% estático (los líderes de Hoenn no cambian), así que se
@@ -3558,6 +3673,17 @@
           return;
         }
 
+        // Bloque 13: función de escritura solo para juegos con la
+        // dirección confirmada.
+        if (data.bagWritingAvailable === false) {
+          note.hidden = false;
+          note.textContent =
+            "Esta herramienta todavía no está disponible para el juego conectado.";
+          note.classList.add("error");
+          button.disabled = true;
+          return;
+        }
+
         button.disabled = false;
         note.classList.remove("error");
         note.hidden = true;
@@ -3630,6 +3756,8 @@
         document.getElementById("cfg-refresh").value = data.realtime.refresh_ms;
         document.getElementById("cfg-app-version").textContent = data.appVersion;
         document.getElementById("cfg-hackroom-enabled").checked = !!data.hackroom.enabled;
+        // Bloque 13: el interruptor no aplica a juegos sin hackroom.
+        document.getElementById("cfg-hackroom-enabled").disabled = data.hackroom.available === false;
 
         setCfgStatus("cfg-connection-status", "", null);
         setCfgStatus("cfg-cache-status", "", null);
@@ -3973,6 +4101,8 @@
   // tiene un Pokémon real capturado del que sacar el speciesId).
   var nuzlockeSpeciesCatalog = null;
   var nuzlockeLocationCatalog = null;
+  // Juego al que corresponde el catálogo cacheado (Bloque 13).
+  var catalogProcessName = null;
   var nuzlockeSpeciesIdByLowerName = {};
   var nuzlockeCatalogsLoading = false;
 
@@ -4329,6 +4459,14 @@
         });
 
         nuzlockeCatalogsLoading = false;
+
+        // Bloque 13: una lista vacía (todavía no hay juego detectado
+        // o el juego no tiene catálogo) no se deja cacheada, para
+        // reintentar cuando haya un juego conectado.
+        if (nuzlockeLocationCatalog.length === 0) {
+          nuzlockeLocationCatalog = null;
+        }
+
         callback();
       })
       .catch(function (error) {
@@ -4441,7 +4579,13 @@
       }
     );
 
-    renderIfChanged("nz-next-leader", data.nextLeader || null, renderNuzlockeNextLeader);
+    var leadersAvailable = data.leadersAvailable !== false;
+
+    renderIfChanged(
+      "nz-next-leader",
+      leadersAvailable ? (data.nextLeader || null) : "unavailable",
+      renderNuzlockeNextLeader
+    );
     renderIfChanged("nz-leaders", data.gymLeaders || [], renderNuzlockeLeaders);
   }
 
@@ -4508,14 +4652,30 @@
     }
   }
 
+  // Etiqueta visible del estado (06/10/2026, a pedido del usuario):
+  // un Pokémon que se fue por intercambio se muestra como
+  // "Intercambiado" (el dato histórico -- ruta y estado -- no cambia,
+  // igual que en el panel original); un especial muestra solo su
+  // origen ("Fósil", "Shiny", "Huevo"...), sin el prefijo "Especial/".
   function nuzlockeStatusLabel(entry) {
+    if (entry.tradedAway) {
+      return "Intercambiado";
+    }
     if (entry.status === "especial" && entry.origin) {
-      return "Especial/" + (NZ_ORIGIN_LABELS[entry.origin] || entry.origin);
+      return NZ_ORIGIN_LABELS[entry.origin] || entry.origin;
     }
     if (entry.extraCapture) {
       return "Captura Extra";
     }
     return NZ_STATUS_LABELS[entry.status] || entry.status || "—";
+  }
+
+  // Clase de color de la píldora: "Intercambiado" tiene la suya, distinta
+  // de "Muerto"/"Perdido", para que se lea de un vistazo.
+  function nuzlockeStatusClass(entry) {
+    return entry.tradedAway
+      ? "intercambiado"
+      : entry.status || "sin_intentar";
   }
 
   // Posición de orden para una fila de la tabla (05/09/2026):
@@ -4621,6 +4781,9 @@
   function buildEncounterRow(entry, displayIndex, options) {
     var row = document.createElement("tr");
 
+    // Pokémon que se fue por intercambio: nombre y especie tachados.
+    row.classList.toggle("nz-row-traded", !!entry.tradedAway);
+
     var searchKey = (
       (entry.location || "") + " " + (entry.species || "") + " " + (entry.nickname || "")
     ).toLowerCase();
@@ -4667,7 +4830,7 @@
       "</span></td>" +
       "<td>" + escapeHtml(entry.nickname || "—") + "</td>" +
       "<td>" + (level != null ? level : "—") + "</td>" +
-      '<td><span class="nz-status-pill nz-status-' + (entry.status || "sin_intentar") + '">' +
+      '<td><span class="nz-status-pill nz-status-' + nuzlockeStatusClass(entry) + '">' +
       escapeHtml(nuzlockeStatusLabel(entry)) +
       "</span></td>" +
       deleteCell;
@@ -4943,6 +5106,53 @@
       return;
     }
 
+    if (nextLeader === "unavailable") {
+      // Bloque 13: el juego conectado no tiene datos de líderes.
+      body.innerHTML = '<p class="nz-empty-note">Los datos de líderes de este juego todavía no están disponibles.</p>';
+      if (btn) {
+        btn.hidden = true;
+      }
+      if (detailBtn) {
+        detailBtn.hidden = true;
+      }
+      return;
+    }
+
+    if (nextLeader && nextLeader.isLeague) {
+      // P4: con las 8 medallas, la tarjeta pasa al Alto Mando: rostros
+      // de los 4 miembros y el campeón en vez de los Pokémon, y como
+      // Lvl Cap el Pokémon más fuerte del primer miembro.
+      if (btn) {
+        btn.hidden = false;
+      }
+      if (detailBtn) {
+        detailBtn.hidden = false;
+      }
+
+      var facesHtml = (nextLeader.members || []).map(function (member) {
+        var faceUrl = spriteBaseUrl + "/sprites/gym_leaders/" + member.portraitFile;
+        return (
+          '<div class="nz-next-leader-face' + (member.kind === "champion" ? " champion" : "") + '" title="' + escapeHtml(member.nameEs || "") + '">' +
+          '<img src="' + faceUrl + '" alt="' + escapeHtml(member.nameEs || "") + '" onerror="this.style.visibility=\'hidden\'" />' +
+          "<span>" + escapeHtml(member.nameEs || "") + "</span>" +
+          "</div>"
+        );
+      }).join("");
+
+      body.innerHTML =
+        '<div class="nz-next-leader-info">' +
+        '<span class="nz-next-leader-name">Alto Mando</span>' +
+        '<span class="nz-next-leader-badge">y campeón</span>' +
+        '<span class="nz-next-leader-location">Liga Pokémon</span>' +
+        "</div>" +
+        '<div class="nz-next-leader-team nz-next-leader-faces">' + facesHtml + "</div>" +
+        '<div class="nz-next-leader-cap">' +
+        '<span class="nz-next-leader-cap-value">Nv. ' + nextLeader.levelCap + "</span>" +
+        '<span class="nz-next-leader-cap-label">Lvl Cap</span>' +
+        "</div>";
+      return;
+    }
+
     if (!nextLeader) {
       // Las 8 medallas ya están obtenidas -- no queda "líder
       // siguiente" que mostrar, no es un error ni un dato faltante.
@@ -4963,7 +5173,7 @@
       detailBtn.hidden = false;
     }
 
-    var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + nextLeader.portraitIndex + ".png";
+    var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + (nextLeader.portraitFile || (nextLeader.portraitIndex + ".png"));
 
     var teamHtml = (nextLeader.team || []).map(function (mon) {
       var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
@@ -5004,11 +5214,40 @@
     }
     container.innerHTML = "";
 
-    (leaders || []).forEach(function (leader) {
+    if (!leaders || leaders.length === 0) {
+      container.innerHTML = '<p class="nz-empty-note">Los datos de líderes de este juego todavía no están disponibles.</p>';
+      return;
+    }
+
+    // P4: pestaña "Bosses" con dos secciones, Líderes (con medalla) y
+    // Alto Mando (miembros + campeón, sin estado de progreso).
+    var gymLeaders = leaders.filter(function (leader) { return !leader.kind || leader.kind === "gym"; });
+    var leagueLeaders = leaders.filter(function (leader) { return leader.kind && leader.kind !== "gym"; });
+
+    function appendSectionTitle(text) {
+      var title = document.createElement("h3");
+      title.className = "nz-bosses-section-title";
+      title.textContent = text;
+      container.appendChild(title);
+    }
+
+    if (leagueLeaders.length) {
+      appendSectionTitle("Líderes");
+    }
+
+    gymLeaders.concat([null], leagueLeaders).forEach(function (leader) {
+      if (leader === null) {
+        if (leagueLeaders.length) {
+          appendSectionTitle("Alto Mando");
+        }
+        return;
+      }
+
+      var isGym = !leader.kind || leader.kind === "gym";
       var card = document.createElement("div");
       card.className = "nz-leader-card" + (leader.earned ? " earned" : "");
 
-      var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + leader.portraitIndex + ".png";
+      var portraitUrl = spriteBaseUrl + "/sprites/gym_leaders/" + (leader.portraitFile || (leader.portraitIndex + ".png"));
 
       var teamHtml = (leader.team || []).map(function (mon) {
         var spriteUrl = spriteBaseUrl + "/sprites/pokemon_shuffle/" + padSpeciesId(mon.speciesId) + ".png";
@@ -5078,16 +5317,20 @@
 
       card.innerHTML =
         '<div class="nz-leader-header">' +
-        '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" />' +
+        '<img class="nz-leader-portrait" src="' + portraitUrl + '" alt="" onerror="this.style.visibility=\'hidden\'" />' +
         '<div class="nz-leader-info">' +
         '<span class="nz-leader-name">' + escapeHtml(leader.nameEs || leader.name || "") + "</span>" +
-        '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>" +
+        (isGym
+          ? '<span class="nz-leader-badge">' + escapeHtml(leader.badgeNameEs || leader.badgeName || "") + "</span>"
+          : '<span class="nz-leader-badge">' + (leader.kind === "champion" ? "Campeón" : "Alto Mando") + "</span>") +
         '<span class="nz-leader-location">' + escapeHtml(leader.gymLocationEs || leader.gymLocation || "") + "</span>" +
         "</div>" +
         '<div class="nz-leader-header-actions">' +
-        '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
-        (leader.earned ? "Obtenida" : "Pendiente") +
-        "</span>" +
+        (isGym
+          ? '<span class="nz-leader-status-pill' + (leader.earned ? " earned" : "") + '">' +
+            (leader.earned ? "Obtenida" : "Pendiente") +
+            "</span>"
+          : "") +
         // Botón de solo ícono + tooltip (06/09/2026, mismo
         // tratamiento que "Detalle de equipo" de la tarjeta de
         // líder siguiente en Seguimiento -- ver .dash-icon-btn/

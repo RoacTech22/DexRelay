@@ -75,4 +75,7 @@ data/backups/
 !data/species_extra.json
 
 assets/pokemon/
-.git.zip
+.git.ziptools/probes/xy/salida/
+tools/probes/xy/salida/
+
+comprimir_dexrelay.bat

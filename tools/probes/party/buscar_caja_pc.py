@@ -42,7 +42,7 @@ COMO USARLO:
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PARTY_ORDER_ADDRESS,
     POKEMON_POINTER_OFFSET,
     SLOT_DATA_SIZE,

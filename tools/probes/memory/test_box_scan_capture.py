@@ -43,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from app.core.runtime import Runtime
 from app.core.state import ApplicationState
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     BOX_BASE_ADDRESS,
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
@@ -121,7 +121,7 @@ def test_read_boxes_range_pide_el_bloque_completo_de_7_cajas():
     por caja -- aprovechando que están confirmadas contiguas (ver
     get_box_address() en pointers.py).
     """
-    from app.memory.pointers import BOX_BLOCK_SIZE
+    from tools.probes.legacy_pointers import BOX_BLOCK_SIZE
 
     window_size = BOX_BLOCK_SIZE * 7
     reader = _make_reader(b"\x00" * window_size)
@@ -138,7 +138,7 @@ def test_read_boxes_range_pide_el_bloque_completo_de_7_cajas():
 
 
 def test_read_boxes_range_lectura_incompleta_devuelve_lista_vacia():
-    from app.memory.pointers import BOX_BLOCK_SIZE
+    from tools.probes.legacy_pointers import BOX_BLOCK_SIZE
 
     window_size = BOX_BLOCK_SIZE * 7
     reader = _make_reader(b"\x00" * (window_size - 10))

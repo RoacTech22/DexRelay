@@ -4,10 +4,7 @@ import glob
 import os
 from pathlib import Path
 
-from app.memory.pointers import (
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
-)
+from app.games.registry import all_profiles
 
 # Bajo (8 hex) del Title ID de cada juego -- son los mismos Title
 # IDs públicos y conocidos que ya usa
@@ -17,9 +14,13 @@ from app.memory.pointers import (
 # "aplicación" en 3DS.
 _TITLE_ID_HIGH = "00040000"
 
+#
+# Bloque 11 (ruta multijuego): el valor vive ahora en el perfil de cada
+# juego (`GameContent.title_id_low`).
 _TITLE_ID_LOW_BY_PROCESS = {
-    PROCESS_NAME_ALPHA_SAPPHIRE: "0011c500",
-    PROCESS_NAME_OMEGA_RUBY: "0011c400",
+    profile.key: profile.content.title_id_low
+    for profile in all_profiles()
+    if profile.content.title_id_low
 }
 
 # Nombre real del archivo de guardado dentro de

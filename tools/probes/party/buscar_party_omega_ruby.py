@@ -38,7 +38,7 @@ COMO USARLO:
 
 from app.core.config import Config
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import PARTY_ORDER_ADDRESS, SLOT_DATA_SIZE
+from tools.probes.legacy_pointers import PARTY_ORDER_ADDRESS, SLOT_DATA_SIZE
 from app.memory.structures import Pokemon6, decrypt_data
 
 

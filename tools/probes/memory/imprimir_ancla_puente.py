@@ -32,7 +32,7 @@ COMO USARLO:
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import PARTY_ORDER_ADDRESS
+from tools.probes.legacy_pointers import PARTY_ORDER_ADDRESS
 
 
 def main():

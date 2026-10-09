@@ -42,7 +42,7 @@ cambiaron respecto a la lectura anterior.
 import time
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PARTY_ORDER_ADDRESS,
     ORDER_ENTRY_SIZE,
 )

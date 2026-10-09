@@ -15,10 +15,8 @@ from PIL import Image, ImageTk
 from ttkbootstrap.constants import PRIMARY, SECONDARY, SUCCESS
 
 from app.core import paths
-from app.memory.pointers import (
-    PROCESS_NAME_ALPHA_SAPPHIRE,
-    PROCESS_NAME_OMEGA_RUBY,
-)
+PROCESS_NAME_ALPHA_SAPPHIRE = "sango-2"
+PROCESS_NAME_OMEGA_RUBY = "sango-1"
 
 LOGO_PATH = paths.path("assets", "ui", "dexrelay_logo.png")
 LOGO_DISPLAY_WIDTH = 320

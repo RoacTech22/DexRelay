@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from app.games.registry import get_profile
 from app.services.badges_service import BadgesService
 
 
@@ -26,6 +27,8 @@ class FakeReader:
     def __init__(self, value, process_name="sango-2"):
         self.memory = FakeMemoryReader(value)
         self.process_name = process_name
+        # Bloque 13: BadgesService lee la dirección del perfil del reader.
+        self.profile = get_profile(process_name)
 
 
 def test_badges():

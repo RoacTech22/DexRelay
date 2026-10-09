@@ -9,7 +9,12 @@ para pywebview/JS sigue siendo UNA sola clase con los mismos métodos públicos.
 
 from __future__ import annotations
 
-from app.memory.pointers import BOX_COUNT, BOX_SLOT_COUNT
+# Cajas de fábrica (7) y casilleros por caja (30): igual en ORAS y X/Y
+# (box_count de GameCapabilities y box_slot_count del MemoryMap). Antes
+# vivían en app/memory/pointers.py (retirado en P9).
+BOX_COUNT = 7
+BOX_SLOT_COUNT = 30
+
 from app.services.evolution_translations import (
     EVOLUTION_METHOD_COMPACT_LABELS,
     METHOD_KEYS_USING_ITEM_ARGUMENT,
@@ -345,7 +350,7 @@ class PokemonMixin:
         # los demás overrides de esta fase: solo se aplica con
         # hackroom.enabled prendido, y solo si este movimiento
         # puntual tiene algo documentado.
-        if self.app.config.get("hackroom", "enabled", default=False):
+        if self._hackroom_enabled():
 
             move_changes = self._hackroom_attack_changes_by_move.get(
                 move_id

@@ -46,7 +46,7 @@ ANTES DE USAR --confirmar POR PRIMERA VEZ:
 import argparse
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     RARE_CANDY_ITEM_ID,
     MEDICINE_POCKET_SCAN_SLOTS,
     get_medicine_pocket_start_address,

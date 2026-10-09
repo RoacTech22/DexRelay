@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DexRelay — Nuzlocke tracker and OBS overlays for Pokémon ORAS and X/Y on Azahar</title>
+  <meta name="description" content="DexRelay shows your team, badges, Pokédex and Nuzlocke in real time while you play Pokémon Omega Ruby, Alpha Sapphire, X or Y on Azahar, with OBS overlays. Free for Windows.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#030a16">
+  <link rel="canonical" href="https://roactech22.github.io/DexRelay/en/">
+  <link rel="alternate" hreflang="es" href="https://roactech22.github.io/DexRelay/">
+  <link rel="alternate" hreflang="en" href="https://roactech22.github.io/DexRelay/en/">
+  <link rel="alternate" hreflang="x-default" href="https://roactech22.github.io/DexRelay/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DexRelay">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="DexRelay — Nuzlocke tracker and OBS overlays for Pokémon ORAS and X/Y on Azahar">
+  <meta property="og:description" content="DexRelay shows your team, badges, Pokédex and Nuzlocke in real time while you play Pokémon Omega Ruby, Alpha Sapphire, X or Y on Azahar, with OBS overlays. Free for Windows.">
+  <meta property="og:url" content="https://roactech22.github.io/DexRelay/en/">
+  <meta property="og:image" content="https://roactech22.github.io/DexRelay/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="DexRelay: your companion for Pokémon ORAS and X/Y on Azahar">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DexRelay — Nuzlocke tracker and OBS overlays for Pokémon ORAS and X/Y on Azahar">
+  <meta name="twitter:description" content="DexRelay shows your team, badges, Pokédex and Nuzlocke in real time while you play Pokémon Omega Ruby, Alpha Sapphire, X or Y on Azahar, with OBS overlays. Free for Windows.">
+  <meta name="twitter:image" content="https://roactech22.github.io/DexRelay/assets/og-image.jpg">
+  <link rel="icon" href="../assets/dexrelay.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "DexRelay",
+    "description": "DexRelay shows your team, badges, Pokédex and Nuzlocke in real time while you play Pokémon Omega Ruby, Alpha Sapphire, X or Y on Azahar, with OBS overlays. Free for Windows.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Windows 10, Windows 11",
+    "softwareVersion": "0.5.0-alpha",
+    "url": "https://roactech22.github.io/DexRelay/en/",
+    "image": "https://roactech22.github.io/DexRelay/assets/og-image.jpg",
+    "downloadUrl": "https://github.com/RoacTech22/DexRelay/releases",
+    "inLanguage": "en",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "inLanguage": "en",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does DexRelay modify my game?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. DexRelay reads your game data from Azahar’s memory and shows it in real time. It does not modify your ROM or your save; the only exception is the optional Tools page, which adds a Rare Candy to the bag."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which games does it work with?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. DexRelay supports Pokémon Omega Ruby, Alpha Sapphire, X and Y running on Azahar."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work with Rising Ruby and Sinking Sapphire?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. DexRelay includes optional support for the Rising Ruby and Sinking Sapphire ROM hacks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to install .NET?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You do not need to install .NET to use the distributed version."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it free? What state is it in?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, DexRelay is free. It is currently in alpha (v0.5.0-alpha), so there may be bugs: you can report them on GitHub Issues."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use it with OBS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. DexRelay lets you use its overlays in OBS to show your game information."
+        }
+      }
+    ]
+  }
+]
+  </script>
+  <script>
+    (function () {
+      try {
+        var s = localStorage.getItem('dexrelay-lang'), cur = document.documentElement.lang;
+        if (s && s !== cur && /^(es|en)$/.test(s) && !location.hash) location.replace('../index.html');
+      } catch (_) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <a class="skip" href="#top">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-in">
+      <a class="brand" href="#top" aria-label="DexRelay home"><svg class="mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gmk1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38c6ff"/><stop offset="1" stop-color="#1273ff"/></linearGradient></defs><path d="M24 5.500a18.500 18.500 0 0 1 17 11.200" fill="none" stroke="url(#gmk1)" stroke-width="4.200" stroke-linecap="round"/><path d="M42.300 25.500A18.500 18.500 0 0 1 24 42.500" fill="none" stroke="url(#gmk1)" stroke-width="4.200" stroke-linecap="round"/><path d="M24 42.500A18.500 18.500 0 0 1 5.700 25.500" fill="none" stroke="url(#gmk1)" stroke-width="4.200" stroke-linecap="round"/><path d="M6.800 16.700A18.500 18.500 0 0 1 20 6" fill="none" stroke="url(#gmk1)" stroke-width="4.200" stroke-linecap="round"/><path d="M10 24h8.500M29.500 24H38" stroke="url(#gmk1)" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="24" r="4.800" fill="none" stroke="url(#gmk1)" stroke-width="3.600"/></svg><span class="wordmark">DEX<b>RELAY</b></span></a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
+      <nav class="nav" id="nav" aria-label="Main navigation">
+        <a href="#caracteristicas">Features</a>
+        <a href="#como-empezar">How it works</a>
+        <a class="nav-gh" href="https://github.com/RoacTech22/DexRelay" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
+</svg>GitHub</a>
+        <div class="lang" id="lang">
+          <button class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" aria-label="Language">
+            <svg class="svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.600 2.700 3.900 5.700 3.900 9S14.600 18.300 12 21c-2.600-2.700-3.900-5.700-3.900-9S9.400 5.700 12 3z" fill="none" stroke="currentColor" stroke-width="1.700"/></svg>
+            <span>EN</span>
+            <svg class="svg chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ul class="lang-menu" id="lang-menu" role="list">
+            <li><a href="../index.html" lang="es" hreflang="es" data-lang="es"><b>ES</b>Español</a></li>
+            <li><a href="index.html" lang="en" hreflang="en" data-lang="en" aria-current="true"><b>EN</b>English</a></li>
+          </ul>
+        </div>
+        <a class="btn btn-primary btn-sm" href="https://github.com/RoacTech22/DexRelay/releases" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M504.4 240.8V0L227.9 40.3v200.5zM208.4 43.2 7.6 72.5v168.3h200.8zM7.6 268.3v170.4l200.8 29.6v-200zM227.9 471.2 504.4 512V268.3H227.9z"/></svg>Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap hero-in">
+        <div class="hero-copy">
+          <div class="pill-eyebrow">POKÉMON ORAS · X/Y · <b>AZAHAR</b> · <span data-dr-version>v0.5.0-alpha</span></div>
+          <h1>Your companion for<br><span>Pokémon ORAS and X/Y<br>on Azahar</span></h1>
+          <p class="lead">Real-time team · Nuzlocke · Pokédex<br>Badges · OBS</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="https://github.com/RoacTech22/DexRelay/releases" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M504.4 240.8V0L227.9 40.3v200.5zM208.4 43.2 7.6 72.5v168.3h200.8zM7.6 268.3v170.4l200.8 29.6v-200zM227.9 471.2 504.4 512V268.3H227.9z"/></svg>Download for Windows <i class="arr">→</i></a>
+            <a class="btn btn-ghost btn-lg" href="https://github.com/RoacTech22/DexRelay" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
+</svg>View on GitHub</a>
+          </div>
+          <ul class="hero-meta">
+            <li><span class="m-ico m-win"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M504.4 240.8V0L227.9 40.3v200.5zM208.4 43.2 7.6 72.5v168.3h200.8zM7.6 268.3v170.4l200.8 29.6v-200zM227.9 471.2 504.4 512V268.3H227.9z"/></svg></span>Windows 10/11 x64</li>
+            <li><span class="m-ico"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 3 7.2v9.6l9 4.7 9-4.7V7.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 7.2l9 4.6 9-4.6M12 11.8v9.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>No .NET install needed</li>
+            <li><span class="m-ico"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 6.5V12l3.6 2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>100% free</li>
+          </ul>
+        </div>
+        <div class="hero-product" aria-hidden="false">
+          <div class="product-glow"></div>
+          <div class="tilt">
+            <img src="../assets/screens/dashboard-app.webp" width="1593" height="947" fetchpriority="high" decoding="async" alt="DexRelay dashboard showing the team, badges, location and Nuzlocke status">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUÉ ES -->
+    <section class="sec what" id="que-es">
+      <div class="wrap what-in">
+        <div class="what-copy">
+          <span class="eyebrow">WHAT IS DEXRELAY?</span>
+          <h2>Your game. Your data.<br><span>Your DexRelay.</span></h2>
+          <p>DexRelay connects Pokémon Omega Ruby, Alpha Sapphire, X and Y running on Azahar to an interface that keeps your game, your progress and your overlays always within reach.</p>
+        </div>
+
+        <div class="flow" aria-label="DexRelay data flow">
+          <div class="node node-src">
+            <strong>Azahar</strong><i class="plus">+</i><strong class="sm">Pokémon ORAS and X/Y</strong>
+            <div class="src-art">
+              <span class="src-3ds"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 253.86 183.07">
+  
+  <g>
+    <g>
+      <path  d="M253.57,172.94l-9.32-33.7c.12-.55.18-1.11.18-1.69V8c0-4.41-3.59-8-8-8H17.44c-4.41,0-8,3.59-8,8v129.55c0,.58.07,1.15.18,1.69L.3,172.94c-.7,2.52-.15,5.16,1.51,7.19,1.57,1.93,4.01,2.94,6.5,2.94h237.25c2.49,0,4.93-1.01,6.5-2.94,1.66-2.04,2.21-4.67,1.51-7.19ZM19.44,12c0-1.1.9-2,2-2h211c1.1,0,2,.9,2,2v121.55c0,1.1-.9,2-2,2H21.44c-1.1,0-2-.9-2-2V12ZM240.6,173.07H13.26c-1.32,0-2.28-1.26-1.93-2.53l6.5-23.49c.24-.87,1.03-1.47,1.93-1.47h214.35c.9,0,1.69.6,1.93,1.47l6.49,23.49c.35,1.27-.61,2.53-1.93,2.53Z"/>
+      <rect  x="36.88" y="151.87" width="180.12" height="5" rx="1" ry="1"/>
+      <rect  x="29.89" y="161.78" width="194.09" height="5" rx="1" ry="1"/>
+    </g>
+  </g>
+</svg></span>
+              <span class="src-game" style="background-image:url(../assets/bg_omega_ruby.jpg)"></span>
+            </div>
+          </div>
+          <div class="flow-label"><span>Real-time<br>data</span><i class="line"></i></div>
+          <div class="node node-core">
+            <svg class="mark-lg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gmk2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38c6ff"/><stop offset="1" stop-color="#1273ff"/></linearGradient></defs><path d="M24 5.500a18.500 18.500 0 0 1 17 11.200" fill="none" stroke="url(#gmk2)" stroke-width="4.200" stroke-linecap="round"/><path d="M42.300 25.500A18.500 18.500 0 0 1 24 42.500" fill="none" stroke="url(#gmk2)" stroke-width="4.200" stroke-linecap="round"/><path d="M24 42.500A18.500 18.500 0 0 1 5.700 25.500" fill="none" stroke="url(#gmk2)" stroke-width="4.200" stroke-linecap="round"/><path d="M6.800 16.700A18.500 18.500 0 0 1 20 6" fill="none" stroke="url(#gmk2)" stroke-width="4.200" stroke-linecap="round"/><path d="M10 24h8.500M29.500 24H38" stroke="url(#gmk2)" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="24" r="4.800" fill="none" stroke="url(#gmk2)" stroke-width="3.600"/></svg>
+            <strong>DexRelay</strong>
+            <ul>
+              <li>Reads your game data</li>
+              <li>Organizes the information</li>
+              <li>Generates overlays</li>
+            </ul>
+          </div>
+          <ul class="outs">
+            <li><span class="o-ico o-blue"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="12.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>Interface</li>
+            <li><span class="o-ico o-white"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 6.5V12l3.6 2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>OBS Overlays</li>
+            <li><span class="o-ico o-red"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5c-4.4 0-7.5 3-7.5 7 0 2.4 1.1 4.2 2.8 5.3V18c0 .8.6 1.5 1.5 1.5h.7V21h1.5v-1.5h1v1.5h1.5v-1.5h.7c.9 0 1.5-.7 1.5-1.5v-3.2c1.7-1.1 2.8-2.9 2.8-5.3 0-4-3.1-7-7.5-7z" fill="currentColor"/><circle cx="8.8" cy="10.8" r="1.9" fill="#07101e"/><circle cx="15.2" cy="10.8" r="1.9" fill="#07101e"/><path d="M12 13.6l-1 2h2z" fill="#07101e"/></svg></span>Nuzlocke</li>
+            <li><span class="o-ico o-white"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5v17M3.5 12H12" stroke="currentColor" stroke-width="1.8"/><circle cx="7.7" cy="7.7" r="1.6" fill="currentColor"/><circle cx="16.3" cy="16.3" r="1.6" fill="currentColor"/></svg></span>Pokédex</li>
+            <li><span class="o-ico o-gold"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="#f4b73a"/><circle cx="12" cy="12" r="6.3" fill="none" stroke="#a8670b" stroke-width="1.6"/><circle cx="12" cy="12" r="3.2" fill="#ffd978"/></svg></span>Badges</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARACTERÍSTICAS -->
+    <section class="sec features" id="caracteristicas">
+      <div class="wrap">
+        <span class="eyebrow">FEATURES</span>
+        <h2>Everything you <span>need</span> for your playthrough</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#46b0ff"/><stop offset="1" stop-color="#1b6dff"/></linearGradient></defs><circle cx="24" cy="15" r="8" fill="url(#gu)"/><path d="M8 40c0-8.6 7-13 16-13s16 4.400 16 13c0 1.300-1 2-2.200 2H10.200C9 42 8 41.300 8 40z" fill="url(#gu)"/><circle cx="9.500" cy="19" r="5.200" fill="#2f8cff" opacity=".85"/><path d="M0 36c0-5.400 4.200-8.500 9.500-8.500 1.500 0 2.800.2 4 .7-2.500 2.200-3.800 5.200-3.800 8.800v1.500H1.600C.7 38.500 0 37.800 0 36z" fill="#2f8cff" opacity=".85"/><circle cx="38.500" cy="19" r="5.200" fill="#2f8cff" opacity=".85"/><path d="M48 36c0-5.400-4.200-8.500-9.500-8.500-1.500 0-2.800.2-4 .7 2.500 2.200 3.800 5.200 3.800 8.800v1.500h8.100c.9 0 1.600-.7 1.600-2.500z" fill="#2f8cff" opacity=".85"/></svg></div>
+            <h3>Team<br>in real time</h3>
+            <p>Check your team, levels and status while you play.</p>
+            <a href="#d-team" data-dialog="d-team">View details <i>→</i></a>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b7a"/><stop offset="1" stop-color="#e0243f"/></linearGradient></defs><path d="M24 3C13.500 3 6.500 10.200 6.500 19.500c0 5.600 2.500 9.800 6.500 12.300V38c0 2 1.400 3.500 3.500 3.500H17V45h3v-3.500h2V45h3v-3.500h2V45h3v-3.500h.5c2.100 0 3.500-1.500 3.500-3.500v-6.200c4-2.500 6.500-6.700 6.500-12.300C41.500 10.200 34.500 3 24 3z" fill="url(#gs)"/><ellipse cx="16.800" cy="22.500" rx="4.400" ry="4.900" fill="#0b1220"/><ellipse cx="31.200" cy="22.500" rx="4.400" ry="4.900" fill="#0b1220"/><path d="M24 28.500l-2.400 4.500h4.800z" fill="#0b1220"/></svg></div>
+            <h3>Nuzlocke Tracker</h3>
+            <p>Log encounters, losses and progress in your Nuzlocke.</p>
+            <a href="#d-nuz" data-dialog="d-nuz">View details <i>→</i></a>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="21" fill="#f6f8fb"/><path d="M3 24C3 12.400 12.400 3 24 3s21 9.400 21 21H3z" fill="#e8353f"/><path d="M3 24h42" stroke="#1a2233" stroke-width="3.600"/><circle cx="24" cy="24" r="21" fill="none" stroke="#1a2233" stroke-width="3.200"/><circle cx="24" cy="24" r="7.500" fill="#f6f8fb" stroke="#1a2233" stroke-width="3.400"/></svg></div>
+            <h3>Pokédex</h3>
+            <p>Look up Pokémon info, types, stats, abilities and evolutions.</p>
+            <a href="#d-dex" data-dialog="d-dex">View details <i>→</i></a>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><radialGradient id="gm" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#ffe49a"/><stop offset=".6" stop-color="#f3b335"/><stop offset="1" stop-color="#b97511"/></radialGradient></defs><circle cx="24" cy="24" r="21" fill="url(#gm)"/><circle cx="24" cy="24" r="15" fill="none" stroke="#8e5508" stroke-width="3" opacity=".75"/><circle cx="24" cy="24" r="9" fill="#ffd36b"/><circle cx="24" cy="24" r="21" fill="none" stroke="#7a4706" stroke-width="2"/></svg></div>
+            <h3>Badges</h3>
+            <p>Track your gym progress and the badges you have earned.</p>
+            <a href="#d-med" data-dialog="d-med">View details <i>→</i></a>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9d7bff"/><stop offset="1" stop-color="#5b3fe0"/></linearGradient></defs><rect x="3" y="6" width="42" height="28" rx="4" fill="url(#gp)"/><rect x="7" y="10" width="34" height="20" rx="1.500" fill="#2a1f77"/><rect x="7" y="10" width="34" height="20" rx="1.500" fill="#6e5cf0" opacity=".55"/><path d="M17 42h14M24 34v8" stroke="url(#gp)" stroke-width="3.500" stroke-linecap="round"/></svg></div>
+            <h3>OBS</h3>
+            <p>Bring your game information straight to your stream.</p>
+            <a href="#d-obs" data-dialog="d-obs">View details <i>→</i></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- EN ACCIÓN -->
+    <section class="sec action" id="en-accion">
+      <div class="wrap action-in">
+        <div class="action-left">
+          <span class="eyebrow">DEXRELAY IN ACTION</span>
+          <h2>An interface designed for you</h2>
+          <p class="sub">Discover the main sections of DexRelay.</p>
+          <div class="shot shot-main">
+            <img src="../assets/screens/dashboard-app.webp" width="1593" height="947" alt="DexRelay Dashboard screen: team, badges and Azahar status" loading="lazy" decoding="async">
+          </div>
+          <div class="shot-cap"><span class="tag tag-blue">Dashboard</span><p>All your game information in one place.</p></div>
+        </div>
+        <div class="action-right">
+          <article class="mini mini-teal">
+            <span class="tag tag-teal">Team</span>
+            <p>Check your team in real time.</p>
+            <div class="mini-img"><img src="../assets/screens/team-app.webp" width="1593" height="949" alt="DexRelay Team screen with the six Pokémon, their moves and stats" loading="lazy" decoding="async"></div>
+          </article>
+          <article class="mini mini-red">
+            <span class="tag tag-red">Nuzlocke</span>
+            <p>Log encounters, losses and progress.</p>
+            <div class="mini-img"><img src="../assets/screens/nuzlocke-app.webp" width="1591" height="947" alt="DexRelay Nuzlocke screen with encounters, losses and stats" loading="lazy" decoding="async"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- STREAM -->
+    <section class="sec stream" id="stream">
+      <div class="wrap stream-in">
+        <div class="stream-copy">
+          <h2>Your game is also<br>part of <span>the stream</span></h2>
+          <p>Connect DexRelay overlays to OBS and show your game information right on top of the gameplay.</p>
+          <ul class="chips">
+            <li><span class="c-ico c-blue"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#46b0ff"/><stop offset="1" stop-color="#1b6dff"/></linearGradient></defs><circle cx="24" cy="15" r="8" fill="url(#gu)"/><path d="M8 40c0-8.6 7-13 16-13s16 4.400 16 13c0 1.300-1 2-2.200 2H10.200C9 42 8 41.300 8 40z" fill="url(#gu)"/><circle cx="9.500" cy="19" r="5.200" fill="#2f8cff" opacity=".85"/><path d="M0 36c0-5.400 4.200-8.500 9.500-8.500 1.500 0 2.800.2 4 .7-2.500 2.200-3.800 5.200-3.800 8.800v1.500H1.600C.7 38.500 0 37.800 0 36z" fill="#2f8cff" opacity=".85"/><circle cx="38.500" cy="19" r="5.200" fill="#2f8cff" opacity=".85"/><path d="M48 36c0-5.400-4.200-8.500-9.500-8.500-1.500 0-2.800.2-4 .7 2.500 2.200 3.800 5.200 3.800 8.800v1.500h8.100c.9 0 1.600-.7 1.600-2.500z" fill="#2f8cff" opacity=".85"/></svg></span>Team</li>
+            <li><span class="c-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><radialGradient id="gm" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#ffe49a"/><stop offset=".6" stop-color="#f3b335"/><stop offset="1" stop-color="#b97511"/></radialGradient></defs><circle cx="24" cy="24" r="21" fill="url(#gm)"/><circle cx="24" cy="24" r="15" fill="none" stroke="#8e5508" stroke-width="3" opacity=".75"/><circle cx="24" cy="24" r="9" fill="#ffd36b"/><circle cx="24" cy="24" r="21" fill="none" stroke="#7a4706" stroke-width="2"/></svg></span>Badges</li>
+            <li><span class="c-ico"><svg class="svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b7a"/><stop offset="1" stop-color="#e0243f"/></linearGradient></defs><path d="M24 3C13.500 3 6.500 10.200 6.500 19.500c0 5.600 2.500 9.800 6.500 12.300V38c0 2 1.400 3.500 3.500 3.500H17V45h3v-3.500h2V45h3v-3.500h2V45h3v-3.500h.5c2.100 0 3.500-1.500 3.500-3.500v-6.200c4-2.500 6.500-6.700 6.500-12.300C41.500 10.200 34.500 3 24 3z" fill="url(#gs)"/><ellipse cx="16.800" cy="22.500" rx="4.400" ry="4.900" fill="#0b1220"/><ellipse cx="31.200" cy="22.500" rx="4.400" ry="4.900" fill="#0b1220"/><path d="M24 28.500l-2.400 4.500h4.800z" fill="#0b1220"/></svg></span>Nuzlocke</li>
+          </ul>
+        </div>
+        <div class="stream-visual">
+          <img src="../assets/stream.webp" width="1101" height="619" alt="Pokémon gameplay with DexRelay OBS overlays showing the team, badges and chat" loading="lazy" decoding="async">
+        </div>
+      </div>
+    </section>
+
+
+    <!-- OBS EN 4 PASOS -->
+    <section class="sec obs" id="obs">
+      <div class="wrap obs-in">
+        <div class="obs-copy">
+          <span class="eyebrow">OBS OVERLAYS</span>
+          <h2>Connect it to OBS <span>in 4 steps</span></h2>
+          <ol class="obs-steps">
+            <li><b>1</b><span>Open DexRelay and go to <strong>Overlays</strong>.</span></li>
+            <li><b>2</b><span>Copy the URL of the overlay you want to use.</span></li>
+            <li><b>3</b><span>In OBS Studio, add a <strong>Browser</strong> source and paste the URL.</span></li>
+            <li><b>4</b><span>Adjust the size and position to your liking.</span></li>
+          </ol>
+          <p class="obs-note">DexRelay must be open with the server running for the overlays to update.</p>
+        </div>
+        <div class="obs-table" role="table" aria-label="Available overlays">
+          <div class="ot-row ot-head" role="row"><span role="columnheader">Overlay</span><span role="columnheader">Size</span><span role="columnheader">URL</span></div>
+          <div class="ot-row" role="row"><span role="cell"><b>Team</b><small>Your live team</small></span><span role="cell">1170×210</span><span role="cell"><code>http://localhost:8080/overlay/team</code></span></div>
+          <div class="ot-row" role="row"><span role="cell"><b>Badges</b><small>Your badges</small></span><span role="cell">656×100</span><span role="cell"><code>http://localhost:8080/overlay/badges</code></span></div>
+          <div class="ot-row" role="row"><span role="cell"><b>Nuzlocke</b><small>Graveyard and stats</small></span><span role="cell">376×177</span><span role="cell"><code>http://localhost:8080/overlay/nuzlocke</code></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROMHACKS -->
+    <section class="sec romhack" id="romhacks">
+      <div class="rh-art rh-ruby" aria-hidden="true"></div>
+      <div class="rh-art rh-sapphire" aria-hidden="true"></div>
+      <div class="wrap">
+        <h2>Also for <span>Rising Ruby</span> and <span>Sinking Sapphire</span></h2>
+        <p>DexRelay includes optional support for the Rising Ruby and Sinking Sapphire ROM hacks.</p>
+        <div class="rh-row">
+          <span class="rh-pill rh-pill-ruby"><svg class="svg pb" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".18"/><path d="M12 4.500a7.500 7.500 0 0 1 7.500 7.500h-15A7.500 7.500 0 0 1 12 4.500z" fill="currentColor"/><path d="M4.500 12h15" stroke="currentColor" stroke-width="1.600"/><circle cx="12" cy="12" r="2.600" fill="#07101e" stroke="currentColor" stroke-width="1.600"/></svg>Rising Ruby</span>
+          <span class="rh-pill rh-pill-sapphire"><svg class="svg pb" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".18"/><path d="M12 4.500a7.500 7.500 0 0 1 7.500 7.500h-15A7.500 7.500 0 0 1 12 4.500z" fill="currentColor"/><path d="M4.500 12h15" stroke="currentColor" stroke-width="1.600"/><circle cx="12" cy="12" r="2.600" fill="#07101e" stroke="currentColor" stroke-width="1.600"/></svg>Sinking Sapphire</span>
+          <span class="rh-tags"><span><svg class="svg dot" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.500" fill="currentColor"/></svg>ORAS · X/Y</span><span><svg class="svg dot" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.500" fill="currentColor"/></svg>Azahar</span><span><svg class="svg dot" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.500" fill="currentColor"/></svg>Update 1.4 / 1.5</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓMO EMPEZAR -->
+    <section class="sec how" id="como-empezar">
+      <div class="wrap">
+        <h2>How to get started</h2>
+        <p class="sub">DexRelay up and running in just 3 steps.</p>
+        <div class="steps">
+          <article class="step"><b class="num">1</b><div><h3>Download</h3><p>Download DexRelay for Windows.</p></div></article>
+          <i class="step-arr" aria-hidden="true">→</i>
+          <article class="step"><b class="num">2</b><div><h3>Connect</h3><p>Open Azahar with your Pokémon ORAS, X or Y game.</p></div></article>
+          <i class="step-arr" aria-hidden="true">→</i>
+          <article class="step"><b class="num">3</b><div><h3>Play</h3><p>Start DexRelay and let the data show up in real time.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUISITOS + FAQ -->
+    <section class="sec reqfaq" id="requisitos">
+      <div class="wrap reqfaq-in">
+        <article class="panel req">
+          <h2>Requirements</h2>
+          <p class="sub">Designed to work without hassle.</p>
+          <ul>
+            <li><span class="r-ico r-win"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M504.4 240.8V0L227.9 40.3v200.5zM208.4 43.2 7.6 72.5v168.3h200.8zM7.6 268.3v170.4l200.8 29.6v-200zM227.9 471.2 504.4 512V268.3H227.9z"/></svg></span>Windows 10 / 11 (x64)</li>
+            <li><span class="r-ico r-azahar"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148.08 192.83">
+  
+  <g>
+    <g>
+      <path  d="M136.58,192.83H11.5c-6.35,0-11.5-5.15-11.5-11.5V11.5C0,5.15,5.15,0,11.5,0h125.08c6.35,0,11.5,5.15,11.5,11.5v169.83c0,6.35-5.15,11.5-11.5,11.5ZM19,177.83h110.08c2.21,0,4-1.79,4-4V19c0-2.21-1.79-4-4-4H19c-2.21,0-4,1.79-4,4v154.83c0,2.21,1.79,4,4,4Z"/>
+      <rect  x="26.84" y="25.4" width="92.94" height="67.46" rx="5" ry="5"/>
+      <circle  cx="90.84" cy="134.16" r="9.36"/>
+      <circle  cx="110.42" cy="151.98" r="9.36"/>
+      <rect  x="40.58" y="124.89" width="8.87" height="36.35" rx="1.27" ry="1.27"/>
+      <rect  x="26.84" y="138.63" width="36.35" height="8.87" rx="1.27" ry="1.27"/>
+    </g>
+  </g>
+</svg></span>Azahar</li>
+            <li><span class="r-ico r-game" style="background-image:url(../assets/bg_omega_ruby.jpg)"></span>Pokémon Omega Ruby / Alpha Sapphire</li><li><span class="r-ico r-game" style="background-image:url(../assets/bg_pokemon_x.jpg)"></span>Pokémon X / Y</li>
+            <li><span class="r-ico r-upd"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="#1493ff" opacity=".22"/><path d="M17.500 12a5.500 5.500 0 1 1-1.700-4" fill="none" stroke="#38b6ff" stroke-width="1.900" stroke-linecap="round"/><path d="M17.800 4.800v3.600h-3.600" fill="none" stroke="#38b6ff" stroke-width="1.900" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Update 1.4 (ORAS) · 1.5 (X/Y)</li>
+          </ul>
+        </article>
+
+        <article class="panel faq" id="faq">
+          <div class="faq-head"><h2>Frequently asked questions</h2><button type="button" class="faq-all" id="faqAll">View all →</button></div>
+          <div class="faq-list">
+            <details><summary>Does DexRelay modify my game?</summary><div>No. DexRelay reads your game data from Azahar’s memory and shows it in real time. It does not modify your ROM or your save; the only exception is the optional Tools page, which adds a Rare Candy to the bag.</div></details>
+            <details><summary>Which games does it work with?</summary><div>Yes. DexRelay supports Pokémon Omega Ruby, Alpha Sapphire, X and Y running on Azahar.</div></details>
+            <details><summary>Does it work with Rising Ruby and Sinking Sapphire?</summary><div>Yes. DexRelay includes optional support for the Rising Ruby and Sinking Sapphire ROM hacks.</div></details>
+            <details><summary>Do I need to install .NET?</summary><div>You do not need to install .NET to use the distributed version.</div></details>
+            <details><summary>Is it free? What state is it in?</summary><div>Yes, DexRelay is free. It is currently in alpha (<span data-dr-version>v0.5.0-alpha</span>), so there may be bugs: you can report them on GitHub Issues.</div></details>
+            <details><summary>Can I use it with OBS?</summary><div>Yes. DexRelay lets you use its overlays in OBS to show your game information.</div></details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+
+    <!-- TRANSPARENCIA -->
+    <section class="sec trust" id="transparencia">
+      <div class="wrap">
+        <h2>Transparent <span>by design</span></h2>
+        <div class="trust-grid">
+          <article class="trust-card"><div class="t-ico"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1.5 12S5.500 5 12 5s10.500 7 10.500 7-4 7-10.500 7S1.500 12 1.500 12z" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.200" fill="none" stroke="currentColor" stroke-width="1.800"/></svg></div><h3>Reads, does not modify</h3><p>DexRelay reads the game’s memory live. It does not modify your ROM or your save; the only exception is the optional Tools page, which adds a Rare Candy to the bag.</p></article>
+          <article class="trust-card"><div class="t-ico"><svg class="svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.500" y="4" width="19" height="12.500" rx="2" fill="none" stroke="currentColor" stroke-width="1.800"/><path d="M8 20.500h8M12 16.500v4" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/><path d="M7 10.500l2.200 2L7 14.500M11.500 14.500H15" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Everything on your PC</h3><p>Data and overlays are served from your own computer (localhost), without relying on an external service.</p></article>
+          <article class="trust-card"><div class="t-ico"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
+</svg></div><h3>Project on GitHub</h3><p>Follow development, download each release and report bugs in Issues. DexRelay is in alpha and improves with your feedback.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta" id="descargar">
+      <div class="cta-bg" aria-hidden="true"></div>
+      <div class="wrap cta-in">
+        <div>
+          <h2>Your game.<br>Your data.<br>Your <span>DexRelay.</span></h2>
+          <p>Take your Pokémon ORAS, X or Y game one step further.</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary btn-xl" href="https://github.com/RoacTech22/DexRelay/releases" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512"><path d="M504.4 240.8V0L227.9 40.3v200.5zM208.4 43.2 7.6 72.5v168.3h200.8zM7.6 268.3v170.4l200.8 29.6v-200zM227.9 471.2 504.4 512V268.3H227.9z"/></svg>Download for Windows <i class="arr">→</i></a>
+          <a class="btn btn-ghost btn-xl" href="https://github.com/RoacTech22/DexRelay" target="_blank" rel="noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
+</svg>View on GitHub</a>
+          <p class="cta-note">Latest version: <b><span data-dr-version>v0.5.0-alpha</span></b> · pre-release · Windows x64</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap foot-in">
+      <div class="foot-brand">
+        <a class="brand" href="#top" aria-label="DexRelay"><svg class="mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="gmk3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38c6ff"/><stop offset="1" stop-color="#1273ff"/></linearGradient></defs><path d="M24 5.500a18.500 18.500 0 0 1 17 11.200" fill="none" stroke="url(#gmk3)" stroke-width="4.200" stroke-linecap="round"/><path d="M42.300 25.500A18.500 18.500 0 0 1 24 42.500" fill="none" stroke="url(#gmk3)" stroke-width="4.200" stroke-linecap="round"/><path d="M24 42.500A18.500 18.500 0 0 1 5.700 25.500" fill="none" stroke="url(#gmk3)" stroke-width="4.200" stroke-linecap="round"/><path d="M6.800 16.700A18.500 18.500 0 0 1 20 6" fill="none" stroke="url(#gmk3)" stroke-width="4.200" stroke-linecap="round"/><path d="M10 24h8.500M29.500 24H38" stroke="url(#gmk3)" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="24" r="4.800" fill="none" stroke="url(#gmk3)" stroke-width="3.600"/></svg><span class="wordmark">DEX<b>RELAY</b></span></a>
+        <p>Your companion for Pokémon ORAS and X/Y on Azahar.</p>
+      </div>
+      <nav class="foot-links" aria-label="Links">
+        <a href="https://github.com/RoacTech22/DexRelay" target="_blank" rel="noopener noreferrer"><svg class="ico" aria-hidden="true" focusable="false" fill="currentColor" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="currentColor"/>
+</svg>GitHub</a>
+        <a href="https://github.com/RoacTech22/DexRelay/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+        <a href="https://github.com/RoacTech22/DexRelay/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+      </nav>
+      <p class="legal">DexRelay is an independent project and is not part of Nintendo.</p>
+    </div>
+  </footer>
+
+
+  <dialog class="dlg" id="d-team" aria-labelledby="d-team-t">
+    <div class="dlg-in">
+      <button class="dlg-x" type="button" data-close aria-label="Close">×</button>
+      <div class="dlg-copy"><h3 id="d-team-t">Real-time team</h3><p>Your current team, exactly as it is in the game, while you play.</p><ul><li>All 6 Pokémon with level, types, HP and status.</li><li>General, Team and Box tabs, covering your 7 boxes.</li><li>Details for each Pokémon: ability, stats and moves with PP, power and accuracy.</li><li>Gender icon next to the level, with a compact or expanded view.</li></ul></div>
+      <div class="dlg-img"><img src="../assets/screens/team-app.webp" width="1593" height="949" alt="DexRelay Team screen with the six Pokémon, their moves and stats" loading="lazy" decoding="async"></div>
+    </div>
+  </dialog>
+  <dialog class="dlg" id="d-nuz" aria-labelledby="d-nuz-t">
+    <div class="dlg-in">
+      <button class="dlg-x" type="button" data-close aria-label="Close">×</button>
+      <div class="dlg-copy"><h3 id="d-nuz-t">Nuzlocke Tracker</h3><p>Keep track of your Nuzlocke without spreadsheets.</p><ul><li>Automatic encounter capture: DexRelay detects the route and whether the Pokémon is shiny.</li><li>Permanent graveyard: a fallen Pokémon never returns to the team, even if its HP goes back up.</li><li>Editable rules: enable, add or remove the rules of your challenge.</li><li>Gym leader tracking with the level cap and each leader’s full team.</li><li>Summary with alive, fallen, encounters and progress.</li></ul></div>
+      <div class="dlg-img"><img src="../assets/screens/nuzlocke-app.webp" width="1591" height="947" alt="DexRelay Nuzlocke screen with encounters, losses and stats" loading="lazy" decoding="async"></div>
+    </div>
+  </dialog>
+  <dialog class="dlg" id="d-dex" aria-labelledby="d-dex-t">
+    <div class="dlg-in">
+      <button class="dlg-x" type="button" data-close aria-label="Close">×</button>
+      <div class="dlg-copy"><h3 id="d-dex-t">Pokédex</h3><p>Look up any Pokémon without leaving the game.</p><ul><li>Types, base stats and abilities, including the hidden one.</li><li>Evolution tree with all of its branches.</li><li>Weaknesses, resistances and immunities calculated from the type chart.</li><li>Height, weight and category of each species.</li></ul></div>
+      <div class="dlg-img"><img src="../assets/screens/pokedex-app.webp" width="895" height="679" alt="DexRelay Pokédex entry with base stats, evolution, weaknesses and resistances" loading="lazy" decoding="async"></div>
+    </div>
+  </dialog>
+  <dialog class="dlg" id="d-med" aria-labelledby="d-med-t">
+    <div class="dlg-in">
+      <button class="dlg-x" type="button" data-close aria-label="Close">×</button>
+      <div class="dlg-copy"><h3 id="d-med-t">Badges</h3><p>Track your gym progress.</p><ul><li>X/8 progress and a grid of the 8 badges, highlighting the ones you have earned.</li><li>Value read from Azahar’s memory, with a bit-by-bit breakdown.</li><li>Data and portraits of the gym leaders.</li><li>Badge overlay ready for your stream.</li></ul></div>
+      <div class="dlg-img"><img src="../assets/screens/medallas-app.webp" width="1407" height="860" alt="DexRelay Badges screen with gym progress and the 8 badges" loading="lazy" decoding="async"></div>
+    </div>
+  </dialog>
+  <dialog class="dlg" id="d-obs" aria-labelledby="d-obs-t">
+    <div class="dlg-in">
+      <button class="dlg-x" type="button" data-close aria-label="Close">×</button>
+      <div class="dlg-copy"><h3 id="d-obs-t">OBS overlays</h3><p>Three overlays ready for your stream.</p><ul><li>Team (1170×210), Badges (656×100) and Nuzlocke (376×177).</li><li>Copy the URL and paste it into an OBS Browser source.</li><li>In-app preview and Team Overlay editor: HP, level, nickname and sprite set.</li><li>Animations for entry, evolution, level up and defeat.</li></ul></div>
+      <div class="dlg-img"><img src="../assets/screens/overlays-app.webp" width="1456" height="612" alt="DexRelay Overlays screen with Team, Badges and Nuzlocke and their URLs" loading="lazy" decoding="async"></div>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      var tg = document.querySelector('.nav-toggle'), nav = document.getElementById('nav');
+      if (tg && nav) {
+        tg.addEventListener('click', function () {
+          var o = nav.classList.toggle('open');
+          tg.setAttribute('aria-expanded', o); tg.setAttribute('aria-label', o ? 'Close menu' : 'Open menu');
+        });
+        nav.addEventListener('click', function (e) { if (e.target.closest('a')) { nav.classList.remove('open'); tg.setAttribute('aria-expanded', 'false'); } });
+      }
+    })();
+    (function () {
+      var box = document.getElementById('lang'); if (!box) return;
+      var btn = box.querySelector('.lang-btn');
+      function set(o) { box.classList.toggle('open', o); btn.setAttribute('aria-expanded', o); }
+      btn.addEventListener('click', function (e) { e.stopPropagation(); set(!box.classList.contains('open')); });
+      document.addEventListener('click', function (e) { if (!box.contains(e.target)) set(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); btn.focus(); } });
+      box.querySelectorAll('a[data-lang]').forEach(function (a) {
+        a.addEventListener('click', function () { try { localStorage.setItem('dexrelay-lang', a.getAttribute('data-lang')); } catch (_) {} });
+      });
+    })();
+    (function () {
+      document.querySelectorAll('[data-dialog]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var d = document.getElementById(a.getAttribute('data-dialog'));
+          if (d && d.showModal) { e.preventDefault(); d.showModal(); }
+        });
+      });
+      document.querySelectorAll('dialog.dlg').forEach(function (d) {
+        d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
+      });
+    })();
+    (function () {
+      var btn = document.getElementById('faqAll');
+      if (!btn) return;
+      var items = document.querySelectorAll('#faq details');
+      var open = false;
+      btn.addEventListener('click', function () {
+        open = !open;
+        items.forEach(function (d) { d.open = open; });
+        btn.textContent = open ? 'Hide →' : 'View all →';
+      });
+    })();
+  </script>
+
+  <script>
+    /* Versión automática: lee el último release publicado en GitHub (incluye pre-releases)
+       y actualiza todos los textos marcados con data-dr-version. Si falla (sin red, límite de
+       la API), queda el texto estático del HTML. Se guarda 1 h en sessionStorage. */
+    (function () {
+      var els = document.querySelectorAll('[data-dr-version]');
+      if (!els.length) return;
+      function apply(tag) {
+        if (!/^v\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/.test(tag)) return;
+        els.forEach(function (el) { el.textContent = tag; });
+      }
+      var KEY = 'dr-latest-release', TTL = 3600000;
+      try {
+        var c = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+        if (c && Date.now() - c.t < TTL) { apply(c.tag); return; }
+      } catch (e) { }
+      fetch('https://api.github.com/repos/RoacTech22/DexRelay/releases?per_page=1', { headers: { Accept: 'application/vnd.github+json' } })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (d) {
+          var tag = d && d[0] && d[0].tag_name; if (!tag) return;
+          apply(tag);
+          try { sessionStorage.setItem(KEY, JSON.stringify({ tag: tag, t: Date.now() })); } catch (e) { }
+        })
+        .catch(function () { });
+    })();
+  </script>
+</body>
+</html>

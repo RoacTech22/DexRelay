@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime, timezone
+
+from app.games.base import SpecialRules
 
 
 def _now_iso() -> str:
@@ -31,6 +34,28 @@ def _now_iso() -> str:
 # criterio que ya usa LocationCatalog/LocationResolver en otros
 # lados del proyecto).
 DEVON_CORP_LOCATION_ID = 190
+
+# Qué lugares cuentan como "solo un fósil pudo salir de aquí" cuando el
+# servicio se crea SIN perfil de juego (tests y scripts viejos): el
+# comportamiento histórico de Hoenn. Con perfil (P3, paridad X/Y) manda
+# `profile.content.special_rules.fossil_location_ids`.
+_LEGACY_SPECIAL_RULES = SpecialRules(
+    fossil_location_ids=frozenset({DEVON_CORP_LOCATION_ID})
+)
+
+# Cuánto vale una baja de fósiles de la bolsa para emparejarla con el
+# Pokémon que sale (P3). Medido en vivo en Pokémon Y el 06/10/2026: la
+# cantidad baja 13-15 s ANTES de que aparezca el Pokémon (dos casos);
+# 60 s deja un margen de ~4x sin dejar una baja vieja a la espera.
+FOSSIL_DROP_WINDOW_SECONDS = 60.0
+
+# Lugar de encuentro de un Pokémon recibido por intercambio con un NPC.
+# Es el mismo ID en toda la Gen 6 (las listas de AS y de X son idénticas
+# en 30001) y se confirmó en vivo en Pokémon Y (06/10/2026): PKHeX lo
+# devuelve en ESPAÑOL ("Intercambio (NPC)"), no como el "a Link Trade
+# (NPC)" en inglés que se vio en ORAS el 28/08/2026, así que el texto
+# solo no alcanza: se detecta también por ID.
+TRADE_NPC_LOCATION_IDS = frozenset({30001})
 
 
 class NuzlockeService:
@@ -66,9 +91,38 @@ class NuzlockeService:
     Documento Maestro, sección 3: "Estado actual vs. historial").
     """
 
-    def __init__(self, storage) -> None:
+    def __init__(
+        self,
+        storage,
+        profile_provider=None,
+        clock=None,
+        place_provider=None,
+    ) -> None:
         self.storage = storage
         self._data = None
+
+        # Fósil por la bolsa (P3, 06/10/2026): cantidad total de
+        # fósiles vista en la última lectura y los instantes de las
+        # bajas todavía sin emparejar con un Pokémon nuevo. Solo en
+        # memoria (una baja vale unos segundos). `clock` se inyecta
+        # en los tests.
+        self._clock = clock or time.monotonic
+
+        # Lugar donde está el jugador ahora (nombre del catálogo, o None
+        # si no se puede resolver). Solo se consulta al registrar un
+        # intercambio de un juego con `anchor_specials_to_place`.
+        self._place_provider = place_provider
+        self._last_fossil_count = None
+        self._fossil_drops = []
+
+        # P3 (paridad X/Y): las señales de reglas especiales que
+        # dependen del juego (hoy, el lugar donde se revive un
+        # fósil) salen del perfil activo. `profile_provider` es un
+        # callable sin argumentos (mismo patrón que LocationCatalog
+        # y CombatService). None = sin perfil -> comportamiento
+        # histórico de Hoenn. Un provider que devuelve None (juego
+        # sin perfil) apaga la señal en vez de caer a Hoenn.
+        self._profile_provider = profile_provider
 
         # Detección de "se fue por intercambio" (28/08/2026, ver
         # update()). Solo en memoria -- no hace falta persistir
@@ -76,6 +130,69 @@ class NuzlockeService:
         # es no detectar UN intercambio si la app se reinicia justo
         # en el medio, un caso extremadamente raro.
         self._last_visible_nicknames = None
+
+    def _special_rules(self) -> SpecialRules:
+        """
+        Reglas especiales del juego activo (ver SpecialRules). Sin
+        provider: comportamiento histórico de Hoenn; con un provider
+        que devuelve None (juego sin perfil): todo apagado.
+        """
+
+        if self._profile_provider is None:
+            return _LEGACY_SPECIAL_RULES
+
+        profile = self._profile_provider()
+
+        if profile is None:
+            return SpecialRules()
+
+        return profile.content.special_rules
+
+    def _anchor_for_trade(self, rules) -> str | None:
+        """
+        Ancla de la fila "Intercambiado" (P3): el lugar donde está el
+        jugador al recibir el Pokémon, si el juego lo pide. Sin lugar
+        resuelto (zona sin tabla), cae a la ruta del último encuentro
+        real registrado, que es lo más cercano a "dónde estaba".
+        """
+
+        if not rules.anchor_specials_to_place:
+            return None
+
+        place = None
+
+        if self._place_provider is not None:
+            try:
+                place = self._place_provider()
+            except Exception:  # noqa: BLE001
+                place = None
+
+        return place or self._last_route_location()
+
+    def _last_route_location(self) -> str | None:
+        """
+        Ubicación del encuentro de ruta real actualizado más
+        recientemente (se ignoran "Inicial" y las filas con origen
+        especial o ancla propia), o None.
+        """
+
+        best = None
+
+        for entry in self.get_encounters():
+            if (
+                entry.get("location") == "Inicial"
+                or entry.get("origin")
+                or entry.get("anchorLocation")
+                or entry.get("status") not in ("capturado", "perdido", "muerto")
+            ):
+                continue
+
+            if best is None or (entry.get("updatedAt") or "") >= (
+                best.get("updatedAt") or ""
+            ):
+                best = entry
+
+        return best["location"] if best else None
 
     def switch_storage(self, storage) -> None:
         """
@@ -97,6 +214,51 @@ class NuzlockeService:
         self.storage = storage
         self._data = None
         self._last_visible_nicknames = None
+        self._last_fossil_count = None
+        self._fossil_drops = []
+
+    def _track_fossil_count(self, fossil_count) -> None:
+        """
+        Registra una baja por cada fósil que desapareció de la bolsa
+        desde la lectura anterior. `None` (juego sin esta señal o
+        lectura fallida) no cambia nada: ni se toma como 0 ni borra
+        el último valor conocido.
+        """
+
+        if fossil_count is None:
+            return
+
+        previous = self._last_fossil_count
+        self._last_fossil_count = fossil_count
+
+        if previous is not None and fossil_count < previous:
+            now = self._clock()
+
+            self._fossil_drops.extend(
+                [now] * (previous - fossil_count)
+            )
+
+    def _consume_fossil_drop(self) -> bool:
+        """
+        True (y gasta la baja más antigua vigente) si en los últimos
+        FOSSIL_DROP_WINDOW_SECONDS bajó la cantidad de fósiles y esa
+        baja todavía no se emparejó con ningún Pokémon.
+        """
+
+        now = self._clock()
+
+        self._fossil_drops = [
+            moment
+            for moment in self._fossil_drops
+            if now - moment <= FOSSIL_DROP_WINDOW_SECONDS
+        ]
+
+        if not self._fossil_drops:
+            return False
+
+        self._fossil_drops.pop(0)
+
+        return True
 
     def reset_all(self) -> dict:
         """
@@ -291,17 +453,28 @@ class NuzlockeService:
         return starter_entry
 
     @staticmethod
-    def _is_trade_location(met_location: str | None) -> bool:
+    def _is_trade_location(
+        met_location: str | None,
+        met_location_id: int | None = 0,
+    ) -> bool:
         """
-        True si `met_location` es el texto que el juego reporta
-        para un Pokémon recibido por trueque (link trade, tanto
+        True si el Pokémon fue recibido por trueque (link trade, tanto
         con un NPC en un intercambio scriptado como con otro
-        jugador real) -- en inglés, con el nombre del entrenador
-        entre paréntesis (ej. "a Link Trade (NPC)", confirmado en
-        el juego real el 28/08/2026). No hay ninguna ruta real
-        asociada a esto -- se usa para decidir cuándo aplicar el
-        pseudo-lugar "Intercambiado" en vez de mostrar ese texto.
+        jugador real). Dos señales independientes, basta una:
+
+        - El ID del lugar (TRADE_NPC_LOCATION_IDS): no depende del
+          idioma. En Pokémon Y, PKHeX devolvió "Intercambio (NPC)"
+          (en español) para 30001 (06/10/2026).
+        - El texto en inglés "a Link Trade (NPC)", confirmado en el
+          juego real en ORAS el 28/08/2026.
+
+        No hay ninguna ruta real asociada a esto -- se usa para
+        decidir cuándo aplicar el pseudo-lugar "Intercambiado" en
+        vez de mostrar ese texto.
         """
+
+        if (met_location_id or 0) in TRADE_NPC_LOCATION_IDS:
+            return True
 
         if not met_location:
             return False
@@ -593,6 +766,7 @@ class NuzlockeService:
         team: list[dict],
         boxed_party: list[dict] | None = None,
         has_pokeballs: bool | None = None,
+        fossil_count: int | None = None,
     ) -> dict:
         """
         Compara la party actual contra el estado guardado, detecta
@@ -621,6 +795,10 @@ class NuzlockeService:
 
         if self._data is None:
             self._data = self.storage.load()
+
+        # P3: cantidad de fósiles de la bolsa de este ciclo (None si el
+        # juego no usa esta señal o Runtime no la leyó ahora).
+        self._track_fossil_count(fossil_count)
 
         roster = self._data["roster"]
         graveyard = self._data["graveyard"]
@@ -980,7 +1158,8 @@ class NuzlockeService:
                 )
 
                 if self._is_trade_location(
-                    pokemon.get("metLocation")
+                    pokemon.get("metLocation"),
+                    pokemon.get("metLocationId"),
                 ):
                     trade_registrations_this_cycle.append(
                         nickname
@@ -1142,7 +1321,8 @@ class NuzlockeService:
             )
 
             if self._is_trade_location(
-                boxed_pokemon.get("metLocation")
+                boxed_pokemon.get("metLocation"),
+                boxed_pokemon.get("metLocationId"),
             ):
                 trade_registrations_this_cycle.append(
                     boxed_nickname
@@ -1318,12 +1498,30 @@ class NuzlockeService:
         # ventana de "Egg" se saltó por completo -- se registró
         # como captura salvaje normal): sin importar si se cazó
         # "Egg" o no, si el lugar de encuentro resuelto es Devon
-        # Corp (ver DEVON_CORP_LOCATION_ID), es un fósil sí o sí --
-        # ahí no hay pasto salvaje. Las dos señales son
+        # Corp (ver SpecialRules.fossil_location_ids en el perfil
+        # del juego), es un fósil sí o sí -- ahí no hay pasto
+        # salvaje. Las dos señales son
         # independientes, cualquiera de las dos alcanza.
-        is_fossil = was_fossil or (
-            met_location_id == DEVON_CORP_LOCATION_ID
-        )
+        rules = self._special_rules()
+
+        fossil_from_bag = False
+
+        if rules.fossil_item_ids:
+            # Kalos: el lugar solo no alcanza (el laboratorio está en
+            # un pueblo con pesca salvaje) y la especie tampoco
+            # (randomlocke). Un fósil revivido = lugar del laboratorio
+            # Y una baja reciente de fósiles en la bolsa, que se gasta
+            # una sola vez (la captura pescada siguiente no la
+            # reutiliza).
+            by_signal = (
+                met_location_id in rules.fossil_location_ids
+                and self._consume_fossil_drop()
+            )
+            fossil_from_bag = by_signal
+        else:
+            by_signal = met_location_id in rules.fossil_location_ids
+
+        is_fossil = was_fossil or by_signal
 
         # "shiny"/"fosil" ya no son un status suelto (27-29/08/2026)
         # -- son un origen dentro del status unificado "especial"
@@ -1438,7 +1636,9 @@ class NuzlockeService:
             # pendiente de abajo, igual que cualquier otro caso sin
             # resolver.
 
-        elif met_location and self._is_trade_location(met_location):
+        elif self._is_trade_location(
+            met_location, met_location_id
+        ):
 
             # Intercambio (28/08/2026, a pedido del usuario): el
             # juego reporta el lugar de encuentro de un Pokémon
@@ -1475,6 +1675,7 @@ class NuzlockeService:
                     species,
                     "especial",
                     origin=trade_origin,
+                    anchor_location=self._anchor_for_trade(rules),
                     shiny=is_shiny,
                 )
 
@@ -1497,7 +1698,17 @@ class NuzlockeService:
             # patrón bare-primero-nickname-después que huevo/
             # intercambio, para que TODOS los fósiles se registren
             # directo en la tabla sin pasar por pendientes.
-            pseudo_location = met_location
+            #
+            # P3 (06/10/2026): en Kalos el lugar del fósil (Pueblo
+            # Petroglifo) también es una ruta con pesca salvaje, así
+            # que ahí el perfil pide un pseudo-lugar propio
+            # ("Fósil") para no ocupar la fila de la ruta. Sin
+            # pseudo-lugar (ORAS) se usa el lugar real, como siempre.
+            fossil_base = (
+                rules.fossil_pseudo_location or met_location
+            )
+
+            pseudo_location = fossil_base
 
             location_taken = any(
                 entry["location"] == pseudo_location
@@ -1506,7 +1717,7 @@ class NuzlockeService:
 
             if location_taken:
 
-                pseudo_location = f"{met_location} ({nickname})"
+                pseudo_location = f"{fossil_base} ({nickname})"
 
                 location_taken = any(
                     entry["location"] == pseudo_location
@@ -1521,6 +1732,16 @@ class NuzlockeService:
                     species,
                     "especial",
                     origin="fosil",
+                    # Con pseudo-lugar propio ("Fósil"), la fila se
+                    # ancla al lugar real donde se revivió.
+                    anchor_location=(
+                        met_location
+                        if (
+                            rules.anchor_specials_to_place
+                            and rules.fossil_pseudo_location
+                        )
+                        else None
+                    ),
                     shiny=is_shiny,
                 )
 
@@ -1558,7 +1779,10 @@ class NuzlockeService:
         # vuelve a marcar la especie como pendiente para que la
         # próxima vez (retry o una nueva captura vista) lo siga
         # tratando como fósil en vez de perder la señal.
-        if was_fossil and species_id not in fossil_pending:
+        if (
+            (was_fossil or fossil_from_bag)
+            and species_id not in fossil_pending
+        ):
             fossil_pending.append(species_id)
 
         self._data["pending_encounters"].append({

@@ -59,7 +59,7 @@ import argparse
 import struct
 from collections import Counter
 
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     BOX_COUNT,
     BOX_SLOT_COUNT,
     BOX_SLOT_STRIDE,

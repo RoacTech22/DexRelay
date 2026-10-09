@@ -86,12 +86,10 @@ class NuzlockeMixin:
         # duplicada).
         gym_leaders = self._gym_leaders_with_earned()
 
-        # None si ya se obtuvieron las 8 medallas -- el frontend lo
+        # Con las 8 medallas, pasa a la tarjeta del Alto Mando (P4);
+        # None si el juego no tiene datos de liga -- el frontend lo
         # trata como "sin líder pendiente" en vez de romper.
-        next_leader = next(
-            (leader for leader in gym_leaders if not leader["earned"]),
-            None,
-        )
+        next_leader = self._next_boss(gym_leaders)
 
         return {
             "team": self.app.state.team or [],
@@ -105,6 +103,7 @@ class NuzlockeMixin:
             ),
             "stats": stats,
             "gymLeaders": gym_leaders,
+            "leadersAvailable": self._leaders_available(),
             "nextLeader": next_leader,
         }
 

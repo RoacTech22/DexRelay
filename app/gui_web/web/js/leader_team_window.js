@@ -270,10 +270,15 @@
 
     document.title = "Equipo de " + (leader.nameEs || leader.name || "líder");
     titleEl.textContent = "Equipo de " + (leader.nameEs || leader.name || "—");
-    subtitleEl.textContent =
-      (leader.badgeNameEs || leader.badgeName || "") + " · " + (leader.gymLocationEs || leader.gymLocation || "") +
-      " · Nivel máximo permitido: Nv. " + leader.levelCap +
-      " · " + (leader.earned ? "Medalla obtenida" : "Medalla pendiente");
+    // P4: el Alto Mando y el campeón no tienen medalla ni estado de
+    // progreso, así que el subtítulo no habla de medallas.
+    var isGym = !leader.kind || leader.kind === "gym";
+    subtitleEl.textContent = isGym
+      ? (leader.badgeNameEs || leader.badgeName || "") + " · " + (leader.gymLocationEs || leader.gymLocation || "") +
+        " · Nivel máximo permitido: Nv. " + leader.levelCap +
+        " · " + (leader.earned ? "Medalla obtenida" : "Medalla pendiente")
+      : (leader.kind === "champion" ? "Campeón" : "Alto Mando") + " · " + (leader.gymLocationEs || leader.gymLocation || "") +
+        " · Nivel máximo permitido: Nv. " + leader.levelCap;
 
     cardsEl.innerHTML = (leader.team || [])
       .map(function (mon) {

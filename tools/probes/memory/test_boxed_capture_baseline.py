@@ -78,7 +78,7 @@ class FakeReader:
     def read_total_caught_count(self):
         return self.total_caught
 
-    def read_last_caught(self):
+    def read_wild_rival_copy(self):
         if self.last_caught_queue:
             return self.last_caught_queue.pop(0)
         return None

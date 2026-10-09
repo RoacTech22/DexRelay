@@ -42,7 +42,10 @@ class Application:
 
         self.reader = AzaharReader(
             species_resolver=SpeciesResolver(bridge=self.bridge),
-            location_resolver=LocationResolver(bridge=self.bridge),
+            location_resolver=LocationResolver(
+                bridge=self.bridge,
+                profile_provider=lambda: self.reader.profile,
+            ),
             process_name=process_name,
         )
 
@@ -65,7 +68,9 @@ class Application:
         self._nuzlocke_game = process_name
 
         self.nuzlocke_service = NuzlockeService(
-            NuzlockeStorage.for_game(process_name)
+            NuzlockeStorage.for_game(process_name),
+            profile_provider=lambda: getattr(self.reader, "profile", None),
+            place_provider=lambda: self.runtime.current_place_name(),
         )
 
         # Editor del Team Overlay (GUI v2, página Overlays,
@@ -112,8 +117,12 @@ class Application:
             port=int(server_port),
             nuzlocke_service=self.nuzlocke_service,
             species_catalog=SpeciesCatalog(bridge=self.bridge),
-            location_catalog=LocationCatalog(bridge=self.bridge),
+            location_catalog=LocationCatalog(
+                bridge=self.bridge,
+                profile_provider=lambda: self.reader.profile,
+            ),
             team_overlay_settings=self.team_overlay_settings,
+            profile_provider=lambda: self.reader.profile,
         )
 
         # Runtime (Runtime.update() en su propio hilo) y HTTPServer
@@ -151,6 +160,17 @@ class Application:
         # Bloque 9.1: dedup del log de errores del ciclo realtime.
         self._error_log_seen = {}
         self._transient_streak_logged = False
+
+    @property
+    def profile(self):
+        """
+        Perfil del juego conectado (app/games/), o None si todavía no
+        se detectó ninguno o el juego no está soportado. Bloque 12,
+        ruta multijuego: punto único para que la GUI y los servicios
+        consulten qué juego hay y qué capabilities tiene.
+        """
+
+        return self.reader.profile
 
     @property
     def running(self):

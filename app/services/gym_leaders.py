@@ -94,6 +94,12 @@ GYM_LEADER_NAMES_ES = {
     6: "Alana",
     7: "Vito y Letti",
     8: "Plubio",
+    # Alto Mando y campeón (P4, 07/10/2026; WikiDex, localización España).
+    9: "Sixto",
+    10: "Fátima",
+    11: "Nívea",
+    12: "Dracón",
+    13: "Máximo Peñas",
 }
 
 # Insignia y ciudad en español (06/09/2026), verificadas contra
@@ -121,6 +127,7 @@ GYM_LOCATION_NAMES_ES = {
     "Fortree City": "Ciudad Arborada",
     "Mossdeep City": "Ciudad Algaria",
     "Sootopolis City": "Arrecípolis",
+    "Pokémon League": "Liga Pokémon",
 }
 
 # Habilidad de cada Pokémon de cada líder (06/09/2026, a pedido del
@@ -201,6 +208,44 @@ GYM_LEADER_PORTRAIT_OVERRIDES = {
 }
 
 
+class LeaderSpec:
+    """
+    Qué cambia de un juego a otro en el catálogo de líderes (P4,
+    07/10/2026): archivo de datos, nombres en español, carpeta de
+    retratos y overrides. El default es el de ORAS, sin cambios.
+    """
+
+    def __init__(
+        self,
+        data_file="gym_leaders.json",
+        names_es=None,
+        badge_names_es=None,
+        location_names_es=None,
+        portrait_dir="",
+        portrait_overrides=None,
+    ):
+        self.data_file = data_file
+        self.names_es = (
+            GYM_LEADER_NAMES_ES if names_es is None else names_es
+        )
+        self.badge_names_es = (
+            GYM_BADGE_NAMES_ES
+            if badge_names_es is None
+            else badge_names_es
+        )
+        self.location_names_es = (
+            GYM_LOCATION_NAMES_ES
+            if location_names_es is None
+            else location_names_es
+        )
+        self.portrait_dir = portrait_dir
+        self.portrait_overrides = (
+            GYM_LEADER_PORTRAIT_OVERRIDES
+            if portrait_overrides is None
+            else portrait_overrides
+        )
+
+
 class GymLeaderCatalog:
     """
     Instancia única, cacheada en memoria después de la primera
@@ -208,11 +253,12 @@ class GymLeaderCatalog:
     MoveDataCatalog (el archivo no cambia mientras la app corre).
     """
 
-    def __init__(self, data_path=None, bridge=None):
+    def __init__(self, data_path=None, bridge=None, spec=None):
+        self.spec = spec if spec is not None else LeaderSpec()
         self.data_path = (
             data_path
             if data_path is not None
-            else paths.path("data", "gym_leaders.json")
+            else paths.path("data", self.spec.data_file)
         )
         self._leaders = None
 
@@ -323,6 +369,10 @@ class GymLeaderCatalog:
 
         for leader in raw_leaders:
             order = leader.get("order")
+            kind = leader.get("kind") or "gym"
+            portrait_index = self.spec.portrait_overrides.get(
+                order, order
+            )
             raw_team = leader.get("team", [])
             badge_name = leader.get("badgeName")
             gym_location = leader.get("gymLocation")
@@ -353,20 +403,22 @@ class GymLeaderCatalog:
 
             leaders.append({
                 "order": order,
-                "portraitIndex": GYM_LEADER_PORTRAIT_OVERRIDES.get(
-                    order, order
+                "kind": kind,
+                "portraitIndex": portrait_index,
+                "portraitFile": (
+                    f"{self.spec.portrait_dir}faces/{portrait_index}.png"
                 ),
                 "name": leader.get("name"),
-                "nameEs": GYM_LEADER_NAMES_ES.get(
+                "nameEs": self.spec.names_es.get(
                     order, leader.get("name")
                 ),
                 "typeKey": leader.get("typeKey"),
                 "badgeName": badge_name,
-                "badgeNameEs": GYM_BADGE_NAMES_ES.get(
+                "badgeNameEs": self.spec.badge_names_es.get(
                     badge_name, badge_name
                 ),
                 "gymLocation": gym_location,
-                "gymLocationEs": GYM_LOCATION_NAMES_ES.get(
+                "gymLocationEs": self.spec.location_names_es.get(
                     gym_location, gym_location
                 ),
                 "team": team,
