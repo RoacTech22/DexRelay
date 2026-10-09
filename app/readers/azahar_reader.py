@@ -4,13 +4,16 @@ import struct
 from app.readers.citra import Citra
 from app.readers.base import EmulatorTransport  # noqa: F401 -- tipo del transporte
 from app.memory.memory_reader import MemoryReader
-from app.memory.pointers import (
-    ORDER_ENTRY_SIZE,
-    POKEMON_POINTER_OFFSET,
+from app.memory.structures import (
     SLOT_DATA_SIZE,
     STAT_DATA_OFFSET,
     STAT_DATA_SIZE,
 )
+
+# Tabla de orden del equipo: 6 punteros u32; cada puntero apunta al
+# Pokémon menos 0x40. Igual en ORAS y X/Y (confirmado en vivo).
+ORDER_ENTRY_SIZE = 4
+POKEMON_POINTER_OFFSET = 0x40
 from app.games.registry import (
     get_profile,
     process_names,
@@ -610,7 +613,7 @@ class AzaharReader:
         Lee y descifra un Pokémon en una dirección absoluta
         (ya resuelta, sin sumarle POKEMON_POINTER_OFFSET).
         Reutilizada por read_pokemon() (party) y
-        read_last_caught() (LAST_CAUGHT_ADDRESS).
+        read_wild_rival_copy() (copia del rival salvaje).
 
         Devuelve READ_FAILED si la lectura o el descifrado
         fallan; un Pokemon6 si fue exitosa.
@@ -922,9 +925,9 @@ class AzaharReader:
 
         return pokemon
 
-    def read_last_caught(self):
+    def read_wild_rival_copy(self):
         """
-        Lee LAST_CAUGHT_ADDRESS (ver pointers.py): la dirección fija
+        Lee la copia del Pokémon rival salvaje (wild_rival_copy_address del perfil): la dirección fija
         que contiene el Pokémon capturado más recientemente, incluso
         si fue directo a la Caja PC porque la party estaba llena
         (en ese caso nunca aparece en read_party()).
@@ -935,13 +938,13 @@ class AzaharReader:
         vacía se descarta igual que un slot de party vacío).
         """
 
-        last_caught_address = self._field("last_caught_address")
+        wild_rival_copy_address = self._field("wild_rival_copy_address")
 
-        if last_caught_address is None:
+        if wild_rival_copy_address is None:
             return None
 
         pokemon = self._read_pokemon_at_address(
-            last_caught_address
+            wild_rival_copy_address
         )
 
         if pokemon is READ_FAILED:
@@ -1008,7 +1011,7 @@ class AzaharReader:
         sin migrar a Alpha Sapphire 1.4 y siempre leía 0): sube en
         exactamente 1 cada vez que se captura un Pokémon real
         (equipo o Caja PC, sin contar al inicial). Se usa como
-        confirmación de que read_last_caught() refleja una captura
+        confirmación de que read_wild_rival_copy() refleja una captura
         de verdad, y no solo un encuentro salvaje sin capturar (ver
         Documento Maestro, investigación del 25/08/2026).
 

@@ -150,7 +150,7 @@ def test_textos_de_la_gui_de_oras_congelados():
     ]
 
 
-def test_xy_aparecen_en_la_gui_como_experimentales_con_su_arte():
+def test_xy_aparecen_en_la_gui_con_su_arte():
     assert GAME_VERSIONS[2:] == [
         {
             "label": "Pokémon X",
@@ -159,7 +159,7 @@ def test_xy_aparecen_en_la_gui_como_experimentales_con_su_arte():
             "background": "bg_pokemon_x.jpg",
             "avatar": "avatar_pokemon_x.jpg",
             "card": "card_pokemon_x.jpg",
-            "experimental": True,
+            "experimental": False,
         },
         {
             "label": "Pokémon Y",
@@ -168,7 +168,7 @@ def test_xy_aparecen_en_la_gui_como_experimentales_con_su_arte():
             "background": "bg_pokemon_y.jpg",
             "avatar": "avatar_pokemon_y.jpg",
             "card": "card_pokemon_y.jpg",
-            "experimental": True,
+            "experimental": False,
         },
     ]
 

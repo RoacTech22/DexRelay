@@ -40,7 +40,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
     get_party_order_address,

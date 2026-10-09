@@ -40,7 +40,7 @@ import struct
 from pathlib import Path
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import SLOT_DATA_SIZE
+from tools.probes.legacy_pointers import SLOT_DATA_SIZE
 from app.memory.structures import Pokemon6, decrypt_data
 
 

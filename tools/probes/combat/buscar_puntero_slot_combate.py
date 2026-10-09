@@ -47,7 +47,7 @@ COMO USARLO:
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import POKEMON_POINTER_OFFSET
+from tools.probes.legacy_pointers import POKEMON_POINTER_OFFSET
 from app.services.combat_service import (
     COMBAT_INACTIVE_POINTER,
     COMBAT_POINTER_ADDRESS,

@@ -2,27 +2,26 @@
 Etapa 0 de la ruta multijuego (03/10/2026): prueba "golden" de
 direcciones y constantes de ORAS.
 
-Congela TODO lo que hoy vive en app/memory/pointers.py y
-app/services/combat_service.py para Omega Ruby (sango-1) y Alpha
-Sapphire (sango-2), más los slugs de almacenamiento y el Title ID
-usado para ubicar el save. Los valores se generaron leyendo el
-código ANTES del refactor del Bloque 11; si algún bloque posterior
-cambia cualquiera de ellos, esta prueba falla.
+Congela las direcciones y constantes de ORAS para Omega Ruby
+(sango-1) y Alpha Sapphire (sango-2), más los slugs de
+almacenamiento y el Title ID usado para ubicar el save. Los valores
+se generaron leyendo el código ANTES del refactor del Bloque 11; si
+algún bloque posterior cambia cualquiera de ellos, esta prueba falla.
+
+P9 (09/10/2026): app/memory/pointers.py se retiró (queda archivado
+como tools/probes/legacy_pointers.py solo para los probes). Los mismos
+valores históricos ahora se comprueban contra el MemoryMap de cada
+perfil; ya no existe el comportamiento "proceso desconocido cae a
+Alpha Sapphire".
 
 Por qué existe: mover estas direcciones a app/games/oras/profile.py
 no debe cambiar ni un byte de lo que lee DexRelay en ORAS, y los
 slugs de almacenamiento no deben cambiar nunca (los archivos
 nuzlocke_alpha_sapphire_<tid>_<sid>.json de los usuarios dependen
 de ellos).
-
-LEGACY_UNKNOWN_FALLBACK documenta el comportamiento histórico de los
-getters de pointers.py con un proceso desconocido (caen a Alpha
-Sapphire). Es compatibilidad temporal: el Bloque 12 hace estricto el
-reader y ese fallback deja de usarse; en ese bloque se borra esa
-sección de la prueba, no el resto.
 """
 
-import app.memory.pointers as pointers
+from app.games.registry import get_profile
 import app.services.combat_service as combat_service
 import app.services.nuzlocke_storage as nuzlocke_storage
 import app.services.save_file_locator as save_file_locator
@@ -30,94 +29,32 @@ from app.readers.azahar_reader import KNOWN_PROCESS_NAMES
 
 ORAS_PROCESSES = ("sango-1", "sango-2")
 
-GETTERS = {
-    "get_badges_address": {
-        "sango-1": 0x8c71dc4,
-        "sango-2": 0x8c71dc4,
-    },
-    "get_bag_end_address": {
-        "sango-1": 0x8c6f800,
-        "sango-2": 0x8c6f800,
-    },
-    "get_bag_start_address": {
-        "sango-1": 0x8c6ec70,
-        "sango-2": 0x8c6ec70,
-    },
-    "get_box_address": {
-        "sango-1": [0x8c9e134, 0x8c9fc64, 0x8ca8454],
-        "sango-2": [0x8c9e134, 0x8c9fc64, 0x8ca8454],
-    },
-    "get_box_base_address": {
-        "sango-1": 0x8c9e134,
-        "sango-2": 0x8c9e134,
-    },
-    "get_current_zone_id_address": {
-        "sango-1": 0x8c6e7a2,
-        "sango-2": 0x8c6e7a2,
-    },
-    "get_items_pocket_start_address": {
-        "sango-1": 0x8c6ec70,
-        "sango-2": 0x8c6ec70,
-    },
-    "get_medicine_pocket_start_address": {
-        "sango-1": 0x8c6f5e0,
-        "sango-2": 0x8c6f5e0,
-    },
-    "get_party_count_address": {
-        "sango-1": 0x8cfb1f8,
-        "sango-2": 0x8cfb1f8,
-    },
-    "get_party_order_address": {
-        "sango-1": 0x8cfb1e0,
-        "sango-2": 0x8cfb1e0,
-    },
-    "get_total_caught_address": {
-        "sango-1": 0x8c8b28c,
-        "sango-2": 0x8c8b28c,
-    },
-    "get_trainer_card_address": {
-        "sango-1": 0x8c81340,
-        "sango-2": 0x8c81340,
-    },
-    "get_wild_rival_addresses": {
-        "sango-1": (0x81feec8, 0x81ffa6c, 0x8805638,),
-        "sango-2": (0x81feec8, 0x81ffa6c, 0x8805638,),
-    },
-}
-CONSTANTS = {
-    "BAG_END_ADDRESS": 0x8c6f800,
-    "BAG_MAX_QUANTITY": 999,
-    "BAG_SLOT_SIZE": 4,
-    "BAG_START_ADDRESS": 0x8c6ec70,
-    "BLOCK_SIZE": 56,
-    "BOX_BASE_ADDRESS": 0x8c9e134,
-    "BOX_BLOCK_SIZE": 6960,
-    "BOX_COUNT": 7,
-    "BOX_SLOT_COUNT": 30,
-    "BOX_SLOT_STRIDE": 232,
-    "CAPTURE_BUFFER_ADDRESS": 0x8804a94,
-    "CAPTURE_BUFFER_ENTRY_STRIDE": 484,
-    "CURRENT_ZONE_ID_ADDRESS": 0x8c6e7a2,
-    "CURRENT_ZONE_ID_MIRROR_ADDRESS": 0x8c6e884,
-    "ITEMS_POCKET_SLOT_COUNT": 400,
-    "LAST_CAUGHT_ADDRESS": 0x8805638,
-    "MEDICINE_POCKET_SCAN_SLOTS": 100,
-    "ORDER_ENTRY_SIZE": 4,
-    "PARTY_COUNT_ADDRESS": 0x8cfb1f8,
-    "PARTY_ORDER_ADDRESS": 0x8cfb1e0,
-    "POKEBALL_ITEM_IDS": frozenset([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
-    "POKEMON_POINTER_OFFSET": 64,
-    "PROCESS_NAME_ALPHA_SAPPHIRE": 'sango-2',
-    "PROCESS_NAME_OMEGA_RUBY": 'sango-1',
-    "RARE_CANDY_ITEM_ID": 50,
-    "SLOT_DATA_SIZE": 232,
-    "STAT_DATA_OFFSET": 112,
-    "STAT_DATA_SIZE": 22,
-    "TRAINER_CARD_ADDRESS": 0x8c81340,
-    "TRAINER_CARD_ID_OFFSET": 0,
-    "TRAINER_CARD_NAME_BYTES": 24,
-    "TRAINER_CARD_NAME_OFFSET": 72,
-    "TRAINER_CARD_READ_SIZE": 96,
+# Campo del MemoryMap -> valor congelado (igual en sango-1 y sango-2).
+MEMORY_MAP = {
+    "badges_address": 0x8c71dc4,
+    "bag_end_address": 0x8c6f800,
+    "bag_start_address": 0x8c6ec70,
+    "box_base_address": 0x8c9e134,
+    "box_slot_stride": 232,
+    "box_slot_count": 30,
+    "capture_buffer_address": 0x8804a94,
+    "capture_buffer_entry_stride": 484,
+    "current_zone_id_address": 0x8c6e7a2,
+    "current_zone_id_mirror_address": 0x8c6e884,
+    "items_pocket_start_address": 0x8c6ec70,
+    "items_pocket_slot_count": 400,
+    "wild_rival_copy_address": 0x8805638,
+    "medicine_pocket_start_address": 0x8c6f5e0,
+    "party_count_address": 0x8cfb1f8,
+    "party_order_address": 0x8cfb1e0,
+    "total_caught_address": 0x8c8b28c,
+    "trainer_card_address": 0x8c81340,
+    "trainer_card_read_size": 96,
+    "trainer_card_id_offset": 0,
+    "trainer_card_name_offset": 72,
+    "trainer_card_name_bytes": 24,
+    "wild_rival_addresses": (0x81feec8, 0x81ffa6c, 0x8805638),
+    "pokeball_item_ids": frozenset(range(1, 17)),
 }
 COMBAT = {
     "COMBAT_POINTER_ADDRESS": 0x83f8658,
@@ -127,60 +64,42 @@ COMBAT = {
     "MIN_PLAUSIBLE_COMBAT_POINTER": 0x8000000,
 }
 
-LEGACY_UNKNOWN_FALLBACK = {
-    "get_badges_address": 0x8c71dc4,
-    "get_bag_end_address": 0x8c6f800,
-    "get_bag_start_address": 0x8c6ec70,
-    "get_box_address": [0x8c9e134, 0x8c9fc64, 0x8ca8454],
-    "get_box_base_address": 0x8c9e134,
-    "get_current_zone_id_address": 0x8c6e7a2,
-    "get_items_pocket_start_address": 0x8c6ec70,
-    "get_medicine_pocket_start_address": 0x8c6f5e0,
-    "get_party_count_address": 0x8cfb1f8,
-    "get_party_order_address": 0x8cfb1e0,
-    "get_total_caught_address": 0x8c8b28c,
-    "get_trainer_card_address": 0x8c81340,
-    "get_wild_rival_addresses": (0x81feec8, 0x81ffa6c, 0x8805638,),
-}
+
+def test_direcciones_de_oras_no_cambian():
+    for process in ORAS_PROCESSES:
+        memory_map = get_profile(process).memory_map
+
+        for name, value in MEMORY_MAP.items():
+            assert getattr(memory_map, name) == value, (process, name)
 
 
-def _get(name, process, *extra):
-    return getattr(pointers, name)(process, *extra)
+def test_ventana_de_medicina_de_oras_sigue_siendo_la_legada():
+    # P5: la capacidad medida es solo de X/Y; ORAS conserva la ventana de
+    # 100 casilleros de BagService.
+    from app.services.bag_service import (
+        BAG_MAX_QUANTITY,
+        BAG_SLOT_SIZE,
+        MEDICINE_POCKET_SCAN_SLOTS,
+        RARE_CANDY_ITEM_ID,
+    )
 
+    assert (BAG_SLOT_SIZE, BAG_MAX_QUANTITY) == (4, 999)
+    assert (MEDICINE_POCKET_SCAN_SLOTS, RARE_CANDY_ITEM_ID) == (100, 50)
 
-def test_getters_de_direcciones_por_juego_no_cambian():
-    for name, expected in GETTERS.items():
-        for process, value in expected.items():
-            if name == "get_box_address":
-                actual = [_get(name, process, i) for i in (1, 2, 7)]
-            else:
-                actual = _get(name, process)
-            assert actual == value, (name, process)
-
-
-def test_todos_los_getters_publicos_estan_cubiertos():
-    publicos = {n for n in dir(pointers) if n.startswith("get_")}
-    assert publicos == set(GETTERS)
-
-
-def test_constantes_de_pointers_no_cambian():
-    for name, value in CONSTANTS.items():
-        assert getattr(pointers, name) == value, name
-
-
-def test_no_aparecen_constantes_nuevas_sin_cubrir():
-    actuales = {
-        n for n in dir(pointers)
-        if n.isupper()
-        and not n.startswith("_")
-        and n != "ARCHIVO_DIRECCIONES_AS_BASE"
-    }
-    assert actuales == set(CONSTANTS)
+    for process in ORAS_PROCESSES:
+        assert get_profile(process).memory_map.medicine_pocket_slot_count is None
 
 
 def test_constantes_de_combate_no_cambian():
     for name, value in COMBAT.items():
         assert getattr(combat_service, name) == value, name
+
+    for process in ORAS_PROCESSES:
+        m = get_profile(process).memory_map
+        assert m.combat_pointer_address == 0x83f8658
+        assert m.combat_hp_offset == 1028
+        assert m.wild_battle_flag_offset == 2175
+        assert m.combat_inactive_pointers == (0, 0x83f8654)
 
 
 def test_slugs_de_almacenamiento_de_oras_no_cambian_nunca():
@@ -212,10 +131,11 @@ def test_procesos_conocidos_de_oras():
     }
 
 
-def test_fallback_legacy_de_proceso_desconocido():
-    for name, value in LEGACY_UNKNOWN_FALLBACK.items():
-        if name == "get_box_address":
-            actual = [_get(name, "juego-desconocido", i) for i in (1, 2, 7)]
-        else:
-            actual = _get(name, "juego-desconocido")
-        assert actual == value, name
+def test_formato_de_la_tabla_del_equipo_no_cambia():
+    from app.readers import azahar_reader
+
+    assert azahar_reader.ORDER_ENTRY_SIZE == 4
+    assert azahar_reader.POKEMON_POINTER_OFFSET == 64
+    assert azahar_reader.SLOT_DATA_SIZE == 232
+    assert azahar_reader.STAT_DATA_OFFSET == 112
+    assert azahar_reader.STAT_DATA_SIZE == 22

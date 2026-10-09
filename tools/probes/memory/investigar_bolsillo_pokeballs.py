@@ -50,7 +50,7 @@ lo que imprime.
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     get_bag_start_address,
     get_bag_end_address,
     get_medicine_pocket_start_address,

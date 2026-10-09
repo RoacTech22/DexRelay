@@ -31,15 +31,12 @@ usuario tras verificar Rayo/Thunderbolt contra la API real): la
 primera versión de esta lógica resolvía por NÚMERO DE GENERACIÓN
 (x-y y omega-ruby-alpha-sapphire ambos mapeados a "6"), perdiendo
 la granularidad DENTRO de una misma generación. Rayo tiene un
-`past_value` marcado específicamente en "x-y" con potencia 95 -- el
-cambio a 90 (valor actual, confirmado contra pokeapi.co/api/v2/move/85/
-en vivo) pasó ENTRE X/Y y ORAS, dos version_groups de la misma
-Generación 6 (Game Freak sí aplicó ajustes de potencia a varios
-movimientos especiales -- Rayo, y probablemente otros como
-Lanzallamas/Rayo Hielo -- específicamente al lanzar ORAS, no al
-lanzar X/Y). Al resolver por "generación 6" en bloque, el algoritmo
-viejo devolvía 95 (el valor de X/Y) para ORAS, que es exactamente
-lo que ORAS NO tiene.
+`past_value` marcado en "x-y" con potencia 95. (CORREGIDO 09/10/2026:
+la lectura original de ese dato -- que el cambio a 90 pasó ENTRE X/Y y
+ORAS -- era errónea; el 95 es de Generación 5 y X/Y ya tiene 90, ver la
+nota sobre X/Y más abajo. El resultado para ORAS siempre fue correcto.)
+Al resolver por "generación 6" en bloque, el algoritmo viejo podía
+devolver un valor que no era el de ORAS.
 
 Corrección: en vez de VERSION_GROUP_GENERATION (número de
 generación, demasiado grueso), ahora se usa VERSION_GROUP_ORDER
@@ -118,28 +115,16 @@ REQUEST_DELAY_SECONDS = 0.1
 # version_group objetivo exacto -- ya no alcanza con "Generación 6"
 # a secas (ver el bug real corregido en el docstring del módulo):
 # X/Y y ORAS son dos version_groups DISTINTOS dentro de la misma
-# generación, y al menos un movimiento (Rayo/Thunderbolt) cambió de
-# potencia específicamente entre uno y otro.
+# generación (aunque, medido, sin diferencias de movimientos entre ellos).
 #
-# PENDIENTE A FUTURO (07/09/2026, a pedido del usuario -- anotado
-# para cuando DexRelay dé soporte también a Pokémon X/Y, no solo
-# ORAS): hoy este valor está fijo a "omega-ruby-alpha-sapphire"
-# porque DexRelay solo lee memoria de ORAS. Si en algún momento se
-# agrega soporte para X/Y, ESTE dataset no sirve tal cual para esa
-# versión -- Rayo/Lanzallamas/Rayo Hielo (y probablemente más) YA
-# CONFIRMADO que tienen valores distintos entre X/Y (95) y ORAS
-# (90), justamente el bug que motivó este archivo. Habría que:
-#   1. Parametrizar TARGET_VERSION_GROUP en vez de dejarlo fijo acá.
-#   2. Correr build_move_data.py una segunda vez con
-#      TARGET_VERSION_GROUP="x-y" para generar un dataset SEPARADO
-#      (ej. move_data_xy.json), no pisar move_data.json.
-#   3. MoveDataCatalog (app/services/move_data.py) necesitaría
-#      elegir qué archivo cargar según la versión de juego conectada
-#      (mismo patrón multi-versión que ya usa pointers.py para
-#      direcciones de memoria por process_name).
-# No se resuelve ahora porque no hay soporte de X/Y todavía en
-# ningún otro lado del proyecto (memoria, PKHeX bridge, etc.) --
-# hacerlo bien acá solo, sin lo demás, no serviría de nada.
+# NOTA SOBRE X/Y (P9, 09/10/2026 -- reemplaza un "PENDIENTE A FUTURO" del
+# 07/09/2026 que resultó ser incorrecto): este dataset SIRVE TAL CUAL para
+# Pokémon X/Y. Se midió (tools/probes/xy/comparar_datos_xy_oras.py): el
+# move_changelog.csv de PokéAPI no tiene NINGÚN cambio entre X/Y y ORAS, y
+# Ronald confirmó en el juego que Rayo (90) y Látigo Cepa (45 / 25 PP) son
+# iguales. La etiqueta "x-y" de un past_value marca el version_group donde
+# OCURRIÓ el cambio (Rayo ya vale 90 en X/Y; los 95 son de Gen 5), no el
+# último donde regía el valor viejo. NO generar un move_data_xy.json.
 TARGET_VERSION_GROUP = "omega-ruby-alpha-sapphire"
 
 # Clave estable en inglés (mismo criterio que TypeKey en el bridge

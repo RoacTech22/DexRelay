@@ -21,7 +21,7 @@ alla de tenerlo abierto y conectado.
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PROCESS_NAME_ALPHA_SAPPHIRE,
     PROCESS_NAME_OMEGA_RUBY,
 )

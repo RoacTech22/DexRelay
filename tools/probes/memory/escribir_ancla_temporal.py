@@ -36,7 +36,7 @@ en la región grande (RW, decenas/cientos de MB).
 """
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import PARTY_ORDER_ADDRESS, PROCESS_NAME_ALPHA_SAPPHIRE
+from tools.probes.legacy_pointers import PARTY_ORDER_ADDRESS, PROCESS_NAME_ALPHA_SAPPHIRE
 
 MARKER_BYTES = bytes.fromhex("EFBEADDE")  # 0xDEADBEEF en little-endian
 MARKER_HEX_DISPLAY = "DEADBEEF"

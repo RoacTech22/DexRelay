@@ -40,7 +40,7 @@ import time
 from pathlib import Path
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import CURRENT_ZONE_ID_ADDRESS
+from tools.probes.legacy_pointers import CURRENT_ZONE_ID_ADDRESS
 
 
 OUTPUT_PATH = Path(__file__).parent / "zonas_recolectadas.json"

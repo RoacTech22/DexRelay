@@ -36,7 +36,7 @@ import time
 
 from app.core.config import Config
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import PROCESS_NAME_OMEGA_RUBY, SLOT_DATA_SIZE
+from tools.probes.legacy_pointers import PROCESS_NAME_OMEGA_RUBY, SLOT_DATA_SIZE
 from app.memory.structures import Pokemon6, decrypt_data
 
 

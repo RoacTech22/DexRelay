@@ -3,7 +3,7 @@ Valida el diseño de detección automática del estado "perdido"
 (27/08/2026, ver DexRelay_Contexto_Deteccion_Perdido.md):
 Runtime._update_lost_encounter_tracking() usando las 3 piezas ya
 confirmadas (CURRENT_ZONE_ID_ADDRESS, WILD_BATTLE_FLAG_OFFSET,
-read_last_caught()) más TOTAL_CAUGHT_ADDRESS como confirmación de
+read_wild_rival_copy()) más TOTAL_CAUGHT_ADDRESS como confirmación de
 captura.
 
 No prueba las direcciones de memoria en sí (ya confirmadas en el
@@ -54,7 +54,7 @@ class FakeReader:
     def read_wild_rival_species(self):
         return self.last_caught_species
 
-    def read_last_caught(self):
+    def read_wild_rival_copy(self):
         if self.last_caught_species is None:
             return None
         return {"species": self.last_caught_species}

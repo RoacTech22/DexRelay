@@ -66,7 +66,7 @@ CÓMO USARLO:
 import time
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     BOX_SLOT_STRIDE,
     BOX_SLOT_COUNT,
     SLOT_DATA_SIZE,

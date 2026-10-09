@@ -5,7 +5,7 @@ ABSOLUTA (18/09/2026).
 
 Por qué existe: LAST_CAUGHT_ADDRESS (0x08805638) devolvía la especie
 del rival en pruebas anteriores, pero en la partida real del 18/09
-read_last_caught() da None durante todo el combate (log real:
+read_wild_rival_copy() da None durante todo el combate (log real:
 "last_caught.species=None"). O la dirección se movió en esa versión
 exacta del juego (regla 4: las direcciones son específicas de la
 versión), o el buffer se puebla en otro momento. Este probe lo
@@ -36,7 +36,7 @@ import argparse
 import struct
 
 from app.core.config import Config
-from app.memory.pointers import LAST_CAUGHT_ADDRESS, SLOT_DATA_SIZE
+from tools.probes.legacy_pointers import LAST_CAUGHT_ADDRESS, SLOT_DATA_SIZE
 from app.memory.structures import Pokemon6, decrypt_data
 from app.readers.azahar_reader import AzaharReader
 from tools.probes.memory.buscar_pk6_salvaje import (

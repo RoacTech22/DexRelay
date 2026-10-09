@@ -117,7 +117,7 @@ class _FakeReader:
     def read_wild_rival_species(self):
         return "Pidgey"
 
-    def read_last_caught(self):
+    def read_wild_rival_copy(self):
         return None
 
 

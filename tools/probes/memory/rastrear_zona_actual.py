@@ -59,7 +59,7 @@ import time
 
 from app.readers.azahar_reader import AzaharReader
 from app.services.badges_service import BADGES_ADDRESS
-from app.memory.pointers import PARTY_ORDER_ADDRESS
+from tools.probes.legacy_pointers import PARTY_ORDER_ADDRESS
 
 
 # Ventana de memoria a escanear, centrada en el ancla elegida.

@@ -111,7 +111,7 @@ def test_juego_sin_perfil_no_lee_memoria_ni_cae_a_alpha_sapphire(process_name):
     assert reader.read_current_zone_id() is None
     assert reader.read_total_caught_count() is None
     assert reader.read_has_pokeballs() is None
-    assert reader.read_last_caught() is None
+    assert reader.read_wild_rival_copy() is None
     assert reader.read_wild_rival_species() is None
     assert reader.read_boxes_range() == []
     assert reader.read_box_raw(1) is None

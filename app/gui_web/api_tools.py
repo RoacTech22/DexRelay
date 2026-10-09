@@ -9,8 +9,11 @@ para pywebview/JS sigue siendo UNA sola clase con los mismos métodos públicos.
 
 from __future__ import annotations
 
-from app.memory.pointers import RARE_CANDY_ITEM_ID
-from app.services.bag_service import BagService, BagWriteError
+from app.services.bag_service import (
+    RARE_CANDY_ITEM_ID,
+    BagService,
+    BagWriteError,
+)
 
 
 class ToolsMixin:

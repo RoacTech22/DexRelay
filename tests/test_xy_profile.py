@@ -61,7 +61,7 @@ def test_valores_de_x_y_investigados():
     assert m.badges_address == 0x08C6A6B0
     assert (m.current_zone_id_address, m.current_zone_id_width) == (0x08C670AE, 2)
     assert m.total_caught_address == 0x08C82AC0
-    assert m.last_caught_address == 0x08805614
+    assert m.wild_rival_copy_address == 0x08805614
     assert m.wild_rival_addresses == (0x081FEBA0, 0x081FF744, 0x08805614)
     assert m.combat_pointer_address == 0x081FB304
     assert m.combat_hp_offset == 0x10

@@ -35,7 +35,7 @@ import struct
 import time
 
 from app.core.config import Config
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     LAST_CAUGHT_ADDRESS,
     get_current_zone_id_address,
     get_total_caught_address,
@@ -106,7 +106,7 @@ def main():
     print(f"  puntero: {describe_pointer(read_u32(reader, COMBAT_POINTER_ADDRESS))}")
     print(f"  zona   : {resolve_zone_name(reader.read_current_zone_id())}")
     print(f"  total  : {reader.read_total_caught_count()}")
-    last = reader.read_last_caught()
+    last = reader.read_wild_rival_copy()
     print(f"  rival  : {last.get('species') if last else None}")
     print()
     print("Hacé el combate salvaje ahora. Ctrl+C para cortar.")
@@ -132,7 +132,7 @@ def main():
                 wild_text = "entrenador"
 
             zone_id = reader.read_current_zone_id()
-            last = reader.read_last_caught()
+            last = reader.read_wild_rival_copy()
 
             current = {
                 "puntero": describe_pointer(pointer),

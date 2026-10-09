@@ -61,7 +61,7 @@ no hay riesgo de corromper el save corriendo este script.
 import struct
 
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import get_party_order_address
+from tools.probes.legacy_pointers import get_party_order_address
 from app.services.badges_service import BADGES_ADDRESS
 
 

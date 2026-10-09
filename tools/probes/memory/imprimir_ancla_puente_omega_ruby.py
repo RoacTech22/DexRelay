@@ -38,7 +38,7 @@ import struct
 
 from app.core.config import Config
 from app.readers.azahar_reader import AzaharReader
-from app.memory.pointers import CAPTURE_BUFFER_ADDRESS
+from tools.probes.legacy_pointers import CAPTURE_BUFFER_ADDRESS
 
 
 # CAPTURE_BUFFER_ADDRESS -- ya confirmada y documentada para

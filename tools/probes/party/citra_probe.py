@@ -2,7 +2,7 @@ import struct
 
 from app.readers.citra import Citra
 from app.memory.memory_reader import MemoryReader
-from app.memory.pointers import (
+from tools.probes.legacy_pointers import (
     PARTY_ORDER_ADDRESS,
     ORDER_ENTRY_SIZE,
     POKEMON_POINTER_OFFSET,

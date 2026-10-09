@@ -114,12 +114,13 @@ def test_xy_declara_explicitamente_lo_que_no_esta_investigado():
                 ), campo.name
 
 
-def test_xy_comparten_mapa_y_son_experimentales():
+def test_xy_comparten_mapa_y_ya_no_son_experimentales():
     x = get_profile("kujira-1")
     y = get_profile("kujira-2")
 
     assert x.memory_map == y.memory_map
-    assert x.capabilities.experimental and y.capabilities.experimental
+    assert not x.capabilities.experimental
+    assert not y.capabilities.experimental
     assert not get_profile("sango-2").capabilities.experimental
     assert x.display_name == "Pokémon X" and y.display_name == "Pokémon Y"
     assert x.content.title_id_low == "00055d00"
