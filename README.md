@@ -14,8 +14,8 @@
 
 <p align="center">
 
-  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.7.0-alpha">
-    <img src="https://img.shields.io/badge/Descargar-v0.7.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.7.1-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.7.1--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
   <a href="https://github.com/RoacTech22/DexRelay/issues">
@@ -46,7 +46,7 @@ DexRelay integra en una sola aplicación:
 
 La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
 
-> **Estado actual:** v0.7.0-alpha  
+> **Estado actual:** v0.7.1-alpha  
 > Rediseño completo de la interfaz con tema día/noche y modales de movimientos y habilidades con datos ampliados.
 
 ---
@@ -245,11 +245,11 @@ El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejec
 
 Descarga:
 
-**DexRelay v0.7.0-alpha**
+**DexRelay v0.7.1-alpha**
 
 Archivo:
 
-`DexRelay-v0.7.0-alpha-win-x64.zip`
+`DexRelay-v0.7.1-alpha-win-x64.zip`
 
 ## 2. Extraer
 
