@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://roactech22.github.io/DexRelay/sitemap.xml

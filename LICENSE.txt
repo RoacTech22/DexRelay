@@ -1,0 +1,19 @@
+DexRelay - Licencia de uso (borrador)
+Copyright (c) 2026 RoacTech22. Todos los derechos reservados.
+
+1. Uso. Se concede el derecho personal, no exclusivo e intransferible de
+   descargar y usar DexRelay de forma gratuita, incluido su uso en
+   transmisiones y videos (overlays para OBS).
+2. Restricciones. No está permitido redistribuir, vender, alquilar,
+   sublicenciar, modificar, descompilar, desensamblar ni realizar ingeniería
+   inversa de DexRelay, salvo en la medida en que una ley aplicable lo
+   permita de forma imperativa.
+3. Componentes de terceros. DexRelay incluye componentes con licencia
+   propia, entre ellos PKHeX.Core (GNU GPLv3). El código fuente del bridge
+   DexRelay.PKHeX.exe está en la carpeta bridge/ de este repositorio y se
+   rige por su propia licencia (bridge/LICENSE), no por esta.
+4. Marcas. Pokémon y sus nombres son marcas de sus respectivos dueños.
+   DexRelay no está afiliado ni respaldado por Nintendo, Game Freak ni
+   The Pokémon Company.
+5. Sin garantía. DexRelay se entrega "tal cual", sin garantías de ningún
+   tipo. El autor no responde por daños derivados de su uso.
