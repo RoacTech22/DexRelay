@@ -14,8 +14,8 @@
 
 <p align="center">
 
-  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.7.1-alpha">
-    <img src="https://img.shields.io/badge/Descargar-v0.7.1--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.8.0-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.8.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
   <a href="https://github.com/RoacTech22/DexRelay/issues">
@@ -39,6 +39,7 @@ DexRelay integra en una sola aplicación:
 - Pokédex integrada.
 - Cajas Pokémon.
 - Medallas y líderes de gimnasio.
+- Bosses: rivales, villanos y combates de historia, con detección automática.
 - Nuzlocke Tracker.
 - Overlays para OBS.
 - Servidor HTTP local.
@@ -46,8 +47,8 @@ DexRelay integra en una sola aplicación:
 
 La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
 
-> **Estado actual:** v0.7.1-alpha  
-> Rediseño completo de la interfaz con tema día/noche y modales de movimientos y habilidades con datos ampliados.
+> **Estado actual:** v0.8.0-alpha  
+> Bosses y detección automática de combates ganados en Pokémon X/Y (Kalos), y shiny y objeto equipado visibles en tus Pokémon.
 
 ---
 
@@ -81,6 +82,7 @@ Para cada Pokémon puedes consultar información como:
 - Movimientos.
 - HP actual y máximo.
 - Estadísticas.
+- Si es shiny y el objeto que lleva equipado.
 - Información detallada del Pokémon.
 
 También puedes consultar las primeras **7 cajas** del PC.
@@ -125,6 +127,21 @@ DexRelay muestra:
 - Alto Mando y campeón, con sus equipos.
 - Próximo líder y nivel máximo recomendado.
 - Información específica para Rising Ruby / Sinking Sapphire cuando el modo hackrom está activado.
+
+---
+
+## Bosses
+
+La pestaña **Bosses** reúne los combates de historia de la región: tu rival y tus amigos, villanos, profesores, líderes, Alto Mando y campeón.
+
+DexRelay puede:
+
+- Marcar automáticamente los combates ya ganados (los líderes, por medalla).
+- Mostrar el equipo de cada boss con niveles, movimientos y habilidades.
+- Indicar el **Siguiente boss**, agrupando los combates que van seguidos.
+- Permitir marcar o desmarcar un combate a mano.
+
+Disponible en ORAS y en X/Y. La detección de algunos combates de Kalos tiene pocas observaciones y puede fallar; en ese caso puedes marcarlos a mano.
 
 ---
 
@@ -245,11 +262,11 @@ El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejec
 
 Descarga:
 
-**DexRelay v0.7.1-alpha**
+**DexRelay v0.8.0-alpha**
 
 Archivo:
 
-`DexRelay-v0.7.1-alpha-win-x64.zip`
+`DexRelay-v0.8.0-alpha-win-x64.zip`
 
 ## 2. Extraer
 
@@ -300,6 +317,8 @@ Las URLs locales tienen este formato:
 `http://localhost:8080/overlay/badges`
 
 `http://localhost:8080/overlay/nuzlocke`
+
+El overlay de medallas tiene tres estilos (se elige en la página **Medallas** de la GUI): ícono de medalla, retrato del líder de medio cuerpo o líder de cuerpo completo; los líderes se ven "apagados" hasta ganar su medalla. Tamaño recomendado en OBS: 656 × 100 (medallas), 914 × 100 (medio cuerpo) o 668 × 100 (cuerpo completo).
 
 No necesitas publicar ningún puerto de Internet.
 
