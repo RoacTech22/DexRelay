@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Tu compañero para Pokémon ORAS y X/Y en Azahar</strong>
+  <strong>Tu compañero para Pokémon ORAS, X/Y y Sol/Luna en Azahar</strong>
 </p>
 
 <p align="center">
@@ -14,8 +14,8 @@
 
 <p align="center">
 
-  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.8.0-alpha">
-    <img src="https://img.shields.io/badge/Descargar-v0.8.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
+  <a href="https://github.com/RoacTech22/DexRelay/releases#release-v0.9.0-alpha">
+    <img src="https://img.shields.io/badge/Descargar-v0.9.0--alpha-00c8d7?style=for-the-badge" alt="Descargar DexRelay">
   </a>
 
   <a href="https://github.com/RoacTech22/DexRelay/issues">
@@ -28,7 +28,7 @@
 
 ## ¿Qué es DexRelay?
 
-**DexRelay** es una aplicación de escritorio para partidas de **Pokémon Omega Ruby y Alpha Sapphire (ORAS)** y de **Pokémon X e Y** ejecutadas en **Azahar**.
+**DexRelay** es una aplicación de escritorio para partidas de **Pokémon Omega Ruby y Alpha Sapphire (ORAS)**, de **Pokémon X e Y** y de **Pokémon Sol y Luna** ejecutadas en **Azahar**.
 
 Lee los datos de la partida en tiempo real y los convierte en información útil para jugar, gestionar un Nuzlocke y transmitir tus partidas.
 
@@ -38,7 +38,7 @@ DexRelay integra en una sola aplicación:
 - Información detallada de Pokémon.
 - Pokédex integrada.
 - Cajas Pokémon.
-- Medallas y líderes de gimnasio.
+- Medallas y líderes de gimnasio (en Alola, el Desafío de las islas).
 - Bosses: rivales, villanos y combates de historia, con detección automática.
 - Nuzlocke Tracker.
 - Overlays para OBS.
@@ -47,7 +47,7 @@ DexRelay integra en una sola aplicación:
 
 La aplicación funciona **100 % offline** y no necesita servicios externos durante su ejecución.
 
-> **Estado actual:** v0.8.0-alpha  
+> **Estado actual:** v0.9.0-alpha  
 > Bosses y detección automática de combates ganados en Pokémon X/Y (Kalos), y shiny y objeto equipado visibles en tus Pokémon.
 
 ---
@@ -85,7 +85,7 @@ Para cada Pokémon puedes consultar información como:
 - Si es shiny y el objeto que lleva equipado.
 - Información detallada del Pokémon.
 
-También puedes consultar las primeras **7 cajas** del PC.
+También puedes consultar las cajas del PC (las primeras **7** en Hoenn y Kalos y las **8** de Alola).
 
 ---
 
@@ -107,6 +107,7 @@ La ficha de cada especie puede mostrar:
 - Categoría.
 - Evoluciones.
 - Evoluciones ramificadas.
+- Formas regionales de Alola, con su evolución regional.
 - Debilidades.
 - Resistencias.
 - Inmunidades.
@@ -116,6 +117,8 @@ La ficha de cada especie puede mostrar:
 ## Medallas y líderes de gimnasio
 
 Consulta el progreso de las 8 medallas de Hoenn o de Kalos y la información de los líderes, el Alto Mando y el campeón de cada región.
+
+En **Pokémon Sol y Luna** no hay medallas: la página muestra el **Desafío de las islas**, con las 7 pruebas de capitán y las 4 Grandes Pruebas de los Kahuna por isla, más la Liga Pokémon de Alola (Kaudan, Mayla, Zarala, Kahili y el campeón Kukui) con sus retratos.
 
 DexRelay muestra:
 
@@ -141,7 +144,7 @@ DexRelay puede:
 - Indicar el **Siguiente boss**, agrupando los combates que van seguidos.
 - Permitir marcar o desmarcar un combate a mano.
 
-Disponible en ORAS y en X/Y. La detección de algunos combates de Kalos tiene pocas observaciones y puede fallar; en ese caso puedes marcarlos a mano.
+Disponible en ORAS, en X/Y y en Sol/Luna. En Alola cubre los **37 combates** de la historia (rivales, capitanes, dominantes, Kahuna, villanos, Alto Mando y campeón), con la naturaleza, la habilidad y el objeto de cada dominante; el Alto Mando se puede hacer en cualquier orden y cada combate se marca al terminar. La detección de algunos combates de Kalos tiene pocas observaciones y puede fallar; en ese caso puedes marcarlos a mano.
 
 ---
 
@@ -161,10 +164,10 @@ El tracker permite gestionar:
 - Cementerio.
 - Encuentros perdidos.
 - Reglas de la partida.
-- Nivel máximo del siguiente líder.
+- Nivel máximo del siguiente líder (en Alola, del siguiente dominante, Kahuna o campeón).
 - Estadísticas generales.
 - Tiempo de juego.
-- Seguimiento de rutas y zonas.
+- Seguimiento de rutas y zonas (en Alola, agrupadas por isla).
 
 El sistema también puede detectar automáticamente encuentros que terminan sin captura y dejarlos registrados para revisión cuando la información disponible no permite resolverlos completamente.
 
@@ -245,6 +248,8 @@ Actualmente DexRelay soporta:
 - Pokémon Alpha Sapphire — actualización **1.4**.
 - Pokémon X — actualización **1.5**.
 - Pokémon Y — actualización **1.5**.
+- Pokémon Sol — actualización **1.2**.
+- Pokémon Luna — actualización **1.2**.
 
 > Las direcciones de memoria utilizadas por DexRelay corresponden a estas versiones exactas del juego. Los juegos base sin la actualización indicada no están soportados.
 
@@ -262,11 +267,11 @@ El bridge de PKHeX utilizado por DexRelay está incluido en el release como ejec
 
 Descarga:
 
-**DexRelay v0.8.0-alpha**
+**DexRelay v0.9.0-alpha**
 
 Archivo:
 
-`DexRelay-v0.8.0-alpha-win-x64.zip`
+`DexRelay-v0.9.0-alpha-win-x64.zip`
 
 ## 2. Extraer
 
@@ -282,7 +287,7 @@ Abre:
 
 ## 4. Iniciar Azahar
 
-Abre Azahar y carga Pokémon Omega Ruby, Alpha Sapphire, X o Y.
+Abre Azahar y carga Pokémon Omega Ruby, Alpha Sapphire, X, Y, Sol o Luna.
 
 DexRelay detectará automáticamente el juego compatible.
 
@@ -319,6 +324,8 @@ Las URLs locales tienen este formato:
 `http://localhost:8080/overlay/nuzlocke`
 
 El overlay de medallas tiene tres estilos (se elige en la página **Medallas** de la GUI): ícono de medalla, retrato del líder de medio cuerpo o líder de cuerpo completo; los líderes se ven "apagados" hasta ganar su medalla. Tamaño recomendado en OBS: 656 × 100 (medallas), 914 × 100 (medio cuerpo) o 668 × 100 (cuerpo completo).
+
+En **Sol y Luna** el overlay muestra los 4 **Kahuna** (Kaudan, Mayla, Denio y Hela), en medio cuerpo o cuerpo completo; el estilo de medallas no aparece en esos juegos.
 
 No necesitas publicar ningún puerto de Internet.
 
@@ -408,5 +415,5 @@ DexRelay utiliza:
 <p align="center">
   <strong>DexRelay</strong>
   <br>
-  Tu compañero para Pokémon ORAS y X/Y en Azahar.
+  Tu compañero para Pokémon ORAS, X/Y y Sol/Luna en Azahar.
 </p>
