@@ -393,3 +393,28 @@ body:has(dialog[open]){overflow:hidden}
   .lang-menu{position:static;margin-top:6px;display:none;opacity:1;visibility:visible;transform:none;box-shadow:none}
   .lang.open .lang-menu{display:block}
 }
+
+/* ---------- Requisitos: tarjetas de juegos (mismo estilo que la bienvenida de la app) ---------- */
+.req-games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.req-game{--g:52,211,160;position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:124px;padding:14px;border-radius:14px;background:linear-gradient(160deg,rgba(var(--g),.16),rgba(var(--g),0) 70%),#0b1d33;border:1px solid rgba(var(--g),.4);transition:transform .15s ease}
+.req-game:hover{transform:translateY(-2px)}
+.req-game[data-badge="AS"]{--g:96,165,250}
+.req-game[data-badge="OR"]{--g:248,113,100}
+.req-game[data-badge="X"]{--g:129,140,248}
+.req-game[data-badge="Y"]{--g:240,86,130}
+.req-game[data-badge="S"]{--g:255,177,60}
+.req-game[data-badge="L"]{--g:176,136,255}
+.req-game-art{position:absolute;z-index:-1;right:-4%;bottom:-6%;width:78%;height:112%;max-width:none;object-fit:contain;object-position:right bottom;opacity:.4;pointer-events:none;transform-origin:right bottom;transform:translate(var(--art-x,0),var(--art-y,0)) scale(calc(var(--art-s,1)*var(--art-flip,1)),var(--art-s,1));filter:drop-shadow(var(--art-sx,-7px) 7px 0 rgba(var(--g),.55)) drop-shadow(0 0 10px rgba(var(--g),.5));-webkit-mask-image:linear-gradient(to left,#000 40%,transparent 100%);mask-image:linear-gradient(to left,#000 40%,transparent 100%)}
+.a-kyogre{--art-x:8%;--art-y:-7%;--art-s:1}
+.a-groudon{--art-x:14%;--art-y:-5%;--art-s:1.35;--art-flip:-1;--art-sx:2px;object-position:left bottom;transform-origin:50% 100%;-webkit-mask-image:linear-gradient(to right,#000 40%,transparent 100%);mask-image:linear-gradient(to right,#000 40%,transparent 100%)}
+.a-xerneas{--art-x:0%;--art-y:-2%;--art-s:1}
+.a-yveltal{--art-x:5%;--art-y:-2%;--art-s:1.2}
+.a-solgaleo{--art-x:4%;--art-y:-3%;--art-s:1.05}
+.a-lunala{--art-x:6%;--art-y:-3%;--art-s:1.1}
+.req-game-pill{align-self:flex-start;padding:2px 8px;border-radius:999px;background:rgba(var(--g),.18);color:rgb(var(--g));font-size:10.5px;font-weight:700;letter-spacing:.08em}
+.req-game-text{display:flex;flex-direction:column;gap:1px}
+.req-game-sub{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.req-game-name{font-family:var(--display);font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--text)}
+.req-game-upd{margin-top:3px;font-size:10.5px;letter-spacing:.04em;color:var(--muted)}
+@media (max-width:720px){.req-games{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.req-game{transition:none}}
